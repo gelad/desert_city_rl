@@ -1,5 +1,5 @@
 """
-    Player input handling/
+    Player input handling.
 """
 
 import tdl

@@ -1,6 +1,8 @@
 import player_input
 import render
 
+import random
+
 
 class Cell:
     """
@@ -110,6 +112,13 @@ class Location:
         if pattern == 'clear':  # simply make a location full of sand tiles
             self.cells.clear()
             self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
+        if pattern == 'ruins':  # simply make a location of sand and few wall elements
+            self.cells.clear()
+            self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
+            random.seed()
+            for i in range(1, random.randint(2, 40)):
+                wall = Wall('Wall', '#', 100)
+                self.place_entity(wall, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
     def place_entity(self, entity, x, y):
         """ Method that places given entity on the location """
@@ -137,7 +146,7 @@ class Game:
         """ Method that starts a new game. """
         self.current_loc = Location(100, 100)
         self.locations.append(self.current_loc)
-        self.current_loc.generate('clear')
+        self.current_loc.generate('ruins')
         self.player = Fighter('Player', '@', 10, 100)
         self.current_loc.place_entity(self.player, 10, 10)
         self.state = 'playing'
