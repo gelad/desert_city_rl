@@ -153,6 +153,7 @@ class Game:
         self.state = 'playing'
 
 
+# =========================== global functions, save/load, loop, etc =================================
 def save_game(game):
     """ Game saving function """
     pickle.dump(game, open('savegame', 'wb'))
