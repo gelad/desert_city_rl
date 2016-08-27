@@ -142,8 +142,6 @@ class Game:
         self.locations = []  # list of locations
         if game_type == 'new':  # constructor option for new game start
             self.new_game()
-        if game_type == 'load':  # constructor option for load game
-            self.load_game()
 
     def new_game(self):
         """ Method that starts a new game. Mostly a placeholder now. """
