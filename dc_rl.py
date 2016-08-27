@@ -1,15 +1,13 @@
-import tdl
 import player_input
 import render
 
 
 class Cell:
-    def __init__(self, tile_type, glyph, blocks_move=False, blocks_los=False, explored=False):
+    def __init__(self, tile_type, blocks_move=False, blocks_los=False, explored=False):
         self.explored = explored
         self.type = tile_type
         self.blocks_move = blocks_move
         self.blocks_los = blocks_los
-        self.glyph = glyph
         self.entities = []
 
     def is_movement_allowed(self):
@@ -22,11 +20,13 @@ class Cell:
 
 
 class Entity:
-    def __init__(self, name, location=None, position=None, occupies_tile=False):
+    def __init__(self, name, char=' ', location=None, position=None, occupies_tile=False, blocks_los=False):
         self.name = name
         self.location = location
         self.position = position
         self.occupies_tile = occupies_tile
+        self.blocks_los = blocks_los
+        self.char = char  # TODO: убрать графическую информацию куда-нибудь в рендер?
 
     def move(self, dx, dy):
         if self.position:
@@ -55,11 +55,17 @@ class Actor:
 
 
 class Fighter(BattleEntity, Actor, Entity):
-    def __init__(self, name, hp, speed, ai=None):
-        Entity.__init__(self, name=name, occupies_tile=True)
+    def __init__(self, name, char, hp, speed, ai=None):
+        Entity.__init__(self, name=name, char=char, occupies_tile=True)
         BattleEntity.__init__(self, hp)
         Actor.__init__(self, speed)
         self.ai = ai
+
+
+class Wall(BattleEntity, Entity):
+    def __init__(self, name, char, hp, blocks_los=True):
+        Entity.__init__(self, name=name, char=char, occupies_tile=True, blocks_los=blocks_los)
+        BattleEntity.__init__(self, hp)
 
 
 class Location:
@@ -72,7 +78,7 @@ class Location:
     def generate(self, pattern):
         if pattern == 'clear':
             self.cells.clear()
-            self.cells = [[Cell('FLOOR', '.') for y in range(self.height)] for x in range(self.width)]
+            self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
 
     def place_entity(self, entity, x, y):
         if (x >= 0) and (y >= 0) and (x < self.width) and (y < self.height):
@@ -83,25 +89,40 @@ class Location:
             raise Exception('Attempted to place entity outside of location.', entity.name)
 
 
+class Game:
+    def __init__(self, game_type='new'):
+        self.current_loc = None
+        self.player = None
+        self.state = ''
+        self.locations = []
+        if game_type == 'new':
+            self.new_game()
+
+    def new_game(self):
+        self.current_loc = Location(100, 100)
+        self.locations.append(self.current_loc)
+        self.current_loc.generate('clear')
+        self.player = Fighter('Player', '@', 10, 100)
+        self.current_loc.place_entity(self.player, 10, 10)
+        self.state = 'playing'
+
+
 def main_loop():
-    while not tdl.event.isWindowClosed():  # TODO: убрать в input, менять там game_state когда он будет, убрать импорт
+    while not game.state == 'exit':  # TODO: убрать в input, менять там game_state когда он будет, убрать импорт
         events = player_input.handle_input()
         for event in events:
             if event == 'exit':
-                return
+                game.state = 'exit'
             if event == 'move_up':
-                player.move(0, -1)
+                game.player.move(0, -1)
             if event == 'move_down':
-                player.move(0, 1)
+                game.player.move(0, 1)
             if event == 'move_right':
-                player.move(1, 0)
+                game.player.move(1, 0)
             if event == 'move_left':
-                player.move(-1, 0)
-        render.render_all(current_loc, player)
+                game.player.move(-1, 0)
+        render.render_all(game.current_loc, game.player)
 
-current_loc = Location(50, 50)
-current_loc.generate('clear')
-player = Fighter('Player', 10, 100)
-current_loc.place_entity(player, 10, 10)
 
+game = Game()
 main_loop()
