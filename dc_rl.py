@@ -2,6 +2,7 @@ import player_input
 import render
 
 import random
+import pickle
 
 
 class Cell:
@@ -141,9 +142,11 @@ class Game:
         self.locations = []  # list of locations
         if game_type == 'new':  # constructor option for new game start
             self.new_game()
+        if game_type == 'load':  # constructor option for load game
+            self.load_game()
 
     def new_game(self):
-        """ Method that starts a new game. """
+        """ Method that starts a new game. Mostly a placeholder now. """
         self.current_loc = Location(100, 100)
         self.locations.append(self.current_loc)
         self.current_loc.generate('ruins')
@@ -152,12 +155,26 @@ class Game:
         self.state = 'playing'
 
 
+def save_game(game):
+    """ Game saving function """
+    pickle.dump(game, open('savegame', 'wb'))
+
+
+def load_game():
+    """ Game loading function """
+    try:
+        return pickle.load(open('savegame', 'rb'))
+    except FileNotFoundError:
+        return False
+
+
 def main_loop():
     """ Main game loop function """
     while not game.state == 'exit':
         control_events = player_input.handle_input()  # get list of player desired actions
         for event in control_events:
             if event == 'exit':
+                save_game(game)  # save game before exit
                 game.state = 'exit'
             if event == 'move_up':
                 game.player.move(0, -1)
@@ -170,5 +187,7 @@ def main_loop():
         graphics.render_all(game.current_loc, game.player)  # call a screen rendering function
 
 graphics = render.Graphics()
-game = Game()
+game = load_game()
+if not game:
+    game = Game()
 main_loop()
