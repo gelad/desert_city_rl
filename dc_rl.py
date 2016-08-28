@@ -268,38 +268,70 @@ def main_loop():
                 save_game(game)  # save game before exit
                 game.state = 'exit'
             # TODO: make a move-open-attack handling function to avoid code duplication
-            elif command == 'move_up':
+            elif command == 'move_n':
                 if not game.player.move(0, -1):
                     if loc.is_in_boundaries(player_x, player_y - 1):
                         door = loc.cells[player_x][player_y - 1].is_there_a(Door)
                         if door:
                             game.player.open(0, -1)
-            elif command == 'move_down':
+            elif command == 'move_s':
                 if not game.player.move(0, 1):
                     if loc.is_in_boundaries(player_x, player_y + 1):
                         door = loc.cells[player_x][player_y + 1].is_there_a(Door)
                         if door:
                             game.player.open(0, 1)
-            elif command == 'move_right':
-                if not game.player.move(1, 0):
-                    if loc.is_in_boundaries(player_x + 1, player_y):
-                        door = loc.cells[player_x + 1][player_y].is_there_a(Door)
-                        if door:
-                            game.player.open(1, 0)
-            elif command == 'move_left':
+            elif command == 'move_w':
                 if not game.player.move(-1, 0):
                     if loc.is_in_boundaries(player_x - 1, player_y):
                         door = loc.cells[player_x - 1][player_y].is_there_a(Door)
                         if door:
                             game.player.open(-1, 0)
-            elif command == 'close_up':
+            elif command == 'move_e':
+                if not game.player.move(1, 0):
+                    if loc.is_in_boundaries(player_x + 1, player_y):
+                        door = loc.cells[player_x + 1][player_y].is_there_a(Door)
+                        if door:
+                            game.player.open(1, 0)
+            elif command == 'move_nw':
+                if not game.player.move(-1, -1):
+                    if loc.is_in_boundaries(player_x - 1, player_y - 1):
+                        door = loc.cells[player_x - 1][player_y - 1].is_there_a(Door)
+                        if door:
+                            game.player.open(-1, -1)
+            elif command == 'move_ne':
+                if not game.player.move(1, -1):
+                    if loc.is_in_boundaries(player_x + 1, player_y - 1):
+                        door = loc.cells[player_x + 1][player_y - 1].is_there_a(Door)
+                        if door:
+                            game.player.open(1, -1)
+            elif command == 'move_sw':
+                if not game.player.move(-1, 1):
+                    if loc.is_in_boundaries(player_x - 1, player_y + 1):
+                        door = loc.cells[player_x - 1][player_y + 1].is_there_a(Door)
+                        if door:
+                            game.player.open(-1, 1)
+            elif command == 'move_se':
+                if not game.player.move(1, 1):
+                    if loc.is_in_boundaries(player_x + 1, player_y + 1):
+                        door = loc.cells[player_x + 1][player_y + 1].is_there_a(Door)
+                        if door:
+                            game.player.open(1, 1)
+            elif command == 'close_n':
                 game.player.close(0, -1)
-            elif command == 'close_down':
+            elif command == 'close_s':
                 game.player.close(0, 1)
-            elif command == 'close_right':
-                game.player.close(1, 0)
-            elif command == 'close_left':
+            elif command == 'close_w':
                 game.player.close(-1, 0)
+            elif command == 'close_e':
+                game.player.close(1, 0)
+            elif command == 'close_nw':
+                game.player.close(-1, -1)
+            elif command == 'close_ne':
+                game.player.close(1, -1)
+            elif command == 'close_sw':
+                game.player.close(-1, 1)
+            elif command == 'close_se':
+                game.player.close(1, 1)
         graphics.render_all(game.current_loc, game.player, game)  # call a screen rendering function
 
 graphics = render.Graphics()
