@@ -1,0 +1,6 @@
+Implement composite actions (i.e. c + direction for closing doors) (DONE)
+Implement doors (as objects) and close/open action (DONE)
+Implement look command (move camera instead of player)
+Add some config files (at least mechanism for them)
+Make tileset readable from text/xml/json file.
+Implement time system.
