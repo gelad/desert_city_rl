@@ -146,7 +146,7 @@ class Door(BattleEntity, Entity):
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open
         self.__set_char()  # set current char for drawing purposes # TODO: move graphic to render
-        Entity.__init__(self, name=name, char=self.char, occupies_tile=True, blocks_los=blocks_los)
+        Entity.__init__(self, name=name, char=self.char, occupies_tile=self.is_closed, blocks_los=blocks_los)
         BattleEntity.__init__(self, hp)
 
     def __set_char(self):
@@ -268,37 +268,37 @@ def main_loop():
                 save_game(game)  # save game before exit
                 game.state = 'exit'
             # TODO: make a move-open-attack handling function to avoid code duplication
-            if command == 'move_up':
+            elif command == 'move_up':
                 if not game.player.move(0, -1):
                     if loc.is_in_boundaries(player_x, player_y - 1):
                         door = loc.cells[player_x][player_y - 1].is_there_a(Door)
                         if door:
                             game.player.open(0, -1)
-            if command == 'move_down':
+            elif command == 'move_down':
                 if not game.player.move(0, 1):
                     if loc.is_in_boundaries(player_x, player_y + 1):
                         door = loc.cells[player_x][player_y + 1].is_there_a(Door)
                         if door:
                             game.player.open(0, 1)
-            if command == 'move_right':
+            elif command == 'move_right':
                 if not game.player.move(1, 0):
                     if loc.is_in_boundaries(player_x + 1, player_y):
                         door = loc.cells[player_x + 1][player_y].is_there_a(Door)
                         if door:
                             game.player.open(1, 0)
-            if command == 'move_left':
+            elif command == 'move_left':
                 if not game.player.move(-1, 0):
                     if loc.is_in_boundaries(player_x - 1, player_y):
                         door = loc.cells[player_x - 1][player_y].is_there_a(Door)
                         if door:
                             game.player.open(-1, 0)
-            if command == 'close_up':
+            elif command == 'close_up':
                 game.player.close(0, -1)
-            if command == 'close_down':
+            elif command == 'close_down':
                 game.player.close(0, 1)
-            if command == 'close_right':
+            elif command == 'close_right':
                 game.player.close(1, 0)
-            if command == 'close_left':
+            elif command == 'close_left':
                 game.player.close(-1, 0)
         graphics.render_all(game.current_loc, game.player, game)  # call a screen rendering function
 
