@@ -1,6 +1,7 @@
 """
     This file contains time-system and actions.
 """
+import game_logic
 
 
 class Action:
@@ -86,7 +87,7 @@ def act_move(player, loc, dx, dy):
     player_y = player.position[1]
     if not player.move(dx, dy):
         if loc.is_in_boundaries(player_x + dx, player_y + dy):
-            door = loc.cells[player_x + dx][player_y + dy].is_there_a(Door)
+            door = loc.cells[player_x + dx][player_y + dy].is_there_a(game_logic.Door)
             if door:
                 player.open(dx, dy)
     player.state = 'ready'
