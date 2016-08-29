@@ -30,7 +30,7 @@ class ActionMgr:
     def __init__(self):
         self.actions = []
 
-    def register_action(self, func, args, kwargs, t_needed=0):
+    def register_action(self, t_needed, func, *args, **kwargs):
         """ Method creates an action and adds it to action list """
         action = Action(t_passed=0, t_needed=t_needed, frozen=False, func=func, args=args, kwargs=kwargs)
         self.actions.append(action)
@@ -69,8 +69,24 @@ class TimeSystem:
         for act_mgr in self.act_mgrs:
             act_mgr.pass_ticks(ticks)
 
+    def current_time(self):
+        """ Method returning current time. """
+        return self._current_time
 
+
+# ============================= ACTION FUNCTIONS ================================================
 def act_print_debug(text):
-    """ Simple debug action, that prints a string to console"""
+    """ Simple debug action, that prints a string to console """
     print(text)
 
+
+def act_move(player, loc, dx, dy):
+    """ Entity moving action """
+    player_x = player.position[0]
+    player_y = player.position[1]
+    if not player.move(dx, dy):
+        if loc.is_in_boundaries(player_x + dx, player_y + dy):
+            door = loc.cells[player_x + dx][player_y + dy].is_there_a(Door)
+            if door:
+                player.open(dx, dy)
+    player.state = 'ready'

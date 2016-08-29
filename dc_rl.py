@@ -1,5 +1,6 @@
 import player_input
 import render
+import actions
 
 import random
 import pickle
@@ -115,6 +116,16 @@ class Actor(Entity):
             raise Exception('Attempted to open door with entity not positioned in any location. ', self.name)
         return False
 
+    def perform(self, action, *args, **kwargs):
+        """ Method for performing an action in a location (maybe in future will be actions outside)
+             Handles state change """
+        if self.location:
+            # TODO: pass speed as an argument to action (ticks must be calculated action-side)
+            self.location.action_mgr.register_action(self.speed, action, *args, **kwargs)
+            self.state = 'performing'
+        else:
+            raise Exception('Attempted to perform action with entity not positioned in any location. ', self.name)
+
 
 class Fighter(BattleEntity, Actor, Entity):
     """
@@ -184,6 +195,7 @@ class Location:
         self.height = height  # height of location in tiles
         self.width = width  # width of location in tiles
         self.cells = []  # list of Cell objects
+        self.action_mgr = actions.ActionMgr()  # action manager for this location
         # self.entities = []  # TODO: decide, is it necessary to store a list of all entities on map
 
     def is_in_boundaries(self, x, y):
@@ -227,12 +239,15 @@ class Game:
         self.player = None  # player object
         self.state = ''  # game state, like 'playing', 'paused' etc
         self.locations = []  # list of locations
+        self.time_system = actions.TimeSystem()  # time system object
         if game_type == 'new':  # constructor option for new game start
             self.new_game()
 
     def new_game(self):
         """ Method that starts a new game. Mostly a placeholder now. """
         self.current_loc = Location(100, 100)
+        # TODO: a debug hack, need to make action manager registered when location is created somehow
+        self.time_system.register_act_mgr(self.current_loc.action_mgr)  # register act manager to time system
         self.locations.append(self.current_loc)
         self.current_loc.generate('ruins')
         self.player = Fighter('Player', '@', 10, 100)
@@ -260,63 +275,30 @@ def load_game():
 def main_loop():
     """ Main game loop function """
     while not game.state == 'exit':
+        # TODO: separate time passing from render. render too slooooow
         commands = player_input.handle_input(game)  # get list of player commands
-        player_x = game.player.position[0]
-        player_y = game.player.position[1]
-        loc = game.current_loc
+        if game.state == 'playing':
+            game.time_system.pass_time()
         for command in commands:
             if command == 'exit':
                 save_game(game)  # save game before exit
                 game.state = 'exit'
-            # TODO: make a move-open-attack handling function to avoid code duplication
             elif command == 'move_n':
-                if not game.player.move(0, -1):
-                    if loc.is_in_boundaries(player_x, player_y - 1):
-                        door = loc.cells[player_x][player_y - 1].is_there_a(Door)
-                        if door:
-                            game.player.open(0, -1)
+                game.player.perform(actions.act_move, game.player, game.current_loc, 0, -1)
             elif command == 'move_s':
-                if not game.player.move(0, 1):
-                    if loc.is_in_boundaries(player_x, player_y + 1):
-                        door = loc.cells[player_x][player_y + 1].is_there_a(Door)
-                        if door:
-                            game.player.open(0, 1)
+                game.player.perform(actions.act_move, game.player, game.current_loc, 0, 1)
             elif command == 'move_w':
-                if not game.player.move(-1, 0):
-                    if loc.is_in_boundaries(player_x - 1, player_y):
-                        door = loc.cells[player_x - 1][player_y].is_there_a(Door)
-                        if door:
-                            game.player.open(-1, 0)
+                game.player.perform(actions.act_move, game.player, game.current_loc, -1, 0)
             elif command == 'move_e':
-                if not game.player.move(1, 0):
-                    if loc.is_in_boundaries(player_x + 1, player_y):
-                        door = loc.cells[player_x + 1][player_y].is_there_a(Door)
-                        if door:
-                            game.player.open(1, 0)
+                game.player.perform(actions.act_move, game.player, game.current_loc, 1, 0)
             elif command == 'move_nw':
-                if not game.player.move(-1, -1):
-                    if loc.is_in_boundaries(player_x - 1, player_y - 1):
-                        door = loc.cells[player_x - 1][player_y - 1].is_there_a(Door)
-                        if door:
-                            game.player.open(-1, -1)
+                game.player.perform(actions.act_move, game.player, game.current_loc, -1, -1)
             elif command == 'move_ne':
-                if not game.player.move(1, -1):
-                    if loc.is_in_boundaries(player_x + 1, player_y - 1):
-                        door = loc.cells[player_x + 1][player_y - 1].is_there_a(Door)
-                        if door:
-                            game.player.open(1, -1)
+                game.player.perform(actions.act_move, game.player, game.current_loc, 1, -1)
             elif command == 'move_sw':
-                if not game.player.move(-1, 1):
-                    if loc.is_in_boundaries(player_x - 1, player_y + 1):
-                        door = loc.cells[player_x - 1][player_y + 1].is_there_a(Door)
-                        if door:
-                            game.player.open(-1, 1)
+                game.player.perform(actions.act_move, game.player, game.current_loc, -1, 1)
             elif command == 'move_se':
-                if not game.player.move(1, 1):
-                    if loc.is_in_boundaries(player_x + 1, player_y + 1):
-                        door = loc.cells[player_x + 1][player_y + 1].is_there_a(Door)
-                        if door:
-                            game.player.open(1, 1)
+                game.player.perform(actions.act_move, game.player, game.current_loc, 1, 1)
             elif command == 'close_n':
                 game.player.close(0, -1)
             elif command == 'close_s':

@@ -63,5 +63,6 @@ class Graphics:
             self.panel.clear()
             self.panel.draw_str(0, 0, game.state)
             self.panel.draw_str(0, 1, str(player_x)+':'+str(player_y))
+            self.panel.draw_str(0, 2, 'Current time: '+str(game.time_system.current_time()))
             self.console.blit(self.panel, 0, self.map_height)
             tdl.flush()  # draw main console
