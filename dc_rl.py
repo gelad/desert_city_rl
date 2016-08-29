@@ -62,8 +62,9 @@ class Actor(Entity):
         Mixin class, adds acting functionality to the Entity.
         Time-system related stuff.
     """
-    def __init__(self, speed):
+    def __init__(self, speed, state='ready'):
         self.speed = speed  # overall speed factor of actions
+        self.state = state  # actor state - ready, acting or withdrawal (for now)
 
     def move(self, dx, dy):
         """ Movement method, checks if it is allowed to move. For player, monster movement. """
