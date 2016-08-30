@@ -52,21 +52,21 @@ def execute_player_commands(game, commands):
         elif command == 'move_se':
             command_default_direction(player, loc, 1, 1)
         elif command == 'close_n':
-            game.player.close(0, -1)
+            command_close_direction(player, loc, 0, -1)
         elif command == 'close_s':
-            game.player.close(0, 1)
+            command_close_direction(player, loc, 0, 1)
         elif command == 'close_w':
-            game.player.close(-1, 0)
+            command_close_direction(player, loc, -1, 0)
         elif command == 'close_e':
-            game.player.close(1, 0)
+            command_close_direction(player, loc, 1, 0)
         elif command == 'close_nw':
-            game.player.close(-1, -1)
+            command_close_direction(player, loc, -1, -1)
         elif command == 'close_ne':
-            game.player.close(1, -1)
+            command_close_direction(player, loc, 1, -1)
         elif command == 'close_sw':
-            game.player.close(-1, 1)
+            command_close_direction(player, loc, -1, 1)
         elif command == 'close_se':
-            game.player.close(1, 1)
+            command_close_direction(player, loc, 1, 1)
 
 
 # ========================== COMMAND FUNCTIONS (special cases, to prevent code duplication) ====================
@@ -79,8 +79,8 @@ def command_default_direction(player, loc, dx, dy):
     new_x = player_x + dx
     new_y = player_y + dy
     if loc.is_in_boundaries(new_x, new_y):  # check if new position is in the location boundaries
-        if loc.cells[new_x][new_y].is_movement_allowed():  # if movement is allowed - perform move action
-            player.perform(actions.act_move, game.player, game.current_loc, dx, dy)
+        if loc.cells[new_x][new_y].is_movement_allowed():  # check if movement is allowed
+            player.perform(actions.act_move, game.player, dx, dy)  # perform move action
             return True
         door = loc.cells[new_x][new_y].is_there_a(game_logic.Door)
         if door:  # check if there is a door
@@ -90,11 +90,23 @@ def command_default_direction(player, loc, dx, dy):
         return False
 
 
+def command_close_direction(player, loc, dx, dy):
+    """ Command function for player wants to close door in some direction  """
+    door_x = player.position[0] + dx
+    door_y = player.position[1] + dy
+    if loc.is_in_boundaries(door_x, door_y):  # check if position of selected cell is in boundaries
+        door = loc.cells[door_x][door_y].is_there_a(game_logic.Door)
+        if door:  # check if there is a door
+            if not door.is_closed:  # check if it is closed
+                player.perform(actions.act_close_door, game.player, door)  # close door
+                return True
+        return False
+
+
 # ==============================================================================================================
 def main_loop():
     """ Main game loop function """
     while not game.state == 'exit':
-        # TODO: TEST how time works!
         game.state = 'playing'
         if game.player.state == 'ready':  # TODO: menu implementation will need rework on game state handling
             game.state = 'waiting_input'  # if player is ready to act, stop time and wait for input

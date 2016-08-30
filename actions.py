@@ -103,7 +103,16 @@ def act_move(action, register_call, actor, dx, dy):
 def act_open_door(action, register_call, actor, door):
     """ Actor opening door action """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed // 4  # one move takes actor.speed ticks to perform
+        action.t_needed = actor.speed // 4  # open door is a 1/4 speed action for now
     else:  # part that is executed when action fires
         actor.open(door)  # open the door
+        actor.state = 'ready'  # return actor to ready state
+
+
+def act_close_door(action, register_call, actor, door):
+    """ Actor closing door action """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed // 4    # close door is a 1/4 speed action for now
+    else:  # part that is executed when action fires
+        actor.close(door)  # close the door
         actor.state = 'ready'  # return actor to ready state

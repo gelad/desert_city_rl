@@ -86,20 +86,12 @@ class Actor(Entity):
             raise Exception('Attempted to move entity not positioned in any location. ', self.name)
         return False
 
-    def close(self, dx, dy):
+    def close(self, door):
         """ Door closing method """
-        # checks if entity is positioned in location
-        if self.position:
-            door_x = self.position[0] + dx
-            door_y = self.position[1] + dy
-            # check is there a door
-            if self.location.is_in_boundaries(door_x, door_y):
-                for ent in self.location.cells[door_x][door_y].entities:
-                    if type(ent) == Door:
-                        return ent.close()
+        if door:
+            return door.close()
         else:
-            raise Exception('Attempted to close door with entity not positioned in any location. ', self.name)
-        return False
+            raise Exception('Attempted to close non-existing door. ', self.name)
 
     def open(self, door):
         """ Door opening method """
