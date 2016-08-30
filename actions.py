@@ -19,9 +19,15 @@ class Action:
     def fire_if_ready(self):
         """ Method that checks for if action is ready to fire, and does it """
         if self.t_passed >= self.t_needed:
-            self.func(*self.args, **self.kwargs)
+            self.func(self, False, *self.args, **self.kwargs)  # call an action function in normal mode
             return True
         return False
+
+    def register(self):
+        """ Method that runs action function in registration mode - when it is registered. Adjust action time
+            according to actor speed, etc.
+        """
+        self.func(self, True, *self.args, **self.kwargs)  # call an action function in registration mode
 
 
 class ActionMgr:
@@ -34,6 +40,7 @@ class ActionMgr:
     def register_action(self, t_needed, func, *args, **kwargs):
         """ Method creates an action and adds it to action list """
         action = Action(t_passed=0, t_needed=t_needed, frozen=False, func=func, args=args, kwargs=kwargs)
+        action.register()  # call action's func in register mode
         self.actions.append(action)
 
     def pass_ticks(self, ticks=1):
@@ -76,18 +83,27 @@ class TimeSystem:
 
 
 # ============================= ACTION FUNCTIONS ================================================
-def act_print_debug(text):
+def act_print_debug(action, register_call, text):
     """ Simple debug action, that prints a string to console """
-    print(text)
+    if register_call:  # part executed when function is registered in ActionMgr
+        pass
+    else:              # part that is executed when action fires
+        print(text)
 
 
-def act_move(player, loc, dx, dy):
-    """ Entity moving action """
-    player_x = player.position[0]
-    player_y = player.position[1]
-    if not player.move(dx, dy):
-        if loc.is_in_boundaries(player_x + dx, player_y + dy):
-            door = loc.cells[player_x + dx][player_y + dy].is_there_a(game_logic.Door)
-            if door:
-                player.open(dx, dy)
-    player.state = 'ready'
+def act_move(action, register_call, actor, dx, dy):
+    """ Actor self-moving action (need a different one for unvoluntarily movement, regardless of speed) """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed  # one move takes actor.speed ticks to perform
+    else:  # part that is executed when action fires
+        actor.move(dx, dy)  # move actor to desired coords
+        actor.state = 'ready'  # return actor to ready state
+
+
+def act_open_door(action, register_call, actor, door):
+    """ Actor opening door action """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed // 4  # one move takes actor.speed ticks to perform
+    else:  # part that is executed when action fires
+        actor.open(door)  # open the door
+        actor.state = 'ready'  # return actor to ready state
