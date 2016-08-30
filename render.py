@@ -47,8 +47,6 @@ class Graphics:
             # map rendering
             player_x = player.position[0]
             player_y = player.position[1]
-            # TODO: rework debug code on visibility
-            player_fov = fov_los.get_fov(player_x, player_y, loc, 99.5)
             camera_x = self.map_width // 2  # camera (viewport) is centered by default at center of map part of window
             camera_y = self.map_height // 2  # there is player @ too
             for x in range(0, self.map_width):  # iterate through every x, y in map_console
@@ -57,7 +55,7 @@ class Graphics:
                     rel_y = y - camera_y + player_y
                     # TODO: rework debug code on visibility
                     # checks if location coordinates are valid (in boundaries)
-                    if loc.is_in_boundaries(rel_x, rel_y) and (rel_x, rel_y) in player_fov:
+                    if loc.is_in_boundaries(rel_x, rel_y) and player.is_in_fov(rel_x, rel_y):
                         cg = self.cell_graphics(loc.cells[rel_x][rel_y])  # obtain cell graphics
                         self.map_console.draw_char(x, y, cg[0], cg[1], cg[2])  # draw it on map_console
                     else:

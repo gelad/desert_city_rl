@@ -2,6 +2,7 @@
     This file contains game logic objects.
 """
 import actions
+import fov_los
 
 import random
 
@@ -67,6 +68,23 @@ class BattleEntity:
         self.maxhp = hp  # maximum hitpoints
 
 
+class Seer(Entity):
+    """
+        Mixin class, adds visibility (FOV & LOS) functionality to Entity.
+    """
+    def __init__(self, sight_radius):
+        self.sight_radius = sight_radius  # sight radius in tiles
+        self.fov_set = ()  # field of view - set of (x, y) points
+
+    def compute_fov(self):
+        """ Method that calculates FOV """
+        self.fov_set = fov_los.get_fov(self.position[0], self.position[1], self.location, self.sight_radius)
+
+    def is_in_fov(self, x, y):
+        """ Method that determines is a cell in Seer's FOV """
+        return (x, y) in self.fov_set
+
+
 class Actor(Entity):
     """
         Mixin class, adds acting functionality to the Entity.
@@ -90,6 +108,8 @@ class Actor(Entity):
                     self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                     self.location.cells[new_x][new_y].entities.append(self)  # add to new cell
                     self.position = (new_x, new_y)  # update entity position
+                    if isinstance(self, Seer):  # check if entity is a Seer
+                        self.compute_fov()  # compute moved entity FOV TODO: rework testing visibility
                     return True
         else:
             raise Exception('Attempted to move entity not positioned in any location. ', self.name)
@@ -122,15 +142,16 @@ class Actor(Entity):
             raise Exception('Attempted to perform action with entity not positioned in any location. ', self.name)
 
 
-class Fighter(BattleEntity, Actor, Entity):
+class Fighter(BattleEntity, Actor, Seer, Entity):
     """
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
-    def __init__(self, name, char, hp, speed, ai=None):
+    def __init__(self, name, char, hp, speed, sight_radius, ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, char=char, occupies_tile=True)
         BattleEntity.__init__(self, hp)
         Actor.__init__(self, speed)
+        Seer.__init__(self, sight_radius=sight_radius)
         self.ai = ai  # ai component - PLACEHOLDER for now
 
 
@@ -255,8 +276,9 @@ class Game:
         self.current_loc = Location(100, 100)
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
-        self.player = Fighter('Player', '@', 10, 100)
+        self.player = Fighter('Player', '@', 10, 100, 99.5)
         self.current_loc.place_entity(self.player, 10, 10)
+        self.player.compute_fov()  # compute player's FOV TODO: rework testing visibility
 
     def add_location(self, location):
         """ Method thar adds a location to the game """
