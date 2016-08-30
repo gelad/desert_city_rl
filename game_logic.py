@@ -217,6 +217,7 @@ class Location:
         self.cells = []  # list of Cell objects
         self.action_mgr = actions.ActionMgr()  # action manager for this location
         # self.entities = []  # TODO: decide, is it necessary to store a list of all entities on map
+        self.seers = []  # a list of Seer objects, to recompute their FOV if map changes
 
     def is_in_boundaries(self, x, y):
         """ Method validating coordinates, to avoid out of range errors  """
@@ -246,6 +247,9 @@ class Location:
             self.cells[x][y].entities.append(entity)  # add entity to Cell list
             entity.position = (x, y)  # update entity position
             entity.location = self  # update entity location
+            if isinstance(entity, Seer):  # check if entity is a Seer
+                entity.compute_fov()  # recompute it's FOV
+                self.seers.append(entity)  # add it to Seers list
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
 
@@ -274,9 +278,8 @@ class Game:
         self.current_loc = Location(100, 100)
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
-        self.player = Fighter('Player', '@', 10, 100, 99.5)
+        self.player = Fighter('Player', '@', 10, 100, 99.5)  # TODO: lessen sight radius or optimize FOV algorithm
         self.current_loc.place_entity(self.player, 10, 10)
-        self.player.compute_fov()  # compute player's FOV TODO: rework testing visibility
 
     def add_location(self, location):
         """ Method thar adds a location to the game """
