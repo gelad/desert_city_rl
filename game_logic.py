@@ -120,9 +120,11 @@ class Actor(Entity):
         """ Method for performing an action in a location (maybe in future will be actions outside)
              Handles state change """
         if self.location:
-            # TODO: pass speed as an argument to action (ticks must be calculated action-side)
-            self.location.action_mgr.register_action(self.speed, action, *args, **kwargs)
-            self.state = 'performing'
+            if self.state == 'ready':
+                self.location.action_mgr.register_action(self.speed, action, *args, **kwargs)
+                self.state = 'performing'
+                return True
+            return False
         else:
             raise Exception('Attempted to perform action with entity not positioned in any location. ', self.name)
 

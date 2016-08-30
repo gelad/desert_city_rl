@@ -6,3 +6,4 @@ Make tileset readable from text/xml/json file.
 Implement time system. (DONE!)
 Rework 'close' command with time system.
 Deal with TODOs! (erase this after doing)
+Comment the uncommented.

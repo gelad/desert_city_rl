@@ -23,52 +23,56 @@ def load_game():
         return False
 
 
+def execute_player_commands(game, commands):
+    for command in commands:
+        if command == 'exit':
+            save_game(game)  # save game before exit
+            game.state = 'exit'
+        elif command == 'move_n':
+            game.player.perform(actions.act_move, game.player, game.current_loc, 0, -1)
+        elif command == 'move_s':
+            game.player.perform(actions.act_move, game.player, game.current_loc, 0, 1)
+        elif command == 'move_w':
+            game.player.perform(actions.act_move, game.player, game.current_loc, -1, 0)
+        elif command == 'move_e':
+            game.player.perform(actions.act_move, game.player, game.current_loc, 1, 0)
+        elif command == 'move_nw':
+            game.player.perform(actions.act_move, game.player, game.current_loc, -1, -1)
+        elif command == 'move_ne':
+            game.player.perform(actions.act_move, game.player, game.current_loc, 1, -1)
+        elif command == 'move_sw':
+            game.player.perform(actions.act_move, game.player, game.current_loc, -1, 1)
+        elif command == 'move_se':
+            game.player.perform(actions.act_move, game.player, game.current_loc, 1, 1)
+        elif command == 'close_n':
+            game.player.close(0, -1)
+        elif command == 'close_s':
+            game.player.close(0, 1)
+        elif command == 'close_w':
+            game.player.close(-1, 0)
+        elif command == 'close_e':
+            game.player.close(1, 0)
+        elif command == 'close_nw':
+            game.player.close(-1, -1)
+        elif command == 'close_ne':
+            game.player.close(1, -1)
+        elif command == 'close_sw':
+            game.player.close(-1, 1)
+        elif command == 'close_se':
+            game.player.close(1, 1)
+
+
 def main_loop():
     """ Main game loop function """
     while not game.state == 'exit':
         # TODO: TEST how time works!
-        commands = player_input.handle_input(game)  # get list of player commands
-        if game.state == 'playing':
-            game.time_system.pass_time()
+        game.state = 'playing'
         if game.player.state == 'ready':
-            game.state = 'waiting_input'
-        for command in commands:
-            if command == 'exit':
-                save_game(game)  # save game before exit
-                return
-            elif command == 'move_n':
-                game.player.perform(actions.act_move, game.player, game.current_loc, 0, -1)
-            elif command == 'move_s':
-                game.player.perform(actions.act_move, game.player, game.current_loc, 0, 1)
-            elif command == 'move_w':
-                game.player.perform(actions.act_move, game.player, game.current_loc, -1, 0)
-            elif command == 'move_e':
-                game.player.perform(actions.act_move, game.player, game.current_loc, 1, 0)
-            elif command == 'move_nw':
-                game.player.perform(actions.act_move, game.player, game.current_loc, -1, -1)
-            elif command == 'move_ne':
-                game.player.perform(actions.act_move, game.player, game.current_loc, 1, -1)
-            elif command == 'move_sw':
-                game.player.perform(actions.act_move, game.player, game.current_loc, -1, 1)
-            elif command == 'move_se':
-                game.player.perform(actions.act_move, game.player, game.current_loc, 1, 1)
-            elif command == 'close_n':
-                game.player.close(0, -1)
-            elif command == 'close_s':
-                game.player.close(0, 1)
-            elif command == 'close_w':
-                game.player.close(-1, 0)
-            elif command == 'close_e':
-                game.player.close(1, 0)
-            elif command == 'close_nw':
-                game.player.close(-1, -1)
-            elif command == 'close_ne':
-                game.player.close(1, -1)
-            elif command == 'close_sw':
-                game.player.close(-1, 1)
-            elif command == 'close_se':
-                game.player.close(1, 1)
-            game.state = 'playing'
+            game.state = 'waiting_input'  # if player is ready to act, stop time and wait for input
+            commands = player_input.handle_input(game)  # get list of player commands
+            execute_player_commands(game, commands)
+        if game.state == 'playing':  # pass time
+            game.time_system.pass_time()
         if not game.state == 'playing':
             graphics.render_all(game.current_loc, game.player, game)  # call a screen rendering function
 
