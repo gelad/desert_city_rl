@@ -108,8 +108,6 @@ class Actor(Entity):
                     self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                     self.location.cells[new_x][new_y].entities.append(self)  # add to new cell
                     self.position = (new_x, new_y)  # update entity position
-                    if isinstance(self, Seer):  # check if entity is a Seer
-                        self.compute_fov()  # compute moved entity FOV TODO: rework testing visibility
                     return True
         else:
             raise Exception('Attempted to move entity not positioned in any location. ', self.name)

@@ -97,6 +97,8 @@ def act_move(action, register_call, actor, dx, dy):
         action.t_needed = actor.speed  # one move takes actor.speed ticks to perform
     else:  # part that is executed when action fires
         actor.move(dx, dy)  # move actor to desired coords
+        if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
+            actor.compute_fov()  # compute actor's FOV TODO: rework testing visibility
         actor.state = 'ready'  # return actor to ready state
 
 
@@ -106,6 +108,8 @@ def act_open_door(action, register_call, actor, door):
         action.t_needed = actor.speed // 4  # open door is a 1/4 speed action for now
     else:  # part that is executed when action fires
         actor.open(door)  # open the door
+        if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
+            actor.compute_fov()  # compute actor's FOV TODO: rework testing visibility
         actor.state = 'ready'  # return actor to ready state
 
 
@@ -115,4 +119,6 @@ def act_close_door(action, register_call, actor, door):
         action.t_needed = actor.speed // 4    # close door is a 1/4 speed action for now
     else:  # part that is executed when action fires
         actor.close(door)  # close the door
+        if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
+            actor.compute_fov()  # compute actor's FOV TODO: rework testing visibility
         actor.state = 'ready'  # return actor to ready state
