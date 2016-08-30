@@ -34,6 +34,15 @@ class Cell:
                 return ent
         return False
 
+    def is_transparent(self):
+        """ Method that returns if the cell is transparent for light """
+        if self.blocks_los:  # check if tile blocks los itself
+            return False
+        for ent in self.entities:  # check if any of placed entities blocks los
+            if ent.blocks_los:
+                return False
+        return True
+
 
 class Entity:
     """
@@ -136,13 +145,17 @@ class Wall(BattleEntity, Entity):
 
 class Door(BattleEntity, Entity):
     """
-        Mixed class of a door, that has HP and can be destroyed, has open/closed state.
+        Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
     # TODO: handle blocks_los in opened/closed state
-    def __init__(self, name, char_closed, char_open, hp, blocks_los=True, is_closed=True):
+    def __init__(self, name, char_closed, char_open, hp, is_closed=True):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open
+        if is_closed:
+            blocks_los = True
+        else:
+            blocks_los = False
         self.__set_char()  # set current char for drawing purposes # TODO: move graphic to render
         Entity.__init__(self, name=name, char=self.char, occupies_tile=self.is_closed, blocks_los=blocks_los)
         BattleEntity.__init__(self, hp)
@@ -160,6 +173,7 @@ class Door(BattleEntity, Entity):
             self.is_closed = False
             self.occupies_tile = False
             self.__set_char()
+            self.blocks_los = False
             return True  # if action successful
         return False  # if it's not
 
@@ -169,6 +183,7 @@ class Door(BattleEntity, Entity):
             self.is_closed = True
             self.occupies_tile = True
             self.__set_char()
+            self.blocks_los = True
             return True  # if action successful
         return False  # if it's not
 
@@ -215,6 +230,12 @@ class Location:
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
 
+    def is_cell_transparent(self, x, y):
+        """ Method that determines, is cell at x, y is transparent """
+        if self.is_in_boundaries(x, y):  # check if cell coords are in boundaries
+            return self.cells[x][y].is_transparent()  # return if cell is transparent
+        return False  # if out of bounds, edge of the map certainly block los ;)
+
 
 class Game:
     """
@@ -232,9 +253,13 @@ class Game:
     def new_game(self):
         """ Method that starts a new game. Mostly a placeholder now. """
         self.current_loc = Location(100, 100)
-        # TODO: a debug hack, need to make action manager registered when location is created somehow
-        self.time_system.register_act_mgr(self.current_loc.action_mgr)  # register act manager to time system
-        self.locations.append(self.current_loc)
+        self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
         self.player = Fighter('Player', '@', 10, 100)
         self.current_loc.place_entity(self.player, 10, 10)
+
+    def add_location(self, location):
+        """ Method thar adds a location to the game """
+        self.time_system.register_act_mgr(location.action_mgr)  # register act manager to time system
+        self.locations.append(location)
+

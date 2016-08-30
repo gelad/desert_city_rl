@@ -8,15 +8,6 @@ import tdl
 INPUT_ENGINE = 'TDL'
 
 
-# class Command
-#
-# class CommandMgr:
-#     def __init__(self):
-#         self.commands = []
-#
-#     def add_command(self, ):
-
-
 def handle_input(game):
     """ Function returns list of player input (not keypresses, but desired actions) """
     if INPUT_ENGINE == 'TDL':
