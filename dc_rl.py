@@ -32,41 +32,47 @@ def execute_player_commands(game, commands):
         player_y = game.player.position[1]
     loc = game.current_loc
     for command in commands:
-        if command == 'exit':
-            save_game(game)  # save game before exit
-            game.state = 'exit'
-        elif command == 'move_n':
-            command_default_direction(player, loc, 0, -1)
-        elif command == 'move_s':
-            command_default_direction(player, loc, 0, 1)
-        elif command == 'move_w':
-            command_default_direction(player, loc, -1, 0)
-        elif command == 'move_e':
-            command_default_direction(player, loc, 1, 0)
-        elif command == 'move_nw':
-            command_default_direction(player, loc, -1, -1)
-        elif command == 'move_ne':
-            command_default_direction(player, loc, 1, -1)
-        elif command == 'move_sw':
-            command_default_direction(player, loc, -1, 1)
-        elif command == 'move_se':
-            command_default_direction(player, loc, 1, 1)
-        elif command == 'close_n':
-            command_close_direction(player, loc, 0, -1)
-        elif command == 'close_s':
-            command_close_direction(player, loc, 0, 1)
-        elif command == 'close_w':
-            command_close_direction(player, loc, -1, 0)
-        elif command == 'close_e':
-            command_close_direction(player, loc, 1, 0)
-        elif command == 'close_nw':
-            command_close_direction(player, loc, -1, -1)
-        elif command == 'close_ne':
-            command_close_direction(player, loc, 1, -1)
-        elif command == 'close_sw':
-            command_close_direction(player, loc, -1, 1)
-        elif command == 'close_se':
-            command_close_direction(player, loc, 1, 1)
+        if game.state == 'waiting_input':
+            if command == 'exit':
+                save_game(game)  # save game before exit
+                game.state = 'exit'
+            elif command == 'move_n':
+                command_default_direction(player, loc, 0, -1)
+            elif command == 'move_s':
+                command_default_direction(player, loc, 0, 1)
+            elif command == 'move_w':
+                command_default_direction(player, loc, -1, 0)
+            elif command == 'move_e':
+                command_default_direction(player, loc, 1, 0)
+            elif command == 'move_nw':
+                command_default_direction(player, loc, -1, -1)
+            elif command == 'move_ne':
+                command_default_direction(player, loc, 1, -1)
+            elif command == 'move_sw':
+                command_default_direction(player, loc, -1, 1)
+            elif command == 'move_se':
+                command_default_direction(player, loc, 1, 1)
+            elif command == 'close_n':
+                command_close_direction(player, loc, 0, -1)
+            elif command == 'close_s':
+                command_close_direction(player, loc, 0, 1)
+            elif command == 'close_w':
+                command_close_direction(player, loc, -1, 0)
+            elif command == 'close_e':
+                command_close_direction(player, loc, 1, 0)
+            elif command == 'close_nw':
+                command_close_direction(player, loc, -1, -1)
+            elif command == 'close_ne':
+                command_close_direction(player, loc, 1, -1)
+            elif command == 'close_sw':
+                command_close_direction(player, loc, -1, 1)
+            elif command == 'close_se':
+                command_close_direction(player, loc, 1, 1)
+            elif command == 'look':  # 'look' command
+                game.state = 'looking'
+        elif game.state == 'looking':
+            if command == 'exit':
+                game.state = 'playing'
 
 
 # ========================== COMMAND FUNCTIONS (special cases, to prevent code duplication) ====================
@@ -107,8 +113,13 @@ def command_close_direction(player, loc, dx, dy):
 def main_loop():
     """ Main game loop function """
     while not game.state == 'exit':
+        if game.state == 'looking':
+            commands = player_input.handle_input(game)  # get list of player commands
+            execute_player_commands(game, commands)
         game.state = 'playing'
-        if game.player.state == 'ready':  # TODO: menu implementation will need rework on game state handling
+        if game.player.state == 'ready' and game.state == 'playing':
+            # TODO: menu implementation will need rework on game state handling
+            # Make wait for input a sort of a flag, it occures in different states
             game.state = 'waiting_input'  # if player is ready to act, stop time and wait for input
             commands = player_input.handle_input(game)  # get list of player commands
             execute_player_commands(game, commands)

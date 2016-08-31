@@ -6,6 +6,7 @@ Implement FOV (as a separate module, wrapper on tdl fov) (DONE)
 Make a interface panel on right side instead of bottom. (DONE)
 
 
+Before look command rework game state handling.
 Implement look command (move camera instead of player)
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.

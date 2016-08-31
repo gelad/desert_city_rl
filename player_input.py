@@ -53,6 +53,8 @@ def handle_input(game):
                             player_input.append('close_sw')
                         elif key.keychar == 'KP3':
                             player_input.append('close_se')
+                    if event.keychar == 'l':  # 'look' command
+                        player_input.append('look')
             elif event.type == "QUIT":
                 player_input.append('exit')
         return player_input
