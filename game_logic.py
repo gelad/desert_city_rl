@@ -144,6 +144,15 @@ class Actor(Entity):
             raise Exception('Attempted to perform action with entity not positioned in any location. ', self.name)
 
 
+class Item (Entity):
+    """
+        Mixed class, simple Item.
+    """
+    def __init__(self, name, char):
+        # calling constructors
+        Entity.__init__(self, name=name, char=char, occupies_tile=False)
+
+
 class Fighter(BattleEntity, Actor, Seer, Entity):
     """
         Mixed class, basic monster, that can participate in combat and perform actions.
@@ -253,8 +262,11 @@ class Location:
                 wall = Wall('Wall', '#', 100)
                 self.place_entity(wall, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(2, 20)):
-                door = Door(name='Door', char_closed='+', char_open='.', hp=100, is_closed=False)
+                door = Door(name='Door', char_closed='+', char_open='.', hp=100, is_closed=True)
                 self.place_entity(door, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(1, random.randint(2, 20)):
+                item = Item(name='Boulder', char='*')
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
     def place_entity(self, entity, x, y):
         """ Method that places given entity on the location """
