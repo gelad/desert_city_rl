@@ -31,20 +31,21 @@ class Graphics:
         char = ' '
         color = [255, 255, 255]
         bgcolor = [0, 0, 0]
-        if visible:
+        if visible:  # check if cell is visible
             if cell.tile == 'SAND':  # sand tile type
                 char = '.'
                 color = [150, 150, 0]
-                bgcolor = [60, 60, 20]
+                bgcolor = [60, 60, 0]
             for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
                 char = ent.char
                 color = [255, 255, 255]
-                if ent.occupies_tile:
+                if ent.occupies_tile:  # check if there is entity, occupying tile - display it on top
                     break
+            # update visited cells map (for displaying grey out of vision explored tiles)
             loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
             return [char, color, bgcolor]
-        elif cell.explored:
-            prev_seen_cg = loc.out_of_sight_map[(x, y)]
+        elif cell.explored:  # check if it was previously explored
+            prev_seen_cg = loc.out_of_sight_map[(x, y)]  # take cell graphic from out_of_sight map of Location
             prev_seen_cg[1] = [100, 100, 100]  # make it greyish
             prev_seen_cg[2] = [50, 50, 50]
             return prev_seen_cg
