@@ -2,9 +2,10 @@ Implement composite actions (i.e. c + direction for closing doors) (DONE)
 Implement doors (as objects) and close/open action (DONE)
 Implement time system. (DONE!)
 Rework 'close' command with time system. (DONE)
+Implement FOV (as a separate module, wrapper on tdl fov) (DONE)
 
 Make a interface panel on left side instead of bottom.
 Implement look command (move camera instead of player)
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
-Implement FOV (as a separate module, wrapper on tdl fov) - consider Cogmind approach.
+

@@ -79,6 +79,10 @@ class Seer(Entity):
     def compute_fov(self):
         """ Method that calculates FOV """
         self.fov_set = fov_los.get_fov(self.position[0], self.position[1], self.location, self.sight_radius)
+        if isinstance(self, Player):
+            for point in self.fov_set:
+                if self.location.is_in_boundaries(point[0], point[1]):
+                    self.location.cells[point[0]][point[1]].explored = True
 
     def is_in_fov(self, x, y):
         """ Method that determines is a cell in Seer's FOV """
@@ -153,6 +157,15 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
         self.ai = ai  # ai component - PLACEHOLDER for now
 
 
+class Player(Fighter):
+    """
+        Child class, adds player-specific functionality to Fighter.
+    """
+    def __init__(self, name, char, hp, speed, sight_radius):
+        # calling constructor of parent class
+        Fighter.__init__(self, name=name, char=char, hp=hp,speed=speed, sight_radius=sight_radius, ai=None)
+
+
 class Wall(BattleEntity, Entity):
     """
         Mixed class of a wall, that has HP and can be destroyed, but lacks acting ability.
@@ -216,8 +229,10 @@ class Location:
         self.width = width  # width of location in tiles
         self.cells = []  # list of Cell objects
         self.action_mgr = actions.ActionMgr()  # action manager for this location
-        # self.entities = []  # TODO: decide, is it necessary to store a list of all entities on map
+        # self.entities = []  # a list of Entities
         self.seers = []  # a list of Seer objects, to recompute their FOV if map changes
+        # WARNING! it's a hack, graphic-related info stored in loc, to save/load it with the loc
+        self.out_of_sight_map = {}  # dict for storing explored, but invisible tiles
 
     def is_in_boundaries(self, x, y):
         """ Method validating coordinates, to avoid out of range errors  """
@@ -278,11 +293,11 @@ class Game:
         self.current_loc = Location(100, 100)
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
-        self.player = Fighter('Player', '@', 10, 100, 99.5)  # TODO: lessen sight radius or optimize FOV algorithm
+        self.player = Player('Player', '@', 10, 100, 23.5)  # TODO: lessen sight radius or optimize FOV algorithm
         self.current_loc.place_entity(self.player, 10, 10)
 
     def add_location(self, location):
-        """ Method thar adds a location to the game """
+        """ Method that adds a location to the game """
         self.time_system.register_act_mgr(location.action_mgr)  # register act manager to time system
         self.locations.append(location)
 

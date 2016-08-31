@@ -6,6 +6,7 @@ class Graphics:
     """
         Class that performs all graphic-related work.
     """
+
     def __init__(self, renderer='TDL', screen_width=80, screen_height=65, map_width=80, map_height=50, fps_limit=60):
         if renderer == 'TDL':
             self.renderer = renderer
@@ -25,21 +26,29 @@ class Graphics:
 
     # TODO: make some data structure storing tileset (simply a TYPE - CHAR - COLOR for start)
     @staticmethod
-    def cell_graphics(cell):
+    def cell_graphics(x, y, cell, loc, visible):
         """ Method that returns graphic representation of tile. Must be reworked when tileset comes in """
         char = ' '
         color = [255, 255, 255]
         bgcolor = [0, 0, 0]
-        if cell.tile == 'SAND':  # sand tile type
-            char = '.'
-            color = [150, 150, 0]
-            bgcolor = [60, 60, 20]
-        for ent in cell.entities:  # iterate through list of entities, if there are any, display them instead of tile
-            char = ent.char
-            color = [255, 255, 255]
-            if ent.occupies_tile:
-                return ent.char, [255, 255, 255], bgcolor
-        return char, color, bgcolor
+        if visible:
+            if cell.tile == 'SAND':  # sand tile type
+                char = '.'
+                color = [150, 150, 0]
+                bgcolor = [60, 60, 20]
+            for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
+                char = ent.char
+                color = [255, 255, 255]
+                if ent.occupies_tile:
+                    break
+            loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
+            return [char, color, bgcolor]
+        elif cell.explored:
+            prev_seen_cg = loc.out_of_sight_map[(x, y)]
+            prev_seen_cg[1] = [100, 100, 100]  # make it greyish
+            prev_seen_cg[2] = [50, 50, 50]
+            return prev_seen_cg
+        return [char, color, bgcolor]
 
     def render_all(self, loc, player, game):
         """ Method that displays all to screen """
@@ -53,10 +62,11 @@ class Graphics:
                 for y in range(0, self.map_height):
                     rel_x = x - camera_x + player_x  # game location coordinates in accordance to screen coordinates
                     rel_y = y - camera_y + player_y
-                    # TODO: rework debug code on visibility
                     # checks if location coordinates are valid (in boundaries)
-                    if loc.is_in_boundaries(rel_x, rel_y) and player.is_in_fov(rel_x, rel_y):
-                        cg = self.cell_graphics(loc.cells[rel_x][rel_y])  # obtain cell graphics
+                    if loc.is_in_boundaries(rel_x, rel_y):
+                        # obtain cell graphics
+                        cg = self.cell_graphics(rel_x, rel_y, loc.cells[rel_x][rel_y], loc,
+                                                player.is_in_fov(rel_x, rel_y))
                         self.map_console.draw_char(x, y, cg[0], cg[1], cg[2])  # draw it on map_console
                     else:
                         self.map_console.draw_char(x, y, ' ')  # if out of bounds then draw blank space
@@ -64,7 +74,7 @@ class Graphics:
             # bottom panel rendering
             self.panel.clear()
             self.panel.draw_str(0, 0, game.state)
-            self.panel.draw_str(0, 1, str(player_x)+':'+str(player_y))
-            self.panel.draw_str(0, 2, 'Current time: '+str(game.time_system.current_time()))
+            self.panel.draw_str(0, 1, str(player_x) + ':' + str(player_y))
+            self.panel.draw_str(0, 2, 'Current time: ' + str(game.time_system.current_time()))
             self.console.blit(self.panel, 0, self.map_height)
             tdl.flush()  # draw main console
