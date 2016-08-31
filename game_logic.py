@@ -188,7 +188,6 @@ class Door(BattleEntity, Entity):
     """
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
-    # TODO: handle blocks_los in opened/closed state
     def __init__(self, name, char_closed, char_open, hp, is_closed=True):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
@@ -305,7 +304,7 @@ class Game:
         self.current_loc = Location(100, 100)
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
-        self.player = Player('Player', '@', 10, 100, 23.5)  # TODO: lessen sight radius or optimize FOV algorithm
+        self.player = Player('Player', '@', 10, 100, 23.5)
         self.current_loc.place_entity(self.player, 10, 10)
 
     def add_location(self, location):

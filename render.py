@@ -7,21 +7,21 @@ class Graphics:
         Class that performs all graphic-related work.
     """
 
-    def __init__(self, renderer='TDL', screen_width=80, screen_height=65, map_width=80, map_height=50, fps_limit=60):
+    def __init__(self, renderer='TDL', screen_width=100, screen_height=50, map_width=80, map_height=50, fps_limit=60):
         if renderer == 'TDL':
             self.renderer = renderer
             self.screen_width = screen_width  # screen width in tiles
             self.screen_height = screen_height  # screen height in tiles
             self.map_width = map_width  # map width in tiles
             self.map_height = map_height  # map height in tiles
-            self.panel_width = self.screen_width  # panel width in tiles
-            self.panel_height = self.screen_height - self.map_height  # panel height in tiles
+            self.panel_width = self.screen_width - self.map_width  # panel width in tiles
+            self.panel_height = self.screen_height  # panel height in tiles
             self.fps_limit = fps_limit  # FPS limit
             # TDL initialization block
             tdl.set_font('consolas_unicode_16x16.png', greyscale=True)
             self.console = tdl.init(screen_width, screen_height, title="Desert City")  # main console, displayed
             self.map_console = tdl.Console(map_width, map_height)  # offscreen map console
-            self.panel = tdl.Console(map_width, map_height)
+            self.panel = tdl.Console(self.panel_width, self.panel_height)
             tdl.set_fps(fps_limit)
 
     # TODO: make some data structure storing tileset (simply a TYPE - CHAR - COLOR for start)
@@ -72,10 +72,10 @@ class Graphics:
                     else:
                         self.map_console.draw_char(x, y, ' ')  # if out of bounds then draw blank space
             self.console.blit(self.map_console)  # blit map_console on main console
-            # bottom panel rendering
+            # right panel rendering
             self.panel.clear()
             self.panel.draw_str(0, 0, game.state)
             self.panel.draw_str(0, 1, str(player_x) + ':' + str(player_y))
             self.panel.draw_str(0, 2, 'Current time: ' + str(game.time_system.current_time()))
-            self.console.blit(self.panel, 0, self.map_height)
+            self.console.blit(self.panel, self.map_width, 0)
             tdl.flush()  # draw main console
