@@ -29,7 +29,6 @@ class Cell:
 
     def is_there_a(self, thing):
         """ Method for checking some kind of entity present in cell(monster, door, item, etc) """
-        # TODO: add method for multiple entities (if needed a list of items or monsters)
         for ent in self.entities:
             if type(ent) == thing:
                 return ent
@@ -58,7 +57,7 @@ class Entity:
         self.char = char  # char that represents entity in graphics ('@') TODO: move graphics info to render.py?
 
 
-class BattleEntity:
+class BattleEntity(Entity):
     """
         Mixin class, adds combat related functionality to the Entity.
         Hp, taking/inflicting damage, that kind of stuff.
@@ -66,6 +65,16 @@ class BattleEntity:
     def __init__(self, hp):
         self.hp = hp  # current hitpoints
         self.maxhp = hp  # maximum hitpoints
+
+    def take_damage(self, damage):
+        """ This method should be called if entity is damaged """
+        self.hp -= damage
+        if self.hp <= 0:
+            self.death()
+
+    def death(self):
+        """ Abstract method that is called when BattleEntity dies """
+        raise NotImplementedError
 
 
 class Seer(Entity):
@@ -144,6 +153,25 @@ class Actor(Entity):
             raise Exception('Attempted to perform action with entity not positioned in any location. ', self.name)
 
 
+class AI:
+    """ Base class that represents monster AI """
+    def __init__(self, state):
+        self.state = state  # state of AI, i.e. 'sleeping', 'wandering', 'chasing'
+
+    def act(self):
+        """ Abstract method of AI class that is called when AI should decide what to do """
+        raise NotImplementedError
+
+
+class SimpleMeleeChaserAI(AI):
+    """ A simple melee chaser monster AI """
+    def __init__(self, state='idle'):
+        AI.__init__(self, state)
+
+    def act(self):
+        pass
+
+
 class Item (Entity):
     """
         Mixed class, simple Item.
@@ -165,6 +193,11 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
         Seer.__init__(self, sight_radius=sight_radius)
         self.ai = ai  # ai component - PLACEHOLDER for now
 
+    def death(self):
+        """ Death method """
+        print(self.name + ' dies!')
+        self.location.remove_entity(self)
+
 
 class Player(Fighter):
     """
@@ -182,6 +215,11 @@ class Wall(BattleEntity, Entity):
     def __init__(self, name, char, hp, blocks_los=True):
         Entity.__init__(self, name=name, char=char, occupies_tile=True, blocks_los=blocks_los)
         BattleEntity.__init__(self, hp)
+
+    def death(self):
+        """ Death method """
+        print(self.name + ' is destroyed!')
+        self.location.remove_entity(self)
 
 
 class Door(BattleEntity, Entity):
@@ -227,6 +265,11 @@ class Door(BattleEntity, Entity):
             return True  # if action successful
         return False  # if it's not
 
+    def death(self):
+        """ Death method """
+        print(self.name + ' is destroyed!')
+        self.location.remove_entity(self)
+
 
 class Location:
     """
@@ -238,7 +281,8 @@ class Location:
         self.cells = []  # list of Cell objects
         self.action_mgr = actions.ActionMgr()  # action manager for this location
         # self.entities = []  # a list of Entities
-        self.seers = []  # a list of Seer objects, to recompute their FOV if map changes
+        self.seers = []  # a list of Seer objects, to recompute their FOV if map changes # TODO: make fov recompute
+        self.actors = []  # a list of Actor objects
         # WARNING! it's a hack, graphic-related info stored in loc, to save/load it with the loc
         self.out_of_sight_map = {}  # dict for storing explored, but invisible tiles
 
@@ -276,8 +320,19 @@ class Location:
             if isinstance(entity, Seer):  # check if entity is a Seer
                 entity.compute_fov()  # recompute it's FOV
                 self.seers.append(entity)  # add it to Seers list
+            if isinstance(entity, Actor):  # check if entity is an Actor
+                self.actors.append(entity)  # add it to Actors list
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
+
+    def remove_entity(self, entity):
+        """ Method that removes entity from location """
+        # remove entity from cell
+        entity.location.cells[entity.position[0]][entity.position[1]].entities.remove(entity)
+        if isinstance(entity, Seer):  # check if entity is a Seer
+            self.seers.remove(entity)  # remove from seers list
+        if isinstance(entity, Actor):  # check if entity is an Actor
+            self.actors.remove(entity)  # remove from actors list
 
     def is_cell_transparent(self, x, y):
         """ Method that determines, is cell at x, y is transparent """

@@ -34,9 +34,11 @@ def execute_player_commands(commands):
     loc = game.current_loc
     for command in commands:
         if game.state == 'playing':
+            # game exit command
             if command == 'exit':
                 save_game(game)  # save game before exit
                 game.state = 'exit'
+            # moving commands
             elif command == 'move_n':
                 command_default_direction(player, loc, 0, -1)
             elif command == 'move_s':
@@ -53,6 +55,7 @@ def execute_player_commands(commands):
                 command_default_direction(player, loc, -1, 1)
             elif command == 'move_se':
                 command_default_direction(player, loc, 1, 1)
+            # closing door commands
             elif command == 'close_n':
                 command_close_direction(player, loc, 0, -1)
             elif command == 'close_s':
@@ -69,12 +72,15 @@ def execute_player_commands(commands):
                 command_close_direction(player, loc, -1, 1)
             elif command == 'close_se':
                 command_close_direction(player, loc, 1, 1)
-            elif command == 'look':  # 'look' command
+            # 'look' command
+            elif command == 'look':
                 game.state = 'looking'
         elif game.state == 'looking':  # if the game is in 'looking' mode
-            if command == 'exit':  # exit looking mode
+            # exit looking mode
+            if command == 'exit':
                 graphics.set_camera_offset(0, 0)  # set camera offset to normal
                 game.state = 'playing'  # resume normal game flow
+            # moving camera commands
             elif command == 'move_n':
                 graphics.move_camera(0, -1)
             elif command == 'move_s':
