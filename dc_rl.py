@@ -32,7 +32,7 @@ def execute_player_commands(game, commands):
         player_y = game.player.position[1]
     loc = game.current_loc
     for command in commands:
-        if game.state == 'waiting_input':
+        if game.state == 'playing':
             if command == 'exit':
                 save_game(game)  # save game before exit
                 game.state = 'exit'
@@ -113,20 +113,38 @@ def command_close_direction(player, loc, dx, dy):
 def main_loop():
     """ Main game loop function """
     while not game.state == 'exit':
-        if game.state == 'looking':
-            commands = player_input.handle_input(game)  # get list of player commands
-            execute_player_commands(game, commands)
-        game.state = 'playing'
-        if game.player.state == 'ready' and game.state == 'playing':
-            # TODO: menu implementation will need rework on game state handling
-            # Make wait for input a sort of a flag, it occures in different states
-            game.state = 'waiting_input'  # if player is ready to act, stop time and wait for input
-            commands = player_input.handle_input(game)  # get list of player commands
-            execute_player_commands(game, commands)
-        if game.state == 'playing':  # pass time
-            game.time_system.pass_time()
-        if not game.state == 'playing':
+        draw_screen = False
+        if game.state == 'playing':
+            if game.is_waiting_input:
+                commands = player_input.handle_input(game)  # get list of player commands
+                if commands:
+                    execute_player_commands(game, commands)
+                draw_screen = True
+                if not game.player.state == 'ready':
+                    game.is_waiting_input = False
+            else:
+                game.time_system.pass_time()
+                if game.player.state == 'ready':
+                    game.is_waiting_input = True
+        elif game.state == 'looking':
+            if game.is_waiting_input:
+                pass
+            else:
+                pass
+        if draw_screen:
             graphics.render_all(game.current_loc, game.player, game)  # call a screen rendering function
+        # if game.state == 'looking':
+        #     commands = player_input.handle_input(game)  # get list of player commands
+        #     execute_player_commands(game, commands)
+        # game.state = 'playing'
+        # if game.player.state == 'ready' and game.state == 'playing':
+        #     game.state = 'waiting_input'  # if player is ready to act, stop time and wait for input
+        #     commands = player_input.handle_input(game)  # get list of player commands
+        #     execute_player_commands(game, commands)
+        # if game.state == 'playing':  # pass time
+        #     game.time_system.pass_time()
+        # if not game.state == 'playing':
+        #     graphics.render_all(game.current_loc, game.player, game)  # call a screen rendering function
 
 graphics = render.Graphics()
 game = load_game()

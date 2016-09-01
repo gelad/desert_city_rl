@@ -293,7 +293,8 @@ class Game:
     def __init__(self, game_type='new'):
         self.current_loc = None  # current location
         self.player = None  # player object
-        self.state = ''  # game state, like 'playing', 'paused' etc
+        self.state = ''  # game state, like 'playing', 'looking', 'menu'
+        self.is_waiting_input = True  # is game paused and waiting for player input
         self.locations = []  # list of locations
         self.time_system = actions.TimeSystem()  # time system object
         if game_type == 'new':  # constructor option for new game start
@@ -306,6 +307,8 @@ class Game:
         self.current_loc.generate('ruins')
         self.player = Player('Player', '@', 10, 100, 23.5)
         self.current_loc.place_entity(self.player, 10, 10)
+        self.is_waiting_input = True
+        self.state = 'playing'
 
     def add_location(self, location):
         """ Method that adds a location to the game """

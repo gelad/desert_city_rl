@@ -34,8 +34,8 @@ class Graphics:
         if visible:  # check if cell is visible
             if cell.tile == 'SAND':  # sand tile type
                 char = '.'
-                color = [150, 150, 0]
-                bgcolor = [60, 60, 0]
+                color = [200, 200, 0]
+                bgcolor = [100, 100, 0]
             for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
                 char = ent.char
                 color = [255, 255, 255]
