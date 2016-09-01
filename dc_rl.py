@@ -17,13 +17,14 @@ def load_game():
     try:
         loaded_game = pickle.load(open('savegame', 'rb'))
         if loaded_game.state == 'exit':
+            print('Saved game state was exit, changed to playing')  # debug output
             loaded_game.state = 'playing'
         return loaded_game
     except FileNotFoundError:
         return False
 
 
-def execute_player_commands(game, commands):
+def execute_player_commands(commands):
     """ Function that translates player input commands to game logic actions and runs them """
     # block for easier naming inside function
     player = game.player
@@ -70,9 +71,26 @@ def execute_player_commands(game, commands):
                 command_close_direction(player, loc, 1, 1)
             elif command == 'look':  # 'look' command
                 game.state = 'looking'
-        elif game.state == 'looking':
-            if command == 'exit':
-                game.state = 'playing'
+        elif game.state == 'looking':  # if the game is in 'looking' mode
+            if command == 'exit':  # exit looking mode
+                graphics.set_camera_offset(0, 0)  # set camera offset to normal
+                game.state = 'playing'  # resume normal game flow
+            elif command == 'move_n':
+                graphics.move_camera(0, -1)
+            elif command == 'move_s':
+                graphics.move_camera(0, 1)
+            elif command == 'move_w':
+                graphics.move_camera(-1, 0)
+            elif command == 'move_e':
+                graphics.move_camera(1, 0)
+            elif command == 'move_nw':
+                graphics.move_camera(-1, -1)
+            elif command == 'move_ne':
+                graphics.move_camera(1, -1)
+            elif command == 'move_sw':
+                graphics.move_camera(-1, 1)
+            elif command == 'move_se':
+                graphics.move_camera(1, 1)
 
 
 # ========================== COMMAND FUNCTIONS (special cases, to prevent code duplication) ====================
@@ -114,37 +132,29 @@ def main_loop():
     """ Main game loop function """
     while not game.state == 'exit':
         draw_screen = False
-        if game.state == 'playing':
+        if game.state == 'playing':  # check if state is 'playing'
+            if game.is_waiting_input:  # check if game is waiting for player input
+                commands = player_input.handle_input(game)  # get list of player commands
+                if commands:  # if there are commands
+                    execute_player_commands(commands)  # execute them
+                draw_screen = True  # set flag to draw screen
+                if not game.player.state == 'ready':  # if after command execution player is performing an action
+                    game.is_waiting_input = False  # set waiting for input flag to False
+            else:  # if not waiting for input
+                game.time_system.pass_time()  # pass game time, fire events
+                if game.player.state == 'ready':  # check if player is 'ready'
+                    game.is_waiting_input = True  # set waiting for input flag True
+        elif game.state == 'looking':  # check if state is 'looking'
             if game.is_waiting_input:
                 commands = player_input.handle_input(game)  # get list of player commands
-                if commands:
-                    execute_player_commands(game, commands)
-                draw_screen = True
-                if not game.player.state == 'ready':
-                    game.is_waiting_input = False
-            else:
-                game.time_system.pass_time()
-                if game.player.state == 'ready':
-                    game.is_waiting_input = True
-        elif game.state == 'looking':
-            if game.is_waiting_input:
-                pass
+                if commands:  # if there are commands
+                    execute_player_commands(commands)  # execute them
+                draw_screen = True  # set flag to draw screen
             else:
                 pass
         if draw_screen:
             graphics.render_all(game.current_loc, game.player, game)  # call a screen rendering function
-        # if game.state == 'looking':
-        #     commands = player_input.handle_input(game)  # get list of player commands
-        #     execute_player_commands(game, commands)
-        # game.state = 'playing'
-        # if game.player.state == 'ready' and game.state == 'playing':
-        #     game.state = 'waiting_input'  # if player is ready to act, stop time and wait for input
-        #     commands = player_input.handle_input(game)  # get list of player commands
-        #     execute_player_commands(game, commands)
-        # if game.state == 'playing':  # pass time
-        #     game.time_system.pass_time()
-        # if not game.state == 'playing':
-        #     graphics.render_all(game.current_loc, game.player, game)  # call a screen rendering function
+
 
 graphics = render.Graphics()
 game = load_game()

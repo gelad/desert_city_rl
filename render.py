@@ -9,7 +9,7 @@ class Graphics:
 
     def __init__(self, renderer='TDL', screen_width=100, screen_height=50, map_width=80, map_height=50, fps_limit=60):
         if renderer == 'TDL':
-            self.renderer = renderer
+            self.renderer = renderer  # renderer type
             self.screen_width = screen_width  # screen width in tiles
             self.screen_height = screen_height  # screen height in tiles
             self.map_width = map_width  # map width in tiles
@@ -17,12 +17,21 @@ class Graphics:
             self.panel_width = self.screen_width - self.map_width  # panel width in tiles
             self.panel_height = self.screen_height  # panel height in tiles
             self.fps_limit = fps_limit  # FPS limit
+            self.cam_offset = (0, 0)  # camera offset (for looking, shooting, etc)
             # TDL initialization block
             tdl.set_font('consolas_unicode_16x16.png', greyscale=True)
             self.console = tdl.init(screen_width, screen_height, title="Desert City")  # main console, displayed
             self.map_console = tdl.Console(map_width, map_height)  # offscreen map console
-            self.panel = tdl.Console(self.panel_width, self.panel_height)
-            tdl.set_fps(fps_limit)
+            self.panel = tdl.Console(self.panel_width, self.panel_height)  # offscreen panel console
+            tdl.set_fps(fps_limit)  # set fps limit
+
+    def move_camera(self, dx, dy):
+        """ Method for moving camera by dx, dy """
+        self.cam_offset = (self.cam_offset[0] + dx, self.cam_offset[1] + dy)
+
+    def set_camera_offset(self, x, y):
+        """ Method for setting camera offset """
+        self.cam_offset = (x, y)
 
     # TODO: make some data structure storing tileset (simply a TYPE - CHAR - COLOR for start)
     @staticmethod
@@ -57,12 +66,13 @@ class Graphics:
             # map rendering
             player_x = player.position[0]
             player_y = player.position[1]
-            camera_x = self.map_width // 2  # camera (viewport) is centered by default at center of map part of window
-            camera_y = self.map_height // 2  # there is player @ too
+            # player on-screen coords
+            player_scr_x = self.map_width // 2 - self.cam_offset[0]
+            player_scr_y = self.map_height // 2 - self.cam_offset[1]
             for x in range(0, self.map_width):  # iterate through every x, y in map_console
                 for y in range(0, self.map_height):
-                    rel_x = x - camera_x + player_x  # game location coordinates in accordance to screen coordinates
-                    rel_y = y - camera_y + player_y
+                    rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
+                    rel_y = y - player_scr_y + player_y
                     # checks if location coordinates are valid (in boundaries)
                     if loc.is_in_boundaries(rel_x, rel_y):
                         # obtain cell graphics
@@ -71,6 +81,9 @@ class Graphics:
                         self.map_console.draw_char(x, y, cg[0], cg[1], cg[2])  # draw it on map_console
                     else:
                         self.map_console.draw_char(x, y, ' ')  # if out of bounds then draw blank space
+                    if not self.cam_offset == (0, 0):
+                        # if camera is not centered on player - draw there a red 'X'
+                        self.map_console.draw_char(self.map_width // 2, self.map_height // 2, 'X', [255, 0, 0])
             self.console.blit(self.map_console)  # blit map_console on main console
             # right panel rendering
             self.panel.clear()
