@@ -42,13 +42,18 @@ class ActionMgr:
         action = Action(t_passed=0, t_needed=t_needed, frozen=False, func=func, args=args, kwargs=kwargs)
         action.register()  # call action's func in register mode
         self.actions.append(action)
+        return action
+
+    def remove_action(self, action):
+        """ Method removes an action """
+        self.actions.remove(action)
 
     def pass_ticks(self, ticks=1):
         """ Method that increments tick count on actions, and makes them fire if ready """
         for action in self.actions:
             action.t_passed += ticks
             if action.fire_if_ready():
-                self.actions.remove(action)
+                self.remove_action(action)
 
 
 class TimeSystem:
@@ -99,6 +104,7 @@ def act_move(action, register_call, actor, dx, dy):
         actor.move(dx, dy)  # move actor to desired coords
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
             actor.compute_fov()  # compute actor's FOV
+        actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
 
 
@@ -110,6 +116,7 @@ def act_open_door(action, register_call, actor, door):
         actor.open(door)  # open the door
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
             actor.compute_fov()  # compute actor's FOV
+        actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
 
 
@@ -121,4 +128,5 @@ def act_close_door(action, register_call, actor, door):
         actor.close(door)  # close the door
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
             actor.compute_fov()  # compute actor's FOV
+        actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state

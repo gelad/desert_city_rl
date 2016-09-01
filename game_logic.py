@@ -11,6 +11,7 @@ class Cell:
     """
         Class represents a single cell in location grid
     """
+
     def __init__(self, tile_type, blocks_move=False, blocks_los=False, explored=False):
         self.explored = explored  # is tile explored?
         self.tile = tile_type  # tile type for drawing purposes (i.e. 'WALL', 'FLOOR')
@@ -48,6 +49,7 @@ class Entity:
     """
         Base class for all game entities - monsters, items, walls, etc.
     """
+
     def __init__(self, name='', char=' ', location=None, position=None, occupies_tile=False, blocks_los=False):
         self.name = name  # entity name
         self.location = location  # Location object, where entity is placed
@@ -62,6 +64,7 @@ class BattleEntity(Entity):
         Mixin class, adds combat related functionality to the Entity.
         Hp, taking/inflicting damage, that kind of stuff.
     """
+
     def __init__(self, hp):
         self.hp = hp  # current hitpoints
         self.maxhp = hp  # maximum hitpoints
@@ -81,6 +84,7 @@ class Seer(Entity):
     """
         Mixin class, adds visibility (FOV & LOS) functionality to Entity.
     """
+
     def __init__(self, sight_radius):
         self.sight_radius = sight_radius  # sight radius in tiles
         self.fov_set = ()  # field of view - set of (x, y) points
@@ -103,9 +107,11 @@ class Actor(Entity):
         Mixin class, adds acting functionality to the Entity.
         Time-system related stuff.
     """
+
     def __init__(self, speed, state='ready'):
         self.speed = speed  # overall speed factor of actions
         self.state = state  # actor state - ready, acting or withdrawal (for now)
+        self.actions = []  # list of actions
 
     def move(self, dx, dy):
         """ Movement method, checks if it is allowed to move. For player, monster movement. """
@@ -140,12 +146,14 @@ class Actor(Entity):
         else:
             raise Exception('Attempted to open non-existing door. ', self.name)
 
-    def perform(self, action, *args, **kwargs):
+    def perform(self, action_function, *args, **kwargs):
         """ Method for performing an action in a location (maybe in future will be actions outside)
              Handles state change """
         if self.location:
             if self.state == 'ready':
-                self.location.action_mgr.register_action(self.speed, action, *args, **kwargs)
+                # register action and add it on actor's action list
+                self.actions.append(
+                    self.location.action_mgr.register_action(self.speed, action_function, *args, **kwargs))
                 self.state = 'performing'
                 return True
             return False
@@ -155,6 +163,7 @@ class Actor(Entity):
 
 class AI:
     """ Base class that represents monster AI """
+
     def __init__(self, state):
         self.state = state  # state of AI, i.e. 'sleeping', 'wandering', 'chasing'
 
@@ -165,6 +174,7 @@ class AI:
 
 class SimpleMeleeChaserAI(AI):
     """ A simple melee chaser monster AI """
+
     def __init__(self, state='idle'):
         AI.__init__(self, state)
 
@@ -172,10 +182,11 @@ class SimpleMeleeChaserAI(AI):
         pass
 
 
-class Item (Entity):
+class Item(Entity):
     """
         Mixed class, simple Item.
     """
+
     def __init__(self, name, char):
         # calling constructors
         Entity.__init__(self, name=name, char=char, occupies_tile=False)
@@ -185,13 +196,22 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
     """
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
-    def __init__(self, name, char, hp, speed, sight_radius, ai=None):
+
+    def __init__(self, name, char, hp, speed, sight_radius, damage, ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, char=char, occupies_tile=True)
         BattleEntity.__init__(self, hp)
         Actor.__init__(self, speed)
         Seer.__init__(self, sight_radius=sight_radius)
+        self.damage = damage  # damage from basic melee attack
         self.ai = ai  # ai component - PLACEHOLDER for now
+
+    def deal_damage(self, target):
+        """ Method for dealing damage """
+        if isinstance(target, BattleEntity):
+            target.take_damage(self.damage)  # inflict that damage to target
+        else:
+            raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
 
     def death(self):
         """ Death method """
@@ -203,15 +223,18 @@ class Player(Fighter):
     """
         Child class, adds player-specific functionality to Fighter.
     """
-    def __init__(self, name, char, hp, speed, sight_radius):
+
+    def __init__(self, name, char, hp, speed, sight_radius, damage):
         # calling constructor of parent class
-        Fighter.__init__(self, name=name, char=char, hp=hp,speed=speed, sight_radius=sight_radius, ai=None)
+        Fighter.__init__(self, name=name, char=char, hp=hp, speed=speed, sight_radius=sight_radius, damage=damage,
+                         ai=None)
 
 
 class Wall(BattleEntity, Entity):
     """
         Mixed class of a wall, that has HP and can be destroyed, but lacks acting ability.
     """
+
     def __init__(self, name, char, hp, blocks_los=True):
         Entity.__init__(self, name=name, char=char, occupies_tile=True, blocks_los=blocks_los)
         BattleEntity.__init__(self, hp)
@@ -226,6 +249,7 @@ class Door(BattleEntity, Entity):
     """
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
+
     def __init__(self, name, char_closed, char_open, hp, is_closed=True):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
@@ -275,6 +299,7 @@ class Location:
     """
         Represents a location, has a grid (nested list) of Cells
     """
+
     def __init__(self, height, width):
         self.height = height  # height of location in tiles
         self.width = width  # width of location in tiles
@@ -332,6 +357,8 @@ class Location:
         if isinstance(entity, Seer):  # check if entity is a Seer
             self.seers.remove(entity)  # remove from seers list
         if isinstance(entity, Actor):  # check if entity is an Actor
+            for action in entity.actions:  # remove actions from ActMgr
+                self.action_mgr.remove_action(action)
             self.actors.remove(entity)  # remove from actors list
 
     def is_cell_transparent(self, x, y):
@@ -345,6 +372,7 @@ class Game:
     """
         Representation of whole game model, list of locations, game state, some between-locations info in the future.
     """
+
     def __init__(self, game_type='new'):
         self.current_loc = None  # current location
         self.player = None  # player object
@@ -360,7 +388,7 @@ class Game:
         self.current_loc = Location(100, 100)
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
-        self.player = Player('Player', '@', 10, 100, 23.5)
+        self.player = Player('Player', '@', 10, 100, 23.5, 2)
         self.current_loc.place_entity(self.player, 10, 10)
         self.is_waiting_input = True
         self.state = 'playing'
@@ -369,4 +397,3 @@ class Game:
         """ Method that adds a location to the game """
         self.time_system.register_act_mgr(location.action_mgr)  # register act manager to time system
         self.locations.append(location)
-
