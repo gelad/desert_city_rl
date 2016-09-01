@@ -7,7 +7,7 @@ Make a interface panel on right side instead of bottom. (DONE)
 Before look command rework game state handling. (DONE)
 Implement look command (move camera instead of player) (DONE)
 
-
+Implement attack action.
 Implement simple monster (a zombie with dumb ai)
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
