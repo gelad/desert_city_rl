@@ -50,7 +50,7 @@ class ActionMgr:
 
     def pass_ticks(self, ticks=1):
         """ Method that increments tick count on actions, and makes them fire if ready """
-        for action in self.actions:
+        for action in self.actions[:]:
             action.t_passed += ticks
             if action.fire_if_ready():
                 self.remove_action(action)

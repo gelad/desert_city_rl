@@ -175,6 +175,7 @@ class AI:
 
     def __init__(self, state):
         self.state = state  # state of AI, i.e. 'sleeping', 'wandering', 'chasing'
+        self.owner = None  # owner Entity of ai object. TODO: hack - owner set externally
 
     def act(self):
         """ Abstract method of AI class that is called when AI should decide what to do """
@@ -188,7 +189,19 @@ class SimpleMeleeChaserAI(AI):
         AI.__init__(self, state)
 
     def act(self):
-        pass
+        """ Method called when monster is ready to act """
+        if self.state == 'idle':
+            x = self.owner.position[0]
+            y = self.owner.position[1]
+            for point in self.owner.fov_set:
+                player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
+                if player:
+                    if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) < 1.5:
+                        self.owner.perform(actions.act_attack_melee, self.owner, player)
+                    else:
+                        los = fov_los.get_los(x, y, point[0], point[1])
+                        step_cell = los[1]
+                        self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
 
 
 class Item(Entity):
@@ -210,6 +223,8 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
         # calling constructors of mixins
         Entity.__init__(self, name=name, char=char, occupies_tile=True)
         BattleEntity.__init__(self, hp=hp)
+        if ai:  # set AI owner
+            ai.owner = self
         Actor.__init__(self, speed=speed, ai=ai)
         Seer.__init__(self, sight_radius=sight_radius)
         self.damage = damage  # damage from basic melee attack
@@ -219,10 +234,10 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
         # check if target is in melee range
         # TODO: handle situation when target is already dead (if needed)
         if hypot(target.position[0] - self.position[0], target.position[1] - self.position[1]) < 1.5:
-            print(self.name+' attacks '+target.name+' and deals '+str(self.damage)+' damage!')
+            print(self.name + ' attacks ' + target.name + ' and deals ' + str(self.damage) + ' damage!')
             self.deal_damage(target, self.damage)  # deal damage
         else:
-            print(self.name+' attack misses, because '+target.name+' moved out of range!')
+            print(self.name + ' attack misses, because ' + target.name + ' moved out of range!')
 
     def death(self):
         """ Death method """
@@ -346,8 +361,9 @@ class Location:
             for i in range(1, random.randint(2, 20)):
                 item = Item(name='Boulder', char='*')
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(1, random.randint(1, 10)):
-                enemy = Fighter(name='Mindless body', char='b', hp=6, speed=100, sight_radius=14.5, damage=1)
+            for i in range(1, random.randint(3, 10)):
+                enemy = Fighter(name='Mindless body', char='b', hp=6, speed=100, sight_radius=14.5, damage=1,
+                                ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
     def place_entity(self, entity, x, y):

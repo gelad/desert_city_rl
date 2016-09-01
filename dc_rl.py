@@ -149,6 +149,9 @@ def main_loop():
                     game.is_waiting_input = False  # set waiting for input flag to False
             else:  # if not waiting for input
                 game.time_system.pass_time()  # pass game time, fire events
+                for actor in game.current_loc.actors:  # iterate through actors
+                    if actor.state == 'ready' and actor.ai:  # pick those who have ai and ready to act
+                        actor.ai.act()  # make them act
                 if game.player.state == 'ready':  # check if player is 'ready'
                     game.is_waiting_input = True  # set waiting for input flag True
         elif game.state == 'looking':  # check if state is 'looking'
