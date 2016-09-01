@@ -108,6 +108,16 @@ def act_move(action, register_call, actor, dx, dy):
         actor.state = 'ready'  # return actor to ready state
 
 
+def act_attack_melee(action, register_call, actor, target):
+    """ Actor melee attack """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed  # one basic melee attack takes actor.speed ticks to perform
+    else:  # part that is executed when action fires
+        actor.attack_melee(target)  # attack target
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
 def act_open_door(action, register_call, actor, door):
     """ Actor opening door action """
     if register_call:  # part executed when function is registered in ActionMgr

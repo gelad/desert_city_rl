@@ -5,6 +5,7 @@ import actions
 import fov_los
 
 import random
+from math import hypot
 
 
 class Cell:
@@ -31,7 +32,7 @@ class Cell:
     def is_there_a(self, thing):
         """ Method for checking some kind of entity present in cell(monster, door, item, etc) """
         for ent in self.entities:
-            if type(ent) == thing:
+            if isinstance(ent, thing):
                 return ent
         return False
 
@@ -75,6 +76,13 @@ class BattleEntity(Entity):
         if self.hp <= 0:
             self.death()
 
+    def deal_damage(self, target, damage):
+        """ Method for dealing damage """
+        if isinstance(target, BattleEntity):
+            target.take_damage(damage)  # inflict that damage to target
+        else:
+            raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
+
     def death(self):
         """ Abstract method that is called when BattleEntity dies """
         raise NotImplementedError
@@ -108,10 +116,11 @@ class Actor(Entity):
         Time-system related stuff.
     """
 
-    def __init__(self, speed, state='ready'):
+    def __init__(self, speed, state='ready', ai=None):
         self.speed = speed  # overall speed factor of actions
         self.state = state  # actor state - ready, acting or withdrawal (for now)
         self.actions = []  # list of actions
+        self.ai = ai  # ai component
 
     def move(self, dx, dy):
         """ Movement method, checks if it is allowed to move. For player, monster movement. """
@@ -200,18 +209,20 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
     def __init__(self, name, char, hp, speed, sight_radius, damage, ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, char=char, occupies_tile=True)
-        BattleEntity.__init__(self, hp)
-        Actor.__init__(self, speed)
+        BattleEntity.__init__(self, hp=hp)
+        Actor.__init__(self, speed=speed, ai=ai)
         Seer.__init__(self, sight_radius=sight_radius)
         self.damage = damage  # damage from basic melee attack
-        self.ai = ai  # ai component - PLACEHOLDER for now
 
-    def deal_damage(self, target):
-        """ Method for dealing damage """
-        if isinstance(target, BattleEntity):
-            target.take_damage(self.damage)  # inflict that damage to target
+    def attack_melee(self, target):
+        """ Attack in melee method """
+        # check if target is in melee range
+        # TODO: handle situation when target is already dead (if needed)
+        if hypot(target.position[0] - self.position[0], target.position[1] - self.position[1]) < 1.5:
+            print(self.name+' attacks '+target.name+' and deals '+str(self.damage)+' damage!')
+            self.deal_damage(target, self.damage)  # deal damage
         else:
-            raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
+            print(self.name+' attack misses, because '+target.name+' moved out of range!')
 
     def death(self):
         """ Death method """
@@ -335,6 +346,9 @@ class Location:
             for i in range(1, random.randint(2, 20)):
                 item = Item(name='Boulder', char='*')
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(1, random.randint(1, 10)):
+                enemy = Fighter(name='Mindless body', char='b', hp=6, speed=100, sight_radius=14.5, damage=1)
+                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
     def place_entity(self, entity, x, y):
         """ Method that places given entity on the location """

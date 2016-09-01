@@ -111,13 +111,14 @@ def command_default_direction(player, loc, dx, dy):
     if loc.is_in_boundaries(new_x, new_y):  # check if new position is in the location boundaries
         if loc.cells[new_x][new_y].is_movement_allowed():  # check if movement is allowed
             player.perform(actions.act_move, game.player, dx, dy)  # perform move action
-            return True
         door = loc.cells[new_x][new_y].is_there_a(game_logic.Door)
         if door:  # check if there is a door
             if door.is_closed:  # check if it is closed
                 player.perform(actions.act_open_door, game.player, door)  # open door
-                return True
-        return False
+        # TODO: here must be more complicated check - if target is hostile, etc
+        enemy = loc.cells[new_x][new_y].is_there_a(game_logic.Fighter)
+        if enemy:  # check if there an enemy
+            player.perform(actions.act_attack_melee, game.player, enemy)  # attack it in melee
 
 
 def command_close_direction(player, loc, dx, dy):
