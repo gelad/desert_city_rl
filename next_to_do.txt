@@ -14,3 +14,5 @@ Handle player's death. (DONE)
 Chase bugs in basic melee combat.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
+Implement some sort of event system?
+Implement window system (in Z order) - render

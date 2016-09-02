@@ -236,14 +236,16 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
         # check if target is in melee range
         # TODO: handle situation when target is already dead (if needed)
         if hypot(target.position[0] - self.position[0], target.position[1] - self.position[1]) <= 1.42:
-            print(self.name + ' attacks ' + target.name + ' and deals ' + str(self.damage) + ' damage!')
+            msg = self.name + ' attacks ' + target.name + ' and deals ' + str(self.damage) + ' damage!'
+            Game.add_message(msg, 'PLAYER', [255, 255, 255])
             self.deal_damage(target, self.damage)  # deal damage
         else:
-            print(self.name + ' attack misses, because ' + target.name + ' moved out of range!')
+            msg = self.name + ' attack misses, because ' + target.name + ' moved out of range!'
+            Game.add_message(msg, 'PLAYER', [255, 255, 255])
 
     def death(self):
         """ Death method """
-        print(self.name + ' dies!')
+        Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
         self.location.remove_entity(self)
 
 
@@ -259,7 +261,7 @@ class Player(Fighter):
 
     def death(self):
         """ Death method """
-        print(self.name + ' dies!')
+        Game.add_message('You died!', 'PLAYER', [255, 0, 0])
         self.state = 'dead'
         self.location.remove_entity(self)
 
@@ -410,6 +412,10 @@ class Game:
     """
         Representation of whole game model, list of locations, game state, some between-locations info in the future.
     """
+    log = []  # a list of game messages (like damage, usage of items, etc) each message has level:
+    # DEBUG - debug messages
+    # PLAYER - messages visible to player by default
+    # it is static, because passing a Game object instance to each method that needs write lo log is not right
 
     def __init__(self, game_type='new'):
         self.current_loc = None  # current location
@@ -418,6 +424,7 @@ class Game:
         self.is_waiting_input = True  # is game paused and waiting for player input
         self.locations = []  # list of locations
         self.time_system = actions.TimeSystem()  # time system object
+
         if game_type == 'new':  # constructor option for new game start
             self.new_game()
 
@@ -435,3 +442,8 @@ class Game:
         """ Method that adds a location to the game """
         self.time_system.register_act_mgr(location.action_mgr)  # register act manager to time system
         self.locations.append(location)
+
+    @staticmethod
+    def add_message(message, level, color):
+        """ Method that adds a message to log """
+        Game.log.append((message, level, color))

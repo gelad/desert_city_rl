@@ -1,5 +1,8 @@
 import tdl
 import fov_los
+import game_logic
+
+import textwrap
 
 
 class Graphics:
@@ -7,7 +10,7 @@ class Graphics:
         Class that performs all graphic-related work.
     """
 
-    def __init__(self, renderer='TDL', screen_width=100, screen_height=50, map_width=80, map_height=50, fps_limit=60):
+    def __init__(self, renderer='TDL', screen_width=110, screen_height=50, map_width=80, map_height=50, fps_limit=60):
         if renderer == 'TDL':
             self.renderer = renderer  # renderer type
             self.screen_width = screen_width  # screen width in tiles
@@ -16,6 +19,8 @@ class Graphics:
             self.map_height = map_height  # map height in tiles
             self.panel_width = self.screen_width - self.map_width  # panel width in tiles
             self.panel_height = self.screen_height  # panel height in tiles
+            self.log_width = self.panel_width  # message log width
+            self.log_height = self.panel_height // 2 - 1  # message log height
             self.fps_limit = fps_limit  # FPS limit
             self.cam_offset = (0, 0)  # camera offset (for looking, shooting, etc)
             # TDL initialization block
@@ -23,6 +28,7 @@ class Graphics:
             self.console = tdl.init(screen_width, screen_height, title="Desert City")  # main console, displayed
             self.map_console = tdl.Console(map_width, map_height)  # offscreen map console
             self.panel = tdl.Console(self.panel_width, self.panel_height)  # offscreen panel console
+            self.log = tdl.Console(self.log_width, self.log_height)  # offscreen message log console
             tdl.set_fps(fps_limit)  # set fps limit
 
     def move_camera(self, dx, dy):
@@ -85,10 +91,28 @@ class Graphics:
                         # if camera is not centered on player - draw there a red 'X'
                         self.map_console.draw_char(self.map_width // 2, self.map_height // 2, 'X', [255, 0, 0])
             self.console.blit(self.map_console)  # blit map_console on main console
+            # TODO: move rendering each element to separate function.
             # right panel rendering
             self.panel.clear()
-            self.panel.draw_str(0, 0, game.state)
-            self.panel.draw_str(0, 1, str(player_x) + ':' + str(player_y))
-            self.panel.draw_str(0, 2, 'Current time: ' + str(game.time_system.current_time()))
+            self.panel.draw_str(0, 0, game.player.name)
+            self.panel.draw_str(0, 1, str(game.player.hp)+'/'+str(game.player.maxhp)+' HP')
+            self.panel.draw_str(0, 2, game.state)
+            self.panel.draw_str(0, 3, 'X:'+str(player_x)+' Y:'+str(player_y))
+            self.panel.draw_str(0, 4, 'Current time: '+str(game.time_system.current_time()))
             self.console.blit(self.panel, self.map_width, 0)
+            # message log rendering
+            self.log.clear()  # clear log window
+            # get log messages, intended to be shown to player
+            msgs = [m for m in game_logic.Game.log if m[1] == 'PLAYER']
+            msgs = msgs[-self.log_height:]  # make a slice for last ones log_height ammount
+            log_lines = []
+            for msg in msgs:  # iterate through messages
+                for line in textwrap.wrap(msg[0], self.log_width):  # wrap them in lines of log_width
+                    log_lines.append((line, msg[2]))  # store them in list
+            log_lines = log_lines[-(self.log_height-1):]  # slice list to log_height elements
+            y = 0
+            for line in log_lines:
+                y += 1
+                self.log.draw_str(0, y, line[0], line[1])  # draw each line
+            self.console.blit(self.log, self.map_width, self.panel_height / 2)
             tdl.flush()  # draw main console
