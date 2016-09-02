@@ -435,6 +435,8 @@ class Game:
         self.current_loc.generate('ruins')
         self.player = Player('Player', '@', 10, 100, 23.5, 2)
         self.current_loc.place_entity(self.player, 10, 10)
+        self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
+        self.current_loc.actors.insert(0, self.player)
         self.is_waiting_input = True
         self.state = 'playing'
 
