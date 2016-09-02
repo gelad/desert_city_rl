@@ -202,6 +202,8 @@ class SimpleMeleeChaserAI(AI):
                         los = fov_los.get_los(x, y, point[0], point[1])
                         step_cell = los[1]
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+            if self.owner.state == 'ready':
+                self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
 
 
 class Item(Entity):

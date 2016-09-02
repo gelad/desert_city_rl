@@ -151,6 +151,9 @@ def main_loop():
                     game.is_waiting_input = False  # set waiting for input flag to False
             else:  # if not waiting for input
                 game.time_system.pass_time()  # pass game time, fire events
+                if game.player.state == 'dead':  # check if player is dead
+                    game.state = 'dead'  # set game state to 'dead' # PLACEHOLDER FOR NOW!
+                    draw_screen = True
                 for actor in game.current_loc.actors:  # iterate through actors
                     if actor.state == 'ready' and actor.ai:  # pick those who have ai and ready to act
                         actor.ai.act()  # make them act

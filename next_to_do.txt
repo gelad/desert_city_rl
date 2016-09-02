@@ -8,9 +8,9 @@ Before look command rework game state handling. (DONE)
 Implement look command (move camera instead of player) (DONE)
 Implement attack action. (DONE)
 Implement simple monster (a zombie with dumb ai) (DONE)
+Handle player's death. (DONE)
 
 
-Handle player's death.
-Chase bugs in basic melee combat. (distance calc)
+Chase bugs in basic melee combat.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
