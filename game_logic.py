@@ -196,7 +196,7 @@ class SimpleMeleeChaserAI(AI):
             for point in self.owner.fov_set:
                 player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
                 if player:
-                    if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) < 1.5:
+                    if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
                         self.owner.perform(actions.act_attack_melee, self.owner, player)
                     else:
                         los = fov_los.get_los(x, y, point[0], point[1])
@@ -233,7 +233,7 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
         """ Attack in melee method """
         # check if target is in melee range
         # TODO: handle situation when target is already dead (if needed)
-        if hypot(target.position[0] - self.position[0], target.position[1] - self.position[1]) < 1.5:
+        if hypot(target.position[0] - self.position[0], target.position[1] - self.position[1]) <= 1.42:
             print(self.name + ' attacks ' + target.name + ' and deals ' + str(self.damage) + ' damage!')
             self.deal_damage(target, self.damage)  # deal damage
         else:
@@ -254,6 +254,12 @@ class Player(Fighter):
         # calling constructor of parent class
         Fighter.__init__(self, name=name, char=char, hp=hp, speed=speed, sight_radius=sight_radius, damage=damage,
                          ai=None)
+
+    def death(self):
+        """ Death method """
+        print(self.name + ' dies!')
+        self.state = 'dead'
+        self.location.remove_entity(self)
 
 
 class Wall(BattleEntity, Entity):

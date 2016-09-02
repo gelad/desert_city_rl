@@ -55,6 +55,8 @@ def execute_player_commands(commands):
                 command_default_direction(player, loc, -1, 1)
             elif command == 'move_se':
                 command_default_direction(player, loc, 1, 1)
+            elif command == 'wait1step':  # wait for 1 step
+                player.perform(actions.act_wait, game.player, game.player.speed)
             # closing door commands
             elif command == 'close_n':
                 command_close_direction(player, loc, 0, -1)

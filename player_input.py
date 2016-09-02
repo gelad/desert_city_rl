@@ -34,6 +34,8 @@ def handle_input(game):
                     player_input.append('move_sw')
                 elif event.key == 'KP3':
                     player_input.append('move_se')
+                elif event.key == 'KP5':  # waiting for 1 step
+                    player_input.append('wait1step')
                 elif event.key == 'CHAR':
                     if event.keychar == 'c':  # closing doors
                         key = tdl.event.keyWait()

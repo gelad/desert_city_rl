@@ -96,6 +96,15 @@ def act_print_debug(action, register_call, text):
         print(text)
 
 
+def act_wait(action, register_call, actor, ticks):
+    """ Actor waiting action (doing nothing) """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = ticks  # set desired wait time
+    else:  # part that is executed when action fires
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
 def act_move(action, register_call, actor, dx, dy):
     """ Actor self-moving action (need a different one for unvoluntarily movement, regardless of speed) """
     if register_call:  # part executed when function is registered in ActionMgr
