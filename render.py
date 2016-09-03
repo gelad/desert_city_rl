@@ -1,6 +1,8 @@
 import tdl
+
 import fov_los
 import game_logic
+import ui
 
 import textwrap
 
@@ -10,66 +12,27 @@ class Graphics:
         Class that performs all graphic-related work.
     """
 
-    def __init__(self, renderer='TDL', screen_width=110, screen_height=50, map_width=80, map_height=50, fps_limit=60):
+    def __init__(self, game, renderer='TDL', screen_width=110, screen_height=50, map_width=80, map_height=50,
+                 fps_limit=60):
         if renderer == 'TDL':
             self.renderer = renderer  # renderer type
+            self.fps_limit = fps_limit  # FPS limit
             self.screen_width = screen_width  # screen width in tiles
             self.screen_height = screen_height  # screen height in tiles
-            self.map_width = map_width  # map width in tiles
-            self.map_height = map_height  # map height in tiles
-            self.panel_width = self.screen_width - self.map_width  # panel width in tiles
-            self.panel_height = self.screen_height  # panel height in tiles
-            self.log_width = self.panel_width  # message log width
-            self.log_height = self.panel_height // 2 - 1  # message log height
-            self.fps_limit = fps_limit  # FPS limit
-            self.cam_offset = (0, 0)  # camera offset (for looking, shooting, etc)
+            # window stuff
+            self.win_mgr = ui.WindowManager()  # windows manager
+            main_window = ui.WindowMain(game, 0, 0, screen_width, screen_height, 0, map_width, map_height)
+            self.win_mgr.windows.append(main_window)  # add main window to WinMgr
+            self.win_mgr.active_window = main_window  # make it active
             # TDL initialization block
             tdl.set_font('consolas_unicode_16x16.png', greyscale=True)
-            self.console = tdl.init(screen_width, screen_height, title="Desert City")  # main console, displayed
-            self.map_console = tdl.Console(map_width, map_height)  # offscreen map console
-            self.panel = tdl.Console(self.panel_width, self.panel_height)  # offscreen panel console
-            self.log = tdl.Console(self.log_width, self.log_height)  # offscreen message log console
+            self.console = tdl.Console(screen_width, screen_height)  # console on which windows blit
             tdl.set_fps(fps_limit)  # set fps limit
-
-    def move_camera(self, dx, dy):
-        """ Method for moving camera by dx, dy """
-        self.cam_offset = (self.cam_offset[0] + dx, self.cam_offset[1] + dy)
-
-    def set_camera_offset(self, x, y):
-        """ Method for setting camera offset """
-        self.cam_offset = (x, y)
-
-    # TODO: make some data structure storing tileset (simply a TYPE - CHAR - COLOR for start)
-    @staticmethod
-    def cell_graphics(x, y, cell, loc, visible):
-        """ Method that returns graphic representation of tile. Must be reworked when tileset comes in """
-        char = ' '
-        color = [255, 255, 255]
-        bgcolor = [0, 0, 0]
-        if visible:  # check if cell is visible
-            if cell.tile == 'SAND':  # sand tile type
-                char = '.'
-                color = [200, 200, 0]
-                bgcolor = [100, 100, 0]
-            for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
-                char = ent.char
-                color = [255, 255, 255]
-                if ent.occupies_tile:  # check if there is entity, occupying tile - display it on top
-                    break
-            # update visited cells map (for displaying grey out of vision explored tiles)
-            loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
-            return [char, color, bgcolor]
-        elif cell.explored:  # check if it was previously explored
-            prev_seen_cg = loc.out_of_sight_map[(x, y)]  # take cell graphic from out_of_sight map of Location
-            prev_seen_cg[1] = [100, 100, 100]  # make it greyish
-            prev_seen_cg[2] = [50, 50, 50]
-            return prev_seen_cg
-        return [char, color, bgcolor]
 
     def render_all(self, loc, player, game):
         """ Method that displays all to screen """
         if self.renderer == 'TDL':
-            # map rendering
+            # window rendering
             player_x = player.position[0]
             player_y = player.position[1]
             # player on-screen coords

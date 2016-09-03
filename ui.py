@@ -196,8 +196,8 @@ class Window:
 
 class WindowMain(Window):
     """ Class for main game window """
-    def __init__(self, game, x, y, height, width, z, map_width, map_height):
-        super(WindowMain, self).__init__(x, y, height, width, z)  # call parent constructor
+    def __init__(self, game, x, y, width, height, z, map_width, map_height):
+        super(WindowMain, self).__init__(x, y, width, height, z)  # call parent constructor
         self.game = game  # a Game object
         # elements
         self.map = ElementMap(self, game.current_loc, game.player, 0, 0, map_height, map_width)  # a map element
