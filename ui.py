@@ -49,7 +49,7 @@ class ElementTextLine(Element):
 
     def draw(self):
         """ Method returns tdl.Console with single line of text """
-        console = tdl.Console(1, self.width)
+        console = tdl.Console(self.width, 1)
         console.draw_str(0, 0, self._line, self.color, self.bgcolor)  # draw a line on console
         return console
 
@@ -71,7 +71,7 @@ class ElementMainPanel(Element):
         # update player stats in lines
         self.player_hp.set_line(str(self.player.hp) + '/' + str(self.player.maxhp) + ' HP')
         self.player_pos.set_line('X:' + str(self.player.position[0]) + ' Y:' + str(self.player.position[1]))
-        console = tdl.Console(self.height, self.width)
+        console = tdl.Console(self.width, self.height)
         for element in self.elements:  # blit every element to console
             console.blit(element.draw(), element.x, element.y)
         return console
@@ -200,7 +200,7 @@ class WindowMain(Window):
         super(WindowMain, self).__init__(x, y, width, height, z)  # call parent constructor
         self.game = game  # a Game object
         # elements
-        self.map = ElementMap(self, game.current_loc, game.player, 0, 0, map_height, map_width)  # a map element
+        self.map = ElementMap(self, game.current_loc, game.player, 0, 0, map_width, map_height)  # a map element
         self.add_element(self.map)
         self.panel = ElementMainPanel(self, game.player, map_width, 0, width - map_width, height // 2)  # panel element
         self.add_element(self.panel)
@@ -214,6 +214,7 @@ class WindowMain(Window):
         self.console.clear()
         for element in self.elements:  # blit every element to console
             self.console.blit(element.draw(), element.x, element.y)
+        return self.console
 
     # ========================== COMMAND METHODS (special cases, to prevent code duplication) ====================
     def command_default_direction(self, player, loc, dx, dy):
