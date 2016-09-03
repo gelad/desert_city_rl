@@ -108,24 +108,33 @@ def act_wait(action, register_call, actor, ticks):
 def act_move(action, register_call, actor, dx, dy):
     """ Actor self-moving action (need a different one for unvoluntarily movement, regardless of speed) """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed  # one move takes actor.speed ticks to perform
+        if abs(dx)+abs(dy) == 2:  # if movement is diagonal
+            action.t_needed = actor.speed * 1.414 // 3  # diagonal move takes 1.41 times longer
+        else:  # if it's normal
+            action.t_needed = actor.speed // 3  # actual movement occurs on 1/3 of step
     else:  # part that is executed when action fires
         actor.move(dx, dy)  # move actor to desired coords
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
             actor.compute_fov()  # compute actor's FOV
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
+        #  withdrawal to make whole action take EXACTLY one step
+        if abs(dx) + abs(dy) == 2:  # if movement is diagonal
+            actor.perform(act_withdrawal, actor, actor.speed * 1.414 - actor.speed * 1.414 // 3)
+        else:  # if it's normal
+            actor.perform(act_withdrawal, actor, actor.speed - actor.speed // 3)
 
 
 def act_attack_melee(action, register_call, actor, target):
     """ Actor melee attack """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed // 2  # one basic melee attack takes actor.speed ticks to perform
+        action.t_needed = actor.speed // 2  # attack hit occurs on 1/2 swing duration
     else:  # part that is executed when action fires
         actor.attack_melee(target)  # attack target
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
-        actor.perform(act_withdrawal, actor, actor.speed // 2)
+        # withdrawal to make whole action take EXACTLY actor.speed
+        actor.perform(act_withdrawal, actor, actor.speed - actor.speed // 2)
 
 
 def act_withdrawal(action, register_call, actor, ticks):
