@@ -8,7 +8,7 @@ import tdl
 INPUT_ENGINE = 'TDL'
 
 
-def handle_input(game):
+def get_input(game):
     """ Function returns list of player input (not keypresses, but desired actions) """
     if INPUT_ENGINE == 'TDL':
         user_input = tdl.event.get()  # get input from TDL

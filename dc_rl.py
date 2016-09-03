@@ -36,7 +36,6 @@ def execute_player_commands(commands):
         if game.state == 'playing':
             # game exit command
             if command == 'exit':
-                save_game(game)  # save game before exit
                 game.state = 'exit'
             # moving commands
             elif command == 'move_n':
@@ -149,7 +148,7 @@ def main_loop():
         draw_screen = False
         if game.state == 'playing':  # check if state is 'playing'
             if game.is_waiting_input:  # check if game is waiting for player input
-                commands = player_input.handle_input(game)  # get list of player commands
+                commands = player_input.get_input(game)  # get list of player commands
                 if commands:  # if there are commands
                     execute_player_commands(commands)  # execute them
                 draw_screen = True  # set flag to draw screen
@@ -167,7 +166,7 @@ def main_loop():
                     game.is_waiting_input = True  # set waiting for input flag True
         elif game.state == 'looking':  # check if state is 'looking'
             if game.is_waiting_input:
-                commands = player_input.handle_input(game)  # get list of player commands
+                commands = player_input.get_input(game)  # get list of player commands
                 if commands:  # if there are commands
                     execute_player_commands(commands)  # execute them
                 draw_screen = True  # set flag to draw screen
@@ -182,3 +181,5 @@ game = load_game()
 if not game:
     game = game_logic.Game()
 main_loop()
+if not game.player.state == 'dead':
+    save_game(game)
