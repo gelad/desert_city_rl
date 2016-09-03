@@ -57,6 +57,8 @@ def handle_input(game):
                             player_input.append('close_se')
                     if event.keychar == 'l':  # 'look' command
                         player_input.append('look')
+                    if event.keychar == '`':  # show/hide debug log
+                        player_input.append('debug_log')
             elif event.type == "QUIT":
                 player_input.append('exit')
         return player_input

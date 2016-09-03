@@ -77,6 +77,12 @@ def execute_player_commands(commands):
             # 'look' command
             elif command == 'look':
                 game.state = 'looking'
+            # show/hide debug log command
+            elif command == 'debug_log':
+                if game.show_debug_log:
+                    game.show_debug_log = False
+                else:
+                    game.show_debug_log = True
         elif game.state == 'looking':  # if the game is in 'looking' mode
             # exit looking mode
             if command == 'exit':

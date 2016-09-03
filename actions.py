@@ -120,9 +120,20 @@ def act_move(action, register_call, actor, dx, dy):
 def act_attack_melee(action, register_call, actor, target):
     """ Actor melee attack """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed  # one basic melee attack takes actor.speed ticks to perform
+        action.t_needed = actor.speed // 2  # one basic melee attack takes actor.speed ticks to perform
     else:  # part that is executed when action fires
         actor.attack_melee(target)  # attack target
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+        actor.perform(act_withdrawal, actor, actor.speed // 2)
+
+
+def act_withdrawal(action, register_call, actor, ticks):
+    """ Actor withdrawal """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = ticks  # set desired withdrawal time
+        actor.state = 'withdrawal'
+    else:  # part that is executed when action fires
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
 

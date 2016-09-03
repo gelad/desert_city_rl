@@ -103,7 +103,10 @@ class Graphics:
             # message log rendering
             self.log.clear()  # clear log window
             # get log messages, intended to be shown to player
-            msgs = [m for m in game_logic.Game.log if m[1] == 'PLAYER']
+            if game.show_debug_log:
+                msgs = [m for m in game_logic.Game.log if m[1] == 'DEBUG']
+            else:
+                msgs = [m for m in game_logic.Game.log if m[1] == 'PLAYER']
             msgs = msgs[-self.log_height:]  # make a slice for last ones log_height ammount
             log_lines = []
             for msg in msgs:  # iterate through messages

@@ -136,6 +136,8 @@ class Actor(Entity):
                     self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                     self.location.cells[new_x][new_y].entities.append(self)  # add to new cell
                     self.position = (new_x, new_y)  # update entity position
+                    msg = self.name + 'moved to ' + str(new_x) + ':' + str(new_y)
+                    Game.add_message(msg, 'DEBUG', [255, 255, 255])
                     return True
         else:
             raise Exception('Attempted to move entity not positioned in any location. ', self.name)
@@ -156,7 +158,7 @@ class Actor(Entity):
             raise Exception('Attempted to open non-existing door. ', self.name)
 
     def perform(self, action_function, *args, **kwargs):
-        """ Method for performing an action in a location (maybe in future will be actions outside)
+        """ Method for voluntarily performing an action in a location (maybe in future will be actions outside)
              Handles state change """
         if self.location:
             if self.state == 'ready':
@@ -234,18 +236,22 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
     def attack_melee(self, target):
         """ Attack in melee method """
         # check if target is in melee range
-        # TODO: handle situation when target is already dead (if needed)
-        if hypot(target.position[0] - self.position[0], target.position[1] - self.position[1]) <= 1.42:
+        dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
+        if dist_to_target <= 1.42:
             msg = self.name + ' attacks ' + target.name + ' and deals ' + str(self.damage) + ' damage!'
             Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            msg = self.name + '/' + target.name + 'for' + str(self.damage) + 'dmg@' + str(
+                target.position[0]) + ':' + str(target.position[1])
+            Game.add_message(msg, 'DEBUG', [255, 255, 255])
             self.deal_damage(target, self.damage)  # deal damage
         else:
-            msg = self.name + ' attack misses, because ' + target.name + ' moved out of range!'
-            Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            msg = self.name + 'misses,dist=' + str(dist_to_target)
+            Game.add_message(msg, 'DEBUG', [255, 255, 255])
 
     def death(self):
         """ Death method """
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
+        Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
         self.location.remove_entity(self)
 
 
@@ -262,6 +268,7 @@ class Player(Fighter):
     def death(self):
         """ Death method """
         Game.add_message('You died!', 'PLAYER', [255, 0, 0])
+        Game.add_message(self.name + 'player died', 'DEBUG', [255, 255, 255])
         self.state = 'dead'
         self.location.remove_entity(self)
 
@@ -413,6 +420,7 @@ class Game:
         Representation of whole game model, list of locations, game state, some between-locations info in the future.
     """
     log = []  # a list of game messages (like damage, usage of items, etc) each message has level:
+
     # DEBUG - debug messages
     # PLAYER - messages visible to player by default
     # it is static, because passing a Game object instance to each method that needs write lo log is not right
@@ -424,6 +432,7 @@ class Game:
         self.is_waiting_input = True  # is game paused and waiting for player input
         self.locations = []  # list of locations
         self.time_system = actions.TimeSystem()  # time system object
+        self.show_debug_log = False  # show debug log to player
 
         if game_type == 'new':  # constructor option for new game start
             self.new_game()
