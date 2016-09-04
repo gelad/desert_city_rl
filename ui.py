@@ -6,6 +6,7 @@ import textwrap
 
 import game_logic
 import actions
+import player_input
 
 
 class Element:
@@ -184,7 +185,7 @@ class Window:
         """ Abstract method, must return window appearance, ready to draw (tdl.Console for now) """
         raise NotImplementedError
 
-    def handle_input(self, commands):
+    def handle_input(self):
         """ Abstract method, window must handle input """
         raise NotImplementedError
 
@@ -248,13 +249,15 @@ class WindowMain(Window):
                     player.perform(actions.act_close_door, self.game.player, door)  # close door
                     return True
             return False
+    # ===========================================================================================================
 
-    def handle_input(self, commands):
+    def handle_input(self):
         """ Method that translates player input commands to game logic actions and runs them """
         # block for easier naming inside method
         game = self.game
         player = game.player
         loc = game.current_loc
+        commands = player_input.get_input(game)  # get list of player commands
         for command in commands:
             if game.state == 'playing':
                 # game exit command
@@ -327,6 +330,41 @@ class WindowMain(Window):
                     self.map.move_camera(-1, 1)
                 elif command == 'move_se':
                     self.map.move_camera(1, 1)
+
+
+class WindowListMenu(Window):
+    """ Class for simple menu (list of selectable items) """
+    def __init__(self, items, caption, x=0, y=0, z=0, visible=True):
+        self.items = items  # a list of menu items
+        width = 0
+        y = 0
+        letter_index = ord('a')  # start menu item indexing from 'a'
+        for item in items:
+            y += 1
+            # add menu items as text line objects
+            self.add_element(ElementTextLine(self, 0, y, chr(letter_index)+') '+str(item)))
+            if len(str(item)) > width:
+                width = str(item)
+        width += 3
+        if width < len(caption):
+            width = caption
+        self.add_element(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
+        super(WindowListMenu, self).__init__(x, y, width, items.count + 1, z, visible)  # call parent constructor
+        self.selected = self.items[0]  # set selection to first item
+        self.console = tdl.Console(self.width, self.height)
+
+    def draw(self):
+        """ Drawing method """
+        for element in self.elements:  # blit every element to console
+            self.console.blit(element.draw(), element.x, element.y)
+        return self.console
+
+    def handle_input(self):
+        """ Input handling method """
+        commands = player_input.get_raw_input()  # get a raw input from player
+        for command in commands:
+            if command == 'exit':
+                pass
 
 
 class WindowManager:

@@ -11,8 +11,10 @@ Implement simple monster (a zombie with dumb ai) (DONE)
 Handle player's death. (DONE)
 Experiment - make melee attack a composite action with a withdrawal, actual hit in mid-action. (DONE)
 Chase bugs in basic melee combat. (DONE FOR NOW)
+Implement window system (in Z order) - render (DONE)
+
 
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
 Implement some sort of event system?
-Implement window system (in Z order) - render
+Implement inventory.

@@ -59,6 +59,10 @@ class Entity:
         self.blocks_los = blocks_los  # is it blocking line of sight? walls do, monsters (usually) don't
         self.char = char  # char that represents entity in graphics ('@') TODO: move graphics info to render.py?
 
+    def __str__(self):
+        """ Method returns string representation of an entity - it's name """
+        return self.name
+
 
 class BattleEntity(Entity):
     """

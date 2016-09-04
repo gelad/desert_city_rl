@@ -62,3 +62,9 @@ def get_input(game):
             elif event.type == "QUIT":
                 player_input.append('exit')
         return player_input
+
+
+def get_raw_input():
+    """ Function returns list of player input (not keypresses, but desired actions) """
+    if INPUT_ENGINE == 'TDL':
+        return tdl.event.get()  # get input from TDL
