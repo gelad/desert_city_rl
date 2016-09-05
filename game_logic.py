@@ -176,6 +176,33 @@ class Actor(Entity):
             raise Exception('Attempted to perform action with entity not positioned in any location. ', self.name)
 
 
+class Inventory(Entity):
+    """
+        Mixin class, adds inventory to Entity.
+    """
+
+    def __init__(self):
+        self.inventory = []  # a list of Item objects
+
+    def add_item(self, item):
+        """ Item adding method """
+        self.inventory.append(item)  # add item to inventory
+        item.owner = self  # set item's owner
+        if item.location:  # if it's placed somewhere in location
+            item.location.remove_entity(item)
+
+    def drop_item(self, item):
+        """ Item dropping method (in a location) """
+        item.owner = None
+        self.location.place_entity(item, self.position[0], self.position[1])  # place it on the map
+        self.inventory.remove(item)
+
+    def discard_item(self, item):
+        """ Method that removes item from inventory, without placing it anywhere """
+        item.owner = None
+        self.inventory.remove(item)
+
+
 class AI:
     """ Base class that represents monster AI """
 
@@ -220,9 +247,14 @@ class Item(Entity):
     def __init__(self, name, char):
         # calling constructors
         Entity.__init__(self, name=name, char=char, occupies_tile=False)
+        self.owner = None  # owner of item - entity with inventory
+
+    def use(self):
+        """ Item using method """
+        pass
 
 
-class Fighter(BattleEntity, Actor, Seer, Entity):
+class Fighter(BattleEntity, Inventory, Actor, Seer, Entity):
     """
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
@@ -235,6 +267,7 @@ class Fighter(BattleEntity, Actor, Seer, Entity):
             ai.owner = self
         Actor.__init__(self, speed=speed, ai=ai)
         Seer.__init__(self, sight_radius=sight_radius)
+        Inventory.__init__(self)
         self.damage = damage  # damage from basic melee attack
 
     def attack_melee(self, target):
@@ -405,6 +438,8 @@ class Location:
         """ Method that removes entity from location """
         # remove entity from cell
         entity.location.cells[entity.position[0]][entity.position[1]].entities.remove(entity)
+        entity.position = None
+        entity.location = None
         if isinstance(entity, Seer):  # check if entity is a Seer
             self.seers.remove(entity)  # remove from seers list
         if isinstance(entity, Actor):  # check if entity is an Actor

@@ -156,7 +156,7 @@ class ElementLog(Element):
 
     def draw(self):
         """ Drawing method """
-        console = tdl.Console(self.height, self.width)
+        console = tdl.Console(self.width, self.height)
         # get log messages, intended to be shown to player
         if self.game.show_debug_log:
             msgs = [m for m in game_logic.Game.log if m[1] == 'DEBUG']
@@ -227,7 +227,8 @@ class WindowMain(Window):
         return self.console
 
     # ========================== COMMAND METHODS (special cases, to prevent code duplication) ====================
-    def command_default_direction(self, player, loc, dx, dy):
+    @staticmethod
+    def command_default_direction(player, loc, dx, dy):
         """ Command method for player pressed direction key - move/open/attack/use default action for each type
             of object in desired cell
         """
@@ -237,17 +238,18 @@ class WindowMain(Window):
         new_y = player_y + dy
         if loc.is_in_boundaries(new_x, new_y):  # check if new position is in the location boundaries
             if loc.cells[new_x][new_y].is_movement_allowed():  # check if movement is allowed
-                player.perform(actions.act_move, self.game.player, dx, dy)  # perform move action
+                player.perform(actions.act_move, player, dx, dy)  # perform move action
             door = loc.cells[new_x][new_y].is_there_a(game_logic.Door)
             if door:  # check if there is a door
                 if door.is_closed:  # check if it is closed
-                    player.perform(actions.act_open_door, self.game.player, door)  # open door
+                    player.perform(actions.act_open_door, player, door)  # open door
             # TODO: here must be more complicated check - if target is hostile, etc
             enemy = loc.cells[new_x][new_y].is_there_a(game_logic.Fighter)
             if enemy:  # check if there an enemy
-                player.perform(actions.act_attack_melee, self.game.player, enemy)  # attack it in melee
+                player.perform(actions.act_attack_melee, player, enemy)  # attack it in melee
 
-    def command_close_direction(self, player, loc, dx, dy):
+    @staticmethod
+    def command_close_direction(player, loc, dx, dy):
         """ Command method for player wants to close door in some direction  """
         door_x = player.position[0] + dx
         door_y = player.position[1] + dy
@@ -255,8 +257,27 @@ class WindowMain(Window):
             door = loc.cells[door_x][door_y].is_there_a(game_logic.Door)
             if door:  # check if there is a door
                 if not door.is_closed:  # check if it is closed
-                    player.perform(actions.act_close_door, self.game.player, door)  # close door
+                    player.perform(actions.act_close_door, player, door)  # close door
                     return True
+            return False
+
+    def command_pick_up(self, player, loc, dx, dy):
+        """ Command method for player wants to pick up some items  """
+        x = player.position[0] + dx
+        y = player.position[1] + dy
+        if loc.is_in_boundaries(x, y):  # check if position of selected cell is in boundaries
+            items = [i for i in loc.cells[x][y].entities if isinstance(i, game_logic.Item)]  # select items in cell
+            if items:  # check if there is a door
+                # TODO: make multiple items pickup
+                if len(items) == 1:
+                    player.add_item(items[0])
+                else:
+                    menu = WindowInventoryMenu(items, 'Pick up item:', 0, 0, 1, True, self,
+                                               player.add_item)
+                    menu.x = self.width // 2 - menu.width // 2  # place it at center of screen
+                    menu.y = self.height // 2 - menu.height // 2
+                    self.win_mgr.add_window(menu)
+                    self.win_mgr.active_window = menu
             return False
 
     # ===========================================================================================================
@@ -321,11 +342,24 @@ class WindowMain(Window):
                 # inventory command
                 elif command == 'inventory':
                     # show inventory menu and make it active
-                    inv_menu = WindowInventoryMenu(['one', 'two', 'three'], 'Inventory:', 0, 0, 1, True, self)
+                    inv_menu = WindowInventoryMenu(player.inventory, 'Inventory:', 0, 0, 1, True, self)
                     inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
                     inv_menu.y = self.height // 2 - inv_menu.height // 2
                     self.win_mgr.add_window(inv_menu)
                     self.win_mgr.active_window = inv_menu
+                    # TODO: make a dialog 'what to do with selected item?'
+                # drop item command
+                elif command == 'drop':
+                    # show inventory menu and make it active
+                    inv_menu = WindowInventoryMenu(player.inventory, 'Drop item:', 0, 0, 1, True, self,
+                                                   player.drop_item)
+                    inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
+                    inv_menu.y = self.height // 2 - inv_menu.height // 2
+                    self.win_mgr.add_window(inv_menu)
+                    self.win_mgr.active_window = inv_menu
+                # pick up from ground command
+                elif command == 'ground':
+                    self.command_pick_up(player, loc, 0, 0)
             elif game.state == 'looking':  # if the game is in 'looking' mode
                 # exit looking mode
                 if command == 'exit':
@@ -351,12 +385,11 @@ class WindowMain(Window):
 
 
 class WindowInventoryMenu(Window):
-    """ Class for simple menu (list of selectable items) """
-
+    """ Class for simple inventory menu (list of selectable items, on selection performs player_function with item) """
     # TODO: rework menus
-    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
+    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, player_function=None):
         self.options = options  # a list of menu items
-        width = 0
+        width = 0  # width is calculated accordingly to options length
         y = 0
         letter_index = ord('a')  # start menu item indexing from 'a'
         elems = []
@@ -366,10 +399,10 @@ class WindowInventoryMenu(Window):
             elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + str(option)))
             letter_index += 1
             if len(str(option)) > width:
-                width = len(option)
+                width = len(str(option))
         width += 3
-        if width < len(caption):
-            width = len(caption)
+        if width < len(str(caption)):
+            width = len(str(caption))
         elems.append(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
         super(WindowInventoryMenu, self).__init__(x, y, width, len(options) + 1, z, visible)  # call parent constructor
         for elem in elems:
@@ -378,6 +411,7 @@ class WindowInventoryMenu(Window):
         self.state = 'working'  # set menu state to working
         self.prev_window = prev_window  # previous window
         self.console = tdl.Console(self.width, self.height)
+        self.player_function = player_function  # a player function or method what to do with selected item
 
     def draw(self):
         """ Drawing method """
@@ -399,7 +433,8 @@ class WindowInventoryMenu(Window):
                     if 0 <= index < len(self.options):
                         self.selected = self.options[index]
                         # Here must be an action with an item
-                        print(self.selected)
+                        if self.player_function:
+                            self.player_function(self.selected)
                         self.win_mgr.close_window(self)
 
 
