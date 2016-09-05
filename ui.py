@@ -11,6 +11,7 @@ import player_input
 
 class Element:
     """ Base class for UI element """
+
     def __init__(self, owner, x=0, y=0, width=0, height=0):
         self.owner = owner  # owner (other element or window)
         self.x = x  # position in window
@@ -31,6 +32,7 @@ class Element:
 
 class ElementTextLine(Element):
     """ Simple UI element - line of text """
+
     def __init__(self, owner, x=0, y=0, line='', color=None, bgcolor=None):
         super(ElementTextLine, self).__init__(owner=owner, x=x, y=y, width=len(line), height=1)
         self._line = line  # line of text
@@ -57,6 +59,7 @@ class ElementTextLine(Element):
 
 class ElementMainPanel(Element):
     """ Main panel with player stats, etc """
+
     def __init__(self, owner, player, x=0, y=0, width=0, height=0):
         super(ElementMainPanel, self).__init__(owner=owner, x=x, y=y, width=width, height=height)
         self.player = player  # Player object, to obtain player-related info
@@ -80,6 +83,7 @@ class ElementMainPanel(Element):
 
 class ElementMap(Element):
     """ Location map element  """
+
     def __init__(self, owner, loc, player, x=0, y=0, width=0, height=0):
         super(ElementMap, self).__init__(owner=owner, x=x, y=y, width=width, height=height)
         self.loc = loc  # Location object, to obtain location-related info
@@ -145,6 +149,7 @@ class ElementMap(Element):
 
 class ElementLog(Element):
     """ Game log element """
+
     def __init__(self, owner, game, x=0, y=0, width=0, height=0):
         super(ElementLog, self).__init__(owner=owner, x=x, y=y, height=height, width=width)
         self.game = game  # game object to obtain log level
@@ -172,7 +177,8 @@ class ElementLog(Element):
 
 class Window:
     """ Base class for UI window """
-    def __init__(self, x=0, y=0, width=0, height=0, z=0, visible=True):
+
+    def __init__(self, x=0, y=0, width=0, height=0, z=0, visible=True, prev_window=None):
         self.elements = []  # UI elements, tdl consoles
         self.x = x  # position on screen
         self.y = y
@@ -180,6 +186,8 @@ class Window:
         self.height = height  # element height
         self.z = z  # windows are displayed by render in z-order, from lower to higher
         self.visible = visible  # is window supposed to be shown
+        self.win_mgr = None  # window manager that contains window
+        self.prev_window = prev_window  # previous opened window - to return after window close
 
     def draw(self):
         """ Abstract method, must return window appearance, ready to draw (tdl.Console for now) """
@@ -197,8 +205,9 @@ class Window:
 
 class WindowMain(Window):
     """ Class for main game window """
+
     def __init__(self, game, x, y, width, height, z, map_width, map_height):
-        super(WindowMain, self).__init__(x, y, width, height, z)  # call parent constructor
+        super(WindowMain, self).__init__(x, y, width, height, z, True, None)  # call parent constructor
         self.game = game  # a Game object
         # elements
         self.map = ElementMap(self, game.current_loc, game.player, 0, 0, map_width, map_height)  # a map element
@@ -249,6 +258,7 @@ class WindowMain(Window):
                     player.perform(actions.act_close_door, self.game.player, door)  # close door
                     return True
             return False
+
     # ===========================================================================================================
 
     def handle_input(self):
@@ -308,6 +318,14 @@ class WindowMain(Window):
                         game.show_debug_log = False
                     else:
                         game.show_debug_log = True
+                # inventory command
+                elif command == 'inventory':
+                    # show inventory menu and make it active
+                    inv_menu = WindowInventoryMenu(['one', 'two', 'three'], 'Inventory:', 0, 0, 1, True, self)
+                    inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
+                    inv_menu.y = self.height // 2 - inv_menu.height // 2
+                    self.win_mgr.add_window(inv_menu)
+                    self.win_mgr.active_window = inv_menu
             elif game.state == 'looking':  # if the game is in 'looking' mode
                 # exit looking mode
                 if command == 'exit':
@@ -332,25 +350,33 @@ class WindowMain(Window):
                     self.map.move_camera(1, 1)
 
 
-class WindowListMenu(Window):
+class WindowInventoryMenu(Window):
     """ Class for simple menu (list of selectable items) """
-    def __init__(self, items, caption, x=0, y=0, z=0, visible=True):
-        self.items = items  # a list of menu items
+
+    # TODO: rework menus
+    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
+        self.options = options  # a list of menu items
         width = 0
         y = 0
         letter_index = ord('a')  # start menu item indexing from 'a'
-        for item in items:
+        elems = []
+        for option in options:
             y += 1
             # add menu items as text line objects
-            self.add_element(ElementTextLine(self, 0, y, chr(letter_index)+') '+str(item)))
-            if len(str(item)) > width:
-                width = str(item)
+            elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + str(option)))
+            letter_index += 1
+            if len(str(option)) > width:
+                width = len(option)
         width += 3
         if width < len(caption):
-            width = caption
-        self.add_element(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
-        super(WindowListMenu, self).__init__(x, y, width, items.count + 1, z, visible)  # call parent constructor
-        self.selected = self.items[0]  # set selection to first item
+            width = len(caption)
+        elems.append(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
+        super(WindowInventoryMenu, self).__init__(x, y, width, len(options) + 1, z, visible)  # call parent constructor
+        for elem in elems:
+            self.add_element(elem)
+        self.selected = self.options[0]  # set selection to first item
+        self.state = 'working'  # set menu state to working
+        self.prev_window = prev_window  # previous window
         self.console = tdl.Console(self.width, self.height)
 
     def draw(self):
@@ -361,25 +387,43 @@ class WindowListMenu(Window):
 
     def handle_input(self):
         """ Input handling method """
-        commands = player_input.get_raw_input()  # get a raw input from player
-        for command in commands:
-            if command == 'exit':
-                pass
+        events = player_input.get_raw_input()  # get a raw input from player
+        for event in events:
+            if event.type == 'KEYDOWN':
+                if event.key == 'ESCAPE':
+                    self.state = 'cancelled'
+                    self.win_mgr.close_window(self)
+                elif event.key == 'CHAR':
+                    # convert the ASCII code to an index; if it corresponds to an option, return it
+                    index = ord(event.keychar) - ord('a')
+                    if 0 <= index < len(self.options):
+                        self.selected = self.options[index]
+                        # Here must be an action with an item
+                        print(self.selected)
+                        self.win_mgr.close_window(self)
 
 
 class WindowManager:
     """ Class that manages windows """
+
     def __init__(self):
         self.windows = []  # windows list
         self.active_window = None  # current active window
 
+    def add_window(self, window):
+        """ Window adding method """
+        window.win_mgr = self
+        self.windows.append(window)
+
     def close_window(self, window):
         """ Window closing method """
-        if not window == self.active_window:
+        if window.prev_window and self.active_window == window:
+            self.active_window = window.prev_window
             self.windows.remove(window)
         else:
             raise Exception(
-                "Attempted to close active window. Change active window first.", str(type(self.active_window)))
+                "Attempted to close active window with no previous. Change active window first.",
+                str(type(self.active_window)))
 
     def handle_input(self, commands):
         """ Pass handling input to active window """

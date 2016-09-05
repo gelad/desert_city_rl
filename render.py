@@ -22,7 +22,7 @@ class Graphics:
             # window stuff
             self.win_mgr = ui.WindowManager()  # windows manager
             main_window = ui.WindowMain(game, 0, 0, screen_width, screen_height, 0, map_width, map_height)
-            self.win_mgr.windows.append(main_window)  # add main window to WinMgr
+            self.win_mgr.add_window(main_window)  # add main window to WinMgr
             self.win_mgr.active_window = main_window  # make it active
 
     def render_all(self):

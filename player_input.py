@@ -59,6 +59,8 @@ def get_input(game):
                         player_input.append('look')
                     if event.keychar == '`':  # show/hide debug log
                         player_input.append('debug_log')
+                    if event.keychar == 'i':  # show inventory menu
+                        player_input.append('inventory')
             elif event.type == "QUIT":
                 player_input.append('exit')
         return player_input
