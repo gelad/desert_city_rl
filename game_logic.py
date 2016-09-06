@@ -222,10 +222,8 @@ class Equipment(Entity):
                                             'BODY', 'HEAD', 'FACE', 'LEFT_EAR', 'RIGHT_EAR', 'NECK', 'WAIST', 'LEGS',
                                             'FEET'])
 
-    def equip_item(self, item, slot=None):
+    def equip_item(self, item, slot):
         """ Method for equipping items """
-        if not slot:
-            slot = list(item.equip_slots.keys())[0]  # TODO: rework this after making proper equipment menus
         if self.equipment[slot]:
             self.inventory.add_item(self.equipment[slot])  # add old item to inventory
         if item in self.inventory:  # if item is in inventory - remove it
