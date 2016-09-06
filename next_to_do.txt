@@ -17,8 +17,11 @@ Add consumables. (DONE)
 Make a simple usable item (health potion) (DONE)
 Implement equipment system. (DONE)
 Rework menus. (DONE)
+Implement sabre weapon (and weapon damage calculation) (DONE)
 
 
+Implement dedicated 'use' command.
+Make different speed weapons.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
 Implement some sort of event system?

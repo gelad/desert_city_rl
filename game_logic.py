@@ -353,19 +353,31 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         Seer.__init__(self, sight_radius=sight_radius)
         Inventory.__init__(self)
         Equipment.__init__(self, layout=equip_layout)
-        self.damage = damage  # damage from basic melee attack
+        self.damage = damage  # damage from basic melee 'punch in da face' attack
 
     def attack_melee(self, target):
         """ Attack in melee method """
         # check if target is in melee range
         dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
         if dist_to_target <= 1.42:
-            msg = self.name + ' attacks ' + target.name + ' and deals ' + str(self.damage) + ' damage!'
+            dmg = 0
+            for item in self.equipment.values():  # check if any weapons equipped
+                if item:
+                    if 'weapon' in item.categories:
+                        for eff in item.effects:
+                            if eff.eff == 'INCREASE_MELEE_DAMAGE':
+                                dmg += eff.magnitude
+                        if 'sword' in item.categories:
+                            random.seed()
+                            dmg = random.randrange(dmg - dmg // 3, dmg + dmg // 3)  # a sword damage dispersion
+            if dmg == 0:
+                dmg = self.damage
+            msg = self.name + ' attacks ' + target.name + ' and deals ' + str(dmg) + ' damage!'
             Game.add_message(msg, 'PLAYER', [255, 255, 255])
-            msg = self.name + '/' + target.name + 'for' + str(self.damage) + 'dmg@' + str(
+            msg = self.name + '/' + target.name + 'for' + str(dmg) + 'dmg@' + str(
                 target.position[0]) + ':' + str(target.position[1])
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
-            self.deal_damage(target, self.damage)  # deal damage
+            self.deal_damage(target, dmg)  # deal damage
         else:
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
