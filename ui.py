@@ -107,7 +107,9 @@ class ElementMap(Element):
                 bgcolor = [100, 100, 0]
             for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
                 char = ent.char
-                color = [255, 255, 255]
+                color = ent.color
+                if not color:
+                    color = [255, 255, 255]
                 if ent.occupies_tile:  # check if there is entity, occupying tile - display it on top
                     break
             # update visited cells map (for displaying grey out of vision explored tiles)

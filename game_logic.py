@@ -51,13 +51,16 @@ class Entity:
         Base class for all game entities - monsters, items, walls, etc.
     """
 
-    def __init__(self, name='', char=' ', location=None, position=None, occupies_tile=False, blocks_los=False):
+    def __init__(self, name='', description='', char=' ', color=None, location=None, position=None, occupies_tile=False,
+                 blocks_los=False):
         self.name = name  # entity name
+        self.description = description  # entity's description
         self.location = location  # Location object, where entity is placed
         self.position = position  # (x, y) tuple, represents position in the location
         self.occupies_tile = occupies_tile  # entity occupy tile? (no other occupying entity can be placed there)
         self.blocks_los = blocks_los  # is it blocking line of sight? walls do, monsters (usually) don't
-        self.char = char  # char that represents entity in graphics ('@') TODO: move graphics info to render.py?
+        self.char = char  # char that represents entity in graphics ('@')
+        self.color = color  # entity char color
 
     def __str__(self):
         """ Method returns string representation of an entity - it's name """
@@ -244,9 +247,9 @@ class Item(Entity):
         Mixed class, simple Item.
     """
 
-    def __init__(self, name, char):
+    def __init__(self, name, description, char, color):
         # calling constructors
-        Entity.__init__(self, name=name, char=char, occupies_tile=False)
+        Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=False)
         self.owner = None  # owner of item - entity with inventory
 
     def use(self):
@@ -259,9 +262,9 @@ class Fighter(BattleEntity, Inventory, Actor, Seer, Entity):
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
 
-    def __init__(self, name, char, hp, speed, sight_radius, damage, ai=None):
+    def __init__(self, name, description, char, color, hp, speed, sight_radius, damage, ai=None):
         # calling constructors of mixins
-        Entity.__init__(self, name=name, char=char, occupies_tile=True)
+        Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=True)
         BattleEntity.__init__(self, hp=hp)
         if ai:  # set AI owner
             ai.owner = self
@@ -289,6 +292,8 @@ class Fighter(BattleEntity, Inventory, Actor, Seer, Entity):
         """ Death method """
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
+        corpse = Item(name=self.name+"'s corpse.", description='A dead '+self.name+'.', char='%', color=[200, 50, 50])
+        self.location.place_entity(corpse, self.position[0], self.position[1])
         self.location.remove_entity(self)
 
 
@@ -297,10 +302,10 @@ class Player(Fighter):
         Child class, adds player-specific functionality to Fighter.
     """
 
-    def __init__(self, name, char, hp, speed, sight_radius, damage):
+    def __init__(self, name, description, char, color, hp, speed, sight_radius, damage):
         # calling constructor of parent class
-        Fighter.__init__(self, name=name, char=char, hp=hp, speed=speed, sight_radius=sight_radius, damage=damage,
-                         ai=None)
+        Fighter.__init__(self, name=name, description=description, char=char, color=color, hp=hp, speed=speed,
+                         sight_radius=sight_radius, damage=damage, ai=None)
 
     def death(self):
         """ Death method """
@@ -315,8 +320,9 @@ class Wall(BattleEntity, Entity):
         Mixed class of a wall, that has HP and can be destroyed, but lacks acting ability.
     """
 
-    def __init__(self, name, char, hp, blocks_los=True):
-        Entity.__init__(self, name=name, char=char, occupies_tile=True, blocks_los=blocks_los)
+    def __init__(self, name, char, hp, description='', color=None, blocks_los=True):
+        Entity.__init__(self, name=name, description=description, char=char, color=color,
+                        occupies_tile=True, blocks_los=blocks_los)
         BattleEntity.__init__(self, hp)
 
     def death(self):
@@ -330,7 +336,7 @@ class Door(BattleEntity, Entity):
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
 
-    def __init__(self, name, char_closed, char_open, hp, is_closed=True):
+    def __init__(self, name, description, char_closed, char_open, color, hp, is_closed=True):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open
@@ -338,8 +344,9 @@ class Door(BattleEntity, Entity):
             blocks_los = True
         else:
             blocks_los = False
-        self.__set_char()  # set current char for drawing purposes # TODO: move graphic to render
-        Entity.__init__(self, name=name, char=self.char, occupies_tile=self.is_closed, blocks_los=blocks_los)
+        self.__set_char()  # set current char for drawing purposes
+        Entity.__init__(self, name=name, description=description, char=self.char, color=color,
+                        occupies_tile=self.is_closed, blocks_los=blocks_los)
         BattleEntity.__init__(self, hp)
 
     def __set_char(self):
@@ -407,16 +414,18 @@ class Location:
             self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
             random.seed()
             for i in range(1, random.randint(2, 40)):
-                wall = Wall('Wall', '#', 100)
+                wall = Wall(name='Wall', description='A wall.', char='#', color=[255, 255, 255], hp=100)
                 self.place_entity(wall, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(2, 20)):
-                door = Door(name='Door', char_closed='+', char_open='.', hp=100, is_closed=True)
+                door = Door(name='Door', description='A door.', char_closed='+', char_open='.', color=[255, 255, 255],
+                            hp=100, is_closed=True)
                 self.place_entity(door, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(2, 20)):
-                item = Item(name='Boulder', char='*')
+                item = Item(name='Boulder', description='A stone boulder.', char='*', color=[200, 200, 200])
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(3, 10)):
-                enemy = Fighter(name='Mindless body', char='b', hp=6, speed=100, sight_radius=14.5, damage=1,
+                enemy = Fighter(name='Mindless body', description='No description, debug monster.', char='b',
+                                color=[139, 69, 19], hp=6, speed=100, sight_radius=14.5, damage=1,
                                 ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
@@ -481,7 +490,8 @@ class Game:
         self.current_loc = Location(100, 100)
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
-        self.player = Player('Player', '@', 10, 100, 23.5, 2)
+        self.player = Player(name='Player', description='A player character.', char='@', color=[255, 255, 255],
+        hp=10, speed=100, sight_radius=23.5, damage=2)
         self.current_loc.place_entity(self.player, 10, 10)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
