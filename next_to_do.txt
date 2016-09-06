@@ -15,8 +15,10 @@ Implement window system (in Z order) - render (DONE)
 Implement inventory. (DONE)
 Add consumables. (DONE)
 Make a simple usable item (health potion) (DONE)
+Implement equipment system. (DONE)
 
 
+Rework menus.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
 Implement some sort of event system?

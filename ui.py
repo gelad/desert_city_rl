@@ -396,38 +396,43 @@ class WindowMain(Window):
                         game.show_debug_log = True
                 # inventory command
                 elif command == 'inventory':
-                    # show inventory menu and make it active
-                    inv_menu = WindowInventoryMenu(player.inventory, 'Inventory:', 0, 0, 1, True, self,
-                                                   player.use_item)
-                    inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
-                    inv_menu.y = self.height // 2 - inv_menu.height // 2
-                    self.win_mgr.add_window(inv_menu)
-                    self.win_mgr.active_window = inv_menu
-                    # TODO: make a dialog 'what to do with selected item?'
+                    # show inventory menu
+                    item = show_menu_inventory(self.win_mgr, player.inventory, 'Inventory:', 0, 0, 1, self)
+                    if item:
+                        action = show_menu_list(self.win_mgr, ['Use', 'Equip', 'Drop'],
+                                                'What to do with '+item[0].name+'?', 0, 0, 1, self)
+                        if action:
+                            if action[0] == 'Use':
+                                player.use_item(item[0])
+                            elif action[0] == 'Equip':
+                                slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
+                                                      'Select a slot:', 0, 0, True, self)
+                                if slot:  # if selected - equip item
+                                    player.equip_item(item[0], slot[0])
+                            elif action[0] == 'Drop':
+                                player.drop_item(item[0])
                 # equip item command
                 elif command == 'equip_item':
                     # show list menu with items
                     item = show_menu_list(self.win_mgr, player.inventory, 'Equip item:', 0, 0, True, self)
                     if item:
-                        slot = show_menu_list(self.win_mgr, list(item.equip_slots), 'Select a slot:', 0, 0, True, self)
+                        slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
+                                              'Select a slot:', 0, 0, True, self)
                         if slot:  # if selected - equip item
-                            player.equip_item(item, slot)
-                            # equip item command
+                            player.equip_item(item[0], slot[0])
+                # take off item command
                 elif command == 'take_off_item':
                     # show list menu with equipped items
                     item = show_menu_list(self.win_mgr, [sl for sl in list(player.equipment.values()) if sl],
                                           'Take off item:', 0, 0, True, self)
                     if item:  # if selected - take off
-                        player.unequip_item(item)
+                        player.unequip_item(item[0])
                 # drop item command
                 elif command == 'drop':
-                    # show inventory menu and make it active
-                    inv_menu = WindowInventoryMenu(player.inventory, 'Drop item:', 0, 0, 1, True, self,
-                                                   player.drop_item)
-                    inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
-                    inv_menu.y = self.height // 2 - inv_menu.height // 2
-                    self.win_mgr.add_window(inv_menu)
-                    self.win_mgr.active_window = inv_menu
+                    # show inventory menu
+                    item = show_menu_inventory(self.win_mgr, player.inventory, 'Drop item:', 0, 0, 1, self)
+                    if item:
+                        player.drop_item(item[0])
                 # pick up from ground command
                 elif command == 'ground':
                     self.command_pick_up(player, loc, 0, 0)
@@ -457,11 +462,11 @@ class WindowMain(Window):
                     self.map.move_camera(1, 1)
 
 
+# TODO: refactor ListMenu and InventoryMenu, to minimize code duplication (make one inherit another)
 class WindowInventoryMenu(Window):
     """ Class for simple inventory menu (list of selectable items, on selection performs player_function with item) """
 
-    # TODO: rework menus
-    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, player_function=None):
+    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
         self.options = options  # a list of menu items
         self.x = x
         self.y = y
@@ -487,17 +492,25 @@ class WindowInventoryMenu(Window):
         super(WindowInventoryMenu, self).__init__(self.x, self.y, width, len(options) + 1, z, visible)
         for elem in elems:
             self.add_element(elem)
+        self.selected = None  # if no options - selected remains None
+        self.selected_index = 0
         if len(self.options) > 0:
-            self.selected = self.options[0]  # set selection to first item
+            self.selected = self.options[0]  # set selection to first option
+            self.selected_index = 0
         self.state = 'working'  # set menu state to working
         self.prev_window = prev_window  # previous window
         self.console = tdl.Console(self.width, self.height)
-        self.player_function = player_function  # a player function or method what to do with selected item
 
     def draw(self):
         """ Drawing method """
+        i = 0
         for element in self.elements:  # blit every element to console
+            if i == self.selected_index and self.selected:  # highlight selected element
+                element.bgcolor = [0, 100, 0]
+            else:  # if not highligted - set background color to color of menu caption
+                element.bgcolor = self.elements[-1].bgcolor
             self.console.blit(element.draw(), element.x, element.y)
+            i += 1
         return self.console
 
     def handle_input(self):
@@ -508,21 +521,34 @@ class WindowInventoryMenu(Window):
                 if event.key == 'ESCAPE':
                     self.state = 'cancelled'
                     self.win_mgr.close_window(self)
+                if event.key == 'ENTER':  # if player hits Enter
+                    if self.selected:
+                        self.state = 'finished'
+                        self.win_mgr.close_window(self)
+                    else:  # if no options - cancel selection
+                        self.state = 'cancelled'
+                        self.win_mgr.close_window(self)
+                elif event.key == 'UP' or event.key == 'KP8':  # selection movement
+                    if self.selected_index > 0:  # if up - select previous option
+                        self.selected_index -= 1
+                        self.selected = self.options[self.selected_index]
+                elif event.key == 'DOWN' or event.key == 'KP2':
+                    if self.selected_index < len(self.options) - 1:  # if down - select next option
+                        self.selected_index += 1
+                        self.selected = self.options[self.selected_index]
                 elif event.key == 'CHAR':
                     # convert the ASCII code to an index; if it corresponds to an option, return it
                     index = ord(event.keychar) - ord('a')
                     if 0 <= index < len(self.options):
                         self.selected = self.options[index]
-                        # Here must be an action with an item
-                        if self.player_function:
-                            self.player_function(self.selected)
+                        self.selected_index = index
+                        self.state = 'finished'
                         self.win_mgr.close_window(self)
 
 
 class WindowListMenu(Window):
     """ Class for simple list menu (list of selectable options) """
 
-    # TODO: rework menus
     def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
         self.options = options  # a list of menu options
         self.x = x
@@ -547,16 +573,25 @@ class WindowListMenu(Window):
         super(WindowListMenu, self).__init__(self.x, self.y, width, len(options) + 1, z, visible)
         for elem in elems:
             self.add_element(elem)
+        self.selected = None  # if no options - selected remains None
+        self.selected_index = 0
         if len(self.options) > 0:
             self.selected = self.options[0]  # set selection to first option
+            self.selected_index = 0
         self.state = 'working'  # set menu state to working
         self.prev_window = prev_window  # previous window
         self.console = tdl.Console(self.width, self.height)
 
     def draw(self):
         """ Drawing method """
+        i = 0
         for element in self.elements:  # blit every element to console
+            if i == self.selected_index and self.selected:  # highlight selected element
+                element.bgcolor = [0, 100, 0]
+            else:  # if not highligted - set background color to color of menu caption
+                element.bgcolor = self.elements[-1].bgcolor
             self.console.blit(element.draw(), element.x, element.y)
+            i += 1
         return self.console
 
     def handle_input(self):
@@ -567,11 +602,27 @@ class WindowListMenu(Window):
                 if event.key == 'ESCAPE':
                     self.state = 'cancelled'
                     self.win_mgr.close_window(self)
+                if event.key == 'ENTER':  # if player hits Enter
+                    if self.selected:
+                        self.state = 'finished'
+                        self.win_mgr.close_window(self)
+                    else:  # if no options - cancel selection
+                        self.state = 'cancelled'
+                        self.win_mgr.close_window(self)
+                elif event.key == 'UP' or event.key == 'KP8':  # selection movement
+                    if self.selected_index > 0:  # if up - select previous option
+                        self.selected_index -= 1
+                        self.selected = self.options[self.selected_index]
+                elif event.key == 'DOWN' or event.key == 'KP2':
+                    if self.selected_index < len(self.options) - 1:  # if down - select next option
+                        self.selected_index += 1
+                        self.selected = self.options[self.selected_index]
                 elif event.key == 'CHAR':
                     # convert the ASCII code to an index; if it corresponds to an option, return it
                     index = ord(event.keychar) - ord('a')
                     if 0 <= index < len(self.options):
                         self.selected = self.options[index]
+                        self.selected_index = index
                         self.state = 'finished'
                         self.win_mgr.close_window(self)
 
@@ -617,4 +668,20 @@ def show_menu_list(win_mgr, options, caption, x_offset=0, y_offset=0, z=1, prev_
     if menu.state == 'cancelled':  # if menu cancelled return false
         return False
     if menu.state == 'finished':  # if option selected - return it
-        return menu.selected
+        return menu.selected, menu.selected_index
+
+
+def show_menu_inventory(win_mgr, options, caption, x_offset=0, y_offset=0, z=1, prev_window=None):
+    """ A function to show an inventory menu, and return result """
+    menu = WindowInventoryMenu(options, caption, x_offset, y_offset, z, True, prev_window)  # create a list menu
+    menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
+    menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
+    win_mgr.add_window(menu)  # add menu to window manager
+    win_mgr.active_window = menu
+    while menu.state == 'working':  # a loop until menu does it job (or cancelled)
+        menu.handle_input()
+        win_mgr.graphics.render_all()
+    if menu.state == 'cancelled':  # if menu cancelled return false
+        return False
+    if menu.state == 'finished':  # if option selected - return it
+            return menu.selected, menu.selected_index
