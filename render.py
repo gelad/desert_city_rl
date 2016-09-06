@@ -20,7 +20,7 @@ class Graphics:
             self.console = tdl.init(screen_width, screen_height, title="Desert City")  # main console, displayed
             tdl.set_fps(fps_limit)  # set fps limit
             # window stuff
-            self.win_mgr = ui.WindowManager()  # windows manager
+            self.win_mgr = ui.WindowManager(self)  # windows manager
             main_window = ui.WindowMain(game, 0, 0, screen_width, screen_height, 0, map_width, map_height)
             self.win_mgr.add_window(main_window)  # add main window to WinMgr
             self.win_mgr.active_window = main_window  # make it active

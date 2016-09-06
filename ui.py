@@ -406,13 +406,19 @@ class WindowMain(Window):
                     # TODO: make a dialog 'what to do with selected item?'
                 # equip item command
                 elif command == 'equip_item':
-                    # show inventory menu and make it active
-                    inv_menu = WindowInventoryMenu(player.inventory, 'Equip item:', 0, 0, 1, True, self,
-                                                   player.equip_item)
-                    inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
-                    inv_menu.y = self.height // 2 - inv_menu.height // 2
-                    self.win_mgr.add_window(inv_menu)
-                    self.win_mgr.active_window = inv_menu
+                    # show list menu with items
+                    item = show_menu_list(self.win_mgr, player.inventory, 'Equip item:', 0, 0, True, self)
+                    if item:
+                        slot = show_menu_list(self.win_mgr, list(item.equip_slots), 'Select a slot:', 0, 0, True, self)
+                        if slot:  # if selected - equip item
+                            player.equip_item(item, slot)
+                            # equip item command
+                elif command == 'take_off_item':
+                    # show list menu with equipped items
+                    item = show_menu_list(self.win_mgr, [sl for sl in list(player.equipment.values()) if sl],
+                                          'Take off item:', 0, 0, True, self)
+                    if item:  # if selected - take off
+                        player.unequip_item(item)
                 # drop item command
                 elif command == 'drop':
                     # show inventory menu and make it active
@@ -513,12 +519,70 @@ class WindowInventoryMenu(Window):
                         self.win_mgr.close_window(self)
 
 
+class WindowListMenu(Window):
+    """ Class for simple list menu (list of selectable options) """
+
+    # TODO: rework menus
+    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
+        self.options = options  # a list of menu options
+        self.x = x
+        self.y = y
+        width = 0  # width is calculated accordingly to options length
+        y = 0
+        letter_index = ord('a')  # start menu item indexing from 'a'
+        elems = []
+        for option in options:
+            y += 1
+            # add menu options as text line objects
+            text_line = str(option)
+            elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + text_line))
+            letter_index += 1
+            if len(text_line) > width:
+                width = len(text_line)
+        width += 3
+        if width < len(str(caption)):
+            width = len(str(caption))
+        elems.append(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
+        # call parent constructor
+        super(WindowListMenu, self).__init__(self.x, self.y, width, len(options) + 1, z, visible)
+        for elem in elems:
+            self.add_element(elem)
+        if len(self.options) > 0:
+            self.selected = self.options[0]  # set selection to first option
+        self.state = 'working'  # set menu state to working
+        self.prev_window = prev_window  # previous window
+        self.console = tdl.Console(self.width, self.height)
+
+    def draw(self):
+        """ Drawing method """
+        for element in self.elements:  # blit every element to console
+            self.console.blit(element.draw(), element.x, element.y)
+        return self.console
+
+    def handle_input(self):
+        """ Input handling method """
+        events = player_input.get_raw_input()  # get a raw input from player
+        for event in events:
+            if event.type == 'KEYDOWN':
+                if event.key == 'ESCAPE':
+                    self.state = 'cancelled'
+                    self.win_mgr.close_window(self)
+                elif event.key == 'CHAR':
+                    # convert the ASCII code to an index; if it corresponds to an option, return it
+                    index = ord(event.keychar) - ord('a')
+                    if 0 <= index < len(self.options):
+                        self.selected = self.options[index]
+                        self.state = 'finished'
+                        self.win_mgr.close_window(self)
+
+
 class WindowManager:
     """ Class that manages windows """
 
-    def __init__(self):
+    def __init__(self, graphics):
         self.windows = []  # windows list
         self.active_window = None  # current active window
+        self.graphics = graphics  # a graphics object
 
     def add_window(self, window):
         """ Window adding method """
@@ -538,3 +602,19 @@ class WindowManager:
     def handle_input(self, commands):
         """ Pass handling input to active window """
         self.active_window.handle_input(commands)
+
+
+def show_menu_list(win_mgr, options, caption, x_offset=0, y_offset=0, z=1, prev_window=None):
+    """ A function to show a list menu, and return result """
+    menu = WindowListMenu(options, caption, x_offset, y_offset, z, True, prev_window)  # create a list menu
+    menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
+    menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
+    win_mgr.add_window(menu)  # add menu to window manager
+    win_mgr.active_window = menu
+    while menu.state == 'working':  # a loop until menu does it job (or cancelled)
+        menu.handle_input()
+        win_mgr.graphics.render_all()
+    if menu.state == 'cancelled':  # if menu cancelled return false
+        return False
+    if menu.state == 'finished':  # if option selected - return it
+        return menu.selected

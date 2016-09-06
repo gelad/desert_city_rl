@@ -236,18 +236,18 @@ class Equipment(Entity):
     def unequip_item(self, item):
         """ Method for unequipping items """
         if item in self.equipment.values():
-            self.inventory.add_item(item)  # add item to inventory
-            for eq_item in self.equipment.values():  # remove item from all slots occupied
-                if eq_item == item:
-                    eq_item = None
+            self.add_item(item)  # add item to inventory
+            for sl, it in self.equipment.items():  # remove item from all slots occupied
+                if it == item:
+                    self.equipment[sl] = None
 
     def drop_equipped_item(self, item):
         """ Method for dropping equipped items """
         if item in self.equipment.values():
             self.location.place_entity(item, self.position[0], self.position[1])  # place item at location
-            for eq_item in self.equipment.values():  # remove item from all slots occupied
-                if eq_item == item:
-                    eq_item = None
+            for sl, it in self.equipment.items():  # remove item from all slots occupied
+                if it == item:
+                    self.equipment[sl] = None
             item.owner = None
 
 

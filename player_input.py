@@ -63,6 +63,8 @@ def get_input(game):
                         player_input.append('inventory')
                     if event.keychar == 'e':  # equip item command
                         player_input.append('equip_item')
+                    if event.keychar == 't':  # equip item command
+                        player_input.append('take_off_item')
                     if event.keychar == 'g':  # pick up on same cell command
                         player_input.append('ground')
                     if event.keychar == 'd':  # drop item command
