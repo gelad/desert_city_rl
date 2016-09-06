@@ -411,8 +411,8 @@ class WindowMain(Window):
                                     player.equip_item(item[0], slot[0])
                             elif action[0] == 'Drop':
                                 player.drop_item(item[0])
-                # equip item command
-                elif command == 'equip_item':
+                # wield (equip) command
+                elif command == 'wield_item':
                     # show list menu with items
                     item = show_menu_list(self.win_mgr, player.inventory, 'Equip item:', 0, 0, True, self)
                     if item:
