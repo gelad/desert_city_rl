@@ -208,6 +208,49 @@ class Inventory(Entity):
         self.inventory.remove(item)
 
 
+class Equipment(Entity):
+    """
+        Mixin class for character equipment.
+    """
+
+    def __init__(self, layout='humanoid'):
+        self.equipment = {}  # equipment dict
+        if not isinstance(self, Inventory):  # check if entity has no inventory
+            raise Exception('An Entity with Equipment mixin must have also Inventory one.')
+        if layout == 'humanoid':  # standard equipment layout for humanoids
+            self.equipment = dict.fromkeys(['RIGHT_HAND', 'LEFT_HAND', 'RIGHT_RING', 'LEFT_RING', 'ARMS', 'SHOULDERS',
+                                            'BODY', 'HEAD', 'FACE', 'LEFT_EAR', 'RIGHT_EAR', 'NECK', 'WAIST', 'LEGS',
+                                            'FEET'])
+
+    def equip_item(self, item, slot=None):
+        """ Method for equipping items """
+        if not slot:
+            slot = list(item.equip_slots.keys())[0]  # TODO: rework this after making proper equipment menus
+        if self.equipment[slot]:
+            self.inventory.add_item(self.equipment[slot])  # add old item to inventory
+        if item in self.inventory:  # if item is in inventory - remove it
+            self.discard_item(item)
+        item.owner = self  # set item owner
+        self.equipment[slot] = item  # fill equipment slot with item
+
+    def unequip_item(self, item):
+        """ Method for unequipping items """
+        if item in self.equipment.values():
+            self.inventory.add_item(item)  # add item to inventory
+            for eq_item in self.equipment.values():  # remove item from all slots occupied
+                if eq_item == item:
+                    eq_item = None
+
+    def drop_equipped_item(self, item):
+        """ Method for dropping equipped items """
+        if item in self.equipment.values():
+            self.location.place_entity(item, self.position[0], self.position[1])  # place item at location
+            for eq_item in self.equipment.values():  # remove item from all slots occupied
+                if eq_item == item:
+                    eq_item = None
+            item.owner = None
+
+
 class AI:
     """ Base class that represents monster AI """
 
@@ -249,10 +292,14 @@ class Item(Entity):
         Mixed class, simple Item.
     """
 
-    def __init__(self, name, description, char, color):
+    def __init__(self, name, description, char, color, equip_slots=None):
         # calling constructors
         Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=False)
         self.owner = None  # owner of item - entity with inventory
+        if equip_slots:  # equipment slots, in which item can be placed
+            self.equip_slots = equip_slots
+        else:  # by default - can be taken to hands
+            self.equip_slots = dict.fromkeys(['RIGHT_HAND', 'LEFT_HAND'])
 
     def use(self, target):
         """ Item using method """
@@ -272,8 +319,9 @@ class ItemCharges(Item):
         Child class of item that has charges
     """
 
-    def __init__(self, name, description, char, color, charges, destroyed_after_use=True):
-        super(ItemCharges, self).__init__(name=name, description=description, char=char, color=color)
+    def __init__(self, name, description, char, color, charges, destroyed_after_use=True, equip_slots=None):
+        super(ItemCharges, self).__init__(name=name, description=description,
+                                          char=char, color=color, equip_slots=equip_slots)
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
         self.charges = charges  # number of uses
 
@@ -289,12 +337,13 @@ class ItemCharges(Item):
             self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
 
 
-class Fighter(BattleEntity, Inventory, Actor, Seer, Entity):
+class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
     """
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
 
-    def __init__(self, name, description, char, color, hp, speed, sight_radius, damage, ai=None):
+    def __init__(self, name, description, char, color, hp, speed, sight_radius,
+                 damage, equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=True)
         BattleEntity.__init__(self, hp=hp)
@@ -303,6 +352,7 @@ class Fighter(BattleEntity, Inventory, Actor, Seer, Entity):
         Actor.__init__(self, speed=speed, ai=ai)
         Seer.__init__(self, sight_radius=sight_radius)
         Inventory.__init__(self)
+        Equipment.__init__(self, layout=equip_layout)
         self.damage = damage  # damage from basic melee attack
 
     def attack_melee(self, target):

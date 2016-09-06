@@ -404,6 +404,15 @@ class WindowMain(Window):
                     self.win_mgr.add_window(inv_menu)
                     self.win_mgr.active_window = inv_menu
                     # TODO: make a dialog 'what to do with selected item?'
+                # equip item command
+                elif command == 'equip_item':
+                    # show inventory menu and make it active
+                    inv_menu = WindowInventoryMenu(player.inventory, 'Equip item:', 0, 0, 1, True, self,
+                                                   player.equip_item)
+                    inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
+                    inv_menu.y = self.height // 2 - inv_menu.height // 2
+                    self.win_mgr.add_window(inv_menu)
+                    self.win_mgr.active_window = inv_menu
                 # drop item command
                 elif command == 'drop':
                     # show inventory menu and make it active
