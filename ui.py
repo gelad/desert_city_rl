@@ -270,7 +270,6 @@ class WindowMain(Window):
         if loc.is_in_boundaries(x, y):  # check if position of selected cell is in boundaries
             items = [i for i in loc.cells[x][y].entities if isinstance(i, game_logic.Item)]  # select items in cell
             if items:  # check if there is a door
-                # TODO: make multiple items pickup
                 if len(items) == 1:
                     player.add_item(items[0])
                 else:
@@ -344,7 +343,8 @@ class WindowMain(Window):
                 # inventory command
                 elif command == 'inventory':
                     # show inventory menu and make it active
-                    inv_menu = WindowInventoryMenu(player.inventory, 'Inventory:', 0, 0, 1, True, self)
+                    inv_menu = WindowInventoryMenu(player.inventory, 'Inventory:', 0, 0, 1, True, self,
+                                                   player.use_item)
                     inv_menu.x = self.width // 2 - inv_menu.width // 2  # place it at center of screen
                     inv_menu.y = self.height // 2 - inv_menu.height // 2
                     self.win_mgr.add_window(inv_menu)
@@ -409,7 +409,8 @@ class WindowInventoryMenu(Window):
         super(WindowInventoryMenu, self).__init__(x, y, width, len(options) + 1, z, visible)  # call parent constructor
         for elem in elems:
             self.add_element(elem)
-        self.selected = self.options[0]  # set selection to first item
+        if len(self.options) > 0:
+            self.selected = self.options[0]  # set selection to first item
         self.state = 'working'  # set menu state to working
         self.prev_window = prev_window  # previous window
         self.console = tdl.Console(self.width, self.height)

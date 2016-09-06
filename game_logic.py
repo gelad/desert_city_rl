@@ -3,6 +3,7 @@
 """
 import actions
 import fov_los
+import effects
 
 import random
 from math import hypot
@@ -61,6 +62,7 @@ class Entity:
         self.blocks_los = blocks_los  # is it blocking line of sight? walls do, monsters (usually) don't
         self.char = char  # char that represents entity in graphics ('@')
         self.color = color  # entity char color
+        self.effects = []  # entity effects
 
     def __str__(self):
         """ Method returns string representation of an entity - it's name """
@@ -252,9 +254,39 @@ class Item(Entity):
         Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=False)
         self.owner = None  # owner of item - entity with inventory
 
-    def use(self):
+    def use(self, target):
         """ Item using method """
-        pass
+        for effect in self.effects:
+            if effect.eff == 'HEAL':  # if item has HEAL effect - heal the user
+                result_hp = target.hp + effect.magnitude
+                if result_hp > target.maxhp:
+                    target.hp = target.maxhp
+                else:
+                    target.hp = result_hp
+                msg = self.name + ' heals ' + target.name + ' for ' + str(effect.magnitude) + ' HP.'
+                Game.add_message(msg, 'PLAYER', [255, 255, 255])
+
+
+class ItemCharges(Item):
+    """
+        Child class of item that has charges
+    """
+
+    def __init__(self, name, description, char, color, charges, destroyed_after_use=True):
+        super(ItemCharges, self).__init__(name=name, description=description, char=char, color=color)
+        self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
+        self.charges = charges
+
+    def use(self, target):
+        """ Overrides the use() method, to manage charges and item destruction """
+        if self.charges > 0:  # if there are remaining charges
+            super(ItemCharges, self).use(target)  # call parent method
+            self.charges -= 1  # use 1 charge
+        else:
+            msg = self.name + ' is depleted!'
+            Game.add_message(msg, 'PLAYER', [255, 255, 255])
+        if self.destroyed_after_use and self.charges == 0:
+            self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
 
 
 class Fighter(BattleEntity, Inventory, Actor, Seer, Entity):
@@ -287,6 +319,10 @@ class Fighter(BattleEntity, Inventory, Actor, Seer, Entity):
         else:
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
+
+    def use_item(self, item):
+        """ Item use on self method """
+        item.use(self)
 
     def death(self):
         """ Death method """
@@ -421,7 +457,12 @@ class Location:
                             hp=100, is_closed=True)
                 self.place_entity(door, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(2, 20)):
-                item = Item(name='Boulder', description='A stone boulder.', char='*', color=[200, 200, 200])
+                item = Item(name='boulder', description='A stone boulder.', char='*', color=[200, 200, 200])
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(1, random.randint(1, 5)):
+                item = ItemCharges(name='healing potion', description='A potion that heals 5 HP.',
+                                   char='!', color=[255, 0, 0], charges=1, destroyed_after_use=True)
+                item.effects.append(effects.Effect('HEAL', 5))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(3, 10)):
                 enemy = Fighter(name='Mindless body', description='No description, debug monster.', char='b',
