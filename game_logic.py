@@ -290,10 +290,11 @@ class Item(Entity):
         Mixed class, simple Item.
     """
 
-    def __init__(self, name, description, char, color, equip_slots=None):
+    def __init__(self, name, description, char, color, equip_slots=None, categories=None):
         # calling constructors
         Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=False)
         self.owner = None  # owner of item - entity with inventory
+        self.categories = categories  # item categories - a potion, a sword, etc
         if equip_slots:  # equipment slots, in which item can be placed
             self.equip_slots = equip_slots
         else:  # by default - can be taken to hands
@@ -317,8 +318,9 @@ class ItemCharges(Item):
         Child class of item that has charges
     """
 
-    def __init__(self, name, description, char, color, charges, destroyed_after_use=True, equip_slots=None):
-        super(ItemCharges, self).__init__(name=name, description=description,
+    def __init__(self, name, description, char, color, charges,
+                 categories=None, destroyed_after_use=True, equip_slots=None):
+        super(ItemCharges, self).__init__(name=name, description=description, categories=categories,
                                           char=char, color=color, equip_slots=equip_slots)
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
         self.charges = charges  # number of uses
@@ -505,11 +507,13 @@ class Location:
                             hp=100, is_closed=True)
                 self.place_entity(door, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(2, 20)):
-                item = Item(name='boulder', description='A stone boulder.', char='*', color=[200, 200, 200])
+                item = Item(name='boulder', description='A stone boulder.', categories={'rubbish'},
+                            char='*', color=[200, 200, 200])
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(1, 5)):
                 item = ItemCharges(name='healing potion', description='A potion that heals 5 HP.',
-                                   char='!', color=[255, 0, 0], charges=1, destroyed_after_use=True)
+                                   categories={'consumable', 'potion'}, char='!', color=[255, 0, 0],
+                                   charges=1, destroyed_after_use=True)
                 item.effects.append(effects.Effect('HEAL', 5))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(1, random.randint(3, 10)):
