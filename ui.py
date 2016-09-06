@@ -12,13 +12,14 @@ import player_input
 class Element:
     """ Base class for UI element """
 
-    def __init__(self, owner, x=0, y=0, width=0, height=0):
+    def __init__(self, owner, x=0, y=0, width=0, height=0, visible=True):
         self.owner = owner  # owner (other element or window)
         self.x = x  # position in window
         self.y = y
         self.width = width  # element width
         self.height = height  # element height
         self.elements = []  # child elements
+        self.visible = visible  # is element visible
 
     def draw(self):
         """ Abstract method, must return element appearance, ready to draw (tdl.Console for now) """
@@ -33,8 +34,8 @@ class Element:
 class ElementTextLine(Element):
     """ Simple UI element - line of text """
 
-    def __init__(self, owner, x=0, y=0, line='', color=None, bgcolor=None):
-        super(ElementTextLine, self).__init__(owner=owner, x=x, y=y, width=len(line), height=1)
+    def __init__(self, owner, x=0, y=0, line='', color=None, bgcolor=None, visible=True):
+        super(ElementTextLine, self).__init__(owner=owner, x=x, y=y, width=len(line), height=1, visible=visible)
         self._line = line  # line of text
         if color:  # check if color specified
             self.color = color
@@ -60,8 +61,8 @@ class ElementTextLine(Element):
 class ElementMainPanel(Element):
     """ Main panel with player stats, etc """
 
-    def __init__(self, owner, player, x=0, y=0, width=0, height=0):
-        super(ElementMainPanel, self).__init__(owner=owner, x=x, y=y, width=width, height=height)
+    def __init__(self, owner, player, x=0, y=0, width=0, height=0, visible=True):
+        super(ElementMainPanel, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
         self.player = player  # Player object, to obtain player-related info
         self.add_element(ElementTextLine(self, 0, 0, player.name))  # player name on top of panel
         self.player_hp = ElementTextLine(self, 0, 1, str(player.hp) + '/' + str(player.maxhp) + ' HP')  # player hp bar
@@ -84,8 +85,8 @@ class ElementMainPanel(Element):
 class ElementMap(Element):
     """ Location map element  """
 
-    def __init__(self, owner, loc, player, x=0, y=0, width=0, height=0):
-        super(ElementMap, self).__init__(owner=owner, x=x, y=y, width=width, height=height)
+    def __init__(self, owner, loc, player, x=0, y=0, width=0, height=0, visible=True):
+        super(ElementMap, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
         self.loc = loc  # Location object, to obtain location-related info
         self.player = player  # Player object, to obtain player-related info
         self.cam_offset = (0, 0)  # camera offset (if at (0, 0) - centered on player)
@@ -152,8 +153,8 @@ class ElementMap(Element):
 class ElementLog(Element):
     """ Game log element """
 
-    def __init__(self, owner, game, x=0, y=0, width=0, height=0):
-        super(ElementLog, self).__init__(owner=owner, x=x, y=y, height=height, width=width)
+    def __init__(self, owner, game, x=0, y=0, width=0, height=0, visible=True):
+        super(ElementLog, self).__init__(owner=owner, x=x, y=y, height=height, width=width, visible=visible)
         self.game = game  # game object to obtain log level
 
     def draw(self):
@@ -175,6 +176,46 @@ class ElementLog(Element):
             y += 1
             console.draw_str(0, y, line[0], line[1])  # draw each line
         return console  # a tdl.Console that contains log messages
+
+
+class ElementCellInfo(Element):
+    """ Selected cell info element """
+
+    def __init__(self, owner, game, x=0, y=0, width=0, height=0, visible=False):  #not visible by default
+        super(ElementCellInfo, self).__init__(owner=owner, x=x, y=y, height=height, width=width, visible=visible)
+        self.game = game  # game object to obtain info
+
+    def draw(self):
+        """ Drawing method """
+        console = tdl.Console(self.width, self.height)
+        console.clear()
+        self.elements.clear()
+        entities = self.game.current_loc.cells[self.game.player.position[0] + self.owner.map.cam_offset[0]][
+            self.game.player.position[1] + self.owner.map.cam_offset[1]].entities  # get entities @ selected cell
+        creatures = [ent for ent in entities if ent.occupies_tile]
+        items = [ent for ent in entities if isinstance(ent, game_logic.Item)]
+        other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
+        cur_y = 0  # a 'cursor' y position
+        for creature in creatures:  # show creature info if any
+            self.add_element(ElementTextLine(self, 0, cur_y, creature.name+' is here.', creature.color))
+            cur_y += 1
+            for ln in textwrap.wrap(creature.description, self.width):
+                self.add_element(ElementTextLine(self, 0, cur_y, ln))
+                cur_y += 1
+        self.add_element(ElementTextLine(self, 0, cur_y, 'Items:'))
+        cur_y += 1
+        for item in items:  # show items if any
+            self.add_element(ElementTextLine(self, 0, cur_y, item.name, item.color))
+            cur_y += 1
+        self.add_element(ElementTextLine(self, 0, cur_y, 'Other:'))
+        cur_y += 1
+        for other in other:  # show other objects
+            self.add_element(ElementTextLine(self, 0, cur_y, other.name + ' is here.', other.color))
+            cur_y += 1
+        for element in self.elements:  # blit every element to console
+            if element.visible:
+                console.blit(element.draw(), element.x, element.y)
+        return console
 
 
 class Window:
@@ -218,6 +259,9 @@ class WindowMain(Window):
         self.add_element(self.panel)
         self.log = ElementLog(self, game, map_width, height // 2, width - map_width, height // 2 - 1)  # log element
         self.add_element(self.log)
+        # cell info element
+        self.cell_info = ElementCellInfo(self, game, map_width, height // 2, width - map_width, height // 2 - 1)
+        self.add_element(self.cell_info)
         self.cam_offset = (0, 0)  # camera offset (for looking, shooting, etc)
         self.console = tdl.Console(width, height)  # offscreen console of window
 
@@ -225,7 +269,8 @@ class WindowMain(Window):
         """ Window drawing method """
         self.console.clear()
         for element in self.elements:  # blit every element to console
-            self.console.blit(element.draw(), element.x, element.y)
+            if element.visible:
+                self.console.blit(element.draw(), element.x, element.y)
         return self.console
 
     # ========================== COMMAND METHODS (special cases, to prevent code duplication) ====================
@@ -334,6 +379,8 @@ class WindowMain(Window):
                 # 'look' command
                 elif command == 'look':
                     game.state = 'looking'
+                    self.log.visible = False
+                    self.cell_info.visible = True
                 # show/hide debug log command
                 elif command == 'debug_log':
                     if game.show_debug_log:
@@ -366,6 +413,8 @@ class WindowMain(Window):
                 # exit looking mode
                 if command == 'exit':
                     self.map.cam_offset = (0, 0)  # set camera offset to normal
+                    self.cell_info.visible = False
+                    self.log.visible = True
                     game.state = 'playing'  # resume normal game flow
                 # moving camera commands
                 elif command == 'move_n':
@@ -388,6 +437,7 @@ class WindowMain(Window):
 
 class WindowInventoryMenu(Window):
     """ Class for simple inventory menu (list of selectable items, on selection performs player_function with item) """
+
     # TODO: rework menus
     def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, player_function=None):
         self.options = options  # a list of menu items
@@ -402,7 +452,7 @@ class WindowInventoryMenu(Window):
             # add menu items as text line objects
             text_line = str(option)
             if isinstance(option, game_logic.ItemCharges):
-                text_line += '['+str(option.charges)+']'
+                text_line += '[' + str(option.charges) + ']'
             elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + text_line))
             letter_index += 1
             if len(text_line) > width:
