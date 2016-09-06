@@ -70,12 +70,19 @@ class ElementMainPanel(Element):
         # player position (for debug)
         self.player_pos = ElementTextLine(self, 0, 2, 'X:' + str(player.position[0]) + ' Y:' + str(player.position[1]))
         self.add_element(self.player_pos)
+        # player equipment in hands
+        self.player_hands = ElementTextLine(self, 0, 3,
+                                            (', '.join([str(player.equipment['RIGHT_HAND']),
+                                             str(player.equipment['LEFT_HAND'])])))
+        self.add_element(self.player_hands)
 
     def draw(self):
         """ Drawing method """
         # update player stats in lines
         self.player_hp.set_line(str(self.player.hp) + '/' + str(self.player.maxhp) + ' HP')
         self.player_pos.set_line('X:' + str(self.player.position[0]) + ' Y:' + str(self.player.position[1]))
+        self.player_hands.set_line((', '.join([str(self.player.equipment['RIGHT_HAND']),
+                                               str(self.player.equipment['LEFT_HAND'])])))
         console = tdl.Console(self.width, self.height)
         for element in self.elements:  # blit every element to console
             console.blit(element.draw(), element.x, element.y)
