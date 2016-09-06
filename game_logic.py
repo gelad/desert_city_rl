@@ -275,7 +275,7 @@ class ItemCharges(Item):
     def __init__(self, name, description, char, color, charges, destroyed_after_use=True):
         super(ItemCharges, self).__init__(name=name, description=description, char=char, color=color)
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
-        self.charges = charges
+        self.charges = charges  # number of uses
 
     def use(self, target):
         """ Overrides the use() method, to manage charges and item destruction """

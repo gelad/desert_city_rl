@@ -391,6 +391,8 @@ class WindowInventoryMenu(Window):
     # TODO: rework menus
     def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, player_function=None):
         self.options = options  # a list of menu items
+        self.x = x
+        self.y = y
         width = 0  # width is calculated accordingly to options length
         y = 0
         letter_index = ord('a')  # start menu item indexing from 'a'
@@ -398,15 +400,19 @@ class WindowInventoryMenu(Window):
         for option in options:
             y += 1
             # add menu items as text line objects
-            elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + str(option)))
+            text_line = str(option)
+            if isinstance(option, game_logic.ItemCharges):
+                text_line += '['+str(option.charges)+']'
+            elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + text_line))
             letter_index += 1
-            if len(str(option)) > width:
-                width = len(str(option))
+            if len(text_line) > width:
+                width = len(text_line)
         width += 3
         if width < len(str(caption)):
             width = len(str(caption))
         elems.append(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
-        super(WindowInventoryMenu, self).__init__(x, y, width, len(options) + 1, z, visible)  # call parent constructor
+        # call parent constructor
+        super(WindowInventoryMenu, self).__init__(self.x, self.y, width, len(options) + 1, z, visible)
         for elem in elems:
             self.add_element(elem)
         if len(self.options) > 0:
