@@ -113,6 +113,13 @@ class ElementMap(Element):
                     color = [255, 255, 255]
                 if ent.occupies_tile:  # check if there is entity, occupying tile - display it on top
                     break
+                if len(cell.entities) > 1:  # if there are multiple items, replace bgcolor
+                    bgcolor = cell.entities[0].color
+                    if color == bgcolor:
+                        bgcolor = [c-30 for c in bgcolor]
+                        for c in bgcolor:
+                            if c < 0:
+                                c = 0
             # update visited cells map (for displaying grey out of vision explored tiles)
             loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
             return [char, color, bgcolor]
