@@ -195,7 +195,7 @@ class ElementLog(Element):
 class ElementCellInfo(Element):
     """ Selected cell info element """
 
-    def __init__(self, owner, game, x=0, y=0, width=0, height=0, visible=False):  #not visible by default
+    def __init__(self, owner, game, x=0, y=0, width=0, height=0, visible=False):  # not visible by default
         super(ElementCellInfo, self).__init__(owner=owner, x=x, y=y, height=height, width=width, visible=visible)
         self.game = game  # game object to obtain info
 
@@ -328,16 +328,13 @@ class WindowMain(Window):
         y = player.position[1] + dy
         if loc.is_in_boundaries(x, y):  # check if position of selected cell is in boundaries
             items = [i for i in loc.cells[x][y].entities if isinstance(i, game_logic.Item)]  # select items in cell
-            if items:  # check if there is a door
+            if items:  # check if there is an item
                 if len(items) == 1:
                     player.add_item(items[0])
                 else:
-                    menu = WindowInventoryMenu(items, 'Pick up item:', 0, 0, 1, True, self,
-                                               player.add_item)
-                    menu.x = self.width // 2 - menu.width // 2  # place it at center of screen
-                    menu.y = self.height // 2 - menu.height // 2
-                    self.win_mgr.add_window(menu)
-                    self.win_mgr.active_window = menu
+                    item = show_menu_inventory(self.win_mgr, items, 'Pick up item:', 0, 0, 1, self)
+                    if item:
+                        player.add_item(item[0])
             return False
 
     # ===========================================================================================================
@@ -427,6 +424,12 @@ class WindowMain(Window):
                                               'Select a slot:', 0, 0, True, self)
                         if slot:  # if selected - equip item
                             player.equip_item(item[0], slot[0])
+                            # wield (equip) command
+                elif command == 'use_item':
+                    # show list menu with items
+                    item = show_menu_list(self.win_mgr, player.inventory, 'Use item:', 0, 0, True, self)
+                    if item:
+                        player.use_item(item[0])
                 # take off item command
                 elif command == 'take_off_item':
                     # show list menu with equipped items

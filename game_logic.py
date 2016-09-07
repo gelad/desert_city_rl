@@ -511,29 +511,29 @@ class Location:
             self.cells.clear()
             self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
             random.seed()
-            for i in range(1, random.randint(2, 40)):
+            for i in range(0, random.randint(2, 40)):
                 wall = Wall(name='Wall', description='A wall.', char='#', color=[255, 255, 255], hp=100)
                 self.place_entity(wall, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(1, random.randint(2, 20)):
+            for i in range(0, random.randint(2, 20)):
                 door = Door(name='Door', description='A door.', char_closed='+', char_open='.', color=[255, 255, 255],
                             hp=100, is_closed=True)
                 self.place_entity(door, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(1, random.randint(2, 20)):
+            for i in range(0, random.randint(2, 20)):
                 item = Item(name='boulder', description='A stone boulder.', categories={'rubbish'},
                             char='*', color=[200, 200, 200])
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(1, random.randint(1, 5)):
+            for i in range(0, random.randint(1, 5)):
                 item = ItemCharges(name='healing potion', description='A potion that heals 5 HP.',
                                    categories={'consumable', 'potion'}, char='!', color=[255, 0, 0],
                                    charges=1, destroyed_after_use=True)
                 item.effects.append(effects.Effect('HEAL', 5))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(1, random.randint(1, 2)):
+            for i in range(0, random.randint(1, 2)):
                 item = Item(name='sabre', description='A sharp sabre with pointy tip.',
                             categories={'weapon', 'sword'}, char='/', color=[200, 200, 255])
                 item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 5))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(1, random.randint(3, 10)):
+            for i in range(0, random.randint(3, 10)):
                 enemy = Fighter(name='Mindless body', description='No description, debug monster.', char='b',
                                 color=[139, 69, 19], hp=6, speed=100, sight_radius=14.5, damage=1,
                                 ai=SimpleMeleeChaserAI())

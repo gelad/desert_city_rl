@@ -65,6 +65,8 @@ def get_input(game):
                         player_input.append('wield_item')
                     if event.keychar == 't':  # take off command
                         player_input.append('take_off_item')
+                    if event.keychar == 'u':  # use command
+                        player_input.append('use_item')
                     if event.keychar == 'g':  # pick up on same cell command
                         player_input.append('ground')
                     if event.keychar == 'd':  # drop item command
