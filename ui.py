@@ -470,6 +470,10 @@ class WindowMain(Window):
                     self.map.move_camera(-1, 1)
                 elif command == 'move_se':
                     self.map.move_camera(1, 1)
+            elif game.state == 'dead':  # if game is in dead state
+                # game exit command
+                if command == 'exit':
+                    game.state = 'exit'
 
 
 # TODO: refactor ListMenu and InventoryMenu, to minimize code duplication (make one inherit another)
