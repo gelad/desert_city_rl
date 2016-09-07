@@ -18,9 +18,10 @@ Make a simple usable item (health potion) (DONE)
 Implement equipment system. (DONE)
 Rework menus. (DONE)
 Implement sabre weapon (and weapon damage calculation) (DONE)
+Implement dedicated 'use' command. (DONE)
 
 
-Implement dedicated 'use' command.
+Make item interactions actions that take time.
 Make different speed weapons.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.

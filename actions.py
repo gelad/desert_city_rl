@@ -128,13 +128,29 @@ def act_move(action, register_call, actor, dx, dy):
 def act_attack_melee(action, register_call, actor, target):
     """ Actor melee attack """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed // 2  # attack hit occurs on 1/2 swing duration
+        spd = 0
+        weapons = 0  # weapons number eqipped
+        for item in actor.equipment.values():  # check if any weapons equipped
+            if item:
+                if 'weapon' in item.categories:  # correct speed if weapon(s)
+                    weapons += 1
+                    if 'speed_normal' in item.categories:
+                        spd += actor.speed
+                    elif 'speed_fast' in item.categories:
+                        spd += actor.speed * 0.75
+                    elif 'speed_slow' in item.categories:
+                        spd += actor.speed * 1.75
+        if weapons > 1:  # dual-wielding penalty
+            spd *= 1.25
+        elif weapons == 0:
+            spd = actor.speed
+        action.t_needed = spd / 2  # attack hit occurs on 1/2 swing duration
     else:  # part that is executed when action fires
         actor.attack_melee(target)  # attack target
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
         # withdrawal to make whole action take EXACTLY actor.speed
-        actor.perform(act_withdrawal, actor, actor.speed - actor.speed // 2)
+        actor.perform(act_withdrawal, actor, action.t_needed * 2)
 
 
 def act_withdrawal(action, register_call, actor, ticks):

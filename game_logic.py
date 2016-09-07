@@ -225,7 +225,7 @@ class Equipment(Entity):
     def equip_item(self, item, slot):
         """ Method for equipping items """
         if self.equipment[slot]:
-            self.inventory.add_item(self.equipment[slot])  # add old item to inventory
+            self.add_item(self.equipment[slot])  # add old item to inventory
         if item in self.inventory:  # if item is in inventory - remove it
             self.discard_item(item)
         item.owner = self  # set item owner
@@ -409,8 +409,9 @@ class Player(Fighter):
         """ Death method """
         Game.add_message('You died!', 'PLAYER', [255, 0, 0])
         Game.add_message(self.name + 'player died', 'DEBUG', [255, 255, 255])
+        self.char = '%'
+        self.color = [255, 0 , 0]
         self.state = 'dead'
-        self.location.remove_entity(self)
 
 
 class Wall(BattleEntity, Entity):
@@ -530,8 +531,18 @@ class Location:
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
                 item = Item(name='sabre', description='A sharp sabre with pointy tip.',
-                            categories={'weapon', 'sword'}, char='/', color=[200, 200, 255])
+                            categories={'weapon', 'sword', 'speed_normal'}, char='/', color=[200, 200, 255])
                 item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 5))
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 2)):
+                item = Item(name='dagger', description='A simple dagger about 20cm long.',
+                            categories={'weapon', 'dagger', 'speed_fast'}, char=',', color=[200, 200, 255])
+                item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 3))
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 2)):
+                item = Item(name='bronze maul', description='Huge bronze sphere attached on top of a wooden pole.',
+                            categories={'weapon', 'blunt', 'speed_slow'}, char='/', color=[80, 50, 20])
+                item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 10))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(3, 10)):
                 enemy = Fighter(name='Mindless body', description='No description, debug monster.', char='b',
