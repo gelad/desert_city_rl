@@ -390,7 +390,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         """ Death method """
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
-        corpse = Item(name=self.name+"'s corpse.", description='A dead '+self.name+'.', char='%', color=[200, 50, 50])
+        corpse = Item(name=self.name + "'s corpse.", description='A dead ' + self.name + '.', char='%',
+                      color=self.color)
         self.location.place_entity(corpse, self.position[0], self.position[1])
         for item in self.equipment.values():  # drop all equipped items
             if item:
@@ -497,7 +498,7 @@ class Location:
         self.cells = []  # list of Cell objects
         self.action_mgr = actions.ActionMgr()  # action manager for this location
         # self.entities = []  # a list of Entities
-        self.seers = []  # a list of Seer objects, to recompute their FOV if map changes # TODO: make fov recompute
+        self.seers = []  # a list of Seer objects, to recompute their FOV if map changes
         self.actors = []  # a list of Actor objects
         # WARNING! it's a hack, graphic-related info stored in loc, to save/load it with the loc
         self.out_of_sight_map = {}  # dict for storing explored, but invisible tiles
@@ -566,6 +567,11 @@ class Location:
                 self.seers.append(entity)  # add it to Seers list
             if isinstance(entity, Actor):  # check if entity is an Actor
                 self.actors.append(entity)  # add it to Actors list
+            if entity.blocks_los:  # if placed entity blocks los, recompute fov for adjacent Seers
+                for seer in self.seers:
+                    if hypot(entity.position[0] - seer.position[0],
+                             entity.position[1] - seer.position[1]) <= seer.sight_radius:
+                        seer.compute_fov()
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
 
@@ -581,6 +587,11 @@ class Location:
             for action in entity.actions:  # remove actions from ActMgr
                 self.action_mgr.remove_action(action)
             self.actors.remove(entity)  # remove from actors list
+        if entity.blocks_los:  # if removed entity blocked los, recompute fov for adjacent Seers
+            for seer in self.seers:
+                if hypot(entity.position[0] - seer.position[0],
+                         entity.position[1] - seer.position[1]) <= seer.sight_radius:
+                    seer.compute_fov()
 
     def is_cell_transparent(self, x, y):
         """ Method that determines, is cell at x, y is transparent """
@@ -617,7 +628,7 @@ class Game:
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
         self.player = Player(name='Player', description='A player character.', char='@', color=[255, 255, 255],
-        hp=10, speed=100, sight_radius=23.5, damage=2)
+                             hp=10, speed=100, sight_radius=23.5, damage=2)
         self.current_loc.place_entity(self.player, 10, 10)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
