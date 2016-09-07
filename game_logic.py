@@ -370,6 +370,12 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
                         if 'sword' in item.categories:
                             random.seed()
                             dmg = random.randrange(dmg - dmg // 3, dmg + dmg // 3)  # a sword damage dispersion
+                        if 'dagger' in item.categories:
+                            random.seed()
+                            dmg = random.randrange(dmg - dmg // 2, dmg + dmg // 2)  # a dagger damage dispersion
+                        if 'blunt' in item.categories:
+                            random.seed()
+                            dmg = random.randrange(dmg - dmg // 5, dmg + dmg // 5)  # a blunt weapon damage dispersion
             if dmg == 0:
                 dmg = self.damage
             msg = self.name + ' attacks ' + target.name + ' and deals ' + str(dmg) + ' damage!'
