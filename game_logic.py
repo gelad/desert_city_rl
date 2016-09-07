@@ -392,6 +392,11 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
         corpse = Item(name=self.name+"'s corpse.", description='A dead '+self.name+'.', char='%', color=[200, 50, 50])
         self.location.place_entity(corpse, self.position[0], self.position[1])
+        for item in self.equipment.values():  # drop all equipped items
+            if item:
+                self.drop_equipped_item(item)
+        for item in self.inventory:  # drop all inventory items
+            self.drop_item(item)
         self.location.remove_entity(self)
 
 
@@ -410,7 +415,7 @@ class Player(Fighter):
         Game.add_message('You died!', 'PLAYER', [255, 0, 0])
         Game.add_message(self.name + 'player died', 'DEBUG', [255, 255, 255])
         self.char = '%'
-        self.color = [255, 0 , 0]
+        self.color = [255, 0, 0]
         self.state = 'dead'
 
 
@@ -546,7 +551,7 @@ class Location:
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(3, 10)):
                 enemy = Fighter(name='Mindless body', description='No description, debug monster.', char='b',
-                                color=[139, 69, 19], hp=6, speed=100, sight_radius=14.5, damage=1,
+                                color=[109, 49, 9], hp=5, speed=100, sight_radius=14.5, damage=1,
                                 ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
