@@ -551,8 +551,13 @@ class Location:
                 item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 10))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(3, 10)):
-                enemy = Fighter(name='Mindless body', description='No description, debug monster.', char='b',
+                enemy = Fighter(name='Mindless body', description='No description, normal debug monster.', char='b',
                                 color=[109, 49, 9], hp=5, speed=100, sight_radius=14.5, damage=1,
+                                ai=SimpleMeleeChaserAI())
+                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                enemy = Fighter(name='Sand golem', description='No description, slow debug monster.', char='G',
+                                color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5, damage=4,
                                 ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
