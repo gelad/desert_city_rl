@@ -166,7 +166,7 @@ def act_withdrawal(action, register_call, actor, ticks):
 def act_open_door(action, register_call, actor, door):
     """ Actor opening door action """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed // 4  # open door is a 1/4 speed action for now
+        action.t_needed = actor.speed / 4  # open door is a 1/4 speed action for now
     else:  # part that is executed when action fires
         actor.open(door)  # open the door
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
@@ -178,10 +178,60 @@ def act_open_door(action, register_call, actor, door):
 def act_close_door(action, register_call, actor, door):
     """ Actor closing door action """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed // 4    # close door is a 1/4 speed action for now
+        action.t_needed = actor.speed / 4    # close door is a 1/4 speed action for now
     else:  # part that is executed when action fires
         actor.close(door)  # close the door
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
             actor.compute_fov()  # compute actor's FOV
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
+def act_drop_item(action, register_call, actor, item):
+    """ Actor drop item action """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed / 10    # drop action is 1/10 speed
+    else:  # part that is executed when action fires
+        actor.drop_item(item)  # drop item
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
+def act_pick_up_item(action, register_call, actor, item):
+    """ Actor pick up item action """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed / 4  # pick up action is 1/4 speed
+    else:  # part that is executed when action fires
+        actor.add_item(item)  # pick up item
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
+def act_use_item(action, register_call, actor, item):
+    """ Actor use item action """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed / 4  # use action is 1/4 speed (for now)
+    else:  # part that is executed when action fires
+        actor.use_item(item)  # use item
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
+def act_equip_item(action, register_call, actor, item, slot):
+    """ Actor equip item action """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed  # equip is full turn action (for now)
+    else:  # part that is executed when action fires
+        actor.equip_item(item, slot)  # equip item
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
+def act_unequip_item(action, register_call, actor, item, slot):
+    """ Actor unequip item action """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed / 2  # equip is half turn action (for now)
+    else:  # part that is executed when action fires
+        actor.unequip_item(item)  # unequip item
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state

@@ -330,11 +330,11 @@ class WindowMain(Window):
             items = [i for i in loc.cells[x][y].entities if isinstance(i, game_logic.Item)]  # select items in cell
             if items:  # check if there is an item
                 if len(items) == 1:
-                    player.add_item(items[0])
+                    player.perform(actions.act_pick_up_item, player, items[0])
                 else:
                     item = show_menu_inventory(self.win_mgr, items, 'Pick up item:', 0, 0, 1, self)
                     if item:
-                        player.add_item(item[0])
+                        player.perform(actions.act_pick_up_item, player, item[0])
             return False
 
     # ===========================================================================================================
@@ -407,14 +407,14 @@ class WindowMain(Window):
                                                 'What to do with '+item[0].name+'?', 0, 0, 1, self)
                         if action:
                             if action[0] == 'Use':
-                                player.use_item(item[0])
+                                player.perform(actions.act_use_item, player, item[0])
                             elif action[0] == 'Equip':
                                 slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
                                                       'Select a slot:', 0, 0, True, self)
                                 if slot:  # if selected - equip item
-                                    player.equip_item(item[0], slot[0])
+                                    player.perform(actions.act_equip_item, player, item[0], slot[0])
                             elif action[0] == 'Drop':
-                                player.drop_item(item[0])
+                                player.perform(actions.act_drop_item, player, item[0])
                 # wield (equip) command
                 elif command == 'wield_item':
                     # show list menu with items
@@ -423,26 +423,26 @@ class WindowMain(Window):
                         slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
                                               'Select a slot:', 0, 0, True, self)
                         if slot:  # if selected - equip item
-                            player.equip_item(item[0], slot[0])
-                            # wield (equip) command
+                            player.perform(actions.act_equip_item, player, item[0], slot[0])
+                # use command
                 elif command == 'use_item':
                     # show list menu with items
                     item = show_menu_list(self.win_mgr, player.inventory, 'Use item:', 0, 0, True, self)
                     if item:
-                        player.use_item(item[0])
+                        player.perform(actions.act_use_item, player, item[0])
                 # take off item command
                 elif command == 'take_off_item':
                     # show list menu with equipped items
                     item = show_menu_list(self.win_mgr, [sl for sl in list(player.equipment.values()) if sl],
                                           'Take off item:', 0, 0, True, self)
                     if item:  # if selected - take off
-                        player.unequip_item(item[0])
+                        player.perform(actions.act_unequip_item, player, item[0])
                 # drop item command
                 elif command == 'drop':
                     # show inventory menu
                     item = show_menu_inventory(self.win_mgr, player.inventory, 'Drop item:', 0, 0, 1, self)
                     if item:
-                        player.drop_item(item[0])
+                        player.perform(actions.act_drop_item, player, item[0])
                 # pick up from ground command
                 elif command == 'ground':
                     self.command_pick_up(player, loc, 0, 0)

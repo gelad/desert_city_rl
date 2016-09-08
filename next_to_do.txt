@@ -20,9 +20,9 @@ Rework menus. (DONE)
 Implement sabre weapon (and weapon damage calculation) (DONE)
 Implement dedicated 'use' command. (DONE)
 Make different speed weapons. (DONE)
+Make item interactions actions that take time. (DONE)
 
 
-Make item interactions actions that take time.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
 Implement some sort of event system?
