@@ -4,6 +4,7 @@
 import actions
 import fov_los
 import effects
+import events
 
 import random
 from math import hypot
@@ -145,6 +146,7 @@ class Actor(Entity):
                     self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                     self.location.cells[new_x][new_y].entities.append(self)  # add to new cell
                     self.position = (new_x, new_y)  # update entity position
+                    events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
                     msg = self.name + 'moved to ' + str(new_x) + ':' + str(new_y)
                     Game.add_message(msg, 'DEBUG', [255, 255, 255])
                     return True
@@ -249,12 +251,13 @@ class Equipment(Entity):
             item.owner = None
 
 
-class AI:
+class AI(events.Observer):
     """ Base class that represents monster AI """
 
     def __init__(self, state):
         self.state = state  # state of AI, i.e. 'sleeping', 'wandering', 'chasing'
         self.owner = None  # owner Entity of ai object. TODO: hack - owner set externally
+        events.Observer.__init__(self)  # register self as observer
 
     def act(self):
         """ Abstract method of AI class that is called when AI should decide what to do """
@@ -266,10 +269,22 @@ class SimpleMeleeChaserAI(AI):
 
     def __init__(self, state='idle'):
         AI.__init__(self, state)
+        self.observe('location', self.on_event_location)
+
+    def on_event_location(self, data):
+        """ Method handling location-related events """
+        if data['type'] == 'entity_moved':
+            if isinstance(data['entity'], Player):
+                pl_x = data['entity'].position[0]
+                pl_y = data['entity'].position[1]
+                if hypot(pl_x - self.owner.position[0], pl_y - self.owner.position[1]) <= self.owner.sight_radius:
+                    self.state = 'alert'
+                else:
+                    self.state = 'idle'
 
     def act(self):
         """ Method called when monster is ready to act """
-        if self.state == 'idle':
+        if self.state == 'alert':
             x = self.owner.position[0]
             y = self.owner.position[1]
             for point in self.owner.fov_set:
@@ -405,6 +420,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         for item in self.inventory:  # drop all inventory items
             self.drop_item(item)
         self.location.remove_entity(self)
+        self.ai.close()  # unregister Observer
 
 
 class Player(Fighter):
@@ -603,6 +619,7 @@ class Location:
                 if hypot(entity.position[0] - seer.position[0],
                          entity.position[1] - seer.position[1]) <= seer.sight_radius:
                     seer.compute_fov()
+        del entity
 
     def is_cell_transparent(self, x, y):
         """ Method that determines, is cell at x, y is transparent """
