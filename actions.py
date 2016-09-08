@@ -129,7 +129,7 @@ def act_attack_melee(action, register_call, actor, target):
     """ Actor melee attack """
     if register_call:  # part executed when function is registered in ActionMgr
         spd = 0
-        weapons = 0  # weapons number eqipped
+        weapons = 0  # weapons number equipped
         for item in actor.equipment.values():  # check if any weapons equipped
             if item:
                 if 'weapon' in item.categories:  # correct speed if weapon(s)
@@ -227,7 +227,7 @@ def act_equip_item(action, register_call, actor, item, slot):
         actor.state = 'ready'  # return actor to ready state
 
 
-def act_unequip_item(action, register_call, actor, item, slot):
+def act_unequip_item(action, register_call, actor, item):
     """ Actor unequip item action """
     if register_call:  # part executed when function is registered in ActionMgr
         action.t_needed = actor.speed / 2  # equip is half turn action (for now)
