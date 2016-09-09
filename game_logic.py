@@ -7,6 +7,7 @@ import effects
 import events
 
 import random
+import copy
 from math import hypot
 
 
@@ -356,6 +357,33 @@ class ItemCharges(Item):
         if self.destroyed_after_use and self.charges == 0:
             self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
 
+    def decrease(self):
+        """ Decrease charges by 1 """
+        if self.charges > 0:  # if there are remaining charges
+            self.charges -= 1  # use 1 charge
+        else:
+            msg = self.name + ' is depleted!'
+            Game.add_message(msg, 'PLAYER', [255, 255, 255])
+        if self.destroyed_after_use and self.charges == 0:
+            self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
+
+class ItemRangedWeapon(Item):
+    """
+        Child class for a ranged weapon.
+    """
+
+    def __init__(self, name, description, char, color, range, ammo_max=1, ammo_type=None, ammo=None,
+                 categories=None, equip_slots=None):
+        super(ItemRangedWeapon, self).__init__(name=name, description=description, categories=categories,
+                                               char=char, color=color, equip_slots=equip_slots)
+        self.range = range  # max range for ranged weapon
+        self.ammo_type = ammo_type  # acceptable type of ammo ( Item.category)
+        if ammo:
+            self.ammo = ammo  # currently loaded ammo
+        else:
+            self.ammo = []
+        self.ammo_max = ammo_max  # maximum ammo ammount
+
 
 class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
     """
@@ -407,6 +435,15 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         else:
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
+
+    def reload(self, weapon, ammo):
+        """ Reload a ranged weapon """
+        if weapon.ammo_type in ammo.categories:
+            if len(weapon.ammo) < weapon.ammo_max:
+                ammo_copy = copy.deepcopy(ammo)  # make a copy of ammo object
+                ammo_copy.charges = 1  # with one charge
+                ammo.decrease()  # decrease ammount of ammo left
+                weapon.ammo.append(ammo_copy)  # add copy to weapon.ammo
 
     def death(self):
         """ Death method """
@@ -573,6 +610,19 @@ class Location:
                 item = Item(name='bronze maul', description='Huge bronze sphere attached on top of a wooden pole.',
                             categories={'weapon', 'blunt', 'speed_slow'}, char='/', color=[80, 50, 20])
                 item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 10))
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 2)):
+                item = ItemRangedWeapon(name='hunting crossbow', description='A small crossbow.', range=20,
+                                        ammo_type='bolt', categories={'weapon', 'blunt', 'speed_slow'},
+                                        char=')', color=[200, 200, 200])
+                item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 2))
+                item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 8))
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 5)):
+                item = ItemCharges(name='bronze bolt', description='A simple bronze bolt for crossbows.',
+                                   categories={'bolt'}, char='=', color=[80, 50, 20],
+                                   charges=10, destroyed_after_use=True)
+                item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 2))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(3, 10)):
                 enemy = Fighter(name='Mindless body', description='No description, normal debug monster.', char='b',

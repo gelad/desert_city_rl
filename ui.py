@@ -337,6 +337,25 @@ class WindowMain(Window):
                         player.perform(actions.act_pick_up_item, player, item[0])
             return False
 
+    def command_reload(self, player):
+        """ Command method for player wants to reload ranged weapon (in hands)  """
+        for item in player.equipment.values():  # iterate through player equipment
+            if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
+                if len(item.ammo) < item.ammo_max:  # check if it is loaded
+                    # select appropriate ammo items
+                    ammos = [a for a in player.inventory if item.ammo_type in a.categories]
+                    if ammos:
+                        if len(ammos) == 1:
+                            player.perform(actions.act_reload, player, item, ammos[0])
+                        else:
+                            ammo = show_menu_inventory(self.win_mgr, ammos, 'Select ammunition:', 0, 0, 1, self)
+                            if ammo:
+                                player.perform(actions.act_reload, player, item, ammo[0])
+                    else:
+                        game_logic.Game.add_message('No '+item.ammo_type+' type ammunition.', 'PLAYER', [255, 255, 255])
+                else:
+                    game_logic.Game.add_message(item.name+' is fully loaded.', 'PLAYER', [255, 255, 255])
+
     # ===========================================================================================================
 
     def handle_input(self):
@@ -446,6 +465,9 @@ class WindowMain(Window):
                 # pick up from ground command
                 elif command == 'ground':
                     self.command_pick_up(player, loc, 0, 0)
+                # reload ranged weapon (in hands) command
+                elif command == 'reload':
+                    self.command_reload(player)
             elif game.state == 'looking':  # if the game is in 'looking' mode
                 # exit looking mode
                 if command == 'exit':

@@ -23,6 +23,8 @@ Make different speed weapons. (DONE)
 Make item interactions actions that take time. (DONE)
 
 
+Implement shooting.
+Implement throwing.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
 Implement some sort of event system?

@@ -153,6 +153,22 @@ def act_attack_melee(action, register_call, actor, target):
         actor.perform(act_withdrawal, actor, action.t_needed * 2)
 
 
+def act_reload(action, register_call, actor, weapon, ammo):
+    """ Actor reloading ranged weapon """
+    if register_call:  # part executed when function is registered in ActionMgr
+        if 'crossbow' in weapon.categories:
+            spd = actor.speed * 3
+        elif 'bow' in weapon.categories:
+            spd = actor.speed / 2
+        else:  # if unknown type of ranged weapon
+            spd = actor.speed
+        action.t_needed = spd  # attack hit occurs on 1/2 swing duration
+    else:  # part that is executed when action fires
+        actor.reload(weapon, ammo)  # attack target
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+
+
 def act_withdrawal(action, register_call, actor, ticks):
     """ Actor withdrawal """
     if register_call:  # part executed when function is registered in ActionMgr

@@ -9,4 +9,5 @@ class Effect:
         self.eff = eff  # an effect identificator
         self.magnitude = magnitude  # effect magnitude
         if eff == 'INCREASE_MELEE_DAMAGE': self.description = 'Increases melee damage by '+str(magnitude)
+        if eff == 'INCREASE_RANGED_DAMAGE': self.description = 'Increases ranged damage by ' + str(magnitude)
         if eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints.'
