@@ -5,7 +5,7 @@ import weakref
 
 
 class Observer:
-    """ Observer mixin to an Entity, completely copy-pasted from SO :( """
+    """ Observer mixin, completely copy-pasted from SO :( """
     _observers = weakref.WeakSet()
 
     def __init__(self):

@@ -90,6 +90,8 @@ class BattleEntity(Entity):
         """ Method for dealing damage """
         if isinstance(target, BattleEntity):
             target.take_damage(damage)  # inflict that damage to target
+            events.Event('location', {'type': 'entity_damaged', 'attacker': self,
+                                      'target': target, 'damage': damage})  # fire an event
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
 
@@ -169,8 +171,7 @@ class Actor(Entity):
             raise Exception('Attempted to open non-existing door. ', self.name)
 
     def perform(self, action_function, *args, **kwargs):
-        """ Method for voluntarily performing an action in a location (maybe in future will be actions outside)
-             Handles state change """
+        """ Method for voluntarily performing an action in a location (maybe in future will be actions outside) """
         if self.location:
             if self.state == 'ready':
                 # register action and add it on actor's action list
@@ -208,6 +209,10 @@ class Inventory(Entity):
         """ Method that removes item from inventory, without placing it anywhere """
         item.owner = None
         self.inventory.remove(item)
+
+    def use_item(self, item):
+        """ Item use on self method """
+        item.use(self)
 
 
 class Equipment(Entity):
@@ -403,14 +408,11 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
 
-    def use_item(self, item):
-        """ Item use on self method """
-        item.use(self)
-
     def death(self):
         """ Death method """
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
+        events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
         corpse = Item(name=self.name + "'s corpse.", description='A dead ' + self.name + '.', char='%',
                       color=self.color)
         self.location.place_entity(corpse, self.position[0], self.position[1])
@@ -454,7 +456,7 @@ class Wall(BattleEntity, Entity):
 
     def death(self):
         """ Death method """
-        print(self.name + ' is destroyed!')
+        events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
         self.location.remove_entity(self)
 
 
@@ -505,7 +507,7 @@ class Door(BattleEntity, Entity):
 
     def death(self):
         """ Death method """
-        print(self.name + ' is destroyed!')
+        events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
         self.location.remove_entity(self)
 
 
@@ -599,11 +601,13 @@ class Location:
                     if hypot(entity.position[0] - seer.position[0],
                              entity.position[1] - seer.position[1]) <= seer.sight_radius:
                         seer.compute_fov()
+            events.Event('location', {'type': 'entity_placed', 'entity': entity})  # fire an event
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
 
     def remove_entity(self, entity):
         """ Method that removes entity from location """
+        events.Event('location', {'type': 'entity_removed', 'entity': entity})  # fire an event
         # remove entity from cell
         entity.location.cells[entity.position[0]][entity.position[1]].entities.remove(entity)
         entity.position = None
