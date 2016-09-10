@@ -409,9 +409,9 @@ class WindowMain(Window):
         ty = player.position[1] - self.map.cam_offset[1]
         target = player.location.cells[tx][ty].is_there_a(game_logic.Fighter)  # TODO: if more monster types - add here
         if target:
-            player.perform(actions.act_reload, player, weapon, target)  # if there are a monster - target him
+            player.perform(actions.act_fire_ranged, player, weapon, target)  # if there are a monster - target him
         else:
-            player.perform(actions.act_reload, player, weapon, (tx, ty))  # if not - target cell
+            player.perform(actions.act_fire_ranged, player, weapon, (tx, ty))  # if not - target cell
     # ===========================================================================================================
 
     def handle_input(self):

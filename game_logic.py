@@ -70,6 +70,24 @@ class Entity:
         """ Method returns string representation of an entity - it's name """
         return self.name
 
+    def relocate(self, x, y):
+        """ Movement method, just moves entity to (x, y). """
+        # checks if entity is positioned in location
+        if self.position:
+            # check if new position is in the location boundaries
+            if self.location.is_in_boundaries(x, y):
+                # remove from old cell
+                self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
+                self.location.cells[x][y].entities.append(self)  # add to new cell
+                self.position = (x, y)  # update entity position
+                events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
+                msg = self.name + 'relocated to ' + str(x) + ':' + str(y)
+                Game.add_message(msg, 'DEBUG', [255, 255, 255])
+                return True
+        else:
+            raise Exception('Attempted to relocate entity not positioned in any location. ', self.name)
+        return False
+
 
 class BattleEntity(Entity):
     """
@@ -306,6 +324,66 @@ class SimpleMeleeChaserAI(AI):
                 self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
 
 
+class UnguidedShotAI(AI):
+    """ An unguided shot AI """
+
+    def __init__(self, power, target, state='set_route'):
+        AI.__init__(self, state)
+        self.route = fov_los.get_los(self.owner.position[0], self.owner.position[1], target[0], target[1])
+        self.next = iter(self.route)
+        self.power = power
+        self.observe('location', self.on_event_location)
+
+    def on_event_location(self, data):
+        """ Method handling location-related events """
+        pass  # currently this AI don't react to map events
+
+    def act(self):
+        """ Method called when shot is ready to act """
+        if self.state == 'flying':
+            x = self.owner.position[0]
+            y = self.owner.position[1]
+            enemy = self.owner.location.cells[x][y].is_there_a(BattleEntity)  # BattleEntity at position of projectile
+            if enemy:
+                if enemy.occupies_tile:
+                    damage = 0
+                    for ef in self.owner.weapon.effects:
+                        # TODO: make ranged damage calculate more complicated way
+                        if ef.eff == 'INCREASE_RANGED_DAMAGE':
+                            damage += ef.magnitude
+                    for ef in self.owner.ammo.effects:
+                        if ef.eff == 'INCREASE_RANGED_DAMAGE':
+                            damage += ef.magnitude
+                    if isinstance(enemy, Inventory):
+                        enemy.add_item(self.owner.ammo)
+                        self.owner.ammo = None
+                    else:
+                        self.owner.ammo = None
+                    Game.add_message(self.owner.name+' hits '+enemy.name+' for '+str(damage)+' damage!',
+                                     'PLAYER', [255, 255, 255])
+                    self.owner.weapon.owner.deal_damage(enemy, damage)
+                    self.state = 'stopped'
+                    self.owner.death()
+                    return
+            try:
+                next_cell = next(self.next)
+            except StopIteration:
+                self.state = 'stopped'
+                self.owner.location.place_entity(self.owner.ammo, x, y)
+                self.owner.ammo = None
+                self.owner.death()
+                return
+            if self.power == 0:
+                self.state = 'stopped'
+                self.owner.location.place_entity(self.owner.ammo, x, y)
+                self.owner.ammo = None
+                self.owner.death()
+                return
+            self.owner.perform(actions.act_relocate, self.owner, self.owner.speed, x, y)
+            self.power -= 1
+
+
+
 class Item(Entity):
     """
         Mixed class, simple Item.
@@ -476,6 +554,21 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
                 self.drop_equipped_item(item)
         for item in self.inventory:  # drop all inventory items
             self.drop_item(item)
+        self.location.remove_entity(self)
+        self.ai.close()  # unregister Observer
+
+
+class UnguidedShot(Actor, Entity):
+    """ Mixed class for unguided projectile """
+    def __init__(self, weapon, ammo, speed, target):
+        self.damage = weapon  # weapon that fired projectile
+        self.ammo = ammo  # ammo piece
+        self.target = target  # target (x, y) tuple
+        Entity.__init__(self, name=ammo.name, description=ammo.description, char=ammo.char, color=ammo.color)
+        Actor.__init__(self, speed=speed, ai=UnguidedShotAI(power=weapon.range, target=target))
+
+    def death(self):
+        """ Death function """
         self.location.remove_entity(self)
         self.ai.close()  # unregister Observer
 
