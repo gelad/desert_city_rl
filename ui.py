@@ -81,8 +81,17 @@ class ElementMainPanel(Element):
         # update player stats in lines
         self.player_hp.set_line(str(self.player.hp) + '/' + str(self.player.maxhp) + ' HP')
         self.player_pos.set_line('X:' + str(self.player.position[0]) + ' Y:' + str(self.player.position[1]))
-        self.player_hands.set_line((', '.join([str(self.player.equipment['RIGHT_HAND']),
-                                               str(self.player.equipment['LEFT_HAND'])])))
+        right = self.player.equipment['RIGHT_HAND']
+        left = self.player.equipment['LEFT_HAND']
+        if isinstance(right, game_logic.ItemRangedWeapon):  # display ammo loaded to ranged weapon
+            right = str(right) + '[' + str(len(right.ammo))+']'
+        else:
+            right = str(right)
+        if isinstance(left, game_logic.ItemRangedWeapon):
+            right = str(left) + '[' + str(len(left.ammo)) + ']'
+        else:
+            left = str(left)
+        self.player_hands.set_line(', '.join([right, left]))
         console = tdl.Console(self.width, self.height)
         for element in self.elements:  # blit every element to console
             console.blit(element.draw(), element.x, element.y)
