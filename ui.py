@@ -405,8 +405,8 @@ class WindowMain(Window):
 
     def command_fire(self, player, weapon):
         """ Command method for player wants to fire ranged weapon - target confirmed, fire """
-        tx = player.position[0] - self.map.cam_offset[0]  # target cell coordinates
-        ty = player.position[1] - self.map.cam_offset[1]
+        tx = player.position[0] + self.map.cam_offset[0]  # target cell coordinates
+        ty = player.position[1] + self.map.cam_offset[1]
         target = player.location.cells[tx][ty].is_there_a(game_logic.Fighter)  # TODO: if more monster types - add here
         if target:
             player.perform(actions.act_fire_ranged, player, weapon, target)  # if there are a monster - target him

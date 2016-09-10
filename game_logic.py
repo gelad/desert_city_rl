@@ -278,9 +278,9 @@ class Equipment(Entity):
 class AI(events.Observer):
     """ Base class that represents monster AI """
 
-    def __init__(self, state):
+    def __init__(self, state, owner=None):
         self.state = state  # state of AI, i.e. 'sleeping', 'wandering', 'chasing'
-        self.owner = None  # owner Entity of ai object. TODO: hack - owner set externally
+        self.owner = owner  # owner Entity of ai object. TODO: hack - owner set externally
         events.Observer.__init__(self)  # register self as observer
 
     def act(self):
@@ -327,20 +327,32 @@ class SimpleMeleeChaserAI(AI):
 class UnguidedShotAI(AI):
     """ An unguided shot AI """
 
-    def __init__(self, power, target, state='set_route'):
-        AI.__init__(self, state)
-        self.route = fov_los.get_los(self.owner.position[0], self.owner.position[1], target[0], target[1])
-        self.next = iter(self.route)
+    def __init__(self, power, target, owner, state='set_route'):
+        AI.__init__(self, state, owner)
+        self.route = None
+        self.next = None
         self.power = power
+        self.target = target
         self.observe('location', self.on_event_location)
 
     def on_event_location(self, data):
         """ Method handling location-related events """
         pass  # currently this AI don't react to map events
 
+    def enroute(self):
+        """ Method to calculate route """
+        self.route = fov_los.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
+        self.next = iter(self.route)
+        next(self.next)
+
     def act(self):
         """ Method called when shot is ready to act """
-        if self.state == 'flying':
+        if self.state == 'set_route':
+            next_cell = next(self.next)
+            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
+            self.power -= 1
+            self.state = 'flying'
+        elif self.state == 'flying':
             x = self.owner.position[0]
             y = self.owner.position[1]
             enemy = self.owner.location.cells[x][y].is_there_a(BattleEntity)  # BattleEntity at position of projectile
@@ -373,15 +385,14 @@ class UnguidedShotAI(AI):
                 self.owner.ammo = None
                 self.owner.death()
                 return
-            if self.power == 0:
+            if self.power <= 0:
                 self.state = 'stopped'
                 self.owner.location.place_entity(self.owner.ammo, x, y)
                 self.owner.ammo = None
                 self.owner.death()
                 return
-            self.owner.perform(actions.act_relocate, self.owner, self.owner.speed, x, y)
+            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
             self.power -= 1
-
 
 
 class Item(Entity):
@@ -521,7 +532,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         if isinstance(target, BattleEntity):
             if target.position:
                 tx = target.position[0]  # set projectile target to target current position
-                ty = target.position[0]
+                ty = target.position[1]
             else:
                 return  # if target has no position - stop shooting, it might be dead
         else:  # if a cell - set tx:ty as target cell
@@ -530,7 +541,9 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         ammo = weapon.ammo[0]
         weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
         # TODO: here goes spawning unguided projectile
-
+        shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
+        self.location.place_entity(shot, self.position[0], self.position[1])
+        shot.ai.enroute()
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
@@ -561,11 +574,11 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
 class UnguidedShot(Actor, Entity):
     """ Mixed class for unguided projectile """
     def __init__(self, weapon, ammo, speed, target):
-        self.damage = weapon  # weapon that fired projectile
+        self.weapon = weapon  # weapon that fired projectile
         self.ammo = ammo  # ammo piece
         self.target = target  # target (x, y) tuple
         Entity.__init__(self, name=ammo.name, description=ammo.description, char=ammo.char, color=ammo.color)
-        Actor.__init__(self, speed=speed, ai=UnguidedShotAI(power=weapon.range, target=target))
+        Actor.__init__(self, speed=speed, ai=UnguidedShotAI(power=weapon.range, target=target, owner=self))
 
     def death(self):
         """ Death function """

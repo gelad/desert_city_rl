@@ -21,9 +21,10 @@ Implement sabre weapon (and weapon damage calculation) (DONE)
 Implement dedicated 'use' command. (DONE)
 Make different speed weapons. (DONE)
 Make item interactions actions that take time. (DONE)
+Implement shooting. (DONE)
 
 
-Implement shooting.
+Test shooting, test why reload is slow.
 Implement throwing.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
