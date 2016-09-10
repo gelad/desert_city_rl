@@ -44,10 +44,10 @@ def main_loop():
                         actor.ai.act()  # make them act
                 if game.player.state == 'ready':  # check if player is 'ready'
                     game.is_waiting_input = True  # set waiting for input flag True
-        elif game.state == 'looking':  # check if state is 'looking'
+        elif game.state == 'looking' or game.state == 'targeting':  # check if state is 'looking' or 'targeting'
             if game.is_waiting_input:
                 graphics.win_mgr.active_window.handle_input()  # let active window handle them
-                draw_screen = True  # set flag to draw screen
+                draw_screen = True  # set flag to draw scree4n
             else:
                 pass
         elif game.state == 'dead':

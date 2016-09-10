@@ -367,6 +367,7 @@ class ItemCharges(Item):
         if self.destroyed_after_use and self.charges == 0:
             self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
 
+
 class ItemRangedWeapon(Item):
     """
         Child class for a ranged weapon.
@@ -435,6 +436,23 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         else:
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
+
+    def attack_ranged_weapon(self, weapon, target):
+        """ Attack with ranged weapon method """
+        # check if target is a cell or a monster
+        if isinstance(target, BattleEntity):
+            if target.position:
+                tx = target.position[0]  # set projectile target to target current position
+                ty = target.position[0]
+            else:
+                return  # if target has no position - stop shooting, it might be dead
+        else:  # if a cell - set tx:ty as target cell
+            tx = target[0]
+            ty = target[1]
+        ammo = weapon.ammo[0]
+        weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
+        # TODO: here goes spawning unguided projectile
+
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
@@ -613,7 +631,7 @@ class Location:
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
                 item = ItemRangedWeapon(name='hunting crossbow', description='A small crossbow.', range=20,
-                                        ammo_type='bolt', categories={'weapon', 'blunt', 'speed_slow'},
+                                        ammo_type='bolt', categories={'weapon', 'blunt', 'crossbow', 'speed_slow'},
                                         char=')', color=[200, 200, 200])
                 item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 2))
                 item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 8))

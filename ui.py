@@ -3,6 +3,7 @@
 """
 import tdl
 import textwrap
+import math
 
 import game_logic
 import actions
@@ -73,7 +74,7 @@ class ElementMainPanel(Element):
         # player equipment in hands
         self.player_hands = ElementTextLine(self, 0, 3,
                                             (', '.join([str(player.equipment['RIGHT_HAND']),
-                                             str(player.equipment['LEFT_HAND'])])))
+                                                        str(player.equipment['LEFT_HAND'])])))
         self.add_element(self.player_hands)
 
     def draw(self):
@@ -84,7 +85,7 @@ class ElementMainPanel(Element):
         right = self.player.equipment['RIGHT_HAND']
         left = self.player.equipment['LEFT_HAND']
         if isinstance(right, game_logic.ItemRangedWeapon):  # display ammo loaded to ranged weapon
-            right = str(right) + '[' + str(len(right.ammo))+']'
+            right = str(right) + '[' + str(len(right.ammo)) + ']'
         else:
             right = str(right)
         if isinstance(left, game_logic.ItemRangedWeapon):
@@ -109,6 +110,9 @@ class ElementMap(Element):
 
     def move_camera(self, dx, dy):
         """ Method for moving camera by dx, dy """
+        if self.owner.game.state == 'targeting':
+            if math.sqrt((self.cam_offset[0] + dx) ** 2 + (self.cam_offset[1] + dy) ** 2) > self.owner.targeting_range:
+                return
         self.cam_offset = (self.cam_offset[0] + dx, self.cam_offset[1] + dy)
 
     @staticmethod
@@ -132,7 +136,7 @@ class ElementMap(Element):
                 if len(cell.entities) > 1:  # if there are multiple items, replace bgcolor
                     bgcolor = cell.entities[0].color
                     if color == bgcolor:
-                        bgcolor = [c-30 for c in bgcolor]
+                        bgcolor = [c - 30 for c in bgcolor]
                         for c in bgcolor:
                             if c < 0:
                                 c = 0
@@ -220,7 +224,7 @@ class ElementCellInfo(Element):
         other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
         cur_y = 0  # a 'cursor' y position
         for creature in creatures:  # show creature info if any
-            self.add_element(ElementTextLine(self, 0, cur_y, creature.name+' is here.', creature.color))
+            self.add_element(ElementTextLine(self, 0, cur_y, creature.name + ' is here.', creature.color))
             cur_y += 1
             for ln in textwrap.wrap(creature.description, self.width):
                 self.add_element(ElementTextLine(self, 0, cur_y, ln))
@@ -287,6 +291,8 @@ class WindowMain(Window):
         self.add_element(self.cell_info)
         self.cam_offset = (0, 0)  # camera offset (for looking, shooting, etc)
         self.console = tdl.Console(width, height)  # offscreen console of window
+        self.targeting_range = 0  # range in 'targeting' state
+        self.targeting_thing = None  # determines what to do after targeting complete
 
     def draw(self):
         """ Window drawing method """
@@ -361,10 +367,51 @@ class WindowMain(Window):
                             if ammo:
                                 player.perform(actions.act_reload, player, item, ammo[0])
                     else:
-                        game_logic.Game.add_message('No '+item.ammo_type+' type ammunition.', 'PLAYER', [255, 255, 255])
+                        game_logic.Game.add_message('No ' + item.ammo_type + ' type ammunition.', 'PLAYER',
+                                                    [255, 255, 255])
                 else:
-                    game_logic.Game.add_message(item.name+' is fully loaded.', 'PLAYER', [255, 255, 255])
+                    game_logic.Game.add_message(item.name + ' is fully loaded.', 'PLAYER', [255, 255, 255])
 
+    def command_fire_choose(self, player):
+        """ Command method for player wants to fire ranged weapon - choose target """
+        ranged_weapons = [w for w in list(player.equipment.values()) if
+                          isinstance(w, game_logic.ItemRangedWeapon)]  # pick ranged weapons in equipment
+        if ranged_weapons:  # check if there are any
+            if len(ranged_weapons) == 1:  # if one
+                if len(ranged_weapons[0].ammo) > 0:  # if it has ammo loaded
+                    self.targeting_range = ranged_weapons[0].range
+                    self.targeting_thing = ranged_weapons[0]
+                    self.game.state = 'targeting'
+                    self.log.visible = False
+                    self.cell_info.visible = True
+                else:
+                    game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
+                                                'PLAYER', [255, 255, 255])
+            else:  # if multiple ranged equipped
+                weapon = show_menu_list(self.win_mgr, ranged_weapons,
+                                        'Fire weapon:', 0, 0, True, self)  # select one
+                if weapon:
+                    if len(weapon[0].ammo) > 0:  # check if loaded
+                        self.targeting_range = weapon[0].range
+                        self.targeting_thing = weapon[0]
+                        self.game.state = 'targeting'
+                        self.log.visible = False
+                        self.cell_info.visible = True
+                    else:
+                        game_logic.Game.add_message(weapon[0].name + " isn't loaded!",
+                                                    'PLAYER', [255, 255, 255])
+        else:
+            game_logic.Game.add_message('Equip ranged weapon to fire.', 'PLAYER', [255, 255, 255])
+
+    def command_fire(self, player, weapon):
+        """ Command method for player wants to fire ranged weapon - target confirmed, fire """
+        tx = player.position[0] - self.map.cam_offset[0]  # target cell coordinates
+        ty = player.position[1] - self.map.cam_offset[1]
+        target = player.location.cells[tx][ty].is_there_a(game_logic.Fighter)  # TODO: if more monster types - add here
+        if target:
+            player.perform(actions.act_reload, player, weapon, target)  # if there are a monster - target him
+        else:
+            player.perform(actions.act_reload, player, weapon, (tx, ty))  # if not - target cell
     # ===========================================================================================================
 
     def handle_input(self):
@@ -432,7 +479,7 @@ class WindowMain(Window):
                     item = show_menu_inventory(self.win_mgr, player.inventory, 'Inventory:', 0, 0, 1, self)
                     if item:
                         action = show_menu_list(self.win_mgr, ['Use', 'Equip', 'Drop'],
-                                                'What to do with '+item[0].name+'?', 0, 0, 1, self)
+                                                'What to do with ' + item[0].name + '?', 0, 0, 1, self)
                         if action:
                             if action[0] == 'Use':
                                 player.perform(actions.act_use_item, player, item[0])
@@ -477,12 +524,49 @@ class WindowMain(Window):
                 # reload ranged weapon (in hands) command
                 elif command == 'reload':
                     self.command_reload(player)
+                # fire ranged weapon (in hands) command
+                elif command == 'fire':
+                    self.command_fire_choose(player)
             elif game.state == 'looking':  # if the game is in 'looking' mode
                 # exit looking mode
                 if command == 'exit':
                     self.map.cam_offset = (0, 0)  # set camera offset to normal
                     self.cell_info.visible = False
                     self.log.visible = True
+                    game.state = 'playing'  # resume normal game flow
+                # moving camera commands
+                elif command == 'move_n':
+                    self.map.move_camera(0, -1)
+                elif command == 'move_s':
+                    self.map.move_camera(0, 1)
+                elif command == 'move_w':
+                    self.map.move_camera(-1, 0)
+                elif command == 'move_e':
+                    self.map.move_camera(1, 0)
+                elif command == 'move_nw':
+                    self.map.move_camera(-1, -1)
+                elif command == 'move_ne':
+                    self.map.move_camera(1, -1)
+                elif command == 'move_sw':
+                    self.map.move_camera(-1, 1)
+                elif command == 'move_se':
+                    self.map.move_camera(1, 1)
+            elif game.state == 'targeting':  # if the game is in 'targeting' mode
+                # exit looking mode
+                if command == 'exit':
+                    self.map.cam_offset = (0, 0)  # set camera offset to normal
+                    self.cell_info.visible = False
+                    self.log.visible = True
+                    self.targeting_range = 0
+                    self.targeting_thing = None
+                    game.state = 'playing'  # resume normal game flow
+                if command == 'confirm':
+                    self.command_fire(player, self.targeting_thing)
+                    self.map.cam_offset = (0, 0)  # set camera offset to normal
+                    self.cell_info.visible = False
+                    self.log.visible = True
+                    self.targeting_range = 0
+                    self.targeting_thing = None
                     game.state = 'playing'  # resume normal game flow
                 # moving camera commands
                 elif command == 'move_n':
@@ -729,4 +813,4 @@ def show_menu_inventory(win_mgr, options, caption, x_offset=0, y_offset=0, z=1, 
     if menu.state == 'cancelled':  # if menu cancelled return false
         return False
     if menu.state == 'finished':  # if option selected - return it
-            return menu.selected, menu.selected_index
+        return menu.selected, menu.selected_index

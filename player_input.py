@@ -18,6 +18,8 @@ def get_input(game):
             if event.type == 'KEYDOWN':
                 if event.key == 'ESCAPE':  # exiting the game
                     player_input.append('exit')
+                if event.key == 'ENTER':  # confirm some action (targeting, etc)
+                    player_input.append('confirm')
                 elif event.key == 'UP' or event.key == 'KP8':  # movement
                     player_input.append('move_n')
                 elif event.key == 'DOWN' or event.key == 'KP2':
@@ -73,6 +75,8 @@ def get_input(game):
                         player_input.append('drop')
                     if event.keychar == 'r':  # reload ranged weapon command
                         player_input.append('reload')
+                    if event.keychar == 'f':  # fire ranged weapon command
+                        player_input.append('fire')
             elif event.type == "QUIT":
                 player_input.append('exit')
         return player_input
