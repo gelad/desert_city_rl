@@ -357,18 +357,39 @@ class WindowMain(Window):
         # show inventory menu
         item = show_menu_inventory(self.win_mgr, player.inventory, 'Inventory:', 0, 0, 1, self)
         if item:
-            action = show_menu_list(self.win_mgr, ['Use', 'Equip', 'Drop'],
-                                    'What to do with ' + item[0].name + '?', 0, 0, 1, self)
+            add_options = []
+            item = item[0]
+            if isinstance(item, game_logic.ItemRangedWeapon):
+                if len(item.ammo) < item.ammo_max:
+                    add_options.append('Load')
+                if len(item.ammo) > 0:
+                    add_options.append('Unload')
+            action = show_menu_list(self.win_mgr, ['Use', 'Equip', 'Drop']+add_options,
+                                    'What to do with ' + item.name + '?', 0, 0, 1, self)
             if action:
                 if action[0] == 'Use':
-                    player.perform(actions.act_use_item, player, item[0])
+                    player.perform(actions.act_use_item, player, item)
                 elif action[0] == 'Equip':
-                    slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
+                    slot = show_menu_list(self.win_mgr, list(item.equip_slots),
                                           'Select a slot:', 0, 0, True, self)
                     if slot:  # if selected - equip item
-                        player.perform(actions.act_equip_item, player, item[0], slot[0])
+                        player.perform(actions.act_equip_item, player, item, slot[0])
                 elif action[0] == 'Drop':
-                    player.perform(actions.act_drop_item, player, item[0])
+                    player.perform(actions.act_drop_item, player, item)
+                elif action[0] == 'Load':
+                    ammos = [a for a in player.inventory if item.ammo_type in a.categories]
+                    if ammos:
+                        if len(ammos) == 1:
+                            player.perform(actions.act_reload, player, item, ammos[0])
+                        else:
+                            ammo = show_menu_inventory(self.win_mgr, ammos, 'Select ammunition:', 0, 0, 1, self)
+                            if ammo:
+                                player.perform(actions.act_reload, player, item, ammo[0])
+                    else:
+                        game_logic.Game.add_message('No ' + item.ammo_type + ' type ammunition.', 'PLAYER',
+                                                    [255, 255, 255])
+                elif action[0] == 'Unload':
+                    player.perform(actions.act_unload, player, item)
 
     def command_reload(self, player):
         """ Command method for player wants to reload ranged weapon (in hands)  """
