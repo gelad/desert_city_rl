@@ -352,6 +352,24 @@ class WindowMain(Window):
                         player.perform(actions.act_pick_up_item, player, item[0])
             return False
 
+    def command_inventory(self, player):
+        """ Command method to show inventory menu """
+        # show inventory menu
+        item = show_menu_inventory(self.win_mgr, player.inventory, 'Inventory:', 0, 0, 1, self)
+        if item:
+            action = show_menu_list(self.win_mgr, ['Use', 'Equip', 'Drop'],
+                                    'What to do with ' + item[0].name + '?', 0, 0, 1, self)
+            if action:
+                if action[0] == 'Use':
+                    player.perform(actions.act_use_item, player, item[0])
+                elif action[0] == 'Equip':
+                    slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
+                                          'Select a slot:', 0, 0, True, self)
+                    if slot:  # if selected - equip item
+                        player.perform(actions.act_equip_item, player, item[0], slot[0])
+                elif action[0] == 'Drop':
+                    player.perform(actions.act_drop_item, player, item[0])
+
     def command_reload(self, player):
         """ Command method for player wants to reload ranged weapon (in hands)  """
         for item in player.equipment.values():  # iterate through player equipment
@@ -476,20 +494,7 @@ class WindowMain(Window):
                 # inventory command
                 elif command == 'inventory':
                     # show inventory menu
-                    item = show_menu_inventory(self.win_mgr, player.inventory, 'Inventory:', 0, 0, 1, self)
-                    if item:
-                        action = show_menu_list(self.win_mgr, ['Use', 'Equip', 'Drop'],
-                                                'What to do with ' + item[0].name + '?', 0, 0, 1, self)
-                        if action:
-                            if action[0] == 'Use':
-                                player.perform(actions.act_use_item, player, item[0])
-                            elif action[0] == 'Equip':
-                                slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
-                                                      'Select a slot:', 0, 0, True, self)
-                                if slot:  # if selected - equip item
-                                    player.perform(actions.act_equip_item, player, item[0], slot[0])
-                            elif action[0] == 'Drop':
-                                player.perform(actions.act_drop_item, player, item[0])
+                    self.command_inventory(player)
                 # wield (equip) command
                 elif command == 'wield_item':
                     # show list menu with items
@@ -524,6 +529,11 @@ class WindowMain(Window):
                 # reload ranged weapon (in hands) command
                 elif command == 'reload':
                     self.command_reload(player)
+                # unload ranged weapon (in hands) command
+                elif command == 'unload':
+                    for item in player.equipment.values():  # unload every equipped item
+                        if isinstance(item, game_logic.ItemRangedWeapon):
+                            player.perform(actions.act_unload, player, item)
                 # fire ranged weapon (in hands) command
                 elif command == 'fire':
                     self.command_fire_choose(player)

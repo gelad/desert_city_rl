@@ -75,6 +75,8 @@ def get_input(game):
                         player_input.append('drop')
                     if event.keychar == 'r':  # reload ranged weapon command
                         player_input.append('reload')
+                    if event.keychar == 'U':  # unload ranged weapon command
+                        player_input.append('unload')
                     if event.keychar == 'f':  # fire ranged weapon command
                         player_input.append('fire')
             elif event.type == "QUIT":

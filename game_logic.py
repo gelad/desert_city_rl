@@ -554,6 +554,13 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
                 ammo.decrease()  # decrease ammount of ammo left
                 weapon.ammo.append(ammo_copy)  # add copy to weapon.ammo
 
+    def unload(self, weapon):
+        """ Unload a ranged weapon """
+        if weapon.ammo:  # if there are ammo
+            for am in weapon.ammo[:]:  # add ammo to inventory
+                self.add_item(am)
+                weapon.ammo.remove(am)
+
     def death(self):
         """ Death method """
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
@@ -744,7 +751,7 @@ class Location:
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 5)):
                 item = ItemCharges(name='bronze bolt', description='A simple bronze bolt for crossbows.',
-                                   categories={'bolt'}, char='=', color=[80, 50, 20],
+                                   categories={'bolt', 'stackable'}, char='=', color=[80, 50, 20],
                                    charges=10, destroyed_after_use=True)
                 item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 2))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
