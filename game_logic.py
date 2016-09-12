@@ -102,6 +102,7 @@ class BattleEntity(Entity):
     def take_damage(self, damage):
         """ This method should be called if entity is damaged """
         self.hp -= damage
+        events.Event(self, {'type': 'damaged', 'damage': damage})  # fire an Entity event
         if self.hp <= 0:
             self.death()
 
@@ -110,7 +111,7 @@ class BattleEntity(Entity):
         if isinstance(target, BattleEntity):
             target.take_damage(damage)  # inflict that damage to target
             events.Event('location', {'type': 'entity_damaged', 'attacker': self,
-                                      'target': target, 'damage': damage})  # fire an event
+                                      'target': target, 'damage': damage})  # fire a location event
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
 
