@@ -36,6 +36,7 @@ def main_loop():
                     game.is_waiting_input = False  # set waiting for input flag to False
             else:  # if not waiting for input
                 game.time_system.pass_time()  # pass game time, fire events
+                game.current_loc.reap()  # if there are dead after tick - call their death() methods
                 if game.player.state == 'dead':  # check if player is dead
                     game.state = 'dead'  # set game state to dead
                     game.is_waiting_input = True  # set waiting for input flag True

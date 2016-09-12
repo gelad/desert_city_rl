@@ -5,6 +5,7 @@ import actions
 import fov_los
 import effects
 import events
+import abilities
 
 import random
 import copy
@@ -95,21 +96,26 @@ class BattleEntity(Entity):
         Hp, taking/inflicting damage, that kind of stuff.
     """
 
-    def __init__(self, hp):
+    def __init__(self, hp, dead=False):
         self.hp = hp  # current hitpoints
         self.maxhp = hp  # maximum hitpoints
+        self.dead = dead  # is BE dead
 
-    def take_damage(self, damage):
-        """ This method should be called if entity is damaged """
+    def take_damage(self, damage, attacker=None):
+        """ This method should be called if entity is damaged
+        :param damage:
+        :param attacker:
+        """
         self.hp -= damage
-        events.Event(self, {'type': 'damaged', 'damage': damage})  # fire an Entity event
+        events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': damage})  # fire an Entity event
         if self.hp <= 0:
-            self.death()
+            self.dead = True
+            self.location.dead.append(self)  # add BE to dead list, waiting for removal
 
     def deal_damage(self, target, damage):
         """ Method for dealing damage """
         if isinstance(target, BattleEntity):
-            target.take_damage(damage)  # inflict that damage to target
+            target.take_damage(damage, self)  # inflict that damage to target
             events.Event('location', {'type': 'entity_damaged', 'attacker': self,
                                       'target': target, 'damage': damage})  # fire a location event
         else:
@@ -204,6 +210,24 @@ class Actor(Entity):
             raise Exception('Attempted to perform action with entity not positioned in any location. ', self.name)
 
 
+class Abilities(Entity):
+    """
+        Mixin class, adds Abilities to Entity.
+    """
+    def __init__(self):
+        self.abilities = []  # abilities list
+
+    def add_ability(self, ability):
+        """ Ability adding method """
+        ability.set_owner(self)  # set owner of ability
+        self.abilities.append(ability)  # add it to list
+
+    def abilities_set_owner(self, owner):
+        """ Set owner of all abilities - used in Item equip/take """
+        for ability in self.abilities:
+            ability.set_owner(owner)
+
+
 class Inventory(Entity):
     """
         Mixin class, adds inventory to Entity.
@@ -223,18 +247,21 @@ class Inventory(Entity):
                     return
         self.inventory.append(item)  # add item to inventory
         item.owner = self  # set item's owner
+        item.abilities_set_owner(self)  # if it has abilities - set their owner
         if item.location:  # if it's placed somewhere in location
             item.location.remove_entity(item)
 
     def drop_item(self, item):
         """ Item dropping method (in a location) """
         item.owner = None
+        item.abilities_set_owner(None)  # if it has abilities - set their owner
         self.location.place_entity(item, self.position[0], self.position[1])  # place it on the map
         self.inventory.remove(item)
 
     def discard_item(self, item):
         """ Method that removes item from inventory, without placing it anywhere """
         item.owner = None
+        item.abilities_set_owner(None)  # if it has abilities - set their owner
         self.inventory.remove(item)
 
     def use_item(self, item):
@@ -263,6 +290,7 @@ class Equipment(Entity):
         if item in self.inventory:  # if item is in inventory - remove it
             self.discard_item(item)
         item.owner = self  # set item owner
+        item.abilities_set_owner(self)  # if it has abilities - set their owner
         self.equipment[slot] = item  # fill equipment slot with item
 
     def unequip_item(self, item):
@@ -281,6 +309,7 @@ class Equipment(Entity):
                 if it == item:
                     self.equipment[sl] = None
             item.owner = None
+            item.abilities_set_owner(None)  # if it has abilities - set their owner
 
 
 class AI(events.Observer):
@@ -403,7 +432,7 @@ class UnguidedShotAI(AI):
             self.power -= 1
 
 
-class Item(Entity):
+class Item(Abilities, Entity):
     """
         Mixed class, simple Item.
     """
@@ -417,6 +446,7 @@ class Item(Entity):
             self.equip_slots = equip_slots
         else:  # by default - can be taken to hands
             self.equip_slots = dict.fromkeys(['RIGHT_HAND', 'LEFT_HAND'])
+        Abilities.__init__(self)
 
     def use(self, target):
         """ Item using method """
@@ -483,7 +513,7 @@ class ItemRangedWeapon(Item):
         self.ammo_max = ammo_max  # maximum ammo ammount
 
 
-class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
+class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity):
     """
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
@@ -499,6 +529,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Actor, Seer, Entity):
         Seer.__init__(self, sight_radius=sight_radius)
         Inventory.__init__(self)
         Equipment.__init__(self, layout=equip_layout)
+        Abilities.__init__(self)
         self.damage = damage  # damage from basic melee 'punch in da face' attack
 
     def attack_melee(self, target):
@@ -700,6 +731,7 @@ class Location:
         # self.entities = []  # a list of Entities
         self.seers = []  # a list of Seer objects, to recompute their FOV if map changes
         self.actors = []  # a list of Actor objects
+        self.dead = []  # list of dead BattleEntities to be removed
         # WARNING! it's a hack, graphic-related info stored in loc, to save/load it with the loc
         self.out_of_sight_map = {}  # dict for storing explored, but invisible tiles
 
@@ -814,6 +846,12 @@ class Location:
         entity.location = None
         del entity
 
+    def reap(self):
+        """ Method that removes all dead entities at the end of tick """
+        for victim in self.dead[:]:
+            victim.death()
+            self.dead.remove(victim)
+
     def is_cell_transparent(self, x, y):
         """ Method that determines, is cell at x, y is transparent """
         if self.is_in_boundaries(x, y):  # check if cell coords are in boundaries
@@ -850,6 +888,10 @@ class Game:
         self.current_loc.generate('ruins')
         self.player = Player(name='Player', description='A player character.', char='@', color=[255, 255, 255],
                              hp=10, speed=100, sight_radius=23.5, damage=2)
+        cond = abilities.Condition('OWNER_HP_PERCENT', sign='<', number=0.5)
+        react = {'type': 'deal_damage', 'target': 'attacker', 'damage': 3}
+        abil = abilities.Ability(owner=self.player, trigger='damaged', conditions=[cond], reactions=[react])
+        self.player.add_ability(abil)
         self.current_loc.place_entity(self.player, 10, 10)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
