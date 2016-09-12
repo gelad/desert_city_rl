@@ -798,8 +798,6 @@ class Location:
         events.Event('location', {'type': 'entity_removed', 'entity': entity})  # fire an event
         # remove entity from cell
         entity.location.cells[entity.position[0]][entity.position[1]].entities.remove(entity)
-        entity.position = None
-        entity.location = None
         if isinstance(entity, Seer):  # check if entity is a Seer
             self.seers.remove(entity)  # remove from seers list
         if isinstance(entity, Actor):  # check if entity is an Actor
@@ -811,6 +809,8 @@ class Location:
                 if hypot(entity.position[0] - seer.position[0],
                          entity.position[1] - seer.position[1]) <= seer.sight_radius:
                     seer.compute_fov()
+        entity.position = None
+        entity.location = None
         del entity
 
     def is_cell_transparent(self, x, y):

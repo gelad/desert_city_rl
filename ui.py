@@ -89,7 +89,7 @@ class ElementMainPanel(Element):
         else:
             right = str(right)
         if isinstance(left, game_logic.ItemRangedWeapon):
-            right = str(left) + '[' + str(len(left.ammo)) + ']'
+            left = str(left) + '[' + str(len(left.ammo)) + ']'
         else:
             left = str(left)
         self.player_hands.set_line(', '.join([right, left]))
@@ -126,20 +126,24 @@ class ElementMap(Element):
                 char = '.'
                 color = [200, 200, 0]
                 bgcolor = [100, 100, 0]
+            brk = False
             for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
                 char = ent.char
                 color = ent.color
                 if not color:
                     color = [255, 255, 255]
                 if ent.occupies_tile:  # check if there is entity, occupying tile - display it on top
-                    break
+                    color = ent.color
+                    brk = True
                 if len(cell.entities) > 1:  # if there are multiple items, replace bgcolor
                     bgcolor = cell.entities[0].color
                     if color == bgcolor:
-                        bgcolor = [c - 30 for c in bgcolor]
+                        bgcolor = [c - 50 for c in bgcolor]
                         for c in bgcolor:
                             if c < 0:
                                 c = 0
+                if brk:
+                    break
             # update visited cells map (for displaying grey out of vision explored tiles)
             loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
             return [char, color, bgcolor]
