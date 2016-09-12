@@ -772,6 +772,15 @@ class Location:
                             categories={'weapon', 'sword', 'speed_normal'}, char='/', color=[200, 200, 255])
                 item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 5))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                item = Item(name='barbed loincloth', description='It is covered in spikes. Ouch!',
+                            categories={'armor', 'waist'}, char='~', color=[200, 0, 100], equip_slots={'WAIST'})
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                cond = abilities.Condition('EQUIPPED')
+                react = {'type': 'deal_damage', 'target': 'attacker', 'damage': 1}
+                abil = abilities.Ability(name='Barbs', owner=item,
+                                         trigger='damaged', conditions=[cond], reactions=[react])
+                item.add_ability(abil)
             for i in range(0, random.randint(1, 2)):
                 item = Item(name='dagger', description='A simple dagger about 20cm long.',
                             categories={'weapon', 'dagger', 'speed_fast'}, char=',', color=[200, 200, 255])
@@ -888,10 +897,6 @@ class Game:
         self.current_loc.generate('ruins')
         self.player = Player(name='Player', description='A player character.', char='@', color=[255, 255, 255],
                              hp=10, speed=100, sight_radius=23.5, damage=2)
-        cond = abilities.Condition('OWNER_HP_PERCENT', sign='<', number=0.5)
-        react = {'type': 'deal_damage', 'target': 'attacker', 'damage': 3}
-        abil = abilities.Ability(owner=self.player, trigger='damaged', conditions=[cond], reactions=[react])
-        self.player.add_ability(abil)
         self.current_loc.place_entity(self.player, 10, 10)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)

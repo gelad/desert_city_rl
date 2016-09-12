@@ -9,19 +9,24 @@ import bool_eval
 class Condition:
     """ Class for ability condition """
 
-    def __init__(self, condition, **kwargs):
+    def __init__(self, condition='', **kwargs):
         self.condition = condition  # condition identificator
         self.kwargs = kwargs  # arguments to check condition
 
     def evaluate(self, **kwargs):
         """ Method to evaluate condition, returning True or False """
         # TODO: get rid of eval()
-        if self.condition == 'OWNER_HP_PERCENT':
+        if self.condition == 'OWNER_HP_PERCENT':  # OWNER_HP_PERCENT condition
             sign = self.kwargs['sign']
             number = self.kwargs['number']
             return eval(
                 str(kwargs['owner'].hp / kwargs['owner'].maxhp) + sign + str(number))  # check hp percent condition
-        return False
+        if self.condition == 'EQUIPPED' and kwargs['owner']:  # EQUIPPED condition
+            if kwargs['owner_item'] in kwargs['owner'].equipment.values():  # check if item equipped
+                return True
+            else:
+                return False
+        return True
 
 
 class Ability(events.Observer):
@@ -29,6 +34,10 @@ class Ability(events.Observer):
 
     def __init__(self, owner, trigger, reactions, conditions=None, disabled=False, name='', description=''):
         self.owner = owner
+        if isinstance(owner, game_logic.Item):  # if it's an item - set owner to owning Entity
+            self.owner_item = owner  # if Item - Item object
+        else:
+            self.owner_item = None  # if Item - Item object
         self.disabled = disabled  # is ability disabled or not
         self.trigger = trigger  # ability trigger
         self.conditions = conditions  # ability condition
@@ -42,7 +51,8 @@ class Ability(events.Observer):
         """ Method to set owner and refresh observer """
         self.close()  # unregister observing old owner
         if isinstance(owner, game_logic.Item):  # if it's an item - set owner to owning Entity
-            if owner.owner:
+            self.owner_item = owner  # set owner item to Item object
+            if owner.owner:  # if item is equipped or in inventory - set owning Entity
                 self.owner = owner.owner
             else:
                 self.owner = owner  # set owner
@@ -57,7 +67,7 @@ class Ability(events.Observer):
             expression = ''
             for cond in self.conditions:
                 if isinstance(cond, Condition):
-                    kwargs = {'owner': self.owner}  # if other kwargs needed - add here
+                    kwargs = {'owner': self.owner, 'owner_item': self.owner_item}  # if other kwargs needed - add here
                     expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
                 else:
                     expression += cond  # add '(', ')', 'and', 'or' etc
