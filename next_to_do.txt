@@ -22,6 +22,7 @@ Implement dedicated 'use' command. (DONE)
 Make different speed weapons. (DONE)
 Make item interactions actions that take time. (DONE)
 Implement shooting. (DONE)
+Implement abilities. (DONE)
 
 
 Test shooting, test why reload is slow.
