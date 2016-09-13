@@ -23,9 +23,10 @@ Make different speed weapons. (DONE)
 Make item interactions actions that take time. (DONE)
 Implement shooting. (DONE)
 Implement abilities. (DONE)
+Test shooting, test why reload is slow. (DONE)
 
 
-Test shooting, test why reload is slow.
+Implement weight of Entities.
 Implement throwing.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.

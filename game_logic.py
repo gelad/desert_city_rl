@@ -8,7 +8,6 @@ import events
 import abilities
 
 import random
-import copy
 import pickle
 from math import hypot
 
@@ -90,6 +89,14 @@ class Entity:
             raise Exception('Attempted to relocate entity not positioned in any location. ', self.name)
         return False
 
+    def get_effect(self, effect):
+        """ Get resulting effect magnitude (if many effects of same type present - sum of them) """
+        magn = 0  # resulting effect magnitude
+        for ef in self.effects:  # iterate through effects and calculate resulting magnitude
+            if ef.eff == effect:
+                magn += ef.magnitude
+        return magn
+
 
 class BattleEntity(Entity):
     """
@@ -97,9 +104,18 @@ class BattleEntity(Entity):
         Hp, taking/inflicting damage, that kind of stuff.
     """
 
-    def __init__(self, hp, dead=False):
+    def __init__(self, hp, armor=None, resist=None, dead=False):
         self.hp = hp  # current hitpoints
         self.maxhp = hp  # maximum hitpoints
+        if armor:  # physical armor
+            self.armor = {'bashing': 0, 'slashing': 0, 'piercing': 0}
+        else:
+            self.armor = armor
+        if resist:  # magic resistances
+            self.resist = {'fire': 0, 'frost': 0, 'lightning': 0, 'poison': 0, 'acid': 0,
+                           'mental': 0, 'death': 0, 'strange': 0}
+        else:
+            self.resist = resist
         self.dead = dead  # is BE dead
 
     def take_damage(self, damage, attacker=None):
@@ -121,6 +137,18 @@ class BattleEntity(Entity):
                                       'target': target, 'damage': damage})  # fire a location event
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
+
+    def get_protection(self, dmg_type):
+        """ Method to get protection (both armor and block) to specific damage type """
+        # TODO: add immunity effects, and return 'immune' ?
+        prot = 0  # protection  mitigation (% reduce)
+        if dmg_type in self.armor.keys():
+            prot = self.armor[dmg_type]
+        if dmg_type in self.resist.keys():
+            prot = self.resist[dmg_type]
+        block = self.get_effect('BLOCK_'+dmg_type.upper())  # damage block ammount
+        return prot, block  # return protection parameters
+
 
     def death(self):
         """ Abstract method that is called when BattleEntity dies """
@@ -439,11 +467,12 @@ class Item(Abilities, Entity):
         Mixed class, simple Item.
     """
 
-    def __init__(self, name, description, char, color, equip_slots=None, categories=None):
+    def __init__(self, name, description, char, color, equip_slots=None, categories=None, properties=None):
         # calling constructors
         Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=False)
         self.owner = None  # owner of item - entity with inventory
         self.categories = categories  # item categories - a potion, a sword, etc
+        self.properties = properties  # item properties - armor values, accuracy for weapons, etc
         if equip_slots:  # equipment slots, in which item can be placed
             self.equip_slots = equip_slots
         else:  # by default - can be taken to hands
@@ -469,9 +498,9 @@ class ItemCharges(Item):
     """
 
     def __init__(self, name, description, char, color, charges,
-                 categories=None, destroyed_after_use=True, equip_slots=None):
+                 categories=None, properties=None, destroyed_after_use=True, equip_slots=None):
         super(ItemCharges, self).__init__(name=name, description=description, categories=categories,
-                                          char=char, color=color, equip_slots=equip_slots)
+                                          properties=properties, char=char, color=color, equip_slots=equip_slots)
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
         self.charges = charges  # number of uses
 
@@ -501,7 +530,7 @@ class ItemRangedWeapon(Item):
     """
         Child class for a ranged weapon.
     """
-
+    # TODO: convert to simple Item (use properties)
     def __init__(self, name, description, char, color, range, ammo_max=1, ammo_type=None, ammo=None,
                  categories=None, equip_slots=None):
         super(ItemRangedWeapon, self).__init__(name=name, description=description, categories=categories,
@@ -521,10 +550,10 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
     """
 
     def __init__(self, name, description, char, color, hp, speed, sight_radius,
-                 damage, equip_layout='humanoid', ai=None):
+                 damage, armor=None, resist=None, equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=True)
-        BattleEntity.__init__(self, hp=hp)
+        BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist)
         if ai:  # set AI owner
             ai.owner = self
         Actor.__init__(self, speed=speed, ai=ai)
@@ -644,6 +673,21 @@ class Player(Fighter):
         # calling constructor of parent class
         Fighter.__init__(self, name=name, description=description, char=char, color=color, hp=hp, speed=speed,
                          sight_radius=sight_radius, damage=damage, ai=None)
+        # hot zones with percent to hit (monsters doesn't have them)
+        self.hit_zones = {'HEAD': 10, 'BODY': 40, 'ARMS': 15, 'SHOULDERS': 15, 'LEGS': 15, 'FEET': 5}
+
+    def get_protection(self, dmg_type):
+        """ Overrides get_protection() of BattleEntity to add protection from equipment """
+        basic_prot = BattleEntity.get_protection(self, dmg_type)  # obtain protection as every BE, if any
+        prot = basic_prot[0]
+        block = basic_prot[1]
+        hit_zone = weighted_choice(self.hit_zones)
+        armor = self.equipment[hit_zone]
+        if armor:  # if there are armor on hit zone - add protection
+            if 'armor_'+dmg_type in armor.properties.keys():
+                prot += armor.properties[dmg_type]  # add armor protection
+                block += self.get_effect('BLOCK_' + dmg_type.upper())  # add damage block ammount
+        return prot, block, hit_zone
 
     def death(self):
         """ Death method """
@@ -915,3 +959,17 @@ class Game:
     def add_message(message, level, color):
         """ Method that adds a message to log """
         Game.log.append((message, level, color))
+
+
+# ======================================= UTILITY FUNCTIONS ============================================
+def weighted_choice(choices):
+    """ Weighted choice function """
+    total = sum(w for c, w in choices)
+    r = random.uniform(0, total)
+    upto = 0
+    for c, w in choices:
+       if upto + w >= r:
+          return c
+       upto += w
+    assert False, "Shouldn't get here"
+
