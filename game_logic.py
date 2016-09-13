@@ -238,13 +238,14 @@ class Inventory(Entity):
 
     def add_item(self, item):
         """ Item adding method """
-        if 'stackable' in item.categories and isinstance(item, ItemCharges):  # if item is stackable
-            for i in self.inventory:
-                if i.name == item.name:  # add a charge number to existing stack
-                    i.charges += item.charges
-                    if item.location:  # if it's placed somewhere in location
-                        item.location.remove_entity(item)
-                    return
+        if isinstance(item, ItemCharges):  # if item is stackable
+            if 'stackable' in item.categories:
+                for i in self.inventory:
+                    if i.name == item.name:  # add a charge number to existing stack
+                        i.charges += item.charges
+                        if item.location:  # if it's placed somewhere in location
+                            item.location.remove_entity(item)
+                        return
         self.inventory.append(item)  # add item to inventory
         item.owner = self  # set item's owner
         item.abilities_set_owner(self)  # if it has abilities - set their owner
