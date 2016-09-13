@@ -1,21 +1,20 @@
-import player_input
 import render
 import game_logic
 
-import pickle
+import dill
 import os
 
 
 # =========================== global functions, save/load, loop, etc =================================
 def save_game(game):
     """ Game saving function """
-    pickle.dump(game, open('savegame', 'wb'))
+    dill.dump(game, open('savegame', 'wb'))
 
 
 def load_game():
     """ Game loading function """
     try:
-        loaded_game = pickle.load(open('savegame', 'rb'))
+        loaded_game = dill.load(open('savegame', 'rb'))
         if loaded_game.state == 'exit':
             print('Saved game state was exit, changed to playing')  # debug output
             loaded_game.state = 'playing'
