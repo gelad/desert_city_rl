@@ -9,6 +9,7 @@ import abilities
 
 import random
 import copy
+import pickle
 from math import hypot
 
 
@@ -589,7 +590,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         """ Reload a ranged weapon """
         if weapon.ammo_type in ammo.categories:
             if len(weapon.ammo) < weapon.ammo_max:
-                ammo_copy = copy.deepcopy(ammo)  # make a copy of ammo object
+                ammo_copy = pickle.loads(pickle.dumps(ammo, -1))
+                # ammo_copy = copy.deepcopy(ammo)  # make a copy of ammo object
                 ammo_copy.charges = 1  # with one charge
                 ammo.decrease()  # decrease ammount of ammo left
                 weapon.ammo.append(ammo_copy)  # add copy to weapon.ammo
