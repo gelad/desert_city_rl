@@ -108,33 +108,53 @@ class BattleEntity(Entity):
         self.hp = hp  # current hitpoints
         self.maxhp = hp  # maximum hitpoints
         if armor:  # physical armor
-            self.armor = {'bashing': 0, 'slashing': 0, 'piercing': 0}
-        else:
             self.armor = armor
-        if resist:  # magic resistances
-            self.resist = {'fire': 0, 'frost': 0, 'lightning': 0, 'poison': 0, 'acid': 0,
-                           'mental': 0, 'death': 0, 'strange': 0}
         else:
+            self.armor = {'bashing': 0, 'slashing': 0, 'piercing': 0}
+        if resist:  # magic resistances
             self.resist = resist
+        else:
+            self.resist = {'fire': 0, 'cold': 0, 'lightning': 0, 'poison': 0, 'acid': 0,
+                           'mental': 0, 'death': 0, 'strange': 0}
         self.dead = dead  # is BE dead
 
-    def take_damage(self, damage, attacker=None):
+    def take_damage(self, damage, dmg_type='pure', attacker=None):
         """ This method should be called if entity is damaged
-        :param damage:
-        :param attacker:
+        :param dmg_type: damage type
+        :param damage: damage ammount
+        :param attacker: Entity, that inflicted damage
         """
-        self.hp -= damage
-        events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': damage})  # fire an Entity event
-        if self.hp <= 0:
+        try:  # if damage is (min, max) tuple
+            random.seed()
+            min_dmg = damage[0]
+            max_dmg = damage[1]
+            damage = random.randrange(min_dmg, max_dmg)
+        except TypeError:
+            pass
+        if dmg_type == 'pure':  # if 'pure' damage inflict it without any protection
+            resulting_damage = damage
+        else:
+            protection = self.get_protection(dmg_type)  # get (armor, block) tuple
+            # at 100 armor - 50% reduction
+            if protection[0] == -100:  # to prevent division by zero
+                reduce = protection[0]
+            else:
+                reduce = protection[0] / 100 + protection[0]
+            resulting_damage = damage * (1 - reduce) - protection[1]
+        self.hp -= int(resulting_damage)
+        # fire an Entity event
+        events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': damage, 'dmg_type': dmg_type})
+        events.Event('location', {'type': 'entity_damaged', 'attacker': attacker,
+                                  'target': self, 'damage': damage, 'dmg_type': dmg_type})
+        if self.hp <= 0 and not self.dead:  # check if self is alive and < 0 hp
             self.dead = True
             self.location.dead.append(self)  # add BE to dead list, waiting for removal
+        return resulting_damage
 
-    def deal_damage(self, target, damage):
+    def deal_damage(self, target, damage, dmg_type):
         """ Method for dealing damage """
         if isinstance(target, BattleEntity):
-            target.take_damage(damage, self)  # inflict that damage to target
-            events.Event('location', {'type': 'entity_damaged', 'attacker': self,
-                                      'target': target, 'damage': damage})  # fire a location event
+            target.take_damage(damage=damage, dmg_type=dmg_type, attacker=self)  # inflict that damage to target
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
 
@@ -148,7 +168,6 @@ class BattleEntity(Entity):
             prot = self.resist[dmg_type]
         block = self.get_effect('BLOCK_'+dmg_type.upper())  # damage block ammount
         return prot, block  # return protection parameters
-
 
     def death(self):
         """ Abstract method that is called when BattleEntity dies """
@@ -382,7 +401,7 @@ class SimpleMeleeChaserAI(AI):
                 player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
                 if player:
                     if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
-                        self.owner.perform(actions.act_attack_melee, self.owner, player)
+                        self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
                     else:
                         los = fov_los.get_los(x, y, point[0], point[1])
                         step_cell = los[1]
@@ -425,22 +444,39 @@ class UnguidedShotAI(AI):
             enemy = self.owner.location.cells[x][y].is_there_a(BattleEntity)  # BattleEntity at position of projectile
             if enemy:
                 if enemy.occupies_tile:
-                    damage = 0
+                    dmg = 0
+                    dmg_type = 'pure'
+                    # UGLY as hell..
+                    ammo = self.owner.ammo
+                    if 'bashing' in ammo.properties.keys(): dmg = ammo.properties['bashing']; dmg_type = 'bashing'
+                    elif 'slashing' in ammo.properties.keys(): dmg = ammo.properties['slashing']; dmg_type = 'slashing'
+                    elif 'piercing' in ammo.properties.keys(): dmg = ammo.properties['piercing']; dmg_type = 'piercing'
+                    elif 'fire' in ammo.properties.keys(): dmg = ammo.properties['fire']; dmg_type = 'fire'
+                    elif 'cold' in ammo.properties.keys(): dmg = ammo.properties['cold']; dmg_type = 'cold'
+                    elif 'lightning' in ammo.properties.keys(): dmg = ammo.properties['lightning']; dmg_type='lightning'
+                    elif 'poison' in ammo.properties.keys(): dmg = ammo.properties['poison']; dmg_type = 'poison'
+                    elif 'acid' in ammo.properties.keys(): dmg = ammo.properties['acid']; dmg_type = 'acid'
+                    elif 'mental' in ammo.properties.keys(): dmg = ammo.properties['mental']; dmg_type = 'mental'
+                    elif 'death' in ammo.properties.keys(): dmg = ammo.properties['death']; dmg_type = 'death'
+                    elif 'strange' in ammo.properties.keys(): dmg = ammo.properties['strange']; dmg_type = 'strange'
+                    try:  # if damage is (min, max) tuple
+                        random.seed()
+                        min_dmg = dmg[0]
+                        max_dmg = dmg[1]
+                        dmg = random.randrange(min_dmg, max_dmg)
+                    except TypeError:
+                        pass
                     for ef in self.owner.weapon.effects:
-                        # TODO: make ranged damage calculate more complicated way
                         if ef.eff == 'INCREASE_RANGED_DAMAGE':
-                            damage += ef.magnitude
-                    for ef in self.owner.ammo.effects:
-                        if ef.eff == 'INCREASE_RANGED_DAMAGE':
-                            damage += ef.magnitude
+                            dmg += ef.magnitude
                     if isinstance(enemy, Inventory):
                         enemy.add_item(self.owner.ammo)
                         self.owner.ammo = None
                     else:
                         self.owner.ammo = None
-                    Game.add_message(self.owner.name+' hits '+enemy.name+' for '+str(damage)+' damage!',
+                    Game.add_message(self.owner.name+' hits '+enemy.name+' for '+str(dmg)+' damage!',
                                      'PLAYER', [255, 255, 255])
-                    self.owner.weapon.owner.deal_damage(enemy, damage)
+                    self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
                     self.state = 'stopped'
                     self.owner.death()
                     return
@@ -532,9 +568,9 @@ class ItemRangedWeapon(Item):
     """
     # TODO: convert to simple Item (use properties)
     def __init__(self, name, description, char, color, range, ammo_max=1, ammo_type=None, ammo=None,
-                 categories=None, equip_slots=None):
+                 categories=None, properties=None, equip_slots=None):
         super(ItemRangedWeapon, self).__init__(name=name, description=description, categories=categories,
-                                               char=char, color=color, equip_slots=equip_slots)
+                                               properties=properties, char=char, color=color, equip_slots=equip_slots)
         self.range = range  # max range for ranged weapon
         self.ammo_type = ammo_type  # acceptable type of ammo ( Item.category)
         if ammo:
@@ -550,7 +586,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
     """
 
     def __init__(self, name, description, char, color, hp, speed, sight_radius,
-                 damage, armor=None, resist=None, equip_layout='humanoid', ai=None):
+                 damage, dmg_type='bashing', armor=None, resist=None, equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=True)
         BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist)
@@ -562,36 +598,57 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         Equipment.__init__(self, layout=equip_layout)
         Abilities.__init__(self)
         self.damage = damage  # damage from basic melee 'punch in da face' attack
+        self.dmg_type = dmg_type  # damage type of basic attack
 
-    def attack_melee(self, target):
-        """ Attack in melee method """
+    def attack_melee_basic(self, target):
+        """ Attack in melee with basic attack method (mostly for monsters)"""
         # check if target is in melee range
         dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
         if dist_to_target <= 1.42:
-            dmg = 0
-            for item in self.equipment.values():  # check if any weapons equipped
-                if item:
-                    if 'weapon' in item.categories:
-                        for eff in item.effects:
-                            if eff.eff == 'INCREASE_MELEE_DAMAGE':
-                                dmg += eff.magnitude
-                        if 'sword' in item.categories:
-                            random.seed()
-                            dmg = random.randrange(dmg - dmg // 3, dmg + dmg // 3)  # a sword damage dispersion
-                        if 'dagger' in item.categories:
-                            random.seed()
-                            dmg = random.randrange(dmg - dmg // 2, dmg + dmg // 2)  # a dagger damage dispersion
-                        if 'blunt' in item.categories:
-                            random.seed()
-                            dmg = random.randrange(dmg - dmg // 5, dmg + dmg // 5)  # a blunt weapon damage dispersion
-            if dmg == 0:
-                dmg = self.damage
+            dmg = self.damage
             msg = self.name + ' attacks ' + target.name + ' and deals ' + str(dmg) + ' damage!'
             Game.add_message(msg, 'PLAYER', [255, 255, 255])
             msg = self.name + '/' + target.name + 'for' + str(dmg) + 'dmg@' + str(
                 target.position[0]) + ':' + str(target.position[1])
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
-            self.deal_damage(target, dmg)  # deal damage
+            self.deal_damage(target, dmg, self.dmg_type)  # deal damage
+        else:
+            msg = self.name + 'misses,dist=' + str(dist_to_target)
+            Game.add_message(msg, 'DEBUG', [255, 255, 255])
+
+    def attack_melee_weapon(self, weapon, target):
+        """ Attack in melee with weapon method """
+        # check if target is in melee range
+        dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
+        if dist_to_target <= 1.42:
+            dmg = 0
+            dmg_type = 'pure'
+            # TODO: make multiple damage type weapons
+            # UGLY as hell..
+            if 'bashing' in weapon.properties.keys(): dmg = weapon.properties['bashing']; dmg_type = 'bashing'
+            elif 'slashing' in weapon.properties.keys(): dmg = weapon.properties['slashing']; dmg_type = 'slashing'
+            elif 'piercing' in weapon.properties.keys(): dmg = weapon.properties['piercing']; dmg_type = 'piercing'
+            elif 'fire' in weapon.properties.keys(): dmg = weapon.properties['fire']; dmg_type = 'fire'
+            elif 'cold' in weapon.properties.keys(): dmg = weapon.properties['cold']; dmg_type = 'cold'
+            elif 'lightning' in weapon.properties.keys(): dmg = weapon.properties['lightning']; dmg_type = 'lightning'
+            elif 'poison' in weapon.properties.keys(): dmg = weapon.properties['poison']; dmg_type = 'poison'
+            elif 'acid' in weapon.properties.keys(): dmg = weapon.properties['acid']; dmg_type = 'acid'
+            elif 'mental' in weapon.properties.keys(): dmg = weapon.properties['mental']; dmg_type = 'mental'
+            elif 'death' in weapon.properties.keys(): dmg = weapon.properties['death']; dmg_type = 'death'
+            elif 'strange' in weapon.properties.keys(): dmg = weapon.properties['strange']; dmg_type = 'strange'
+            try:  # if damage is (min, max) tuple
+                random.seed()
+                min_dmg = dmg[0]
+                max_dmg = dmg[1]
+                dmg = random.randrange(min_dmg, max_dmg)
+            except TypeError:
+                pass
+            msg = self.name + ' attacks ' + target.name + ' with ' + weapon.name + ' and deals ' + str(dmg) + ' damage!'
+            Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            msg = self.name + '/' + target.name + 'for' + str(dmg) + 'dmg@' + str(
+                target.position[0]) + ':' + str(target.position[1])
+            Game.add_message(msg, 'DEBUG', [255, 255, 255])
+            self.deal_damage(target, dmg, dmg_type)  # deal damage
         else:
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -610,7 +667,6 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             ty = target[1]
         ammo = weapon.ammo[0]
         weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-        # TODO: here goes spawning unguided projectile
         shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
         self.location.place_entity(shot, self.position[0], self.position[1])
         shot.ai.enroute()
@@ -673,8 +729,8 @@ class Player(Fighter):
         # calling constructor of parent class
         Fighter.__init__(self, name=name, description=description, char=char, color=color, hp=hp, speed=speed,
                          sight_radius=sight_radius, damage=damage, ai=None)
-        # hot zones with percent to hit (monsters doesn't have them)
-        self.hit_zones = {'HEAD': 10, 'BODY': 40, 'ARMS': 15, 'SHOULDERS': 15, 'LEGS': 15, 'FEET': 5}
+        # hit zones with percent to hit (monsters doesn't have them)
+        self.hit_zones = [('HEAD', 10), ('BODY', 40), ('ARMS', 15), ('SHOULDERS', 15), ('LEGS', 15), ('FEET', 5)]
 
     def get_protection(self, dmg_type):
         """ Overrides get_protection() of BattleEntity to add protection from equipment """
@@ -816,49 +872,54 @@ class Location:
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
                 item = Item(name='sabre', description='A sharp sabre with pointy tip.',
-                            categories={'weapon', 'sword', 'speed_normal'}, char='/', color=[200, 200, 255])
-                item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 5))
+                            categories={'weapon', 'sword'},
+                            properties={'slashing': (4, 6), 'attack_speed_mod': 1},
+                            char='/', color=[200, 200, 255])
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
                 item = Item(name='barbed loincloth', description='It is covered in spikes. Ouch!',
                             categories={'armor', 'waist'}, char='~', color=[200, 0, 100], equip_slots={'WAIST'})
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
                 cond = abilities.Condition('EQUIPPED')
-                react = {'type': 'deal_damage', 'target': 'attacker', 'damage': 1}
+                react = {'type': 'deal_damage', 'target': 'attacker', 'damage': 1, 'dmg_type': 'piercing'}
                 abil = abilities.Ability(name='Barbs', owner=item,
                                          trigger='damaged', conditions=[cond], reactions=[react])
                 item.add_ability(abil)
             for i in range(0, random.randint(1, 2)):
                 item = Item(name='dagger', description='A simple dagger about 20cm long.',
-                            categories={'weapon', 'dagger', 'speed_fast'}, char=',', color=[200, 200, 255])
-                item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 3))
+                            categories={'weapon', 'dagger'},
+                            properties={'piercing': (1, 4), 'attack_speed_mod': 0.75},
+                            char=',', color=[200, 200, 255])
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
                 item = Item(name='bronze maul', description='Huge bronze sphere attached on top of a wooden pole.',
-                            categories={'weapon', 'blunt', 'speed_slow'}, char='/', color=[80, 50, 20])
-                item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 10))
+                            categories={'weapon', 'blunt'},
+                            properties={'bashing': (8, 12), 'attack_speed_mod': 1.5},
+                            char='/', color=[80, 50, 20])
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
                 item = ItemRangedWeapon(name='hunting crossbow', description='A small crossbow.', range=20,
-                                        ammo_type='bolt', categories={'weapon', 'blunt', 'crossbow', 'speed_slow'},
+                                        ammo_type='bolt',
+                                        categories={'weapon', 'blunt', 'crossbow'},
+                                        properties={'bashing': (1, 3), 'attack_speed_mod': 1.5},
                                         char=')', color=[200, 200, 200])
-                item.effects.append(effects.Effect('INCREASE_MELEE_DAMAGE', 2))
-                item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 8))
+                item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 4))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 5)):
                 item = ItemCharges(name='bronze bolt', description='A simple bronze bolt for crossbows.',
-                                   categories={'bolt', 'stackable'}, char='=', color=[80, 50, 20],
+                                   categories={'bolt', 'stackable'}, 
+                                   properties={'piercing': (1, 4)},
+                                   char='=', color=[80, 50, 20],
                                    charges=10, destroyed_after_use=True)
-                item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 2))
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(3, 10)):
                 enemy = Fighter(name='Mindless body', description='No description, normal debug monster.', char='b',
-                                color=[109, 49, 9], hp=5, speed=100, sight_radius=14.5, damage=1,
+                                color=[109, 49, 9], hp=5, speed=100, sight_radius=14.5, damage=1, dmg_type='bashing',
                                 ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
                 enemy = Fighter(name='Sand golem', description='No description, slow debug monster.', char='G',
-                                color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5, damage=4,
+                                color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5, damage=4, dmg_type='bashing',
                                 ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 

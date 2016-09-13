@@ -139,9 +139,11 @@ class ElementMap(Element):
                     bgcolor = cell.entities[0].color
                     if color == bgcolor:
                         bgcolor = [c - 50 for c in bgcolor]
+                        i = 0
                         for c in bgcolor:
                             if c < 0:
-                                c = 0
+                                bgcolor[i] = 0
+                            i += 1
                 if brk:
                     break
             # update visited cells map (for displaying grey out of vision explored tiles)
@@ -326,7 +328,10 @@ class WindowMain(Window):
             # TODO: here must be more complicated check - if target is hostile, etc
             enemy = loc.cells[new_x][new_y].is_there_a(game_logic.Fighter)
             if enemy:  # check if there an enemy
-                player.perform(actions.act_attack_melee, player, enemy)  # attack it in melee
+                if player.equipment['LEFT_HAND'] or player.equipment['RIGHT_HAND']:
+                    player.perform(actions.act_attack_melee_weapons, player, enemy)  # attack it in melee with weapon
+                else:
+                    player.perform(actions.act_attack_melee_basic, player, enemy)  # attack it in melee with hands
 
     @staticmethod
     def command_close_direction(player, loc, dx, dy):

@@ -137,28 +137,40 @@ def act_relocate(action, register_call, actor, x, y):
         actor.state = 'ready'  # return actor to ready state
 
 
-def act_attack_melee(action, register_call, actor, target):
-    """ Actor melee attack """
+def act_attack_melee_weapons(action, register_call, actor, target):
+    """ Actor melee attack with all equipped weapons """
     if register_call:  # part executed when function is registered in ActionMgr
         spd = 0
-        weapons = 0  # weapons number equipped
+        w_num = 0  # weapons number equipped
+        weapons = []
+        # TODO: make attack with non-weapons equipped
         for item in actor.equipment.values():  # check if any weapons equipped
             if item:
                 if 'weapon' in item.categories:  # correct speed if weapon(s)
-                    weapons += 1
-                    if 'speed_normal' in item.categories:
-                        spd += actor.speed
-                    elif 'speed_fast' in item.categories:
-                        spd += actor.speed * 0.75
-                    elif 'speed_slow' in item.categories:
-                        spd += actor.speed * 1.75
-        if weapons > 1:  # dual-wielding penalty
+                    w_num += 1
+                    weapons.append(item)
+                    if 'attack_speed_mod' in item.properties.keys():
+                        spd += actor.speed * item.properties['attack_speed_mod']
+        if w_num > 1:  # dual-wielding penalty
             spd *= 1.25
-        elif weapons == 0:
+        elif w_num == 0:
             spd = actor.speed
         action.t_needed = spd / 2  # attack hit occurs on 1/2 swing duration
     else:  # part that is executed when action fires
-        actor.attack_melee(target)  # attack target
+        for weapon in [w for w in actor.equipment.values() if w and 'weapon' in w.categories]:
+            actor.attack_melee_weapon(weapon, target)  # attack target with each weapon
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+        # withdrawal to make whole action take EXACTLY actor.speed
+        actor.perform(act_withdrawal, actor, action.t_needed * 2)
+
+
+def act_attack_melee_basic(action, register_call, actor, target):
+    """ Actor melee basic attack - mostly for monsters """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.t_needed = actor.speed / 2  # attack hit occurs on 1/2 swing duration
+    else:  # part that is executed when action fires
+        actor.attack_melee_basic(target)  # attack target
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
         # withdrawal to make whole action take EXACTLY actor.speed

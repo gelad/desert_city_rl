@@ -24,8 +24,11 @@ Make item interactions actions that take time. (DONE)
 Implement shooting. (DONE)
 Implement abilities. (DONE)
 Test shooting, test why reload is slow. (DONE)
+Implement armor and damage types. (DONE)
+Make ranged use damage types. (DONE)
 
 
+Fix bug - freezing monsters after save. - pickle don't serialize Observer class variables - only instance ones. Use dill
 Implement weight of Entities.
 Implement throwing.
 Add some config files (at least mechanism for them)

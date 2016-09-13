@@ -81,7 +81,7 @@ class Ability(events.Observer):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             if reaction['target'] == 'attacker':  # if target is attacker
-                self.owner.deal_damage(event_data['attacker'], reaction['damage'])
+                self.owner.deal_damage(event_data['attacker'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['attacker'].name + ' takes ' + str(reaction['damage']) + ' damage!',
                     'PLAYER', [255, 255, 255])
