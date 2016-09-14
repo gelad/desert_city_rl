@@ -741,7 +741,7 @@ class Player(Fighter):
         armor = self.equipment[hit_zone]
         if armor:  # if there are armor on hit zone - add protection
             if 'armor_'+dmg_type in armor.properties.keys():
-                prot += armor.properties[dmg_type]  # add armor protection
+                prot += armor.properties['armor_'+dmg_type]  # add armor protection
                 block += self.get_effect('BLOCK_' + dmg_type.upper())  # add damage block ammount
         return prot, block, hit_zone
 
@@ -885,6 +885,42 @@ class Location:
                 abil = abilities.Ability(name='Barbs', owner=item,
                                          trigger='damaged', conditions=[cond], reactions=[react])
                 item.add_ability(abil)
+            for i in range(0, random.randint(1, 3)):
+                item = Item(name='misurka', description='A light iron helmet with spike on top.',
+                            categories={'armor'},
+                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            color=[50, 50, 200], equip_slots={'HEAD'})
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                item = Item(name='mail armor', description='A light iron mail armor.',
+                            categories={'armor'},
+                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            color=[50, 50, 200], equip_slots={'BODY'})
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                item = Item(name='iron pauldrons', description='A pair of iron pauldrons.',
+                            categories={'armor'},
+                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            color=[50, 50, 200], equip_slots={'SHOULDERS'})
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                item = Item(name='iron boots', description='A pair of iron boots.',
+                            categories={'armor'},
+                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            color=[50, 50, 200], equip_slots={'FEET'})
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                item = Item(name='iron armguards', description='A pair of iron armguards.',
+                            categories={'armor'},
+                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            color=[50, 50, 200], equip_slots={'ARMS'})
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                item = Item(name='iron leggings', description='A pair of iron leggings.',
+                            categories={'armor'},
+                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            color=[50, 50, 200], equip_slots={'LEGS'})
+                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
                 item = Item(name='dagger', description='A simple dagger about 20cm long.',
                             categories={'weapon', 'dagger'},
@@ -898,7 +934,7 @@ class Location:
                             char='/', color=[80, 50, 20])
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
-                item = ItemRangedWeapon(name='hunting crossbow', description='A small crossbow.', range=20,
+                item = ItemRangedWeapon(name='hunting crossbow', description='A small crossbow.', range=14,
                                         ammo_type='bolt',
                                         categories={'weapon', 'blunt', 'crossbow'},
                                         properties={'bashing': (1, 3), 'attack_speed_mod': 1.5},
@@ -912,9 +948,19 @@ class Location:
                                    char='=', color=[80, 50, 20],
                                    charges=10, destroyed_after_use=True)
                 self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(3, 10)):
+            for i in range(0, random.randint(2, 5)):
                 enemy = Fighter(name='Mindless body', description='No description, normal debug monster.', char='b',
                                 color=[109, 49, 9], hp=5, speed=100, sight_radius=14.5, damage=1, dmg_type='bashing',
+                                ai=SimpleMeleeChaserAI())
+                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(2, 5)):
+                enemy = Fighter(name='Scorpion', description='No description, normal debug monster.', char='s',
+                                color=[5, 5, 5], hp=3, speed=100, sight_radius=14.5, damage=3, dmg_type='piercing',
+                                ai=SimpleMeleeChaserAI())
+                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            for i in range(0, random.randint(1, 3)):
+                enemy = Fighter(name='Rakshasa', description='No description, fast debug monster.', char='R',
+                                color=[255, 127, 80], hp=8, speed=90, sight_radius=18.5, damage=4, dmg_type='slashing',
                                 ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
