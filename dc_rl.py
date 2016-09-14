@@ -1,24 +1,27 @@
 import render
 import game_logic
+import events
 
-import dill
+import pickle
 import os
 
 
 # =========================== global functions, save/load, loop, etc =================================
 def save_game(game):
     """ Game saving function """
-    dill.dump(game, open('savegame', 'wb'))
+    # save game object instance, and observers
+    pickle.dump((game, events.Observer._observers), open('savegame', 'wb'))
 
 
 def load_game():
     """ Game loading function """
     try:
-        loaded_game = dill.load(open('savegame', 'rb'))
+        # load game object instance, and observers
+        loaded_game, events.Observer._observers = pickle.load(open('savegame', 'rb'))
         if loaded_game.state == 'exit':
             print('Saved game state was exit, changed to playing')  # debug output
             loaded_game.state = 'playing'
-        return loaded_game
+        return loaded_game, events.Observer._observers
     except FileNotFoundError:
         return False
 
@@ -60,9 +63,12 @@ def main_loop():
             graphics.render_all()  # call a screen rendering function
 
 
-game = load_game()
-if not game:
+lg = load_game()
+if not lg:
     game = game_logic.Game()
+else:
+    game = lg[0]
+    events.Observer._observers = lg[1]
 graphics = render.Graphics(game)
 main_loop()
 if game.player.state == 'dead':

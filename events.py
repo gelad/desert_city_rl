@@ -6,7 +6,8 @@ import weakref
 
 class Observer:
     """ Observer mixin, completely copy-pasted from SO :( """
-    _observers = weakref.WeakSet()
+    # TODO: test if weakref.WeakSet is needed
+    _observers = set()
 
     def __init__(self):
         self._observers.update({self})
