@@ -10,6 +10,7 @@ import abilities
 import random
 import pickle
 from math import hypot
+from math import ceil
 
 
 class Cell:
@@ -139,9 +140,9 @@ class BattleEntity(Entity):
             if protection[0] == -100:  # to prevent division by zero
                 reduce = protection[0]
             else:
-                reduce = protection[0] / 100 + protection[0]
-            resulting_damage = damage * (1 - reduce) - protection[1]
-        self.hp -= int(resulting_damage)
+                reduce = protection[0] / (100 + protection[0])
+            resulting_damage = ceil(damage * (1 - reduce) - protection[1])
+        self.hp -= resulting_damage
         # fire an Entity event
         events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': damage, 'dmg_type': dmg_type})
         events.Event('location', {'type': 'entity_damaged', 'attacker': attacker,
@@ -154,7 +155,7 @@ class BattleEntity(Entity):
     def deal_damage(self, target, damage, dmg_type):
         """ Method for dealing damage """
         if isinstance(target, BattleEntity):
-            target.take_damage(damage=damage, dmg_type=dmg_type, attacker=self)  # inflict that damage to target
+            return target.take_damage(damage=damage, dmg_type=dmg_type, attacker=self)  # inflict that damage to target
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
 
@@ -606,12 +607,12 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
         if dist_to_target <= 1.42:
             dmg = self.damage
-            msg = self.name + ' attacks ' + target.name + ' and deals ' + str(dmg) + ' damage!'
+            damage_dealt = self.deal_damage(target, dmg, self.dmg_type)  # deal damage
+            msg = self.name + ' attacks ' + target.name + ' and deals ' + str(damage_dealt) + ' damage!'
             Game.add_message(msg, 'PLAYER', [255, 255, 255])
-            msg = self.name + '/' + target.name + 'for' + str(dmg) + 'dmg@' + str(
+            msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
                 target.position[0]) + ':' + str(target.position[1])
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
-            self.deal_damage(target, dmg, self.dmg_type)  # deal damage
         else:
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -643,12 +644,13 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 dmg = random.randrange(min_dmg, max_dmg)
             except TypeError:
                 pass
-            msg = self.name + ' attacks ' + target.name + ' with ' + weapon.name + ' and deals ' + str(dmg) + ' damage!'
+            damage_dealt = self.deal_damage(target, dmg, dmg_type)  # deal damage
+            msg = self.name + ' attacks ' + target.name + ' with '\
+                + weapon.name + ' and deals ' + str(damage_dealt) + ' damage!'
             Game.add_message(msg, 'PLAYER', [255, 255, 255])
-            msg = self.name + '/' + target.name + 'for' + str(dmg) + 'dmg@' + str(
+            msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
                 target.position[0]) + ':' + str(target.position[1])
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
-            self.deal_damage(target, dmg, dmg_type)  # deal damage
         else:
             msg = self.name + 'misses,dist=' + str(dist_to_target)
             Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -888,39 +890,39 @@ class Location:
             for i in range(0, random.randint(1, 3)):
                 item = Item(name='misurka', description='A light iron helmet with spike on top.',
                             categories={'armor'},
-                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
                             color=[50, 50, 200], equip_slots={'HEAD'})
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
                 item = Item(name='mail armor', description='A light iron mail armor.',
                             categories={'armor'},
-                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
                             color=[50, 50, 200], equip_slots={'BODY'})
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
                 item = Item(name='iron pauldrons', description='A pair of iron pauldrons.',
                             categories={'armor'},
-                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
                             color=[50, 50, 200], equip_slots={'SHOULDERS'})
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
                 item = Item(name='iron boots', description='A pair of iron boots.',
                             categories={'armor'},
-                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
                             color=[50, 50, 200], equip_slots={'FEET'})
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
                 item = Item(name='iron armguards', description='A pair of iron armguards.',
                             categories={'armor'},
-                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
                             color=[50, 50, 200], equip_slots={'ARMS'})
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
                 item = Item(name='iron leggings', description='A pair of iron leggings.',
                             categories={'armor'},
-                            properties={'armor_bashing': 100, 'armor_slashing': 100, 'armor_piercing': 100}, char=']',
+                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
                             color=[50, 50, 200], equip_slots={'LEGS'})
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 2)):
                 item = Item(name='dagger', description='A simple dagger about 20cm long.',
                             categories={'weapon', 'dagger'},
@@ -965,7 +967,7 @@ class Location:
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
                 enemy = Fighter(name='Sand golem', description='No description, slow debug monster.', char='G',
-                                color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5, damage=4, dmg_type='bashing',
+                                color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5, damage=5, dmg_type='bashing',
                                 ai=SimpleMeleeChaserAI())
                 self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
@@ -1050,7 +1052,7 @@ class Game:
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
         self.player = Player(name='Player', description='A player character.', char='@', color=[255, 255, 255],
-                             hp=10, speed=100, sight_radius=23.5, damage=2)
+                             hp=100, speed=100, sight_radius=23.5, damage=1)
         self.current_loc.place_entity(self.player, 10, 10)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)

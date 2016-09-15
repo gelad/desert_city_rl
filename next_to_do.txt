@@ -26,11 +26,14 @@ Implement abilities. (DONE)
 Test shooting, test why reload is slow. (DONE)
 Implement armor and damage types. (DONE)
 Make ranged use damage types. (DONE)
-Fix bug - freezing monsters after save. (FIXED) - no need to use dill yet
+Fix bug - freezing monsters after save. (FIXED)
+Implement some sort of event system. (DONE)
 
 
+Make some traps.
+Make data object - library of game Entities, to load them from XML/JSON/WHATEVER.
+Implement simple town level generation.
 Implement weight of Entities.
 Implement throwing.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.
-Implement some sort of event system?
