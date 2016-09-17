@@ -28,12 +28,12 @@ Implement armor and damage types. (DONE)
 Make ranged use damage types. (DONE)
 Fix bug - freezing monsters after save. (FIXED)
 Implement some sort of event system. (DONE)
+Implement weight of Entities. (DONE)
 
 
 Make some traps.
-Make data object - library of game Entities, to load them from XML/JSON/WHATEVER.
+Make data object - library of game Entities, to load them from XML/JSON/WHATEVER. (DATASET READY - LOADING FROM JSON TO GO)
 Implement simple town level generation.
-Implement weight of Entities.
 Implement throwing.
 Add some config files (at least mechanism for them)
 Make tileset readable from text/xml/json file.

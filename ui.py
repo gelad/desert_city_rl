@@ -8,6 +8,7 @@ import math
 import game_logic
 import actions
 import player_input
+import dataset
 
 
 class Element:
@@ -122,10 +123,10 @@ class ElementMap(Element):
         color = [255, 255, 255]
         bgcolor = [0, 0, 0]
         if visible:  # check if cell is visible
-            if cell.tile == 'SAND':  # sand tile type
-                char = '.'
-                color = [200, 200, 0]
-                bgcolor = [100, 100, 0]
+            tile = dataset.get_tile(cell.tile)
+            char = tile[0]
+            color = tile[1]
+            bgcolor = tile[2]
             brk = False
             for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
                 char = ent.char

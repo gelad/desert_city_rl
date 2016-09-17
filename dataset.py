@@ -7,6 +7,7 @@ import abilities
 import events
 
 import pickle
+import jsonpickle
 
 data_set = {}  # a dict containing all entity templates by string ID's
 tile_set = {}  # a dict that contains tile info
@@ -14,9 +15,12 @@ tile_set = {}  # a dict that contains tile info
 
 def initialize():
     """ Function that loads entity templates to data_set """
-    # TODO: make it load from JSON
+    # loading tileset
+    tile_set.update(jsonpickle.loads(open('tileset.json', 'r').read()))
+    # TODO: make Entities load from JSON
+    # loading Entity templates
     data_set['wall_sandstone'] = game_logic.Wall(name='Wall', data_id='wall_sandstone', description='A sandstone wall.',
-                                                 char='#', color=[255, 255, 255], hp=100, weight=1000)
+                                                 char='#', color=[189, 183, 107], hp=100, weight=1000)
     data_set['door_wooden'] = game_logic.Door(name='Door', data_id='door_wooden', description='A wooden door.',
                                               char_closed='+', char_open='.', color=[128, 0, 0],
                                               hp=100, is_closed=True, weight=50)
@@ -128,4 +132,9 @@ def initialize():
 
 def get_entity(data_id):
     """ Function that returns entity template by ID """
-    return pickle.loads(pickle.dumps(data_set[data_id]))
+    return pickle.loads(pickle.dumps(data_set[data_id]))  # return pickle copy of Entity template
+
+
+def get_tile(tile_id):
+    """ Function that returns entity template by ID """
+    return tile_set[tile_id]

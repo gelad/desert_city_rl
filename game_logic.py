@@ -20,9 +20,9 @@ class Cell:
         Class represents a single cell in location grid
     """
 
-    def __init__(self, tile_type, blocks_move=False, blocks_los=False, explored=False):
+    def __init__(self, tile_id, blocks_move=False, blocks_los=False, explored=False):
         self.explored = explored  # is tile explored?
-        self.tile = tile_type  # tile type for drawing purposes (i.e. 'WALL', 'FLOOR')
+        self.tile = tile_id  # tile type for drawing purposes (i.e. 'WALL', 'FLOOR')
         self.blocks_move = blocks_move  # is tile blocking movement?
         self.blocks_los = blocks_los  # is tile blocking line of sight?
         self.entities = []  # entities, positioned in this tile
