@@ -7,6 +7,7 @@ import effects
 import events
 import abilities
 import dataset
+import generation
 
 
 import random
@@ -861,56 +862,6 @@ class Location:
             return True
         return False
 
-    def generate(self, pattern):
-        """ Mapgen method, mostly placeholder for now."""
-        if pattern == 'clear':  # simply make a location full of sand tiles
-            self.cells.clear()
-            self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
-        if pattern == 'ruins':  # simply make a location of sand and few wall and door elements
-            self.cells.clear()
-            self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
-            random.seed()
-            for i in range(0, random.randint(2, 40)):
-                self.place_entity('wall_sandstone', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(2, 20)):
-                self.place_entity('door_wooden', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(2, 20)):
-                self.place_entity('item_boulder', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 5)):
-                self.place_entity('item_healing_potion', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 2)):
-                self.place_entity('item_sabre', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('item_barbed_loincloth', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('item_misurka', random.randint(0, 10), random.randint(0, 10))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('item_mail_armor', random.randint(0, 10), random.randint(0, 10))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('item_iron_pauldrons', random.randint(0, 10), random.randint(0, 10))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('item_iron_boots', random.randint(0, 10), random.randint(0, 10))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('item_iron_armguards', random.randint(0, 10), random.randint(0, 10))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('item_mail_leggings', random.randint(0, 10), random.randint(0, 10))
-            for i in range(0, random.randint(1, 2)):
-                self.place_entity('item_dagger', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 2)):
-                self.place_entity('item_bronze_maul', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 2)):
-                self.place_entity('item_hunting_crossbow', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 5)):
-                self.place_entity('item_bronze_bolt', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(2, 5)):
-                self.place_entity('mob_mindless_body', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(2, 5)):
-                self.place_entity('mob_scorpion', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('mob_rakshasa', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            for i in range(0, random.randint(1, 3)):
-                self.place_entity('mob_sand_golem', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-
     def place_entity(self, entity, x, y):
         """ Method that places given entity on the location (and loads a new one from data, if needed) """
         if self.is_in_boundaries(x, y):  # validate coordinates
@@ -998,11 +949,10 @@ class Game:
 
     def new_game(self):
         """ Method that starts a new game. Mostly a placeholder now. """
-        self.current_loc = Location(100, 100)
+        self.current_loc = generation.generate_loc('ruins', None, 100, 100)
         self.add_location(self.current_loc)
-        self.current_loc.generate('ruins')
-        self.player = Player(name='Player', data_id='player', description='A player character.', char='@', color=[255, 255, 255],
-                             hp=100, speed=100, sight_radius=23.5, damage=1, weight=70)
+        self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
+                             color=[255, 255, 255], hp=100, speed=100, sight_radius=23.5, damage=1, weight=70)
         self.current_loc.place_entity(self.player, 10, 10)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
