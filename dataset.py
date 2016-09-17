@@ -16,7 +16,7 @@ tile_set = {}  # a dict that contains tile info
 def initialize():
     """ Function that loads entity templates to data_set """
     # loading tileset
-    tile_set.update(jsonpickle.loads(open('tileset.json', 'r').read()))
+    tile_set.update(jsonpickle.loads(open("data/tileset.json", 'r').read()))
     # TODO: make Entities load from JSON
     # loading Entity templates
     data_set['wall_sandstone'] = game_logic.Wall(name='Wall', data_id='wall_sandstone', description='A sandstone wall.',
