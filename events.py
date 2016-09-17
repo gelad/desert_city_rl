@@ -20,6 +20,11 @@ class Observer:
         self._observers.discard(self)
         self._observables.clear()
 
+    @staticmethod
+    def clear():
+        """ Method that clears observers set """
+        Observer._observers.clear()
+
 
 class Event:
     """ Event class, used to fire events """

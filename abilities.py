@@ -44,8 +44,12 @@ class Ability(events.Observer):
         self.reactions = reactions  # ability reactions
         self.name = name
         self.description = description
+        self.reobserve()
+
+    def reobserve(self):
+        """ Method that registers Ability to observe events """
         events.Observer.__init__(self)  # register self as observer
-        self.observe(owner, self.on_event_owner)
+        self.observe(self.owner, self.on_event_owner)
 
     def set_owner(self, owner):
         """ Method to set owner and refresh observer """

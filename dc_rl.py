@@ -1,6 +1,7 @@
 import render
 import game_logic
 import events
+import dataset
 
 import pickle
 import os
@@ -63,6 +64,7 @@ def main_loop():
             graphics.render_all()  # call a screen rendering function
 
 
+dataset.initialize()
 lg = load_game()
 if not lg:
     game = game_logic.Game()

@@ -6,6 +6,8 @@ import fov_los
 import effects
 import events
 import abilities
+import dataset
+
 
 import random
 import pickle
@@ -56,12 +58,14 @@ class Entity:
         Base class for all game entities - monsters, items, walls, etc.
     """
 
-    def __init__(self, name='', description='', char=' ', color=None, location=None, position=None, occupies_tile=False,
-                 blocks_los=False):
+    def __init__(self, name='', data_id='', description='', char=' ', color=None, location=None, position=None,
+                 weight=0, occupies_tile=False, blocks_los=False):
         self.name = name  # entity name
+        self.data_id = data_id  # id in Entity data(base)
         self.description = description  # entity's description
         self.location = location  # Location object, where entity is placed
         self.position = position  # (x, y) tuple, represents position in the location
+        self.weight = weight  # weight of an entity, to calculate various things
         self.occupies_tile = occupies_tile  # entity occupy tile? (no other occupying entity can be placed there)
         self.blocks_los = blocks_los  # is it blocking line of sight? walls do, monsters (usually) don't
         self.char = char  # char that represents entity in graphics ('@')
@@ -368,10 +372,19 @@ class AI(events.Observer):
     def __init__(self, state, owner=None):
         self.state = state  # state of AI, i.e. 'sleeping', 'wandering', 'chasing'
         self.owner = owner  # owner Entity of ai object. TODO: hack - owner set externally
+        self.reobserve()
+
+    def reobserve(self):
+        """ Method that registers AI to observe events """
         events.Observer.__init__(self)  # register self as observer
+        self.observe('location', self.on_event_location)
 
     def act(self):
         """ Abstract method of AI class that is called when AI should decide what to do """
+        raise NotImplementedError
+
+    def on_event_location(self, data):
+        """ Abstract method of 'location' event handler """
         raise NotImplementedError
 
 
@@ -380,7 +393,6 @@ class SimpleMeleeChaserAI(AI):
 
     def __init__(self, state='idle'):
         AI.__init__(self, state)
-        self.observe('location', self.on_event_location)
 
     def on_event_location(self, data):
         """ Method handling location-related events """
@@ -420,7 +432,6 @@ class UnguidedShotAI(AI):
         self.next = None
         self.power = power
         self.target = target
-        self.observe('location', self.on_event_location)
 
     def on_event_location(self, data):
         """ Method handling location-related events """
@@ -504,9 +515,11 @@ class Item(Abilities, Entity):
         Mixed class, simple Item.
     """
 
-    def __init__(self, name, description, char, color, equip_slots=None, categories=None, properties=None):
+    def __init__(self, name, data_id, description, char, color, weight=0,
+                 equip_slots=None, categories=None, properties=None):
         # calling constructors
-        Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=False)
+        Entity.__init__(self, name=name, data_id=data_id, description=description, weight=weight,
+                        char=char, color=color, occupies_tile=False)
         self.owner = None  # owner of item - entity with inventory
         self.categories = categories  # item categories - a potion, a sword, etc
         self.properties = properties  # item properties - armor values, accuracy for weapons, etc
@@ -534,10 +547,11 @@ class ItemCharges(Item):
         Child class of item that has charges
     """
 
-    def __init__(self, name, description, char, color, charges,
+    def __init__(self, name, data_id, description, char, color, charges, weight=0,
                  categories=None, properties=None, destroyed_after_use=True, equip_slots=None):
-        super(ItemCharges, self).__init__(name=name, description=description, categories=categories,
-                                          properties=properties, char=char, color=color, equip_slots=equip_slots)
+        super(ItemCharges, self).__init__(name=name, data_id=data_id, description=description, categories=categories,
+                                          properties=properties, weight=weight,
+                                          char=char, color=color, equip_slots=equip_slots)
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
         self.charges = charges  # number of uses
 
@@ -567,10 +581,10 @@ class ItemRangedWeapon(Item):
     """
         Child class for a ranged weapon.
     """
-    # TODO: convert to simple Item (use properties)
-    def __init__(self, name, description, char, color, range, ammo_max=1, ammo_type=None, ammo=None,
+    def __init__(self, name, data_id, description, char, color, range, weight=0, ammo_max=1, ammo_type=None, ammo=None,
                  categories=None, properties=None, equip_slots=None):
-        super(ItemRangedWeapon, self).__init__(name=name, description=description, categories=categories,
+        super(ItemRangedWeapon, self).__init__(name=name, data_id=data_id,
+                                               description=description, categories=categories, weight=weight,
                                                properties=properties, char=char, color=color, equip_slots=equip_slots)
         self.range = range  # max range for ranged weapon
         self.ammo_type = ammo_type  # acceptable type of ammo ( Item.category)
@@ -586,10 +600,11 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
 
-    def __init__(self, name, description, char, color, hp, speed, sight_radius,
-                 damage, dmg_type='bashing', armor=None, resist=None, equip_layout='humanoid', ai=None):
+    def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius,
+                 damage, weight=0, dmg_type='bashing', armor=None, resist=None, equip_layout='humanoid', ai=None):
         # calling constructors of mixins
-        Entity.__init__(self, name=name, description=description, char=char, color=color, occupies_tile=True)
+        Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
+                        weight=weight, occupies_tile=True)
         BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist)
         if ai:  # set AI owner
             ai.owner = self
@@ -695,8 +710,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
         events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
-        corpse = Item(name=self.name + "'s corpse.", description='A dead ' + self.name + '.', char='%',
-                      color=self.color)
+        corpse = Item(name=self.name + "'s corpse.", data_id=self.name+'_corpse',
+                      description='A dead ' + self.name + '.', char='%', color=self.color, weight=self.weight)
         self.location.place_entity(corpse, self.position[0], self.position[1])
         for item in self.equipment.values():  # drop all equipped items
             if item:
@@ -727,10 +742,10 @@ class Player(Fighter):
         Child class, adds player-specific functionality to Fighter.
     """
 
-    def __init__(self, name, description, char, color, hp, speed, sight_radius, damage):
+    def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius, damage, weight):
         # calling constructor of parent class
-        Fighter.__init__(self, name=name, description=description, char=char, color=color, hp=hp, speed=speed,
-                         sight_radius=sight_radius, damage=damage, ai=None)
+        Fighter.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color, hp=hp,
+                         speed=speed, sight_radius=sight_radius, damage=damage, ai=None, weight=weight)
         # hit zones with percent to hit (monsters doesn't have them)
         self.hit_zones = [('HEAD', 10), ('BODY', 40), ('ARMS', 15), ('SHOULDERS', 15), ('LEGS', 15), ('FEET', 5)]
 
@@ -761,9 +776,9 @@ class Wall(BattleEntity, Entity):
         Mixed class of a wall, that has HP and can be destroyed, but lacks acting ability.
     """
 
-    def __init__(self, name, char, hp, description='', color=None, blocks_los=True):
-        Entity.__init__(self, name=name, description=description, char=char, color=color,
-                        occupies_tile=True, blocks_los=blocks_los)
+    def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0):
+        Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
+                        occupies_tile=True, blocks_los=blocks_los, weight=weight)
         BattleEntity.__init__(self, hp)
 
     def death(self):
@@ -777,7 +792,7 @@ class Door(BattleEntity, Entity):
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
 
-    def __init__(self, name, description, char_closed, char_open, color, hp, is_closed=True):
+    def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, is_closed=True):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open
@@ -786,8 +801,8 @@ class Door(BattleEntity, Entity):
         else:
             blocks_los = False
         self.__set_char()  # set current char for drawing purposes
-        Entity.__init__(self, name=name, description=description, char=self.char, color=color,
-                        occupies_tile=self.is_closed, blocks_los=blocks_los)
+        Entity.__init__(self, name=name, data_id=data_id, description=description, char=self.char, color=color,
+                        occupies_tile=self.is_closed, blocks_los=blocks_los, weight=weight)
         BattleEntity.__init__(self, hp)
 
     def __set_char(self):
@@ -856,124 +871,59 @@ class Location:
             self.cells = [[Cell('SAND') for y in range(self.height)] for x in range(self.width)]
             random.seed()
             for i in range(0, random.randint(2, 40)):
-                wall = Wall(name='Wall', description='A wall.', char='#', color=[255, 255, 255], hp=100)
-                self.place_entity(wall, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('wall_sandstone', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(2, 20)):
-                door = Door(name='Door', description='A door.', char_closed='+', char_open='.', color=[255, 255, 255],
-                            hp=100, is_closed=True)
-                self.place_entity(door, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('door_wooden', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(2, 20)):
-                item = Item(name='boulder', description='A stone boulder.', categories={'rubbish'},
-                            char='*', color=[200, 200, 200])
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('item_boulder', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 5)):
-                item = ItemCharges(name='healing potion', description='A potion that heals 5 HP.',
-                                   categories={'consumable', 'potion'}, char='!', color=[255, 0, 0],
-                                   charges=1, destroyed_after_use=True)
-                item.effects.append(effects.Effect('HEAL', 5))
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('item_healing_potion', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
-                item = Item(name='sabre', description='A sharp sabre with pointy tip.',
-                            categories={'weapon', 'sword'},
-                            properties={'slashing': (4, 6), 'attack_speed_mod': 1},
-                            char='/', color=[200, 200, 255])
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('item_sabre', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
-                item = Item(name='barbed loincloth', description='It is covered in spikes. Ouch!',
-                            categories={'armor', 'waist'}, char='~', color=[200, 0, 100], equip_slots={'WAIST'})
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-                cond = abilities.Condition('EQUIPPED')
-                react = {'type': 'deal_damage', 'target': 'attacker', 'damage': 1, 'dmg_type': 'piercing'}
-                abil = abilities.Ability(name='Barbs', owner=item,
-                                         trigger='damaged', conditions=[cond], reactions=[react])
-                item.add_ability(abil)
+                self.place_entity('item_barbed_loincloth', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
-                item = Item(name='misurka', description='A light iron helmet with spike on top.',
-                            categories={'armor'},
-                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
-                            color=[50, 50, 200], equip_slots={'HEAD'})
-                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
+                self.place_entity('item_misurka', random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
-                item = Item(name='mail armor', description='A light iron mail armor.',
-                            categories={'armor'},
-                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
-                            color=[50, 50, 200], equip_slots={'BODY'})
-                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
+                self.place_entity('item_mail_armor', random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
-                item = Item(name='iron pauldrons', description='A pair of iron pauldrons.',
-                            categories={'armor'},
-                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
-                            color=[50, 50, 200], equip_slots={'SHOULDERS'})
-                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
+                self.place_entity('item_iron_pauldrons', random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
-                item = Item(name='iron boots', description='A pair of iron boots.',
-                            categories={'armor'},
-                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
-                            color=[50, 50, 200], equip_slots={'FEET'})
-                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
+                self.place_entity('item_iron_boots', random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
-                item = Item(name='iron armguards', description='A pair of iron armguards.',
-                            categories={'armor'},
-                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
-                            color=[50, 50, 200], equip_slots={'ARMS'})
-                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
+                self.place_entity('item_iron_armguards', random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 3)):
-                item = Item(name='iron leggings', description='A pair of iron leggings.',
-                            categories={'armor'},
-                            properties={'armor_bashing': 200, 'armor_slashing': 200, 'armor_piercing': 200}, char=']',
-                            color=[50, 50, 200], equip_slots={'LEGS'})
-                self.place_entity(item, random.randint(0, 10), random.randint(0, 10))
+                self.place_entity('item_mail_leggings', random.randint(0, 10), random.randint(0, 10))
             for i in range(0, random.randint(1, 2)):
-                item = Item(name='dagger', description='A simple dagger about 20cm long.',
-                            categories={'weapon', 'dagger'},
-                            properties={'piercing': (1, 4), 'attack_speed_mod': 0.75},
-                            char=',', color=[200, 200, 255])
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('item_dagger', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
-                item = Item(name='bronze maul', description='Huge bronze sphere attached on top of a wooden pole.',
-                            categories={'weapon', 'blunt'},
-                            properties={'bashing': (8, 12), 'attack_speed_mod': 1.5},
-                            char='/', color=[80, 50, 20])
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('item_bronze_maul', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 2)):
-                item = ItemRangedWeapon(name='hunting crossbow', description='A small crossbow.', range=14,
-                                        ammo_type='bolt',
-                                        categories={'weapon', 'blunt', 'crossbow'},
-                                        properties={'bashing': (1, 3), 'attack_speed_mod': 1.5},
-                                        char=')', color=[200, 200, 200])
-                item.effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 4))
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('item_hunting_crossbow', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 5)):
-                item = ItemCharges(name='bronze bolt', description='A simple bronze bolt for crossbows.',
-                                   categories={'bolt', 'stackable'}, 
-                                   properties={'piercing': (1, 4)},
-                                   char='=', color=[80, 50, 20],
-                                   charges=10, destroyed_after_use=True)
-                self.place_entity(item, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('item_bronze_bolt', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(2, 5)):
-                enemy = Fighter(name='Mindless body', description='No description, normal debug monster.', char='b',
-                                color=[109, 49, 9], hp=5, speed=100, sight_radius=14.5, damage=1, dmg_type='bashing',
-                                ai=SimpleMeleeChaserAI())
-                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('mob_mindless_body', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(2, 5)):
-                enemy = Fighter(name='Scorpion', description='No description, normal debug monster.', char='s',
-                                color=[5, 5, 5], hp=3, speed=100, sight_radius=14.5, damage=3, dmg_type='piercing',
-                                ai=SimpleMeleeChaserAI())
-                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('mob_scorpion', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
-                enemy = Fighter(name='Rakshasa', description='No description, fast debug monster.', char='R',
-                                color=[255, 127, 80], hp=8, speed=90, sight_radius=18.5, damage=4, dmg_type='slashing',
-                                ai=SimpleMeleeChaserAI())
-                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('mob_rakshasa', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             for i in range(0, random.randint(1, 3)):
-                enemy = Fighter(name='Sand golem', description='No description, slow debug monster.', char='G',
-                                color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5, damage=5, dmg_type='bashing',
-                                ai=SimpleMeleeChaserAI())
-                self.place_entity(enemy, random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+                self.place_entity('mob_sand_golem', random.randint(0, self.width - 1), random.randint(0, self.height - 1))
 
     def place_entity(self, entity, x, y):
-        """ Method that places given entity on the location """
+        """ Method that places given entity on the location (and loads a new one from data, if needed) """
         if self.is_in_boundaries(x, y):  # validate coordinates
+            if isinstance(entity, str):  # if entity is not an Entity object, but a string - load from data
+                entity = dataset.get_entity(entity)
+                try:   # if entity has AI component - register event observer
+                    ai = entity.ai
+                    ai.reobserve()
+                except AttributeError:
+                    pass
+                if isinstance(entity, Abilities):  # if entity has abilities - register them as event observers
+                    for ability in entity.abilities:
+                        ability.reobserve()
             self.cells[x][y].entities.append(entity)  # add entity to Cell list
             entity.position = (x, y)  # update entity position
             entity.location = self  # update entity location
@@ -1051,8 +1001,8 @@ class Game:
         self.current_loc = Location(100, 100)
         self.add_location(self.current_loc)
         self.current_loc.generate('ruins')
-        self.player = Player(name='Player', description='A player character.', char='@', color=[255, 255, 255],
-                             hp=100, speed=100, sight_radius=23.5, damage=1)
+        self.player = Player(name='Player', data_id='player', description='A player character.', char='@', color=[255, 255, 255],
+                             hp=100, speed=100, sight_radius=23.5, damage=1, weight=70)
         self.current_loc.place_entity(self.player, 10, 10)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
