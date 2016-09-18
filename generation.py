@@ -34,6 +34,7 @@ def generate_loc(loc_type, settings, width, height):
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
                              range(plot_x, plot_x + grid_size)],
                              b_x=build_x, b_y=build_y, b_w=build_w, b_h=build_h, b_type=build_type)
+                    floor_cells = []  # empty floor cells for item gen
                     building = subgen_building('house', grid_size // 2, grid_size // 2)
                     for x in range(grid_size // 2):
                         for y in range(grid_size // 2):
@@ -44,45 +45,33 @@ def generate_loc(loc_type, settings, width, height):
                                 loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
                             if building[x][y] == 'door':
                                 loc.place_entity('door_wooden', loc_cell_x, loc_cell_y)
+                            # if cell is passable - add to floor list
+                            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
+                                floor_cells.append((loc_cell_x, loc_cell_y))
+                    item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+                    for i in range(0, item_count):
+                        item_id = game_logic.weighted_choice([('item_healing_potion', 20),
+                                                              ('item_sabre', 10),
+                                                              ('item_barbed_loincloth', 5),
+                                                              ('item_misurka', 5),
+                                                              ('item_mail_armor', 5),
+                                                              ('item_iron_pauldrons', 5),
+                                                              ('item_iron_boots', 5),
+                                                              ('item_iron_armguards', 5),
+                                                              ('item_mail_leggings', 5),
+                                                              ('item_dagger', 10),
+                                                              ('item_bronze_maul', 10),
+                                                              ('item_hunting_crossbow', 5),
+                                                              ('item_bronze_bolt', 10)])
+                        item_coords = floor_cells[random.randrange(len(floor_cells))]
+                        loc.place_entity(item_id, item_coords[0], item_coords[1])
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
                                     range(plot_x, plot_x + grid_size)],
                              b_x=0, b_y=0, b_w=grid_size, b_h=grid_size, b_type=build_type)
-                # TODO: add monster and loot generation in houses (and som e monsters outside)
+                # TODO: add monster and loot generation in houses (and some monsters outside)
                 # TODO: add destructed buildings
-
-        for i in range(0, random.randint(2, 20)):
-            loc.place_entity('item_boulder', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 5)):
-            loc.place_entity('item_healing_potion', random.randint(0, loc.width - 1),
-                             random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 2)):
-            loc.place_entity('item_sabre', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('item_barbed_loincloth', random.randint(0, loc.width - 1),
-                             random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('item_misurka', random.randint(0, 10), random.randint(0, 10))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('item_mail_armor', random.randint(0, 10), random.randint(0, 10))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('item_iron_pauldrons', random.randint(0, 10), random.randint(0, 10))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('item_iron_boots', random.randint(0, 10), random.randint(0, 10))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('item_iron_armguards', random.randint(0, 10), random.randint(0, 10))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('item_mail_leggings', random.randint(0, 10), random.randint(0, 10))
-        for i in range(0, random.randint(1, 2)):
-            loc.place_entity('item_dagger', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 2)):
-            loc.place_entity('item_bronze_maul', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 2)):
-            loc.place_entity('item_hunting_crossbow', random.randint(0, loc.width - 1),
-                             random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 5)):
-            loc.place_entity('item_bronze_bolt', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
         for i in range(0, random.randint(2, 5)):
             loc.place_entity('mob_mindless_body', random.randint(0, loc.width - 1),
                              random.randint(0, loc.height - 1))

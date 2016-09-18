@@ -32,6 +32,7 @@ Implement weight of Entities. (DONE)
 
 
 Implement A* pathfinding.
+Implement different terrain movement cost.
 Make some windows in houses.
 Make some traps.
 Make data object - library of game Entities, to load them from XML/JSON/WHATEVER. (DATASET READY - LOADING FROM JSON TO GO)
