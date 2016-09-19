@@ -12,6 +12,7 @@ class Action:
         self.t_passed = t_passed  # ticks passed since action was registered (incremented externally by ActMgr)
         self.t_needed = t_needed  # ticks needed by action to fire
         self.frozen = frozen  # is action frozen (for stunning/timelock effects)
+        self.data = {}  # action data, some info that need to be stored between calls of action function
         self.func = func  # function that is called when action fires
         self.args = args
         self.kwargs = kwargs
@@ -108,10 +109,14 @@ def act_wait(action, register_call, actor, ticks):
 def act_move(action, register_call, actor, dx, dy):
     """ Actor self-moving action (need a different one for unvoluntarily movement, regardless of speed) """
     if register_call:  # part executed when function is registered in ActionMgr
+        action.data['t_whole'] = actor.speed  # a whole move action time needed
         if abs(dx)+abs(dy) == 2:  # if movement is diagonal
-            action.t_needed = actor.speed * 1.414 // 3  # diagonal move takes 1.41 times longer
-        else:  # if it's normal
-            action.t_needed = actor.speed // 3  # actual movement occurs on 1/3 of step
+            action.data['t_whole'] *= 1.414  # diagonal move takes 1.41 times longer
+        # add move cost if any difficult terrain
+        if actor.location.is_in_boundaries(actor.position[0] + dx, actor.position[1] + dy):
+            action.data['t_whole'] *= \
+                actor.location.cells[actor.position[0] + dx][actor.position[1] + dy].get_move_cost()
+        action.t_needed = action.data['t_whole'] / 3
     else:  # part that is executed when action fires
         actor.move(dx, dy)  # move actor to desired coords
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
@@ -119,10 +124,7 @@ def act_move(action, register_call, actor, dx, dy):
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
         #  withdrawal to make whole action take EXACTLY one step
-        if abs(dx) + abs(dy) == 2:  # if movement is diagonal
-            actor.perform(act_withdrawal, actor, actor.speed * 1.414 - actor.speed * 1.414 // 3)
-        else:  # if it's normal
-            actor.perform(act_withdrawal, actor, actor.speed - actor.speed // 3)
+        actor.perform(act_withdrawal, actor, action.data['t_whole'] / 3 * 2)
 
 
 def act_relocate(action, register_call, actor, x, y):

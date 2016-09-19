@@ -47,6 +47,14 @@ class Cell:
                 break
         return ent_oc
 
+    def get_move_cost(self):
+        """ Method returns movement cost coefficient to cell """
+        mc = 1
+        mc *= self.pass_cost
+        for ent in self.entities:
+            mc *= ent.pass_cost
+        return mc
+
     def is_there_a(self, thing):
         """ Method for checking some kind of entity present in cell(monster, door, item, etc) """
         for ent in self.entities:

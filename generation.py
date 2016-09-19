@@ -47,6 +47,8 @@ def generate_loc(loc_type, settings, width, height):
                                 loc.place_entity('door_wooden', loc_cell_x, loc_cell_y)
                             if building[x][y] == 'small_window':
                                 loc.place_entity('window_small_sandstone', loc_cell_x, loc_cell_y)
+                            if building[x][y] == 'large_window':
+                                loc.place_entity('window_large_sandstone', loc_cell_x, loc_cell_y)
                             # if cell is passable - add to floor list
                             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                                 floor_cells.append((loc_cell_x, loc_cell_y))
@@ -67,22 +69,33 @@ def generate_loc(loc_type, settings, width, height):
                                                               ('item_bronze_bolt', 10)])
                         item_coords = floor_cells[random.randrange(len(floor_cells))]
                         loc.place_entity(item_id, item_coords[0], item_coords[1])
+                    mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+                    for m in range(0, mob_count):
+                        mob_id = game_logic.weighted_choice([('mob_mindless_body', 60),
+                                                            ('mob_scorpion', 20),
+                                                            ('mob_rakshasa', 10 + item_count * 3),
+                                                            ('mob_sand_golem', 10 + item_count * 3)])
+                        # more loot - dangerous mobs
+                        mob_coords = floor_cells[random.randrange(len(floor_cells))]
+                        loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
                                     range(plot_x, plot_x + grid_size)],
                              b_x=0, b_y=0, b_w=grid_size, b_h=grid_size, b_type=build_type)
-                # TODO: add monster and loot generation in houses (and some monsters outside)
+                    floor_cells = []
+                    for x in range(grid_size // 2):
+                        for y in range(grid_size // 2):
+                            floor_cells.append((x + plot_x * 20, y + plot_y * 20))
+                    # place some mobs even there are no building
+                    mob_count = game_logic.weighted_choice([(0, 70), (1, 20), (2, 7), (3, 3)])
+                    for m in range(0, mob_count):
+                        mob_id = game_logic.weighted_choice([('mob_mindless_body', 50),
+                                                             ('mob_scorpion', 40),
+                                                             ('mob_rakshasa', 10)])
+                        mob_coords = floor_cells[random.randrange(len(floor_cells))]
+                        loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
                 # TODO: add destructed buildings
-        for i in range(0, random.randint(2, 5)):
-            loc.place_entity('mob_mindless_body', random.randint(0, loc.width - 1),
-                             random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(2, 5)):
-            loc.place_entity('mob_scorpion', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('mob_rakshasa', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
-        for i in range(0, random.randint(1, 3)):
-            loc.place_entity('mob_sand_golem', random.randint(0, loc.width - 1), random.randint(0, loc.height - 1))
     return loc  # return generated location
 
 
@@ -98,16 +111,16 @@ def subgen_building(building, build_w, build_h, settings=None):
             pattern[0][y] = 'wall'
             pattern[-1][y] = 'wall'
         for n in range(1, 8): # make windows
-            x = random.randrange(build_w)
-            y = random.randrange(build_h)
+            x = random.randrange(1, build_w - 1)
+            y = random.randrange(1, build_h - 1)
             direction = random.randrange(1, 4)
             if direction == 1: x = 0
             if direction == 2: x = -1
             if direction == 3: y = 0
             if direction == 4: y = -1
-            pattern[x][y] = 'small_window'
-        x = random.randrange(build_w)  # make a door
-        y = random.randrange(build_h)
+            pattern[x][y] = game_logic.weighted_choice([('small_window', 50), ('large_window', 50)])
+        x = random.randrange(1, build_w - 1)  # make a door
+        y = random.randrange(1, build_h - 1)
         direction = random.randrange(1, 4)
         if direction == 1: x = 0
         if direction == 2: x = -1
