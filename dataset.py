@@ -22,9 +22,14 @@ def initialize():
     data_set['wall_sandstone'] = game_logic.Prop(name='Wall', data_id='wall_sandstone', description='A sandstone wall.',
                                                  char='#', color=[255, 250, 205], hp=100, weight=1000)
     data_set['window_small_sandstone'] = game_logic.Prop(name='Small window', data_id='window_small_sandstone',
-                                                         occupies_tile=True, blocks_los=False,
+                                                         occupies_tile=True, blocks_los=False, blocks_shots=0.15,
                                                          description='A hole in sandstone wall.',
                                                          char='"', color=[255, 250, 205], hp=100, weight=800)
+    data_set['window_large_sandstone'] = game_logic.Prop(name='Large window', data_id='window_large_sandstone',
+                                                         occupies_tile=False, blocks_los=False, blocks_shots=0,
+                                                         pass_cost=2,
+                                                         description='A large window in sandstone wall.',
+                                                         char='_', color=[255, 250, 205], hp=100, weight=800)
     data_set['door_wooden'] = game_logic.Door(name='Door', data_id='door_wooden', description='A wooden door.',
                                               char_closed='+', char_open='.', color=[128, 0, 0],
                                               hp=100, is_closed=True, weight=50)

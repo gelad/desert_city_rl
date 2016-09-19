@@ -38,6 +38,15 @@ class Cell:
                 return False
         return True
 
+    def get_occupying_entity(self):
+        """ Method returns occupying entity """
+        ent_oc = None
+        for ent in self.entities:
+            if ent.occupies_tile:
+                ent_oc = ent
+                break
+        return ent_oc
+
     def is_there_a(self, thing):
         """ Method for checking some kind of entity present in cell(monster, door, item, etc) """
         for ent in self.entities:
@@ -61,7 +70,7 @@ class Entity:
     """
 
     def __init__(self, name='', data_id='', description='', char=' ', color=None, location=None, position=None,
-                 weight=0, pass_cost=1, occupies_tile=False, blocks_los=False):
+                 weight=0, pass_cost=1, occupies_tile=False, blocks_los=False, blocks_shots=0):
         self.name = name  # entity name
         self.data_id = data_id  # id in Entity data(base)
         self.description = description  # entity's description
@@ -70,6 +79,7 @@ class Entity:
         self.weight = weight  # weight of an entity, to calculate various things
         self.occupies_tile = occupies_tile  # entity occupy tile? (no other occupying entity can be placed there)
         self.blocks_los = blocks_los  # is it blocking line of sight? walls do, monsters (usually) don't
+        self.blocks_shots = blocks_shots  # is it blocking shots? if yes, percent of shots blocked
         self.pass_cost = pass_cost  # movement cost coefficient (for creating difficult terrain)
         self.char = char  # char that represents entity in graphics ('@')
         self.color = color  # entity char color
@@ -456,9 +466,12 @@ class UnguidedShotAI(AI):
         elif self.state == 'flying':
             x = self.owner.position[0]
             y = self.owner.position[1]
-            enemy = self.owner.location.cells[x][y].is_there_a(BattleEntity)  # BattleEntity at position of projectile
+            enemy = self.owner.location.cells[x][y].get_occupying_entity()
             if enemy:
-                if enemy.occupies_tile:
+                if enemy.blocks_shots < 1:  # check if shot pass through (for windows, grates, etc)
+                    enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
+            if enemy:
+                if isinstance(enemy, BattleEntity):  # if enemy can be damaged
                     dmg = 0
                     dmg_type = 'pure'
                     # UGLY as hell..
@@ -495,6 +508,16 @@ class UnguidedShotAI(AI):
                     self.state = 'stopped'
                     self.owner.death()
                     return
+                # TODO: make arrows and bolts break
+                else:  # if enemy cannot be damaged
+                    if isinstance(enemy, Inventory):
+                        enemy.add_item(self.owner.ammo)
+                        self.owner.ammo = None
+                    else:
+                        self.owner.ammo = None
+                    Game.add_message(self.owner.name + ' hits ' + enemy.name + '.', 'PLAYER', [255, 255, 255])
+                    self.state = 'stopped'
+                    self.owner.death()
             try:
                 next_cell = next(self.next)
             except StopIteration:
@@ -522,7 +545,7 @@ class Item(Abilities, Entity):
                  equip_slots=None, categories=None, properties=None):
         # calling constructors
         Entity.__init__(self, name=name, data_id=data_id, description=description, weight=weight, pass_cost=pass_cost,
-                        char=char, color=color, occupies_tile=False)
+                        char=char, color=color, occupies_tile=False, blocks_shots=0)
         self.owner = None  # owner of item - entity with inventory
         self.categories = categories  # item categories - a potion, a sword, etc
         self.properties = properties  # item properties - armor values, accuracy for weapons, etc
@@ -608,7 +631,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                  damage, weight=0, dmg_type='bashing', armor=None, resist=None, equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
-                        weight=weight, pass_cost=1, occupies_tile=True)
+                        weight=weight, pass_cost=1, occupies_tile=True, blocks_shots=1)
         BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist)
         if ai:  # set AI owner
             ai.owner = self
@@ -780,10 +803,11 @@ class Prop(BattleEntity, Entity):
         Mixed class of a prop (wall, window, pillar, etc), that has HP and can be destroyed, but lacks acting ability.
     """
 
-    def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0,
+    def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0, blocks_shots=1,
                  occupies_tile=True, pass_cost=1):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
-                        occupies_tile=occupies_tile, blocks_los=blocks_los, weight=weight, pass_cost=pass_cost)
+                        occupies_tile=occupies_tile, blocks_los=blocks_los, blocks_shots=blocks_shots,
+                        weight=weight, pass_cost=pass_cost)
         BattleEntity.__init__(self, hp)
 
     def death(self):
@@ -804,11 +828,14 @@ class Door(BattleEntity, Entity):
         self.is_closed = is_closed  # is door closed or open
         if is_closed:
             blocks_los = True
+            blocks_shots = 1
         else:
             blocks_los = False
+            blocks_shots = 0
         self.__set_char()  # set current char for drawing purposes
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=self.char, color=color,
-                        occupies_tile=self.is_closed, blocks_los=blocks_los, weight=weight, pass_cost=pass_cost)
+                        occupies_tile=self.is_closed, blocks_los=blocks_los, blocks_shots=blocks_shots,
+                        weight=weight, pass_cost=pass_cost)
         BattleEntity.__init__(self, hp)
 
     def __set_char(self):
@@ -825,6 +852,7 @@ class Door(BattleEntity, Entity):
             self.occupies_tile = False
             self.__set_char()
             self.blocks_los = False
+            self.blocks_shots = 0
             return True  # if action successful
         return False  # if it's not
 
@@ -835,6 +863,7 @@ class Door(BattleEntity, Entity):
             self.occupies_tile = True
             self.__set_char()
             self.blocks_los = True
+            self.blocks_shots = 1
             return True  # if action successful
         return False  # if it's not
 
@@ -959,6 +988,13 @@ class Game:
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=100, speed=100, sight_radius=23.5, damage=1, weight=70)
         self.current_loc.place_entity(self.player, 10, 10)
+        self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
+        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
         self.is_waiting_input = True
