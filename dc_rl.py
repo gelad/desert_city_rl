@@ -65,12 +65,12 @@ def main_loop():
 
 
 dataset.initialize()
-lg = load_game()
-if not lg:
+loaded = load_game()
+if not loaded:
     game = game_logic.Game()
 else:
-    game = lg[0]
-    events.Observer._observers = lg[1]
+    game = loaded[0]
+    events.Observer._observers = loaded[1]
 graphics = render.Graphics(game)
 main_loop()
 if game.player.state == 'dead':

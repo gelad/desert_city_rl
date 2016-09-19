@@ -167,11 +167,13 @@ class BattleEntity(Entity):
             else:
                 reduce = protection[0] / (100 + protection[0])
             resulting_damage = ceil(damage * (1 - reduce) - protection[1])
+        if resulting_damage < 0:
+            resulting_damage = 0
         self.hp -= resulting_damage
         # fire an Entity event
-        events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': damage, 'dmg_type': dmg_type})
+        events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': resulting_damage, 'dmg_type': dmg_type})
         events.Event('location', {'type': 'entity_damaged', 'attacker': attacker,
-                                  'target': self, 'damage': damage, 'dmg_type': dmg_type})
+                                  'target': self, 'damage': resulting_damage, 'dmg_type': dmg_type})
         if self.hp <= 0 and not self.dead:  # check if self is alive and < 0 hp
             self.dead = True
             self.location.dead.append(self)  # add BE to dead list, waiting for removal
@@ -510,9 +512,9 @@ class UnguidedShotAI(AI):
                         self.owner.ammo = None
                     else:
                         self.owner.ammo = None
-                    Game.add_message(self.owner.name+' hits '+enemy.name+' for '+str(dmg)+' damage!',
+                    res_dmg = self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
+                    Game.add_message(self.owner.name+' hits '+enemy.name+' for '+str(res_dmg)+' damage!',
                                      'PLAYER', [255, 255, 255])
-                    self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
                     self.state = 'stopped'
                     self.owner.death()
                     return
@@ -812,11 +814,11 @@ class Prop(BattleEntity, Entity):
     """
 
     def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0, blocks_shots=1,
-                 occupies_tile=True, pass_cost=1):
+                 occupies_tile=True, pass_cost=1, armor=None):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
                         occupies_tile=occupies_tile, blocks_los=blocks_los, blocks_shots=blocks_shots,
                         weight=weight, pass_cost=pass_cost)
-        BattleEntity.__init__(self, hp)
+        BattleEntity.__init__(self, hp, armor=armor)
 
     def death(self):
         """ Death method """
@@ -829,7 +831,7 @@ class Door(BattleEntity, Entity):
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
 
-    def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, pass_cost=1,
+    def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, armor=None, pass_cost=1,
                  is_closed=True):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
@@ -844,7 +846,7 @@ class Door(BattleEntity, Entity):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=self.char, color=color,
                         occupies_tile=self.is_closed, blocks_los=blocks_los, blocks_shots=blocks_shots,
                         weight=weight, pass_cost=pass_cost)
-        BattleEntity.__init__(self, hp)
+        BattleEntity.__init__(self, hp, armor=armor)
 
     def __set_char(self):
         """ Method sets current character to display according to open/closed state """
