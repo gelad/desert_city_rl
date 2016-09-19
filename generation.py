@@ -45,6 +45,8 @@ def generate_loc(loc_type, settings, width, height):
                                 loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
                             if building[x][y] == 'door':
                                 loc.place_entity('door_wooden', loc_cell_x, loc_cell_y)
+                            if building[x][y] == 'small_window':
+                                loc.place_entity('window_small_sandstone', loc_cell_x, loc_cell_y)
                             # if cell is passable - add to floor list
                             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                                 floor_cells.append((loc_cell_x, loc_cell_y))
@@ -95,6 +97,15 @@ def subgen_building(building, build_w, build_h, settings=None):
         for y in range(0, build_h):  # draw vertical walls
             pattern[0][y] = 'wall'
             pattern[-1][y] = 'wall'
+        for n in range(1, 8): # make windows
+            x = random.randrange(build_w)
+            y = random.randrange(build_h)
+            direction = random.randrange(1, 4)
+            if direction == 1: x = 0
+            if direction == 2: x = -1
+            if direction == 3: y = 0
+            if direction == 4: y = -1
+            pattern[x][y] = 'small_window'
         x = random.randrange(build_w)  # make a door
         y = random.randrange(build_h)
         direction = random.randrange(1, 4)

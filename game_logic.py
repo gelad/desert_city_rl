@@ -21,9 +21,10 @@ class Cell:
         Class represents a single cell in location grid
     """
 
-    def __init__(self, tile_id, blocks_move=False, blocks_los=False, explored=False):
+    def __init__(self, tile_id, blocks_move=False, blocks_los=False, explored=False, pass_cost=1):
         self.explored = explored  # is tile explored?
         self.tile = tile_id  # tile type for drawing purposes (i.e. 'WALL', 'FLOOR')
+        self.pass_cost = pass_cost  # movement cost coefficient (for creating difficult terrain)
         self.blocks_move = blocks_move  # is tile blocking movement?
         self.blocks_los = blocks_los  # is tile blocking line of sight?
         self.entities = []  # entities, positioned in this tile
@@ -60,7 +61,7 @@ class Entity:
     """
 
     def __init__(self, name='', data_id='', description='', char=' ', color=None, location=None, position=None,
-                 weight=0, occupies_tile=False, blocks_los=False):
+                 weight=0, pass_cost=1, occupies_tile=False, blocks_los=False):
         self.name = name  # entity name
         self.data_id = data_id  # id in Entity data(base)
         self.description = description  # entity's description
@@ -69,6 +70,7 @@ class Entity:
         self.weight = weight  # weight of an entity, to calculate various things
         self.occupies_tile = occupies_tile  # entity occupy tile? (no other occupying entity can be placed there)
         self.blocks_los = blocks_los  # is it blocking line of sight? walls do, monsters (usually) don't
+        self.pass_cost = pass_cost  # movement cost coefficient (for creating difficult terrain)
         self.char = char  # char that represents entity in graphics ('@')
         self.color = color  # entity char color
         self.effects = []  # entity effects
@@ -516,10 +518,10 @@ class Item(Abilities, Entity):
         Mixed class, simple Item.
     """
 
-    def __init__(self, name, data_id, description, char, color, weight=0,
+    def __init__(self, name, data_id, description, char, color, weight=0, pass_cost=1,
                  equip_slots=None, categories=None, properties=None):
         # calling constructors
-        Entity.__init__(self, name=name, data_id=data_id, description=description, weight=weight,
+        Entity.__init__(self, name=name, data_id=data_id, description=description, weight=weight, pass_cost=pass_cost,
                         char=char, color=color, occupies_tile=False)
         self.owner = None  # owner of item - entity with inventory
         self.categories = categories  # item categories - a potion, a sword, etc
@@ -548,10 +550,10 @@ class ItemCharges(Item):
         Child class of item that has charges
     """
 
-    def __init__(self, name, data_id, description, char, color, charges, weight=0,
+    def __init__(self, name, data_id, description, char, color, charges, weight=0, pass_cost=1,
                  categories=None, properties=None, destroyed_after_use=True, equip_slots=None):
         super(ItemCharges, self).__init__(name=name, data_id=data_id, description=description, categories=categories,
-                                          properties=properties, weight=weight,
+                                          properties=properties, weight=weight, pass_cost=pass_cost,
                                           char=char, color=color, equip_slots=equip_slots)
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
         self.charges = charges  # number of uses
@@ -582,11 +584,12 @@ class ItemRangedWeapon(Item):
     """
         Child class for a ranged weapon.
     """
-    def __init__(self, name, data_id, description, char, color, range, weight=0, ammo_max=1, ammo_type=None, ammo=None,
-                 categories=None, properties=None, equip_slots=None):
+    def __init__(self, name, data_id, description, char, color, range, weight=0, pass_cost=1, ammo_max=1,
+                 ammo_type=None, ammo=None, categories=None, properties=None, equip_slots=None):
         super(ItemRangedWeapon, self).__init__(name=name, data_id=data_id,
                                                description=description, categories=categories, weight=weight,
-                                               properties=properties, char=char, color=color, equip_slots=equip_slots)
+                                               pass_cost=pass_cost, properties=properties, char=char, color=color,
+                                               equip_slots=equip_slots)
         self.range = range  # max range for ranged weapon
         self.ammo_type = ammo_type  # acceptable type of ammo ( Item.category)
         if ammo:
@@ -605,7 +608,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                  damage, weight=0, dmg_type='bashing', armor=None, resist=None, equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
-                        weight=weight, occupies_tile=True)
+                        weight=weight, pass_cost=1, occupies_tile=True)
         BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist)
         if ai:  # set AI owner
             ai.owner = self
@@ -772,14 +775,15 @@ class Player(Fighter):
         self.state = 'dead'
 
 
-class Wall(BattleEntity, Entity):
+class Prop(BattleEntity, Entity):
     """
-        Mixed class of a wall, that has HP and can be destroyed, but lacks acting ability.
+        Mixed class of a prop (wall, window, pillar, etc), that has HP and can be destroyed, but lacks acting ability.
     """
 
-    def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0):
+    def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0,
+                 occupies_tile=True, pass_cost=1):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
-                        occupies_tile=True, blocks_los=blocks_los, weight=weight)
+                        occupies_tile=occupies_tile, blocks_los=blocks_los, weight=weight, pass_cost=pass_cost)
         BattleEntity.__init__(self, hp)
 
     def death(self):
@@ -793,7 +797,8 @@ class Door(BattleEntity, Entity):
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
 
-    def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, is_closed=True):
+    def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, pass_cost=1,
+                 is_closed=True):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open
@@ -803,7 +808,7 @@ class Door(BattleEntity, Entity):
             blocks_los = False
         self.__set_char()  # set current char for drawing purposes
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=self.char, color=color,
-                        occupies_tile=self.is_closed, blocks_los=blocks_los, weight=weight)
+                        occupies_tile=self.is_closed, blocks_los=blocks_los, weight=weight, pass_cost=pass_cost)
         BattleEntity.__init__(self, hp)
 
     def __set_char(self):
@@ -977,8 +982,8 @@ def weighted_choice(choices):
     r = random.uniform(0, total)
     upto = 0
     for c, w in choices:
-       if upto + w >= r:
-          return c
-       upto += w
+        if upto + w >= r:
+            return c
+        upto += w
     assert False, "Shouldn't get here"
 
