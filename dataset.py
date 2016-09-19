@@ -161,7 +161,7 @@ def initialize():
 
     data_set['mob_scorpion'] = game_logic.Fighter(name='Scorpion', data_id='mob_scorpion',
                                                   description='Huge black scorpion, about 1 meter long.', char='s',
-                                                  armor={'bashing': 0, 'slashing': 50, 'piercing': 50},
+                                                  armor={'bashing': -50, 'slashing': 50, 'piercing': 50},
                                                   color=[5, 5, 5], hp=3, speed=100, sight_radius=14.5, damage=3,
                                                   dmg_type='piercing', ai=game_logic.SimpleMeleeChaserAI(), weight=15)
 

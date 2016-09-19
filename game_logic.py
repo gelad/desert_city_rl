@@ -2,7 +2,7 @@
     This file contains game logic objects.
 """
 import actions
-import fov_los
+import fov_los_pf
 import effects
 import events
 import abilities
@@ -213,7 +213,7 @@ class Seer(Entity):
 
     def compute_fov(self):
         """ Method that calculates FOV """
-        self.fov_set = fov_los.get_fov(self.position[0], self.position[1], self.location, self.sight_radius)
+        self.fov_set = fov_los_pf.get_fov(self.position[0], self.position[1], self.location, self.sight_radius)
         if isinstance(self, Player):
             for point in self.fov_set:
                 if self.location.is_in_boundaries(point[0], point[1]):
@@ -416,6 +416,9 @@ class SimpleMeleeChaserAI(AI):
 
     def __init__(self, state='idle'):
         AI.__init__(self, state)
+        self.seen = False  # if player has been seen - set to true. For chasing
+        self.seen_x = -1
+        self.seen_y = -1
 
     def on_event_location(self, data):
         """ Method handling location-related events """
@@ -430,18 +433,34 @@ class SimpleMeleeChaserAI(AI):
 
     def act(self):
         """ Method called when monster is ready to act """
+        # TODO: comment this
         if self.state == 'alert':
             x = self.owner.position[0]
             y = self.owner.position[1]
             for point in self.owner.fov_set:
                 player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
                 if player:
+                    self.seen = True
+                    self.seen_x = player.position[0]  # last seen position of player
+                    self.seen_y = player.position[1]
                     if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
                         self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
                     else:
-                        los = fov_los.get_los(x, y, point[0], point[1])
-                        step_cell = los[1]
-                        self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                        path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])
+                        if len(path) > 0:
+                            step_cell = path[1]
+                            self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                elif self.seen:
+                    if not ((x == self.seen_x) and (y == self.seen_y)):
+                        path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)
+                        if len(path) > 0:
+                            step_cell = path[1]
+                            self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                    else:
+                        self.seen = True
+                        self.seen_x = -1
+                        self.seen_y = -1
+
             if self.owner.state == 'ready':
                 self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
 
@@ -462,7 +481,7 @@ class UnguidedShotAI(AI):
 
     def enroute(self):
         """ Method to calculate route """
-        self.route = fov_los.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
+        self.route = fov_los_pf.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
         self.next = iter(self.route)
         next(self.next)
 
@@ -899,6 +918,7 @@ class Location:
         self.dead = []  # list of dead BattleEntities to be removed
         # WARNING! it's a hack, graphic-related info stored in loc, to save/load it with the loc
         self.out_of_sight_map = {}  # dict for storing explored, but invisible tiles
+        self.astar = None
 
     def is_in_boundaries(self, x, y):
         """ Method validating coordinates, to avoid out of range errors  """
@@ -967,6 +987,14 @@ class Location:
         if self.is_in_boundaries(x, y):  # check if cell coords are in boundaries
             return self.cells[x][y].is_transparent()  # return if cell is transparent
         return False  # if out of bounds, edge of the map certainly block los ;)
+
+    def get_move_cost(self, dest_x, dest_y):
+        """ Method that returns movement cost (for A*) """
+        if self.is_in_boundaries(dest_x, dest_y):
+            if self.cells[dest_x][dest_y].is_movement_allowed():
+                return self.cells[dest_x][dest_y].get_move_cost()
+            return None
+        return None
 
 
 class Game:
