@@ -107,6 +107,8 @@ class Entity:
                 self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                 self.location.cells[x][y].entities.append(self)  # add to new cell
                 self.position = (x, y)  # update entity position
+                if self.occupies_tile or self.pass_cost != 1:  # if entity blocks or impairs movement
+                    self.location.path_map_update(x, y)  # update path map
                 events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
                 msg = self.name + 'relocated to ' + str(x) + ':' + str(y)
                 Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -250,6 +252,8 @@ class Actor(Entity):
                     self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                     self.location.cells[new_x][new_y].entities.append(self)  # add to new cell
                     self.position = (new_x, new_y)  # update entity position
+                    if self.occupies_tile or self.pass_cost != 1:  # if entity blocks or impairs movement
+                        self.location.path_map_update(new_x, new_y)  # update path map
                     events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
                     msg = self.name + 'moved to ' + str(new_x) + ':' + str(new_y)
                     Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -428,8 +432,6 @@ class SimpleMeleeChaserAI(AI):
                 pl_y = data['entity'].position[1]
                 if hypot(pl_x - self.owner.position[0], pl_y - self.owner.position[1]) <= self.owner.sight_radius:
                     self.state = 'alert'
-                else:
-                    self.state = 'idle'
 
     def act(self):
         """ Method called when monster is ready to act """
@@ -448,21 +450,22 @@ class SimpleMeleeChaserAI(AI):
                     else:
                         path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])
                         if len(path) > 0:
-                            step_cell = path[1]
+                            step_cell = path[0]
                             self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
-                elif self.seen:
-                    if not ((x == self.seen_x) and (y == self.seen_y)):
-                        path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)
-                        if len(path) > 0:
-                            step_cell = path[1]
-                            self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+            if self.seen and self.owner.state == 'ready':
+                if not ((x == self.seen_x) and (y == self.seen_y)):
+                    path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)
+                    if len(path) > 0:
+                        step_cell = path[0]
+                        self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
                     else:
-                        self.seen = True
+                        self.seen = False
                         self.seen_x = -1
                         self.seen_y = -1
+                        self.state = 'idle'
 
-            if self.owner.state == 'ready':
-                self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
+        if self.owner.state == 'ready':  # if no action is performed - wait
+            self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
 
 
 class UnguidedShotAI(AI):
@@ -882,6 +885,7 @@ class Door(BattleEntity, Entity):
             self.__set_char()
             self.blocks_los = False
             self.blocks_shots = 0
+            self.location.path_map_update(self.position[0], self.position[1])  # update path map
             return True  # if action successful
         return False  # if it's not
 
@@ -893,6 +897,7 @@ class Door(BattleEntity, Entity):
             self.__set_char()
             self.blocks_los = True
             self.blocks_shots = 1
+            self.location.path_map_update(self.position[0], self.position[1])  # update path map
             return True  # if action successful
         return False  # if it's not
 
@@ -918,7 +923,7 @@ class Location:
         self.dead = []  # list of dead BattleEntities to be removed
         # WARNING! it's a hack, graphic-related info stored in loc, to save/load it with the loc
         self.out_of_sight_map = {}  # dict for storing explored, but invisible tiles
-        self.astar = None
+        self.path_map = [[1 for i in range(width)] for j in range(height)]  # a list of path cost numbers
 
     def is_in_boundaries(self, x, y):
         """ Method validating coordinates, to avoid out of range errors  """
@@ -952,6 +957,8 @@ class Location:
                     if hypot(entity.position[0] - seer.position[0],
                              entity.position[1] - seer.position[1]) <= seer.sight_radius:
                         seer.compute_fov()
+            if entity.occupies_tile or entity.pass_cost != 1:  # if entity blocks or impairs movement
+                self.path_map_update(x, y)  # update path map
             events.Event('location', {'type': 'entity_placed', 'entity': entity})  # fire an event
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
@@ -972,6 +979,8 @@ class Location:
                 if hypot(entity.position[0] - seer.position[0],
                          entity.position[1] - seer.position[1]) <= seer.sight_radius:
                     seer.compute_fov()
+        if entity.occupies_tile or entity.pass_cost != 1:  # if entity blocks or impairs movement
+            self.path_map_update(entity.position[0], entity.position[1])  # update path map
         entity.position = None
         entity.location = None
         del entity
@@ -990,11 +999,26 @@ class Location:
 
     def get_move_cost(self, dest_x, dest_y):
         """ Method that returns movement cost (for A*) """
-        if self.is_in_boundaries(dest_x, dest_y):
-            if self.cells[dest_x][dest_y].is_movement_allowed():
-                return self.cells[dest_x][dest_y].get_move_cost()
-            return None
-        return None
+        if self.cells[dest_x][dest_y].is_there_a(Player):  # if there a player - mark it as passable
+            return self.cells[dest_x][dest_y].get_move_cost()
+        else:
+            return self.path_map[dest_x][dest_y]
+
+    def path_map_recompute(self):
+        """ Method that recomputes path map """
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.cells[x][y].is_movement_allowed():
+                    self.path_map[x][y] = self.cells[x][y].get_move_cost()
+                else:
+                    self.path_map[x][y] = 0
+
+    def path_map_update(self, x, y):
+        """ Method that updates single cell of path map """
+        if self.cells[x][y].is_movement_allowed():
+            self.path_map[x][y] = self.cells[x][y].get_move_cost()
+        else:
+            self.path_map[x][y] = 0
 
 
 class Game:

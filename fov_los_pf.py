@@ -20,11 +20,7 @@ def get_los(x1, y1, x2, y2):
     return tdl.map.bresenham(x1, y1, x2, y2)
 
 
-def get_astar(loc):
-    """ Function that returns tdl AStar object """
-    return tdl.map.AStar(width=loc.width, height=loc.height, callback=loc.get_move_cost)
-
-
 def get_path(loc, x1, y1, x2, y2):
     """ Function that returns path, using A* algorithm """
-    return loc.astar.get_path(x1, y1, x2, y2)
+    astar = tdl.map.AStar(width=loc.width, height=loc.height, callback=loc.get_move_cost)
+    return astar.get_path(x1, y1, x2, y2)

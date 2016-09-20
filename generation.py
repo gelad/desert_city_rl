@@ -97,7 +97,7 @@ def generate_loc(loc_type, settings, width, height):
                         mob_coords = floor_cells[random.randrange(len(floor_cells))]
                         loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
                 # TODO: add destructed buildings
-    loc.astar = fov_los_pf.get_astar(loc)  # generate pathfinding map for location
+    loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 
 
