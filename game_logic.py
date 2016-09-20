@@ -137,7 +137,7 @@ class BattleEntity(Entity):
 
     def __init__(self, hp, armor=None, resist=None, dead=False):
         self.hp = hp  # current hitpoints
-        self.maxhp = hp  # maximum hitpoints
+        self.base_maxhp = hp  # maximum hitpoints
         if armor:  # physical armor
             self.armor = armor
         else:
@@ -148,6 +148,11 @@ class BattleEntity(Entity):
             self.resist = {'fire': 0, 'cold': 0, 'lightning': 0, 'poison': 0, 'acid': 0,
                            'mental': 0, 'death': 0, 'strange': 0}
         self.dead = dead  # is BE dead
+
+    @property
+    def maxhp(self):
+        """ Maximum hp getter (with effects) """
+        return self.base_maxhp
 
     def take_damage(self, damage, dmg_type='pure', attacker=None):
         """ This method should be called if entity is damaged
@@ -236,10 +241,18 @@ class Actor(Entity):
     """
 
     def __init__(self, speed, state='ready', ai=None):
-        self.speed = speed  # overall speed factor of actions
+        self.base_speed = speed  # overall speed factor of actions
         self.state = state  # actor state - ready, acting or withdrawal (for now)
         self.actions = []  # list of actions
         self.ai = ai  # ai component
+
+    @property
+    def speed(self):
+        """ Actor speed getter (with all effects applied) """
+        haste = self.get_effect('HASTE')
+        if haste == 0:  # if no haste effect
+            haste = 100  # set haste coefficient to 1
+        return int(self.base_speed * haste / 100)
 
     def move(self, dx, dy):
         """ Movement method, checks if it is allowed to move. For player, monster movement. """
@@ -353,6 +366,7 @@ class Inventory(Entity):
 
     def use_item(self, item):
         """ Item use on self method """
+        events.Event(self, {'type': 'used_on_self', 'item': item})  # fire an event
         item.use(self)
 
 
@@ -603,7 +617,7 @@ class Item(Abilities, Entity):
                 else:
                     target.hp = result_hp
                 msg = self.name + ' heals ' + target.name + ' for ' + str(effect.magnitude) + ' HP.'
-                Game.add_message(msg, 'PLAYER', [255, 255, 255])
+                Game.add_message(msg, 'PLAYER', [0, 255, 0])
 
 
 class ItemCharges(Item):
@@ -1059,10 +1073,10 @@ class Game:
         self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
         self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         self.current_loc.place_entity('item_bronze_bolt', 11, 11)
-        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
-        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
-        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
-        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        self.current_loc.place_entity('item_haste_potion', 11, 11)
+        self.current_loc.place_entity('item_haste_potion', 11, 11)
+        self.current_loc.place_entity('item_haste_potion', 11, 11)
+        self.current_loc.place_entity('item_barbed_loincloth', 11, 11)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
         self.is_waiting_input = True

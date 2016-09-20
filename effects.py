@@ -22,3 +22,4 @@ class Effect:
         elif eff == 'INCREASE_MELEE_DAMAGE': self.description = 'Increases melee damage by '+str(magnitude)
         elif eff == 'INCREASE_RANGED_DAMAGE': self.description = 'Increases ranged damage by ' + str(magnitude)
         elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints.'
+        elif eff == 'HASTE': self.description = 'Quickens all actions by ' + str(magnitude) + '%.'

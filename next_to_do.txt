@@ -34,9 +34,9 @@ Implement different terrain movement cost. (DONE)
 Make data object - library of game Entities, to load them from XML/JSON/WHATEVER. (DATASET READY - LOADING FROM JSON TO GO)
 Implement simple town level generation. (DONE)
 Make tileset readable from text/xml/json file. (DONE)
+Implement A* pathfinding. (DONE)
 
 
-Implement A* pathfinding.
 Make some traps.
 Implement throwing.
 Add some config files (at least mechanism for them)

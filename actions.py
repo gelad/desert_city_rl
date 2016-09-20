@@ -106,6 +106,20 @@ def act_wait(action, register_call, actor, ticks):
         actor.state = 'ready'  # return actor to ready state
 
 
+def act_apply_timed_effect(action, register_call, target, effect):
+    """ Applies an effect to target for ammount of time """
+    if register_call:  # part executed when function is registered in ActionMgr
+        target.effects.append(effect)  # apply effect
+    else:  # part that is executed when action fires
+        if target:  # if target still exists
+            if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect end
+                color = [255, 255, 255]
+                if effect.eff == 'HASTE':
+                    color = [255, 255, 0]
+                game_logic.Game.add_message(effect.eff.capitalize() + ': ' + ' effect fades away.', 'PLAYER', color)
+            target.effects.remove(effect)  # remove effect
+
+
 def act_move(action, register_call, actor, dx, dy):
     """ Actor self-moving action (need a different one for unvoluntarily movement, regardless of speed) """
     if register_call:  # part executed when function is registered in ActionMgr

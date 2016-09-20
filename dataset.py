@@ -57,6 +57,17 @@ def initialize():
                                                description='A stone boulder.', categories={'rubbish'},
                                                char='*', color=[200, 200, 200], weight=10)
 
+    data_set['item_haste_potion'] = game_logic.ItemCharges(name='haste potion', data_id='item_haste_potion',
+                                                           description='A potion that hastens user by 50%.',
+                                                           categories={'consumable', 'potion'}, char='!',
+                                                           color=[255, 255, 0],
+                                                           charges=1, destroyed_after_use=True, weight=0.2)
+    cond = abilities.Condition('USED')
+    react = {'type': 'apply_timed_effect', 'target': 'item_owner', 'time': 1000, 'effect': effects.Effect('HASTE', 50)}
+    abil = abilities.Ability(name='Haste', owner=data_set['item_haste_potion'],
+                             trigger='used_on_self', conditions=[cond], reactions=[react])
+    data_set['item_haste_potion'].add_ability(abil)
+
     data_set['item_healing_potion'] = game_logic.ItemCharges(name='healing potion', data_id='item_healing_potion',
                                                              description='A potion that heals 5 HP.',
                                                              categories={'consumable', 'potion'}, char='!',

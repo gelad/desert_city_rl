@@ -3,6 +3,7 @@
 """
 import game_logic
 import events
+import actions
 import bool_eval
 
 
@@ -23,6 +24,11 @@ class Condition:
                 str(kwargs['owner'].hp / kwargs['owner'].maxhp) + sign + str(number))  # check hp percent condition
         if self.condition == 'EQUIPPED' and kwargs['owner']:  # EQUIPPED condition
             if kwargs['owner_item'] in kwargs['owner'].equipment.values():  # check if item equipped
+                return True
+            else:
+                return False
+        if self.condition == 'USED':  # USED condition
+            if kwargs['owner_item'] == kwargs['item']:  # check if item used is item with ability
                 return True
             else:
                 return False
@@ -54,13 +60,12 @@ class Ability(events.Observer):
     def set_owner(self, owner):
         """ Method to set owner and refresh observer """
         self.close()  # unregister observing old owner
-        if isinstance(owner, game_logic.Item):  # if it's an item - set owner to owning Entity
-            self.owner_item = owner  # set owner item to Item object
+        try:  # if ability belongs to an item - check owner of item
             if owner.owner:  # if item is equipped or in inventory - set owning Entity
                 self.owner = owner.owner
             else:
                 self.owner = owner  # set owner
-        else:
+        except AttributeError:
             self.owner = owner  # set owner
         events.Observer.__init__(self)  # register observing new owner
         self.observe(owner, self.on_event_owner)
@@ -72,6 +77,8 @@ class Ability(events.Observer):
             for cond in self.conditions:
                 if isinstance(cond, Condition):
                     kwargs = {'owner': self.owner, 'owner_item': self.owner_item}  # if other kwargs needed - add here
+                    if data['type'] == 'used_on_self':  # if used on self type - add used item
+                        kwargs.update({'item': data['item']})
                     expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
                 else:
                     expression += cond  # add '(', ')', 'and', 'or' etc
@@ -85,7 +92,15 @@ class Ability(events.Observer):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             if reaction['target'] == 'attacker':  # if target is attacker
-                self.owner.deal_damage(event_data['attacker'], reaction['damage'], reaction['dmg_type'])
+                damage_dealt = self.owner.deal_damage(event_data['attacker'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
-                    self.name + ': ' + event_data['attacker'].name + ' takes ' + str(reaction['damage']) + ' damage!',
+                    self.name + ': ' + event_data['attacker'].name + ' takes ' + str(damage_dealt) + ' damage!',
                     'PLAYER', [255, 255, 255])
+        if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
+            if reaction['target'] == 'item_owner':  # if target is owner of item
+                self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
+                                                               self.owner, reaction['effect'])
+                color = [255, 255, 255]
+                if reaction['effect'].eff == 'HASTE': color = [255, 255, 0]
+                game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': all actions quickened for ' +
+                                            str(reaction['time']) + ' ticks.', 'PLAYER', color)
