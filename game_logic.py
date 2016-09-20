@@ -104,11 +104,14 @@ class Entity:
             # check if new position is in the location boundaries
             if self.location.is_in_boundaries(x, y):
                 # remove from old cell
+                old_x = self.position[0]  # remember old position to update path map
+                old_y = self.position[1]
                 self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                 self.location.cells[x][y].entities.append(self)  # add to new cell
                 self.position = (x, y)  # update entity position
                 if self.occupies_tile or self.pass_cost != 1:  # if entity blocks or impairs movement
-                    self.location.path_map_update(x, y)  # update path map
+                    self.location.path_map_update(x, y)
+                    self.location.path_map_update(old_x, old_y)  # update path map
                 events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
                 msg = self.name + 'relocated to ' + str(x) + ':' + str(y)
                 Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -249,11 +252,14 @@ class Actor(Entity):
                 # checks if tile allows movement
                 if self.location.cells[new_x][new_y].is_movement_allowed():
                     # remove from old cell
+                    old_x = self.position[0]  # remember old position to update path map
+                    old_y = self.position[1]
                     self.location.cells[self.position[0]][self.position[1]].entities.remove(self)
                     self.location.cells[new_x][new_y].entities.append(self)  # add to new cell
                     self.position = (new_x, new_y)  # update entity position
                     if self.occupies_tile or self.pass_cost != 1:  # if entity blocks or impairs movement
                         self.location.path_map_update(new_x, new_y)  # update path map
+                        self.location.path_map_update(old_x, old_y)  # update path map
                     events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
                     msg = self.name + 'moved to ' + str(new_x) + ':' + str(new_y)
                     Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -452,7 +458,7 @@ class SimpleMeleeChaserAI(AI):
                         if len(path) > 0:
                             step_cell = path[0]
                             self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
-            if self.seen and self.owner.state == 'ready':
+            if self.seen:
                 if not ((x == self.seen_x) and (y == self.seen_y)):
                     path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)
                     if len(path) > 0:
