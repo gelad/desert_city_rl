@@ -120,7 +120,7 @@ def subgen_building(building, build_w, build_h, settings=None):
         for n in range(1, 8): # make windows
             x = random.randrange(1, build_w - 1)
             y = random.randrange(1, build_h - 1)
-            direction = random.randrange(1, 4)
+            direction = random.randint(1, 4)
             if direction == 1: x = 0
             if direction == 2: x = -1
             if direction == 3: y = 0
@@ -128,7 +128,7 @@ def subgen_building(building, build_w, build_h, settings=None):
             pattern[x][y] = game_logic.weighted_choice([('small_window', 50), ('large_window', 50)])
         x = random.randrange(1, build_w - 1)  # make a door
         y = random.randrange(1, build_h - 1)
-        direction = random.randrange(1, 4)
+        direction = random.randint(1, 4)
         if direction == 1: x = 0
         if direction == 2: x = -1
         if direction == 3: y = 0

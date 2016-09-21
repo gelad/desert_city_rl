@@ -6,6 +6,8 @@ import events
 import actions
 import bool_eval
 
+import pickle
+
 
 class Condition:
     """ Class for ability condition """
@@ -86,6 +88,8 @@ class Ability(events.Observer):
                         kwargs.update({'item': data['item']})
                     if data['type'] == 'entity_moved':  # if moved event type - add moved entity
                         kwargs.update({'entity': data['entity']})
+                    if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
+                        kwargs.update({'damage': data['damage']})
                     expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
                 else:
                     expression += cond  # add '(', ')', 'and', 'or' etc
@@ -116,3 +120,13 @@ class Ability(events.Observer):
                 if reaction['effect'].eff == 'HASTE': color = [255, 255, 0]
                 game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': all actions quickened for ' +
                                             str(reaction['time']) + ' ticks.', 'PLAYER', color)
+        if reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
+            if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
+                self.owner.location.action_mgr.register_action(1, actions.act_deal_periodic_damage,
+                                                               self.owner.location.action_mgr, event_data['target'],
+                                                               pickle.loads(pickle.dumps(reaction['effect'])),
+                                                               reaction['damage'],
+                                                               reaction['dmg_type'], reaction['period'],
+                                                               reaction['whole_time'], reaction['stackable'])
+                                                        # doing pickle copy of effect to make every stack separate
+

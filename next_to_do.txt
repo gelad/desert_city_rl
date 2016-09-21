@@ -36,8 +36,9 @@ Implement simple town level generation. (DONE)
 Make tileset readable from text/xml/json file. (DONE)
 Implement A* pathfinding. (DONE)
 Make inventory menu show item info. (DONE)
+Make some traps. (DONE)
+Periodic damage ability. (DONE)
 
 
-Make some traps.
 Implement throwing.
 Add some config files (at least mechanism for them)

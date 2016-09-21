@@ -41,8 +41,8 @@ class ActionMgr:
     def register_action(self, t_needed, func, *args, **kwargs):
         """ Method creates an action and adds it to action list """
         action = Action(t_passed=0, t_needed=t_needed, frozen=False, func=func, args=args, kwargs=kwargs)
-        action.register()  # call action's func in register mode
         self.actions.append(action)
+        action.register()  # call action's func in register mode
         return action
 
     def remove_action(self, action):
@@ -118,6 +118,49 @@ def act_apply_timed_effect(action, register_call, target, effect):
                     color = [255, 255, 0]
                 game_logic.Game.add_message(effect.eff.capitalize() + ': ' + ' effect fades away.', 'PLAYER', color)
             target.effects.remove(effect)  # remove effect
+
+
+def act_deal_periodic_damage(action, register_call, act_mgr, target, effect,
+                             damage, dmg_type, period, whole_time, stackable=False):
+    """ Periodically damages target while effect is on target """
+    if register_call:  # part executed when function is registered in ActionMgr
+        if stackable:  # if effect is stackable
+            if effect in target.effects:  # if there is particularly this effect in
+                pass  # do nothing, deal damage further
+            else:
+                act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect)  # apply a new timed effect
+                if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
+                    color = [255, 255, 255]
+                    if effect.eff == 'POISONED':
+                        color = [0, 150, 0]
+                    game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', color)
+        else:  # if not stackable
+            if effect in target.effects:  # if there is particularly this effect in
+                pass  # do nothing, do damage further
+            else:  # if no this effect, check for similar effects
+                if target.get_effect(effect.eff) > 0:  # if there are such effect type
+                    act_mgr.remove_action(action)  # stop action
+                    return
+                else:
+                    act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect)  # apply a new timed effect
+                    if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
+                        color = [255, 255, 255]
+                        if effect.eff == 'POISONED':
+                            color = [0, 150, 0]
+                        game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', color)
+        action.t_needed = period  # set needed time to 1 period of damage
+    else:  # part that is executed when action fires
+        if target:  # if target still exists
+            if effect in target.effects:  # if effect still on target
+                damage_dealt = target.take_damage(damage, dmg_type)  # do damage
+                if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
+                    color = [255, 255, 255]
+                    if effect.eff == 'POISONED':
+                        color = [0, 150, 0]
+                    game_logic.Game.add_message(effect.eff.capitalize() + ': ' + str(damage_dealt) + ' damage.',
+                                                'PLAYER', color)
+                act_mgr.register_action(whole_time, act_deal_periodic_damage, act_mgr, target, effect,
+                                        damage, dmg_type, period, whole_time, stackable)  # apply next tick of damage
 
 
 def act_move(action, register_call, actor, dx, dy):

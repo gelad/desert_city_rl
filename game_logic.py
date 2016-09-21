@@ -164,7 +164,7 @@ class BattleEntity(Entity):
             random.seed()
             min_dmg = damage[0]
             max_dmg = damage[1]
-            damage = random.randrange(min_dmg, max_dmg)
+            damage = random.randint(min_dmg, max_dmg)
         except TypeError:
             pass
         if dmg_type == 'pure':  # if 'pure' damage inflict it without any protection
@@ -182,6 +182,7 @@ class BattleEntity(Entity):
         self.hp -= resulting_damage
         # fire an Entity event
         events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': resulting_damage, 'dmg_type': dmg_type})
+        # fire location event
         events.Event('location', {'type': 'entity_damaged', 'attacker': attacker,
                                   'target': self, 'damage': resulting_damage, 'dmg_type': dmg_type})
         if self.hp <= 0 and not self.dead:  # check if self is alive and < 0 hp
@@ -543,7 +544,7 @@ class UnguidedShotAI(AI):
                         random.seed()
                         min_dmg = dmg[0]
                         max_dmg = dmg[1]
-                        dmg = random.randrange(min_dmg, max_dmg)
+                        dmg = random.randint(min_dmg, max_dmg)
                     except TypeError:
                         pass
                     for ef in self.owner.weapon.effects:
@@ -703,6 +704,9 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             if dist_to_target <= 1.42:
                 dmg = self.damage
                 damage_dealt = self.deal_damage(target, dmg, self.dmg_type)  # deal damage
+                # fire Entity event
+                events.Event(self, {'type': 'hit_basic_attack', 'target': target,
+                                    'damage': damage_dealt, 'dmg_type': self.dmg_type})
                 msg = self.name + ' attacks ' + target.name + ' and deals ' + str(damage_dealt) + ' damage!'
                 Game.add_message(msg, 'PLAYER', [255, 255, 255])
                 msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
@@ -736,10 +740,13 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                     random.seed()
                     min_dmg = dmg[0]
                     max_dmg = dmg[1]
-                    dmg = random.randrange(min_dmg, max_dmg)
+                    dmg = random.randint(min_dmg, max_dmg)
                 except TypeError:
                     pass
                 damage_dealt = self.deal_damage(target, dmg, dmg_type)  # deal damage
+                # fire Entity event
+                events.Event(self, {'type': 'hit_weapon_attack', 'target': target,
+                                    'damage': damage_dealt, 'dmg_type': dmg_type, 'weapon': weapon})
                 msg = self.name + ' attacks ' + target.name + ' with '\
                     + weapon.name + ' and deals ' + str(damage_dealt) + ' damage!'
                 Game.add_message(msg, 'PLAYER', [255, 255, 255])
