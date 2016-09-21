@@ -851,7 +851,7 @@ class Player(Fighter):
         self.state = 'dead'
 
 
-class Prop(BattleEntity, Entity):
+class Prop(BattleEntity, Abilities, Entity):
     """
         Mixed class of a prop (wall, window, pillar, etc), that has HP and can be destroyed, but lacks acting ability.
     """
@@ -862,6 +862,7 @@ class Prop(BattleEntity, Entity):
                         occupies_tile=occupies_tile, blocks_los=blocks_los, blocks_shots=blocks_shots,
                         weight=weight, pass_cost=pass_cost)
         BattleEntity.__init__(self, hp, armor=armor)
+        Abilities.__init__(self)
 
     def death(self):
         """ Death method """

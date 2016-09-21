@@ -35,6 +35,7 @@ Make data object - library of game Entities, to load them from XML/JSON/WHATEVER
 Implement simple town level generation. (DONE)
 Make tileset readable from text/xml/json file. (DONE)
 Implement A* pathfinding. (DONE)
+Make inventory menu show item info. (DONE)
 
 
 Make some traps.

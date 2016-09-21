@@ -79,6 +79,11 @@ def generate_loc(loc_type, settings, width, height):
                         # more loot - dangerous mobs
                         mob_coords = floor_cells[random.randrange(len(floor_cells))]
                         loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
+                    trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+                    for m in range(0, trap_count):
+                        trap_id = game_logic.weighted_choice([('trap_corrosive_moss', 100)])
+                        trap_coords = floor_cells[random.randrange(len(floor_cells))]
+                        loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in

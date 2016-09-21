@@ -32,6 +32,11 @@ class Condition:
                 return True
             else:
                 return False
+        if self.condition == 'MOVED_ON':  # MOVED_ON condition
+            if kwargs['owner'].position == kwargs['entity'].position:  # check if positions of owner and entity match
+                return True
+            else:
+                return False
         return True
 
 
@@ -55,7 +60,8 @@ class Ability(events.Observer):
     def reobserve(self):
         """ Method that registers Ability to observe events """
         events.Observer.__init__(self)  # register self as observer
-        self.observe(self.owner, self.on_event_owner)
+        self.observe(self.owner, self.on_event)
+        self.observe('location', self.on_event)
 
     def set_owner(self, owner):
         """ Method to set owner and refresh observer """
@@ -67,10 +73,9 @@ class Ability(events.Observer):
                 self.owner = owner  # set owner
         except AttributeError:
             self.owner = owner  # set owner
-        events.Observer.__init__(self)  # register observing new owner
-        self.observe(owner, self.on_event_owner)
+        self.reobserve()  # register observers
 
-    def on_event_owner(self, data):
+    def on_event(self, data):
         """ Method that is called if any owner-related event fires """
         if data['type'] == self.trigger and not self.disabled:  # if trigger is valid
             expression = ''
@@ -79,6 +84,8 @@ class Ability(events.Observer):
                     kwargs = {'owner': self.owner, 'owner_item': self.owner_item}  # if other kwargs needed - add here
                     if data['type'] == 'used_on_self':  # if used on self type - add used item
                         kwargs.update({'item': data['item']})
+                    if data['type'] == 'entity_moved':  # if moved event type - add moved entity
+                        kwargs.update({'entity': data['entity']})
                     expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
                 else:
                     expression += cond  # add '(', ')', 'and', 'or' etc
@@ -95,6 +102,11 @@ class Ability(events.Observer):
                 damage_dealt = self.owner.deal_damage(event_data['attacker'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['attacker'].name + ' takes ' + str(damage_dealt) + ' damage!',
+                    'PLAYER', [255, 255, 255])
+            if reaction['target'] == 'mover':  # if target is mover
+                damage_dealt = self.owner.deal_damage(event_data['entity'], reaction['damage'], reaction['dmg_type'])
+                game_logic.Game.add_message(
+                    self.name + ': ' + event_data['entity'].name + ' takes ' + str(damage_dealt) + ' damage!',
                     'PLAYER', [255, 255, 255])
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item

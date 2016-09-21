@@ -45,6 +45,21 @@ def initialize():
     data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
     data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
 
+    data_set['trap_corrosive_moss'] = game_logic.Prop(name='Corrosive moss', data_id='trap_corrosive_moss',
+                                                      occupies_tile=False, blocks_los=False, blocks_shots=0,
+                                                      armor={'bashing': 300, 'slashing': 50, 'piercing': 300},
+                                                      pass_cost=1,
+                                                      description='A large patch of green acid-dripping moss.',
+                                                      char='_', color=[100, 220, 100], hp=30, weight=10)
+    data_set['trap_corrosive_moss'].effects.append(effects.Effect('BLOCK_BASHING', 30))
+    data_set['trap_corrosive_moss'].effects.append(effects.Effect('BLOCK_SLASHING', 2))
+    data_set['trap_corrosive_moss'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+    cond = abilities.Condition('MOVED_ON')
+    react = {'type': 'deal_damage', 'target': 'mover', 'damage': (1, 3), 'dmg_type': 'acid'}
+    abil = abilities.Ability(name='Corrosive acid', owner=data_set['trap_corrosive_moss'],
+                             trigger='entity_moved', conditions=[cond], reactions=[react])
+    data_set['trap_corrosive_moss'].add_ability(abil)
+
     data_set['door_wooden'] = game_logic.Door(name='Door', data_id='door_wooden', description='A wooden door.',
                                               char_closed='+', char_open='.', color=[128, 0, 0],
                                               armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
