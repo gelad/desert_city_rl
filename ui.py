@@ -60,6 +60,31 @@ class ElementTextLine(Element):
         return console
 
 
+class ElementTextRect(Element):
+    """ Simple UI element - rectangle with text (wrapped) """
+
+    def __init__(self, owner, x, y, width, height, text='', color=None, bgcolor=None, visible=True):
+        super(ElementTextRect, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+        self.text = text  # text to be displayed
+        if color:  # check if color specified
+            self.color = color
+        else:  # if not - white
+            self.color = [255, 255, 255]
+        if bgcolor:  # check if background color specified
+            self.bgcolor = bgcolor
+        else:  # if not - black
+            self.bgcolor = [0, 0, 0]
+
+    def draw(self):
+        """ Method returns tdl.Console with single line of text """
+        console = tdl.Console(self.width, self.height)
+        console.set_mode('scroll')
+        console.move(0, 0)
+        console.set_colors(self.color, self.bgcolor)
+        console.print_str(self.text)  # draw text on console
+        return console
+
+
 class ElementMainPanel(Element):
     """ Main panel with player stats, etc """
 
@@ -97,6 +122,57 @@ class ElementMainPanel(Element):
         console = tdl.Console(self.width, self.height)
         for element in self.elements:  # blit every element to console
             console.blit(element.draw(), element.x, element.y)
+        return console
+
+
+class ElementItemInfo(Element):
+    """ Item info for inventory """
+
+    def __init__(self, owner, item=None, x=0, y=0, width=0, height=0, visible=True):
+        super(ElementItemInfo, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+        self._item = item  # Item object, to obtain player-related info
+        self.item_name = ElementTextLine(self, 0, 0, ' ')
+        self.add_element(self.item_name)  # item name on top of panel
+        self.item_desc = ElementTextRect(self, 0, 1, width, height - 1)  # description of item
+        self.add_element(self.item_desc)
+        self.item = item
+
+    @property
+    def item(self):
+        return self.item
+
+    @item.setter
+    def item(self, item: game_logic.Item):
+        self._item = item
+        text = ''  # clear item info
+        self.item_name.set_line(' ')
+        if item:  # if item is not None
+            self.item_name.set_line(item.name)
+            text += item.description + '\n'
+            text += 'Weight: ' + str(item.weight) + ' kg.\n'
+            if item.properties:
+                if 'bashing' in item.properties:
+                    text += 'Deals '+str(item.properties['bashing'][0])+'-'+str(item.properties['bashing'][1])+' bashing damage.\n'
+                if 'slashing' in item.properties:
+                    text += 'Deals '+str(item.properties['slashing'][0])+'-'+str(item.properties['slashing'][1])+' slashing damage.\n'
+                if 'piercing' in item.properties:
+                    text += 'Deals '+str(item.properties['piercing'][0])+'-'+str(item.properties['piercing'][1])+' piercing damage.\n'
+            if len(item.effects) > 0:
+                text += 'Effects: '
+                for effect in item.effects:
+                    text += effect.description + '\n'
+            if len(item.abilities) > 0:
+                text += 'Abilities: '
+                for ability in item.abilities:
+                    text += ability.name + '\n'
+        self.item_desc.text = text  # set element text to generated text
+
+    def draw(self):
+        """ Drawing method """
+        console = tdl.Console(self.width, self.height)
+        for element in self.elements:  # blit every element to console
+            if element.visible:
+                console.blit(element.draw(), element.x, element.y)
         return console
 
 
@@ -657,9 +733,16 @@ class WindowInventoryMenu(Window):
         width += 3
         if width < len(str(caption)):
             width = len(str(caption))
-        elems.append(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
+        self.caption = ElementTextLine(self, 0, 0, caption)
+        elems.append(self.caption)  # add menu caption as text line
+        width += 1
+        self.item_info = ElementItemInfo(owner=self, x=width, y=0, width=20, height=30)  # add item info panel
+        elems.append(self.item_info)
         # call parent constructor
-        super(WindowInventoryMenu, self).__init__(self.x, self.y, width, len(options) + 1, z, visible)
+        height = len(options) + 1
+        if height < self.item_info.height:
+            height = self.item_info.height
+        super(WindowInventoryMenu, self).__init__(self.x, self.y, width + self.item_info.width, height, z, visible)
         for elem in elems:
             self.add_element(elem)
         self.selected = None  # if no options - selected remains None
@@ -667,6 +750,7 @@ class WindowInventoryMenu(Window):
         if len(self.options) > 0:
             self.selected = self.options[0]  # set selection to first option
             self.selected_index = 0
+            self.item_info.item = self.selected
         self.state = 'working'  # set menu state to working
         self.prev_window = prev_window  # previous window
         self.console = tdl.Console(self.width, self.height)
@@ -675,10 +759,11 @@ class WindowInventoryMenu(Window):
         """ Drawing method """
         i = 0
         for element in self.elements:  # blit every element to console
-            if i == self.selected_index and self.selected:  # highlight selected element
-                element.bgcolor = [0, 100, 0]
-            else:  # if not highligted - set background color to color of menu caption
-                element.bgcolor = self.elements[-1].bgcolor
+            if isinstance(element, ElementTextLine):
+                if i == self.selected_index and self.selected:  # highlight selected element
+                    element.bgcolor = [0, 100, 0]
+                else:  # if not highligted - set background color to color of menu caption
+                    element.bgcolor = self.caption.bgcolor
             self.console.blit(element.draw(), element.x, element.y)
             i += 1
         return self.console
@@ -702,10 +787,12 @@ class WindowInventoryMenu(Window):
                     if self.selected_index > 0:  # if up - select previous option
                         self.selected_index -= 1
                         self.selected = self.options[self.selected_index]
+                        self.item_info.item = self.selected
                 elif event.key == 'DOWN' or event.key == 'KP2':
                     if self.selected_index < len(self.options) - 1:  # if down - select next option
                         self.selected_index += 1
                         self.selected = self.options[self.selected_index]
+                        self.item_info.item = self.selected
                 elif event.key == 'CHAR':
                     # convert the ASCII code to an index; if it corresponds to an option, return it
                     index = ord(event.keychar) - ord('a')

@@ -698,56 +698,57 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
     def attack_melee_basic(self, target):
         """ Attack in melee with basic attack method (mostly for monsters)"""
         # check if target is in melee range
-        dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
-        if dist_to_target <= 1.42:
-            dmg = self.damage
-            damage_dealt = self.deal_damage(target, dmg, self.dmg_type)  # deal damage
-            msg = self.name + ' attacks ' + target.name + ' and deals ' + str(damage_dealt) + ' damage!'
-            Game.add_message(msg, 'PLAYER', [255, 255, 255])
-            msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
-                target.position[0]) + ':' + str(target.position[1])
-            Game.add_message(msg, 'DEBUG', [255, 255, 255])
-        else:
-            msg = self.name + 'misses,dist=' + str(dist_to_target)
-            Game.add_message(msg, 'DEBUG', [255, 255, 255])
+        if target:  # check if target exists
+            dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
+            if dist_to_target <= 1.42:
+                dmg = self.damage
+                damage_dealt = self.deal_damage(target, dmg, self.dmg_type)  # deal damage
+                msg = self.name + ' attacks ' + target.name + ' and deals ' + str(damage_dealt) + ' damage!'
+                Game.add_message(msg, 'PLAYER', [255, 255, 255])
+                msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
+                    target.position[0]) + ':' + str(target.position[1])
+                Game.add_message(msg, 'DEBUG', [255, 255, 255])
+            else:
+                msg = self.name + 'misses,dist=' + str(dist_to_target)
+                Game.add_message(msg, 'DEBUG', [255, 255, 255])
 
     def attack_melee_weapon(self, weapon, target):
         """ Attack in melee with weapon method """
-        # check if target is in melee range
-        dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
-        if dist_to_target <= 1.42:
-            dmg = 0
-            dmg_type = 'pure'
-            # TODO: make multiple damage type weapons
-            # UGLY as hell..
-            if 'bashing' in weapon.properties.keys(): dmg = weapon.properties['bashing']; dmg_type = 'bashing'
-            elif 'slashing' in weapon.properties.keys(): dmg = weapon.properties['slashing']; dmg_type = 'slashing'
-            elif 'piercing' in weapon.properties.keys(): dmg = weapon.properties['piercing']; dmg_type = 'piercing'
-            elif 'fire' in weapon.properties.keys(): dmg = weapon.properties['fire']; dmg_type = 'fire'
-            elif 'cold' in weapon.properties.keys(): dmg = weapon.properties['cold']; dmg_type = 'cold'
-            elif 'lightning' in weapon.properties.keys(): dmg = weapon.properties['lightning']; dmg_type = 'lightning'
-            elif 'poison' in weapon.properties.keys(): dmg = weapon.properties['poison']; dmg_type = 'poison'
-            elif 'acid' in weapon.properties.keys(): dmg = weapon.properties['acid']; dmg_type = 'acid'
-            elif 'mental' in weapon.properties.keys(): dmg = weapon.properties['mental']; dmg_type = 'mental'
-            elif 'death' in weapon.properties.keys(): dmg = weapon.properties['death']; dmg_type = 'death'
-            elif 'strange' in weapon.properties.keys(): dmg = weapon.properties['strange']; dmg_type = 'strange'
-            try:  # if damage is (min, max) tuple
-                random.seed()
-                min_dmg = dmg[0]
-                max_dmg = dmg[1]
-                dmg = random.randrange(min_dmg, max_dmg)
-            except TypeError:
-                pass
-            damage_dealt = self.deal_damage(target, dmg, dmg_type)  # deal damage
-            msg = self.name + ' attacks ' + target.name + ' with '\
-                + weapon.name + ' and deals ' + str(damage_dealt) + ' damage!'
-            Game.add_message(msg, 'PLAYER', [255, 255, 255])
-            msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
-                target.position[0]) + ':' + str(target.position[1])
-            Game.add_message(msg, 'DEBUG', [255, 255, 255])
-        else:
-            msg = self.name + 'misses,dist=' + str(dist_to_target)
-            Game.add_message(msg, 'DEBUG', [255, 255, 255])
+        if target:  # check if target exists
+            dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
+            if dist_to_target <= 1.42:  # check if target is in melee range
+                dmg = 0
+                dmg_type = 'pure'
+                # TODO: make multiple damage type weapons
+                # UGLY as hell..
+                if 'bashing' in weapon.properties.keys(): dmg = weapon.properties['bashing']; dmg_type = 'bashing'
+                elif 'slashing' in weapon.properties.keys(): dmg = weapon.properties['slashing']; dmg_type = 'slashing'
+                elif 'piercing' in weapon.properties.keys(): dmg = weapon.properties['piercing']; dmg_type = 'piercing'
+                elif 'fire' in weapon.properties.keys(): dmg = weapon.properties['fire']; dmg_type = 'fire'
+                elif 'cold' in weapon.properties.keys(): dmg = weapon.properties['cold']; dmg_type = 'cold'
+                elif 'lightning' in weapon.properties.keys(): dmg = weapon.properties['lightning']; dmg_type = 'lightning'
+                elif 'poison' in weapon.properties.keys(): dmg = weapon.properties['poison']; dmg_type = 'poison'
+                elif 'acid' in weapon.properties.keys(): dmg = weapon.properties['acid']; dmg_type = 'acid'
+                elif 'mental' in weapon.properties.keys(): dmg = weapon.properties['mental']; dmg_type = 'mental'
+                elif 'death' in weapon.properties.keys(): dmg = weapon.properties['death']; dmg_type = 'death'
+                elif 'strange' in weapon.properties.keys(): dmg = weapon.properties['strange']; dmg_type = 'strange'
+                try:  # if damage is (min, max) tuple
+                    random.seed()
+                    min_dmg = dmg[0]
+                    max_dmg = dmg[1]
+                    dmg = random.randrange(min_dmg, max_dmg)
+                except TypeError:
+                    pass
+                damage_dealt = self.deal_damage(target, dmg, dmg_type)  # deal damage
+                msg = self.name + ' attacks ' + target.name + ' with '\
+                    + weapon.name + ' and deals ' + str(damage_dealt) + ' damage!'
+                Game.add_message(msg, 'PLAYER', [255, 255, 255])
+                msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
+                    target.position[0]) + ':' + str(target.position[1])
+                Game.add_message(msg, 'DEBUG', [255, 255, 255])
+            else:
+                msg = self.name + 'misses,dist=' + str(dist_to_target)
+                Game.add_message(msg, 'DEBUG', [255, 255, 255])
 
     def attack_ranged_weapon(self, weapon, target):
         """ Attack with ranged weapon method """
