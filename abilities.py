@@ -7,6 +7,7 @@ import actions
 import bool_eval
 
 import pickle
+import random
 
 
 class Condition:
@@ -95,7 +96,11 @@ class Ability(events.Observer):
                     expression += cond  # add '(', ')', 'and', 'or' etc
             if bool_eval.nested_bool_eval(expression):  # if conditions are passed - react
                 for reaction in self.reactions:
-                    self.react(reaction, data)
+                    if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
+                        if random.randint(1, 100) > reaction['chance']:  # take a chance
+                            self.react(reaction, data)
+                    else:  # if not - react
+                        self.react(reaction, data)
                 events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
                 events.Event('location', {'type': 'ability_fired', 'ability': self})
 
