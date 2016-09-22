@@ -122,12 +122,16 @@ def act_apply_timed_effect(action, register_call, target, effect):
     if register_call:  # part executed when function is registered in ActionMgr
         target.effects.append(effect)  # apply effect
     else:  # part that is executed when action fires
-        if target:  # if target still exists
+        if target and effect in target.effects:  # if target still exists and effect too
             if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect end
+                # TODO: make color argument for this action
                 color = [255, 255, 255]
+                if effect.eff == 'RESIST_POISON':
+                    color = [0, 150, 0]
                 if effect.eff == 'HASTE':
                     color = [255, 255, 0]
-                game_logic.Game.add_message(effect.eff.capitalize() + ': ' + ' effect fades away.', 'PLAYER', color)
+                game_logic.Game.add_message(effect.eff.capitalize().replace('_', ' ') + ': ' + ' effect fades away.',
+                                            'PLAYER', color)
             target.effects.remove(effect)  # remove effect
 
 

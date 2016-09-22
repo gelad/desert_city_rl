@@ -128,6 +128,7 @@ class Ability(events.Observer):
                         events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
                         events.Event('location', {'type': 'ability_fired', 'ability': self})
 
+    # TODO: decompose this method - separate each type of reaction to own method (or function)
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
@@ -150,16 +151,42 @@ class Ability(events.Observer):
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
                                                                self.owner, reaction['effect'])
-                game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': ' +
-                                            reaction['effect'].description + ' for ' + str(reaction['time']) +
-                                            ' ticks.', 'PLAYER', self.message_color)
-        if reaction['type'] == 'remove_effect':  # remove effect
+                if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
+                    game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
+                                                reaction['effect'].description + ' for ' + str(reaction['time']) +
+                                                ' ticks.', 'PLAYER', self.message_color)
+        if reaction['type'] == 'remove_effect':  # remove effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
-                self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
-                                                               self.owner, reaction['effect'])
-                game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': ' +
-                                            reaction['effect'].description + ' for ' + str(reaction['time']) +
-                                            ' ticks.', 'PLAYER', self.message_color)
+                if reaction['effects_number'] == 'all':  # if all effects has to be removed
+                    for effect in self.owner.effects[:]:  # remove all such effects
+                        if effect.eff == reaction['effect'].eff:
+                            self.owner.effects.remove(effect)
+                    if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
+                        game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
+                                                    reaction['effect'].eff.upper() + ' effects.',
+                                                    'PLAYER', self.message_color)
+                else:  # if specific number of effects has to be removed
+                    # choose needed effects
+                    needed_effects = [e for e in self.owner.effects if e.eff == reaction['effect'].eff]
+                    if len(needed_effects) > 0:  # if there are
+                        # if effects to be removed number less than present effects
+                        if len(needed_effects) < reaction['effects_number']:
+                            # remove random effects
+                            for effect in random.sample(needed_effects, reaction['effects_number']):
+                                self.owner.effects.remove(effect)
+                            if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
+                                game_logic.Game.add_message(self.name.capitalize() + ': removed ' +
+                                                            str(len(needed_effects)) + ' ' +
+                                                            reaction['effect'].eff.upper() + ' effects.',
+                                                            'PLAYER', self.message_color)
+                        else:  # if not
+                            for effect in self.owner.effects[:]:  # remove all such effects
+                                if effect.eff == reaction['effect'].eff:
+                                    self.owner.effects.remove(effect)
+                            if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
+                                game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
+                                                            reaction['effect'].eff.upper() + ' effects.',
+                                                            'PLAYER', self.message_color)
         if reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
             if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
                 self.owner.location.action_mgr.register_action(1, actions.act_deal_periodic_damage,

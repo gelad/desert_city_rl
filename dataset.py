@@ -107,6 +107,21 @@ def initialize():
                              message_color=[255, 255, 0])
     data_set['item_haste_potion'].add_ability(abil)
 
+    data_set['item_antidote_potion'] = game_logic.ItemCharges(name='antidote potion', data_id='item_antidote_potion',
+                    description='A potion that cures all poison effects, and protects from poison for a short time.',
+                                                              categories={'consumable', 'potion'}, char='!',
+                                                              color=[0, 150, 0],
+                                                              charges=1, destroyed_after_use=True, weight=0.2)
+    cond = abilities.Condition('USED')
+    react1 = {'type': 'remove_effect', 'target': 'item_owner', 'effect': effects.Effect('POISONED', 0),
+              'effects_number': 'all'}
+    react2 = {'type': 'apply_timed_effect', 'target': 'item_owner', 'time': 500,
+              'effect': effects.Effect('RESIST_POISON', 500)}
+    abil = abilities.Ability(name='Antidote', owner=data_set['item_antidote_potion'],
+                             trigger='used_on_self', conditions=[cond], reactions=[react1, react2],
+                             message_color=[0, 150, 0])
+    data_set['item_antidote_potion'].add_ability(abil)
+
     data_set['item_healing_potion'] = game_logic.ItemCharges(name='healing potion', data_id='item_healing_potion',
                                                              description='A potion that heals 5 HP.',
                                                              categories={'consumable', 'potion'}, char='!',

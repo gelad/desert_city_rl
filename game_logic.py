@@ -205,6 +205,7 @@ class BattleEntity(Entity):
             prot = self.armor[dmg_type]
         if dmg_type in self.resist.keys():
             prot = self.resist[dmg_type]
+        prot += self.get_effect('RESIST_'+dmg_type.upper())  # add resistance/armor effects if any
         block = self.get_effect('BLOCK_'+dmg_type.upper())  # damage block ammount
         return prot, block  # return protection parameters
 
@@ -1084,7 +1085,7 @@ class Game:
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_haste_potion', 11, 11)
         #  self.current_loc.place_entity('item_haste_potion', 11, 11)
-        #  self.current_loc.place_entity('item_haste_potion', 11, 11)
+        self.current_loc.place_entity('item_antidote_potion', 11, 11)
         #  self.current_loc.place_entity('item_barbed_loincloth', 11, 11)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
