@@ -57,6 +57,8 @@ class Ability(events.Observer):
         self.conditions = conditions  # ability condition
         self.reactions = reactions  # ability reactions
         self.cooldown = cooldown  # ability internal cooldown in ticks
+        self.ticks_to_cd = 0  # ticks to cooldown
+        self.ability_on_cd = False  # is ability on cd
         self.name = name
         self.description = description
         self.reobserve()
@@ -66,6 +68,7 @@ class Ability(events.Observer):
         events.Observer.__init__(self)  # register self as observer
         self.observe(self.owner, self.on_event)
         self.observe('location', self.on_event)
+        self.observe('time', self.on_event)
 
     def set_owner(self, owner):
         """ Method to set owner and refresh observer """
@@ -81,29 +84,38 @@ class Ability(events.Observer):
 
     def on_event(self, data):
         """ Method that is called if any owner-related event fires """
-        if data['type'] == self.trigger and self.enabled:  # if trigger is valid
-            expression = ''
-            for cond in self.conditions:
-                if isinstance(cond, Condition):
-                    kwargs = {'owner': self.owner, 'owner_item': self.owner_item}  # if other kwargs needed - add here
-                    if data['type'] == 'used_on_self':  # if used on self type - add used item
-                        kwargs.update({'item': data['item']})
-                    if data['type'] == 'entity_moved':  # if moved event type - add moved entity
-                        kwargs.update({'entity': data['entity']})
-                    if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
-                        kwargs.update({'damage': data['damage']})
-                    expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
-                else:
-                    expression += cond  # add '(', ')', 'and', 'or' etc
-            if bool_eval.nested_bool_eval(expression):  # if conditions are passed - react
-                for reaction in self.reactions:
-                    if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
-                        if random.randint(1, 100) > reaction['chance']:  # take a chance
+        if data['type'] == 'ticks_passed':  # if tick event
+            if self.cooldown > 0 and self.enabled and self.ability_on_cd:  # if ability is on cooldown
+                self.ticks_to_cd -= data['ticks']
+                if self.ticks_to_cd <= 0:  # if ability is ready
+                    self.ability_on_cd = False  # finish cooldown
+            if data['type'] == self.trigger and self.enabled and not self.ability_on_cd:  # if trigger is valid
+                expression = ''
+                for cond in self.conditions:
+                    if isinstance(cond, Condition):
+                        # if other kwargs needed - add here
+                        kwargs = {'owner': self.owner, 'owner_item': self.owner_item}
+                        if data['type'] == 'used_on_self':  # if used on self type - add used item
+                            kwargs.update({'item': data['item']})
+                        if data['type'] == 'entity_moved':  # if moved event type - add moved entity
+                            kwargs.update({'entity': data['entity']})
+                        if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
+                            kwargs.update({'damage': data['damage']})
+                        expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
+                    else:
+                        expression += cond  # add '(', ')', 'and', 'or' etc
+                if bool_eval.nested_bool_eval(expression):  # if conditions are passed - react
+                    for reaction in self.reactions:
+                        if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
+                            if random.randint(1, 100) > reaction['chance']:  # take a chance
+                                self.react(reaction, data)
+                                if self.cooldown > 0:  # if ability has cooldown
+                                    self.ability_on_cd = True  # start cooldown
+                                    self.ticks_to_cd = self.cooldown
+                        else:  # if not - react
                             self.react(reaction, data)
-                    else:  # if not - react
-                        self.react(reaction, data)
-                events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
-                events.Event('location', {'type': 'ability_fired', 'ability': self})
+                    events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
+                    events.Event('location', {'type': 'ability_fired', 'ability': self})
 
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """

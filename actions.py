@@ -2,6 +2,8 @@
     This file contains time-system and actions.
 """
 import game_logic
+import events
+
 
 class Action:
     """
@@ -50,6 +52,7 @@ class ActionMgr:
 
     def pass_ticks(self, ticks=1):
         """ Method that increments tick count on actions, and makes them fire if ready """
+        events.Event('time', {'type': 'ticks_passed', 'ticks': ticks, 'act_mgr': self})  # fire event every tick
         for action in self.actions[:]:
             action.t_passed += ticks
             if action.fire_if_ready():
