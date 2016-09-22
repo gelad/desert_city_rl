@@ -128,31 +128,38 @@ class Ability(events.Observer):
                         events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
                         events.Event('location', {'type': 'ability_fired', 'ability': self})
 
-
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             if reaction['target'] == 'attacker':  # if target is attacker
                 damage_dealt = self.owner.deal_damage(event_data['attacker'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
-                    self.name + ': ' + event_data['attacker'].name + ' takes ' + str(damage_dealt) + ' damage!',
-                    'PLAYER', self.message_color)
+                    self.name + ': ' + event_data['attacker'].name + ' takes ' + str(damage_dealt) + ' ' +
+                    str(reaction['dmg_type']) + ' damage!', 'PLAYER', self.message_color)
             if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
                 damage_dealt = self.owner.deal_damage(event_data['target'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
-                    self.name + ': ' + event_data['target'].name + ' takes ' + str(damage_dealt) + ' damage!',
-                    'PLAYER', self.message_color)
+                    self.name + ': ' + event_data['target'].name + ' takes ' + str(damage_dealt) + ' ' +
+                    reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
             if reaction['target'] == 'mover':  # if target is mover
                 damage_dealt = self.owner.deal_damage(event_data['entity'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
-                    self.name + ': ' + event_data['entity'].name + ' takes ' + str(damage_dealt) + ' damage!',
-                    'PLAYER', self.message_color)
+                    self.name + ': ' + event_data['entity'].name + ' takes ' + str(damage_dealt) + ' ' +
+                    str(reaction['dmg_type']) + ' damage!', 'PLAYER', self.message_color)
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
                                                                self.owner, reaction['effect'])
-                game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': all actions quickened for ' +
-                                            str(reaction['time']) + ' ticks.', 'PLAYER', self.message_color)
+                game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': ' +
+                                            reaction['effect'].description + ' for ' + str(reaction['time']) +
+                                            ' ticks.', 'PLAYER', self.message_color)
+        if reaction['type'] == 'remove_effect':  # remove effect
+            if reaction['target'] == 'item_owner':  # if target is owner of item
+                self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
+                                                               self.owner, reaction['effect'])
+                game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': ' +
+                                            reaction['effect'].description + ' for ' + str(reaction['time']) +
+                                            ' ticks.', 'PLAYER', self.message_color)
         if reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
             if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
                 self.owner.location.action_mgr.register_action(1, actions.act_deal_periodic_damage,

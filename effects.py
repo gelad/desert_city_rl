@@ -21,7 +21,7 @@ class Effect:
         elif eff == 'BLOCK_STRANGE': self.description = 'Blocks ' + str(magnitude) + ' strange damage'
         elif eff == 'INCREASE_MELEE_DAMAGE': self.description = 'Increases melee damage by '+str(magnitude)
         elif eff == 'INCREASE_RANGED_DAMAGE': self.description = 'Increases ranged damage by ' + str(magnitude)
-        elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints.'
-        elif eff == 'HASTE': self.description = 'Quickens all actions by ' + str(magnitude) + '%.'
-        elif eff == 'POISONED': self.description = 'Affected by poison.'
+        elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints'
+        elif eff == 'HASTE': self.description = 'Quickens all actions by ' + str(magnitude) + '%'
+        elif eff == 'POISONED': self.description = 'Affected by poison'
         else: self.description = eff  # if no description - simply set description to effect name
