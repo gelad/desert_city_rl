@@ -990,6 +990,7 @@ class Location:
             if entity.occupies_tile or entity.pass_cost != 1:  # if entity blocks or impairs movement
                 self.path_map_update(x, y)  # update path map
             events.Event('location', {'type': 'entity_placed', 'entity': entity})  # fire an event
+            return entity
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
 
@@ -1080,12 +1081,14 @@ class Game:
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1, weight=70)
         self.current_loc.place_entity(self.player, 10, 10)
+        self.player.add_item(self.current_loc.place_entity('item_short_bow', 10, 10))
+        self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_haste_potion', 11, 11)
         #  self.current_loc.place_entity('item_haste_potion', 11, 11)
-        self.current_loc.place_entity('item_antidote_potion', 11, 11)
+        # self.current_loc.place_entity('item_antidote_potion', 11, 11)
         #  self.current_loc.place_entity('item_barbed_loincloth', 11, 11)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)

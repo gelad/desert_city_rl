@@ -211,12 +211,30 @@ def initialize():
                                                                     char=')', color=[200, 200, 200], weight=3)
     data_set['item_hunting_crossbow'].effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 4))
 
+    data_set['item_short_bow'] = game_logic.ItemRangedWeapon(name='short bow',
+                                                             data_id='item_short_bow',
+                                                             description='Short bow suited for small game hunt.',
+                                                             range=10, ammo_type='arrow',
+                                                             categories={'weapon', 'blunt', 'bow'},
+                                                             properties={'bashing': (1, 2),
+                                                                         'attack_speed_mod': 1.1},
+                                                             char=')', color=[128, 0, 0], weight=1.5)
+    data_set['item_short_bow'].effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 1))
+
     data_set['item_bronze_bolt'] = game_logic.ItemCharges(name='bronze bolt', data_id='item_bronze_bolt',
                                                           description='A simple bronze bolt for crossbows.',
                                                           categories={'bolt', 'stackable'},
                                                           properties={'piercing': (1, 4)},
                                                           char='=', color=[80, 50, 20],
                                                           charges=5, destroyed_after_use=True, weight=0.2)
+
+    data_set['item_bronze_tipped_arrow'] = game_logic.ItemCharges(name='bronze tipped arrow',
+                                                                  data_id='item_bronze_tipped_arrow',
+                                                                  description='A simple bronze tipped arrow.',
+                                                                  categories={'arrow', 'stackable'},
+                                                                  properties={'piercing': (1, 3)},
+                                                                  char='=', color=[128, 20, 20],
+                                                                  charges=5, destroyed_after_use=True, weight=0.1)
 
     data_set['mob_mindless_body'] = game_logic.Fighter(name='Mindless body', data_id='mob_mindless_body', char='b',
                                     description='Shaking, dehydrated human body, raised by strange magic of the City.',

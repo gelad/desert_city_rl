@@ -8,6 +8,7 @@ class Effect:
     def __init__(self, eff, magnitude):
         self.eff = eff  # an effect identificator
         self.magnitude = magnitude  # effect magnitude
+        # BLOCK effects
         if eff == 'BLOCK_BASHING': self.description = 'Blocks ' + str(magnitude) + ' bashing damage'
         elif eff == 'BLOCK_SLASHING': self.description = 'Blocks ' + str(magnitude) + ' slashing damage'
         elif eff == 'BLOCK_PIERCING': self.description = 'Blocks ' + str(magnitude) + ' piercing damage'
@@ -19,6 +20,7 @@ class Effect:
         elif eff == 'BLOCK_DEATH': self.description = 'Blocks ' + str(magnitude) + ' death damage'
         elif eff == 'BLOCK_MENTAL': self.description = 'Blocks ' + str(magnitude) + ' mental damage'
         elif eff == 'BLOCK_STRANGE': self.description = 'Blocks ' + str(magnitude) + ' strange damage'
+        # resistance effects
         elif eff == 'RESIST_BASHING': self.description = 'Resists ' + str(magnitude) + ' bashing'
         elif eff == 'RESIST_SLASHING': self.description = 'Resists ' + str(magnitude) + ' slashing'
         elif eff == 'RESIST_PIERCING': self.description = 'Resists ' + str(magnitude) + ' piercing'
@@ -30,9 +32,10 @@ class Effect:
         elif eff == 'RESIST_DEATH': self.description = 'Resists ' + str(magnitude) + ' death'
         elif eff == 'RESIST_MENTAL': self.description = 'Resists ' + str(magnitude) + ' mental'
         elif eff == 'RESIST_STRANGE': self.description = 'Resists ' + str(magnitude) + ' strange'
+        # buff/debuff effects
         elif eff == 'INCREASE_MELEE_DAMAGE': self.description = 'Increases melee damage by '+str(magnitude)
         elif eff == 'INCREASE_RANGED_DAMAGE': self.description = 'Increases ranged damage by ' + str(magnitude)
-        elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints'
         elif eff == 'HASTE': self.description = 'Quickens all actions by ' + str(magnitude) + '%'
         elif eff == 'POISONED': self.description = 'Affected by poison'
+        elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints'  # TODO: move healing to abilities
         else: self.description = eff  # if no description - simply set description to effect name
