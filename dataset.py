@@ -213,7 +213,7 @@ def initialize():
                                                   color=[5, 5, 5], hp=3, speed=100, sight_radius=14.5, damage=3,
                                                   dmg_type='piercing', ai=game_logic.SimpleMeleeChaserAI(), weight=15)
     react = {'type': 'deal_periodic_damage', 'chance': 50, 'target': 'attacked_entity', 'damage': (1, 2),
-             'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 500, 'whole_time': 10000,
+             'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 10000,
              'stackable': False}
     abil = abilities.Ability(name='Poisonous stinger', owner=data_set['mob_scorpion'],
                              trigger='hit_basic_attack', conditions=[], reactions=[react])

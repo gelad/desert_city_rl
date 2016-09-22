@@ -3,7 +3,6 @@
 """
 import game_logic
 
-
 class Action:
     """
         Class for action.
@@ -104,6 +103,15 @@ def act_wait(action, register_call, actor, ticks):
     else:  # part that is executed when action fires
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
+
+
+def act_make_ability_active(action, register_call, ability):
+    """ Enables an ability after time """
+    if register_call:  # part executed when function is registered in ActionMgr
+        pass
+    else:  # part that is executed when action fires
+        if ability:  # if ability still exists
+            ability.disabled = False  # enable it
 
 
 def act_apply_timed_effect(action, register_call, target, effect):

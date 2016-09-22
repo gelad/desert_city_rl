@@ -25,7 +25,7 @@ def generate_loc(loc_type, settings, width, height):
         Plot = namedtuple('Plot', ['cells', 'b_x', 'b_y', 'b_w', 'b_h', 'b_type'])
         for plot_x in range(width // grid_size - 1):
             for plot_y in range(height // grid_size - 1):
-                build_type = game_logic.weighted_choice([('house', 50), ('none', 50)])  # choose a building type
+                build_type = game_logic.weighted_choice([('house', 70), ('none', 30)])  # choose a building type
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)
@@ -62,9 +62,10 @@ def generate_loc(loc_type, settings, width, height):
                                 floor_cells.append((loc_cell_x, loc_cell_y))
                     item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for i in range(0, item_count):
-                        item_id = game_logic.weighted_choice([('item_healing_potion', 20),
+                        item_id = game_logic.weighted_choice([('item_healing_potion', 15),
                                                               ('item_sabre', 10),
                                                               ('item_barbed_loincloth', 5),
+                                                              ('item_haste_potion', 5),
                                                               ('item_misurka', 5),
                                                               ('item_mail_armor', 5),
                                                               ('item_iron_pauldrons', 5),

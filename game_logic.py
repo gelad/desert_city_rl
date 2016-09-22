@@ -1074,18 +1074,18 @@ class Game:
 
     def new_game(self):
         """ Method that starts a new game. Mostly a placeholder now. """
-        self.current_loc = generation.generate_loc('ruins', None, 100, 100)
+        self.current_loc = generation.generate_loc('ruins', None, 200, 200)
         self.add_location(self.current_loc)
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
-                             color=[255, 255, 255], hp=100, speed=100, sight_radius=23.5, damage=1, weight=70)
+                             color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1, weight=70)
         self.current_loc.place_entity(self.player, 10, 10)
-        self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
-        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
-        self.current_loc.place_entity('item_bronze_bolt', 11, 11)
-        self.current_loc.place_entity('item_haste_potion', 11, 11)
-        self.current_loc.place_entity('item_haste_potion', 11, 11)
-        self.current_loc.place_entity('item_haste_potion', 11, 11)
-        self.current_loc.place_entity('item_barbed_loincloth', 11, 11)
+        #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
+        #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
+        #  self.current_loc.place_entity('item_haste_potion', 11, 11)
+        #  self.current_loc.place_entity('item_haste_potion', 11, 11)
+        #  self.current_loc.place_entity('item_haste_potion', 11, 11)
+        #  self.current_loc.place_entity('item_barbed_loincloth', 11, 11)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
         self.is_waiting_input = True

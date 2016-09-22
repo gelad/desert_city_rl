@@ -46,16 +46,17 @@ class Condition:
 class Ability(events.Observer):
     """ Base class for Ability object """
 
-    def __init__(self, owner, trigger, reactions, conditions=None, disabled=False, name='', description=''):
+    def __init__(self, owner, trigger, reactions, conditions=None, enabled=True, cooldown=0, name='', description=''):
         self.owner = owner
         if isinstance(owner, game_logic.Item):  # if it's an item - set owner to owning Entity
             self.owner_item = owner  # if Item - Item object
         else:
             self.owner_item = None  # if Item - Item object
-        self.disabled = disabled  # is ability disabled or not
+        self.enabled = enabled  # is ability enabled or not
         self.trigger = trigger  # ability trigger
         self.conditions = conditions  # ability condition
         self.reactions = reactions  # ability reactions
+        self.cooldown = cooldown  # ability internal cooldown in ticks
         self.name = name
         self.description = description
         self.reobserve()
@@ -80,7 +81,7 @@ class Ability(events.Observer):
 
     def on_event(self, data):
         """ Method that is called if any owner-related event fires """
-        if data['type'] == self.trigger and not self.disabled:  # if trigger is valid
+        if data['type'] == self.trigger and self.enabled:  # if trigger is valid
             expression = ''
             for cond in self.conditions:
                 if isinstance(cond, Condition):
