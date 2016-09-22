@@ -45,6 +45,28 @@ def initialize():
     data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
     data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
 
+    data_set['debris_large_sandstone'] = game_logic.Prop(name='Pile of sandstone blocks',
+                                                         data_id='debris_large_sandstone',
+                                                         occupies_tile=False, blocks_los=False, blocks_shots=0,
+                                                         armor={'bashing': 300, 'slashing': 500, 'piercing': 300},
+                                                         pass_cost=2,
+                                                         description='A collapsed structure, like wall or pillar.',
+                                                         char='&', color=[255, 250, 205], hp=200, weight=800)
+    data_set['debris_large_sandstone'].effects.append(effects.Effect('BLOCK_BASHING', 30))
+    data_set['debris_large_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
+    data_set['debris_large_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
+    data_set['debris_large_wooden'] = game_logic.Prop(name='Pile of wooden debris',
+                                                      data_id='debris_large_wooden',
+                                                      occupies_tile=False, blocks_los=False, blocks_shots=0,
+                                                      armor={'bashing': 200, 'slashing': 200, 'piercing': 200},
+                                                      pass_cost=2,
+                                                      description='Large destroyed wooden furniture.',
+                                                      char='&', color=[128, 0, 0], hp=200, weight=50)
+    data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_BASHING', 20))
+    data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
+    data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_PIERCING', 20))
+
     data_set['trap_corrosive_moss'] = game_logic.Prop(name='Corrosive moss', data_id='trap_corrosive_moss',
                                                       occupies_tile=False, blocks_los=False, blocks_shots=0,
                                                       armor={'bashing': 300, 'slashing': 50, 'piercing': 300},
