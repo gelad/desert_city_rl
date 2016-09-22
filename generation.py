@@ -80,10 +80,11 @@ def generate_loc(loc_type, settings, width, height):
                         loc.place_entity(item_id, item_coords[0], item_coords[1])
                     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for m in range(0, mob_count):
-                        mob_id = game_logic.weighted_choice([('mob_mindless_body', 60),
+                        mob_id = game_logic.weighted_choice([('mob_mindless_body', 55),
                                                             ('mob_scorpion', 20),
                                                             ('mob_rakshasa', 10 + item_count * 3),
-                                                            ('mob_sand_golem', 10 + item_count * 3)])
+                                                            ('mob_sand_golem', 10 + item_count * 3),
+                                                            ('mob_ifrit', 5 + item_count * 2)])
                         # more loot - dangerous mobs
                         mob_coords = floor_cells[random.randrange(len(floor_cells))]
                         loc.place_entity(mob_id, mob_coords[0], mob_coords[1])

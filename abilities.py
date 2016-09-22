@@ -46,7 +46,8 @@ class Condition:
 class Ability(events.Observer):
     """ Base class for Ability object """
 
-    def __init__(self, owner, trigger, reactions, conditions=None, enabled=True, cooldown=0, name='', description=''):
+    def __init__(self, owner, trigger, reactions, conditions=None, enabled=True, cooldown=0, name='', ability_id='',
+                 description='', message_color=None):
         self.owner = owner
         if isinstance(owner, game_logic.Item):  # if it's an item - set owner to owning Entity
             self.owner_item = owner  # if Item - Item object
@@ -59,8 +60,13 @@ class Ability(events.Observer):
         self.cooldown = cooldown  # ability internal cooldown in ticks
         self.ticks_to_cd = 0  # ticks to cooldown
         self.ability_on_cd = False  # is ability on cd
-        self.name = name
-        self.description = description
+        self.name = name  # name of the ability
+        self.ability_id = ability_id  # ability ID in dataset
+        self.description = description  # description of ability
+        if message_color is None:
+            self.message_color = [255, 255, 255]
+        else:
+            self.message_color = message_color  # if ability shows any messages - they use this color
         self.reobserve()
 
     def reobserve(self):
@@ -89,33 +95,39 @@ class Ability(events.Observer):
                 self.ticks_to_cd -= data['ticks']
                 if self.ticks_to_cd <= 0:  # if ability is ready
                     self.ability_on_cd = False  # finish cooldown
-            if data['type'] == self.trigger and self.enabled and not self.ability_on_cd:  # if trigger is valid
-                expression = ''
-                for cond in self.conditions:
-                    if isinstance(cond, Condition):
-                        # if other kwargs needed - add here
-                        kwargs = {'owner': self.owner, 'owner_item': self.owner_item}
-                        if data['type'] == 'used_on_self':  # if used on self type - add used item
-                            kwargs.update({'item': data['item']})
-                        if data['type'] == 'entity_moved':  # if moved event type - add moved entity
-                            kwargs.update({'entity': data['entity']})
-                        if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
-                            kwargs.update({'damage': data['damage']})
-                        expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
-                    else:
-                        expression += cond  # add '(', ')', 'and', 'or' etc
-                if bool_eval.nested_bool_eval(expression):  # if conditions are passed - react
-                    for reaction in self.reactions:
-                        if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
-                            if random.randint(1, 100) > reaction['chance']:  # take a chance
-                                self.react(reaction, data)
-                                if self.cooldown > 0:  # if ability has cooldown
-                                    self.ability_on_cd = True  # start cooldown
-                                    self.ticks_to_cd = self.cooldown
-                        else:  # if not - react
+        if data['type'] == self.trigger and self.enabled and not self.ability_on_cd:  # if trigger is valid
+            expression = ''
+            for cond in self.conditions:
+                if isinstance(cond, Condition):
+                    # if other kwargs needed - add here
+                    kwargs = {'owner': self.owner, 'owner_item': self.owner_item}
+                    if data['type'] == 'used_on_self':  # if used on self type - add used item
+                        kwargs.update({'item': data['item']})
+                    if data['type'] == 'entity_moved':  # if moved event type - add moved entity
+                        kwargs.update({'entity': data['entity']})
+                    if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
+                        kwargs.update({'damage': data['damage']})
+                    expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
+                else:
+                    expression += cond  # add '(', ')', 'and', 'or' etc
+            if bool_eval.nested_bool_eval(expression):  # if conditions are passed - react
+                for reaction in self.reactions:
+                    if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
+                        if random.randint(1, 100) > reaction['chance']:  # take a chance
                             self.react(reaction, data)
-                    events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
-                    events.Event('location', {'type': 'ability_fired', 'ability': self})
+                            if self.cooldown > 0:  # if ability has cooldown
+                                self.ability_on_cd = True  # start cooldown
+                                self.ticks_to_cd = self.cooldown
+                                events.Event(self.owner,
+                                             {'type': 'ability_fired', 'ability': self})  # fire an ability event
+                                events.Event('location', {'type': 'ability_fired', 'ability': self})
+                    else:  # if not - react
+                        self.react(reaction, data)
+                        self.ability_on_cd = True  # start cooldown
+                        self.ticks_to_cd = self.cooldown
+                        events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
+                        events.Event('location', {'type': 'ability_fired', 'ability': self})
+
 
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """
@@ -124,20 +136,23 @@ class Ability(events.Observer):
                 damage_dealt = self.owner.deal_damage(event_data['attacker'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['attacker'].name + ' takes ' + str(damage_dealt) + ' damage!',
-                    'PLAYER', [255, 255, 255])
+                    'PLAYER', self.message_color)
+            if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
+                damage_dealt = self.owner.deal_damage(event_data['target'], reaction['damage'], reaction['dmg_type'])
+                game_logic.Game.add_message(
+                    self.name + ': ' + event_data['target'].name + ' takes ' + str(damage_dealt) + ' damage!',
+                    'PLAYER', self.message_color)
             if reaction['target'] == 'mover':  # if target is mover
                 damage_dealt = self.owner.deal_damage(event_data['entity'], reaction['damage'], reaction['dmg_type'])
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['entity'].name + ' takes ' + str(damage_dealt) + ' damage!',
-                    'PLAYER', [255, 255, 255])
+                    'PLAYER', self.message_color)
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
                                                                self.owner, reaction['effect'])
-                color = [255, 255, 255]
-                if reaction['effect'].eff == 'HASTE': color = [255, 255, 0]
                 game_logic.Game.add_message(reaction['effect'].eff.capitalize() + ': all actions quickened for ' +
-                                            str(reaction['time']) + ' ticks.', 'PLAYER', color)
+                                            str(reaction['time']) + ' ticks.', 'PLAYER', self.message_color)
         if reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
             if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
                 self.owner.location.action_mgr.register_action(1, actions.act_deal_periodic_damage,
