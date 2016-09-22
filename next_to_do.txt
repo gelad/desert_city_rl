@@ -38,9 +38,9 @@ Implement A* pathfinding. (DONE)
 Make inventory menu show item info. (DONE)
 Make some traps. (DONE)
 Periodic damage ability. (DONE)
+Make antidote potion. (DONE)
 
 
-Make antidote potion.
 Make corpse property to BattleEntity - to destroy props to debris and debris to bits and pieces.
 Separate abilities from entities in dataset section.
 Implement throwing.
