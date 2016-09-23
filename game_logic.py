@@ -1108,7 +1108,7 @@ class Game:
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_haste_potion', 11, 11)
         #  self.current_loc.place_entity('item_haste_potion', 11, 11)
-        # self.current_loc.place_entity('item_antidote_potion', 11, 11)
+        #  self.current_loc.place_entity('item_antidote_potion', 11, 11)
         #  self.current_loc.place_entity('item_barbed_loincloth', 11, 11)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)

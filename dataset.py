@@ -7,6 +7,7 @@ import abilities
 import events
 
 import pickle
+import simplejson
 import jsonpickle
 
 data_set = {}  # a dict containing all entity templates by string ID's
