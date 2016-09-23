@@ -423,6 +423,21 @@ class WindowMain(Window):
                     return True
             return False
 
+    @staticmethod
+    def command_smash_direction(player, loc, dx, dy):
+        """ Command method for player wants to close door in some direction  """
+        be_x = player.position[0] + dx  # battle entity estimated position
+        be_y = player.position[1] + dy
+        if loc.is_in_boundaries(be_x, be_y):  # check if position of selected cell is in boundaries
+            be = loc.cells[be_x][be_y].is_there_a(game_logic.BattleEntity)
+            if be:  # check if there is a BattleEntity
+                if player.equipment['LEFT_HAND'] or player.equipment['RIGHT_HAND']:
+                    player.perform(actions.act_attack_melee_weapons, player, be)  # attack it in melee with weapon
+                else:
+                    player.perform(actions.act_attack_melee_basic, player, be)  # attack it in melee with hands
+                return True
+            return False
+
     def command_pick_up(self, player, loc, dx, dy):
         """ Command method for player wants to pick up some items  """
         x = player.position[0] + dx
@@ -587,6 +602,23 @@ class WindowMain(Window):
                     self.command_close_direction(player, loc, -1, 1)
                 elif command == 'close_se':
                     self.command_close_direction(player, loc, 1, 1)
+                # smashin' things commands
+                elif command == 'smash_n':
+                    self.command_smash_direction(player, loc, 0, -1)
+                elif command == 'smash_s':
+                    self.command_smash_direction(player, loc, 0, 1)
+                elif command == 'smash_w':
+                    self.command_smash_direction(player, loc, -1, 0)
+                elif command == 'smash_e':
+                    self.command_smash_direction(player, loc, 1, 0)
+                elif command == 'smash_nw':
+                    self.command_smash_direction(player, loc, -1, -1)
+                elif command == 'smash_ne':
+                    self.command_smash_direction(player, loc, 1, -1)
+                elif command == 'smash_sw':
+                    self.command_smash_direction(player, loc, -1, 1)
+                elif command == 'smash_se':
+                    self.command_smash_direction(player, loc, 1, 1)
                 # 'look' command
                 elif command == 'look':
                     game.state = 'looking'

@@ -57,6 +57,24 @@ def get_input(game):
                             player_input.append('close_sw')
                         elif key.keychar == 'KP3':
                             player_input.append('close_se')
+                    if event.keychar == 's':  # smashin' things
+                        key = tdl.event.keyWait()
+                        if key.keychar == 'UP' or key.keychar == 'KP8':
+                            player_input.append('smash_n')
+                        elif key.keychar == 'DOWN' or key.keychar == 'KP2':
+                            player_input.append('smash_s')
+                        elif key.keychar == 'LEFT' or key.keychar == 'KP4':
+                            player_input.append('smash_w')
+                        elif key.keychar == 'RIGHT' or key.keychar == 'KP6':
+                            player_input.append('smash_e')
+                        elif key.keychar == 'KP7':
+                            player_input.append('smash_nw')
+                        elif key.keychar == 'KP9':
+                            player_input.append('smash_ne')
+                        elif key.keychar == 'KP1':
+                            player_input.append('smash_sw')
+                        elif key.keychar == 'KP3':
+                            player_input.append('smash_se')
                     if event.keychar == 'l':  # 'look' command
                         player_input.append('look')
                     if event.keychar == '`':  # show/hide debug log

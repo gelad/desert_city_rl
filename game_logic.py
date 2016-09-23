@@ -225,6 +225,7 @@ class BattleEntity(Entity):
             corpse = dataset.get_entity(self.corpse)
         return corpse
 
+
 class Seer(Entity):
     """
         Mixin class, adds visibility (FOV & LOS) functionality to Entity.
