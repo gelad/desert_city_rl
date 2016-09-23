@@ -135,9 +135,10 @@ class BattleEntity(Entity):
         Hp, taking/inflicting damage, that kind of stuff.
     """
 
-    def __init__(self, hp, armor=None, resist=None, dead=False):
+    def __init__(self, hp, armor=None, resist=None, dead=False, corpse=''):
         self.hp = hp  # current hitpoints
         self.base_maxhp = hp  # maximum hitpoints
+        self.corpse = ''  # corpse entity, generated when BE dies. If empty - generic corpse is generated.
         if armor:  # physical armor
             self.armor = armor
         else:
@@ -213,6 +214,16 @@ class BattleEntity(Entity):
         """ Abstract method that is called when BattleEntity dies """
         raise NotImplementedError
 
+    def get_corpse(self):
+        """ Method to get corpse Entity """
+        if self.corpse == '':  # if default corpse
+            corpse = Item(name=self.name + "'s corpse.", data_id=self.name + '_corpse',
+                      description='A dead ' + self.name + '.', char='%', color=self.color, weight=self.weight)
+        elif self.corpse == 'no corpse':  # if no corpse
+            return None
+        else:  # if corpse entity_id specified
+            corpse = dataset.get_entity(self.corpse)
+        return corpse
 
 class Seer(Entity):
     """
@@ -682,11 +693,12 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
     """
 
     def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius,
-                 damage, weight=0, dmg_type='bashing', armor=None, resist=None, equip_layout='humanoid', ai=None):
+                 damage, weight=0, dmg_type='bashing',
+                 armor=None, resist=None, corpse='', equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
                         weight=weight, pass_cost=1, occupies_tile=True, blocks_shots=1)
-        BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist)
+        BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist, corpse=corpse)
         if ai:  # set AI owner
             ai.owner = self
         Actor.__init__(self, speed=speed, ai=ai)
@@ -798,9 +810,9 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
         events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
-        corpse = Item(name=self.name + "'s corpse.", data_id=self.name+'_corpse',
-                      description='A dead ' + self.name + '.', char='%', color=self.color, weight=self.weight)
-        self.location.place_entity(corpse, self.position[0], self.position[1])
+        corpse = self.get_corpse()  # get corpse entity
+        if corpse:
+            self.location.place_entity(corpse, self.position[0], self.position[1])
         for item in self.equipment.values():  # drop all equipped items
             if item:
                 self.drop_equipped_item(item)
@@ -865,16 +877,19 @@ class Prop(BattleEntity, Abilities, Entity):
     """
 
     def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0, blocks_shots=1,
-                 occupies_tile=True, pass_cost=1, armor=None):
+                 occupies_tile=True, pass_cost=1, armor=None, corpse='no corpse'):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
                         occupies_tile=occupies_tile, blocks_los=blocks_los, blocks_shots=blocks_shots,
                         weight=weight, pass_cost=pass_cost)
-        BattleEntity.__init__(self, hp, armor=armor)
+        BattleEntity.__init__(self, hp, armor=armor, corpse=corpse)
         Abilities.__init__(self)
 
     def death(self):
         """ Death method """
         events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
+        corpse = self.get_corpse()  # get corpse entity
+        if corpse:
+            self.location.place_entity(corpse, self.position[0], self.position[1])
         self.location.remove_entity(self)
 
 
@@ -884,7 +899,7 @@ class Door(BattleEntity, Entity):
     """
 
     def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, armor=None, pass_cost=1,
-                 is_closed=True):
+                 is_closed=True, corpse='no corpse'):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open
@@ -898,7 +913,7 @@ class Door(BattleEntity, Entity):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=self.char, color=color,
                         occupies_tile=self.is_closed, blocks_los=blocks_los, blocks_shots=blocks_shots,
                         weight=weight, pass_cost=pass_cost)
-        BattleEntity.__init__(self, hp, armor=armor)
+        BattleEntity.__init__(self, hp, armor=armor, corpse=corpse)
 
     def __set_char(self):
         """ Method sets current character to display according to open/closed state """
@@ -934,6 +949,9 @@ class Door(BattleEntity, Entity):
     def death(self):
         """ Death method """
         events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
+        corpse = self.get_corpse()  # get corpse entity
+        if corpse:
+            self.location.place_entity(corpse, self.position[0], self.position[1])
         self.location.remove_entity(self)
 
 

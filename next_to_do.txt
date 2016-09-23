@@ -39,9 +39,9 @@ Make inventory menu show item info. (DONE)
 Make some traps. (DONE)
 Periodic damage ability. (DONE)
 Make antidote potion. (DONE)
+Make corpse property to BattleEntity - to destroy props to debris and debris to bits and pieces. (DONE)
 
 
-Make corpse property to BattleEntity - to destroy props to debris and debris to bits and pieces.
 Implement accuracy for melee.
 Implement accuracy for ranged.
 Make 'give item' debug command.

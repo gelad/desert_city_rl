@@ -21,7 +21,8 @@ def initialize():
     # loading Entity templates
     data_set['wall_sandstone'] = game_logic.Prop(name='Wall', data_id='wall_sandstone', description='A sandstone wall.',
                                                  armor={'bashing': 100, 'slashing': 500, 'piercing': 300},
-                                                 char='#', color=[255, 250, 205], hp=100, weight=1000)
+                                                 char='#', color=[255, 250, 205], hp=100, weight=1000,
+                                                 corpse='debris_large_sandstone')
     data_set['wall_sandstone'].effects.append(effects.Effect('BLOCK_BASHING', 10))
     data_set['wall_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
     data_set['wall_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
@@ -30,7 +31,8 @@ def initialize():
                                                          occupies_tile=True, blocks_los=False, blocks_shots=0.15,
                                                          armor={'bashing': 100, 'slashing': 500, 'piercing': 300},
                                                          description='A hole in sandstone wall.',
-                                                         char='"', color=[255, 250, 205], hp=100, weight=800)
+                                                         char='"', color=[255, 250, 205], hp=100, weight=800,
+                                                         corpse='debris_large_sandstone')
     data_set['window_small_sandstone'].effects.append(effects.Effect('BLOCK_BASHING', 10))
     data_set['window_small_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
     data_set['window_small_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
@@ -40,7 +42,8 @@ def initialize():
                                                          armor={'bashing': 100, 'slashing': 500, 'piercing': 300},
                                                          pass_cost=2,
                                                          description='A large window in sandstone wall.',
-                                                         char='_', color=[255, 250, 205], hp=100, weight=800)
+                                                         char='_', color=[255, 250, 205], hp=100, weight=800,
+                                                         corpse='debris_large_sandstone')
     data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_BASHING', 10))
     data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
     data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
@@ -86,7 +89,8 @@ def initialize():
     data_set['door_wooden'] = game_logic.Door(name='Door', data_id='door_wooden', description='A wooden door.',
                                               char_closed='+', char_open='.', color=[128, 0, 0],
                                               armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
-                                              hp=100, is_closed=True, weight=50)
+                                              hp=100, is_closed=True, weight=50,
+                                              corpse='debris_large_wooden')
     data_set['door_wooden'].effects.append(effects.Effect('BLOCK_BASHING', 10))
     data_set['door_wooden'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
     data_set['door_wooden'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
