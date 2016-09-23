@@ -138,7 +138,7 @@ class BattleEntity(Entity):
     def __init__(self, hp, armor=None, resist=None, dead=False, corpse=''):
         self.hp = hp  # current hitpoints
         self.base_maxhp = hp  # maximum hitpoints
-        self.corpse = ''  # corpse entity, generated when BE dies. If empty - generic corpse is generated.
+        self.corpse = corpse  # corpse entity, generated when BE dies. If empty - generic corpse is generated.
         if armor:  # physical armor
             self.armor = armor
         else:
@@ -1100,6 +1100,7 @@ class Game:
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1, weight=70)
         self.current_loc.place_entity(self.player, 10, 10)
+        # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_short_bow', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)

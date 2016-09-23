@@ -205,6 +205,12 @@ def initialize():
                                                    properties={'bashing': (8, 12), 'attack_speed_mod': 1.5},
                                                    char='/', color=[80, 50, 20], weight=10)
 
+    data_set['item_wall_smasher'] = game_logic.Item(name='wall smasher', data_id='item_wall_smasher',
+                                                    description='A test weapon with tremendous power to smash walls.',
+                                                    categories={'weapon', 'blunt'},
+                                                    properties={'bashing': (150, 300), 'attack_speed_mod': 2},
+                                                    char='/', color=[255, 0, 128], weight=15)
+
     data_set['item_hunting_crossbow'] = game_logic.ItemRangedWeapon(name='hunting crossbow',
                                                                     data_id='item_hunting_crossbow',
                                                                     description='A small crossbow.',
