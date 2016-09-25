@@ -783,11 +783,22 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         else:  # if a cell - set tx:ty as target cell
             tx = target[0]
             ty = target[1]
-        ammo = weapon.ammo[0]
-        weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-        shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
-        self.location.place_entity(shot, self.position[0], self.position[1])
-        shot.ai.enroute()
+        if 'accuracy_ranged' in weapon.properties:  # get weapon accuracy, if no - use default 1
+            acc_weapon = weapon.properties['accuracy_ranged']
+        else:
+            acc_weapon = 1
+        hit = ranged_hit_probability(acc_weapon, weapon.range, hypot(target.position[0] - self.position[0],
+                                                                     target.position[1] - self.position[1]))
+        if hit:
+            ammo = weapon.ammo[0]
+            weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
+            shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
+            self.location.place_entity(shot, self.position[0], self.position[1])
+            shot.ai.enroute()
+        else:
+            # TODO: process miss - make projectile his a cell near the target
+            msg = self.name + ' misses.'
+            Game.add_message(msg, 'PLAYER', [255, 255, 255])
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
@@ -1137,4 +1148,24 @@ def weighted_choice(choices):
             return c
         upto += w
     assert False, "Shouldn't get here"
+
+
+def ranged_hit_probability(weapon_acc, weapon_maxrange, range_to_target, mods=None):
+    """ Function that determines if shot hits the target """
+    # TODO: implement accuracy modifications
+    # goal - to make 70% at range/2, almost 95% one tile away, and very low probability at max range
+    # some math ahead (magic numbers included)
+    hit_prob = 1 - random.betavariate(2, 3)  # probability to hit, Expected value 0.75
+    weapon_halfrange = weapon_maxrange / 2
+    if range_to_target >= weapon_halfrange:  # if target is farther than half range of the weapon
+        range_coef = 0.01 + weapon_halfrange / range_to_target  # calculate (0.01, 1.01) range coefficient
+    else:  # if target is near
+        range_coef = 1 + (1 - (range_to_target / weapon_halfrange))  # calculate (1, 2) range coefficient
+    hit_value = hit_prob * range_coef * weapon_acc
+    if hit_value >= 0.5:  # translate probability to boolean hit-or-not
+        return True
+    else:
+        return False
+
+
 
