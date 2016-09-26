@@ -298,6 +298,26 @@ def initialize():
                              message_color=[255, 50, 0])
     data_set['mob_ifrit'].add_ability(abil)
 
+    data_set['mob_lightning_wisp'] = game_logic.Fighter(name='Lightning wisp', data_id='mob_lightning_wisp',
+                            description='A small hostile magic cloud, that zaps enemies with lightning.', char='w',
+                                                        armor={'bashing': 100, 'slashing': 100, 'piercing': 1000},
+                                                        resist={'cold': -100, 'lightning': 1000},
+                                                        color=[255, 255, 0], hp=2, speed=100, sight_radius=15.5,
+                                                        damage=(1, 2), dmg_type='lightning',
+                                                        ai=game_logic.AbilityUserAI(behavior='ranged',
+                                                                                    properties={'preferred_range': 6}),
+                                                        weight=1)
+    data_set['mob_lightning_wisp'].effects.append(effects.Effect('BLOCK_PIERCING', 100))
+    data_set['mob_lightning_wisp'].effects.append(effects.Effect('BLOCK_LIGHTNING', 100))
+    cond = abilities.Condition('TARGET_IN_RANGE')
+    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (2, 4), 'dmg_type': 'lightning'}
+    ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '8', 'priority': '1',
+               'whole_time': 100, 'use_offset': 0.5}
+    abil = abilities.Ability(name='Zap', owner=data_set['mob_lightning_wisp'], cooldown=300,
+                             trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
+                             message_color=[255, 255, 0])
+    data_set['mob_lightning_wisp'].add_ability(abil)
+
     data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='S',
                                         description='Magic-formed sand, resembling a human figure about 3m high.',
                                                     armor={'bashing': 100, 'slashing': 75, 'piercing': 300},

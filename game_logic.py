@@ -594,30 +594,64 @@ class AbilityUserAI(AI):
 
     def ranged(self):
         """ Method what to do in alert state if ranged behavior """
-        # TODO: change this to actual ranged behavior
         x = self.owner.position[0]
         y = self.owner.position[1]
+        pref_range = self.properties['preferred_range']
+        acted = False  # acted flag
         for point in self.owner.fov_set:  # check for player in FOV
             player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
             if player:  # if there is one
                 self.seen = True
                 self.seen_x = player.position[0]  # update last seen position of player
                 self.seen_y = player.position[1]
-                # if in melee range - attack
-                if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
-                    self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
-                    break  # action is performed - stop iterating through FOV
-                else:  # if not - obtain path
+                range_to_player = hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1])
+                # TODO: move abilities usage to separate method
+                if len(self.owner.abilities) > 0:  # if there are abilities - try to use them
+                    # get a list of ai-usable abilities
+                    ai_abilities = [a for a in self.owner.abilities if a.ai_info and a.ability_on_cd is False]
+                    ai_abilities.sort(key=lambda abil: abil.ai_info['priority'])  # sort list by ability priority
+                    for ability in ai_abilities:  # list of abilities with ai_info
+                        data = {}  # gather data, needed to determine if ability can be used now
+                        if ability.ai_info['type'] == 'ranged_attack':  # if ranged attack - add range info
+                            data['range'] = ability.ai_info['range']
+                        # determine target of ability
+                        if ability.ai_info['target'] == 'player':
+                            target = player
+                        elif ability.ai_info['target'] == 'self':
+                            target = self.owner
+                        else:
+                            raise Exception('Need to specify target of ability!')
+                        data['target'] = target  # add target info to data
+                        data['type'] = ability.trigger  # set event type to ability trigger
+                        if ability.conditions_met(data):
+                            # use ability action
+                            self.owner.perform(actions.act_use_ability, self.owner, target, ability,
+                                               ability.ai_info['whole_time'], ability.ai_info['use_offset'])
+                            acted = True
+                            break  # one action at a time
+                if not acted and range_to_player > pref_range:  # if farther than in preferred range - move closer
                     path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
                     if len(path) > 0:  # if there are path
                         step_cell = path[0]  # move closer
+                        acted = True
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
                         break  # action is performed - stop iterating through FOV
-        if self.seen and self.owner.state == 'ready':  # check if still ready to act, and player was seen
+                if not acted and range_to_player <= 1.42:
+                    # if in melee range - attack
+                    self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
+                    acted = True
+                    break  # action is performed - stop iterating through FOV
+                else:  # if within preferred range - stand still
+                    # TODO: make ranged mob backpedal if too close
+                    acted = True
+                    self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
+                    break  # action is performed - stop iterating through FOV
+        if self.seen and not acted:  # check if still ready to act, and player was seen
             if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
                 path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
                 if len(path) > 0:  # if there are path
                     step_cell = path[0]  # move closer to last known player position
+                    acted = True
                     self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
             else:  # if in last seen player position, and no player in FOV - stop searching, go idle
                 self.seen = False
@@ -1294,7 +1328,7 @@ class Game:
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_short_bow', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
-        self.current_loc.place_entity('mob_ifrit', 15, 15)
+        self.current_loc.place_entity('mob_lightning_wisp', 20, 20)
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
