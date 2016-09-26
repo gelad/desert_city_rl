@@ -676,6 +676,8 @@ class UnguidedShotAI(AI):
 
     def enroute(self):
         """ Method to calculate route """
+        owner = self.owner
+        target = self.target
         self.route = fov_los_pf.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
         self.next = iter(self.route)
         next(self.next)
@@ -701,37 +703,37 @@ class UnguidedShotAI(AI):
                     # UGLY as hell..
                     ammo = self.owner.ammo
                     if 'bashing' in ammo.properties.keys():
-                        dmg = ammo.properties['bashing'];
+                        dmg = ammo.properties['bashing']
                         dmg_type = 'bashing'
                     elif 'slashing' in ammo.properties.keys():
-                        dmg = ammo.properties['slashing'];
+                        dmg = ammo.properties['slashing']
                         dmg_type = 'slashing'
                     elif 'piercing' in ammo.properties.keys():
-                        dmg = ammo.properties['piercing'];
+                        dmg = ammo.properties['piercing']
                         dmg_type = 'piercing'
                     elif 'fire' in ammo.properties.keys():
-                        dmg = ammo.properties['fire'];
+                        dmg = ammo.properties['fire']
                         dmg_type = 'fire'
                     elif 'cold' in ammo.properties.keys():
-                        dmg = ammo.properties['cold'];
+                        dmg = ammo.properties['cold']
                         dmg_type = 'cold'
                     elif 'lightning' in ammo.properties.keys():
-                        dmg = ammo.properties['lightning'];
+                        dmg = ammo.properties['lightning']
                         dmg_type = 'lightning'
                     elif 'poison' in ammo.properties.keys():
-                        dmg = ammo.properties['poison'];
+                        dmg = ammo.properties['poison']
                         dmg_type = 'poison'
                     elif 'acid' in ammo.properties.keys():
-                        dmg = ammo.properties['acid'];
+                        dmg = ammo.properties['acid']
                         dmg_type = 'acid'
                     elif 'mental' in ammo.properties.keys():
-                        dmg = ammo.properties['mental'];
+                        dmg = ammo.properties['mental']
                         dmg_type = 'mental'
                     elif 'death' in ammo.properties.keys():
-                        dmg = ammo.properties['death'];
+                        dmg = ammo.properties['death']
                         dmg_type = 'death'
                     elif 'strange' in ammo.properties.keys():
-                        dmg = ammo.properties['strange'];
+                        dmg = ammo.properties['strange']
                         dmg_type = 'strange'
                     try:  # if damage is (min, max) tuple
                         random.seed()
@@ -776,6 +778,64 @@ class UnguidedShotAI(AI):
                 self.state = 'stopped'
                 self.owner.location.place_entity(self.owner.ammo, x, y)
                 self.owner.ammo = None
+                self.owner.death()
+                return
+            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
+            self.power -= 1
+
+
+class UnguidedProjectileAI(AI):
+    """ An unguided projectile AI """
+    # TODO: refactor this
+    def __init__(self, power, target, owner, state='set_route'):
+        AI.__init__(self, state, owner)
+        self.route = None
+        self.next = None
+        self.power = power
+        self.target = target
+
+    def on_event_location(self, data):
+        """ Method handling location-related events """
+        pass  # currently this AI don't react to map events
+
+    def enroute(self):
+        """ Method to calculate route """
+        self.route = fov_los_pf.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
+        self.next = iter(self.route)
+        next(self.next)
+
+    def act(self):
+        """ Method called when projectile is ready to act """
+        if self.state == 'set_route':
+            next_cell = next(self.next)
+            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
+            self.power -= 1
+            self.state = 'flying'
+        elif self.state == 'flying':
+            x = self.owner.position[0]
+            y = self.owner.position[1]
+            enemy = self.owner.location.cells[x][y].get_occupying_entity()
+            if enemy:
+                # TODO: make projectile property for traveling through some kinds of Entities ( and opposite too)
+                if enemy.blocks_shots < 1:  # check if projectile pass through (for windows, grates, etc)
+                    enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
+            if enemy:
+                if isinstance(enemy, BattleEntity):  # if enemy can be damaged
+                    # fire an event that triggers ability
+                    events.Event(self.owner, {'type': 'projectile_hit', 'target': enemy})
+                    self.state = 'stopped'
+                    self.owner.death()
+                    return
+            try:
+                next_cell = next(self.next)
+            except StopIteration:
+                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y)})
+                self.state = 'stopped'
+                self.owner.death()
+                return
+            if self.power <= 0:
+                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y)})
+                self.state = 'stopped'
                 self.owner.death()
                 return
             self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
@@ -921,37 +981,37 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 # TODO: make multiple damage type weapons
                 # UGLY as hell..
                 if 'bashing' in weapon.properties.keys():
-                    dmg = weapon.properties['bashing'];
+                    dmg = weapon.properties['bashing']
                     dmg_type = 'bashing'
                 elif 'slashing' in weapon.properties.keys():
-                    dmg = weapon.properties['slashing'];
+                    dmg = weapon.properties['slashing']
                     dmg_type = 'slashing'
                 elif 'piercing' in weapon.properties.keys():
-                    dmg = weapon.properties['piercing'];
+                    dmg = weapon.properties['piercing']
                     dmg_type = 'piercing'
                 elif 'fire' in weapon.properties.keys():
-                    dmg = weapon.properties['fire'];
+                    dmg = weapon.properties['fire']
                     dmg_type = 'fire'
                 elif 'cold' in weapon.properties.keys():
-                    dmg = weapon.properties['cold'];
+                    dmg = weapon.properties['cold']
                     dmg_type = 'cold'
                 elif 'lightning' in weapon.properties.keys():
-                    dmg = weapon.properties['lightning'];
+                    dmg = weapon.properties['lightning']
                     dmg_type = 'lightning'
                 elif 'poison' in weapon.properties.keys():
-                    dmg = weapon.properties['poison'];
+                    dmg = weapon.properties['poison']
                     dmg_type = 'poison'
                 elif 'acid' in weapon.properties.keys():
-                    dmg = weapon.properties['acid'];
+                    dmg = weapon.properties['acid']
                     dmg_type = 'acid'
                 elif 'mental' in weapon.properties.keys():
-                    dmg = weapon.properties['mental'];
+                    dmg = weapon.properties['mental']
                     dmg_type = 'mental'
                 elif 'death' in weapon.properties.keys():
-                    dmg = weapon.properties['death'];
+                    dmg = weapon.properties['death']
                     dmg_type = 'death'
                 elif 'strange' in weapon.properties.keys():
-                    dmg = weapon.properties['strange'];
+                    dmg = weapon.properties['strange']
                     dmg_type = 'strange'
                 try:  # if damage is (min, max) tuple
                     random.seed()
@@ -1048,7 +1108,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
 
 
 class UnguidedShot(Actor, Entity):
-    """ Mixed class for unguided projectile """
+    """ Mixed class for unguided shot (from a weapon) """
 
     def __init__(self, weapon, ammo, speed, target):
         self.weapon = weapon  # weapon that fired projectile
@@ -1056,6 +1116,22 @@ class UnguidedShot(Actor, Entity):
         self.target = target  # target (x, y) tuple
         Entity.__init__(self, name=ammo.name, description=ammo.description, char=ammo.char, color=ammo.color)
         Actor.__init__(self, speed=speed, ai=UnguidedShotAI(power=weapon.range, target=target, owner=self))
+
+    def death(self):
+        """ Death function """
+        self.location.remove_entity(self)
+        self.ai.close()  # unregister Observer
+
+
+class UnguidedProjectile(Actor, Abilities, Entity):
+    """ Mixed class for unguided projectile (thrown, magic, etc) """
+
+    def __init__(self, launcher, speed, power, target, name='', description='', char=' ', color=None):
+        self.launcher = launcher  # Entity, that launched projectile
+        self.target = target  # target (x, y) tuple
+        Entity.__init__(self, name=name, description=description, char=char, color=color)
+        Abilities.__init__(self)
+        Actor.__init__(self, speed=speed, ai=UnguidedProjectileAI(power=power, target=target, owner=self))
 
     def death(self):
         """ Death function """
@@ -1328,7 +1404,7 @@ class Game:
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_short_bow', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
-        #  self.current_loc.place_entity('mob_lightning_wisp', 20, 20)
+        self.current_loc.place_entity('mob_ifrit', 20, 20)
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)

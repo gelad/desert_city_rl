@@ -164,6 +164,24 @@ class Ability(events.Observer):
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['entity'].name + ' takes ' + str(damage_dealt) + ' ' +
                     str(reaction['dmg_type']) + ' damage!', 'PLAYER', self.message_color)
+        if reaction['type'] == 'launch_projectile':  # launch projectile reaction
+            if reaction['target'] == 'attacked_entity':  # if target is attacked entity
+                if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
+                    target = (event_data['target'].position[0], event_data['target'].position[1])
+                else:  # if not - it must be a tuple
+                    target = event_data['target']
+                # TODO: make a function, action or a method to launch projectile (cannot reobserve while iterating through events)
+                projectile = pickle.loads(pickle.dumps(reaction['projectile']))  # pickle create new projectile copy
+                projectile.launcher = self.owner  # set it launcher to owner
+                projectile.ai.owner = projectile  # set projectile ai component owner
+                projectile.target = target  # set projectile target
+                projectile.ai.target = target
+                self.owner.location.place_entity(projectile, self.owner.position[0], self.owner.position[1])
+                for abil in projectile.abilities:  # set observers for copied projectile
+                    abil.reobserve()
+                projectile.ai.enroute()
+                game_logic.Game.add_message(
+                    self.owner.name + ' launches a ' + self.name + '!', 'PLAYER', self.message_color)
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,

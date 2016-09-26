@@ -289,11 +289,20 @@ def initialize():
                              trigger='hit_basic_attack', conditions=[], reactions=[react],
                              message_color=[255, 50, 0])
     data_set['mob_ifrit'].add_ability(abil)
+    # TODO: remake Ignite into Fireball
+    # === projectile
+    proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='firebolt',
+                                         description='An arrow of pure flame.', char='*', color=[255, 0, 0])
+    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (1, 5), 'dmg_type': 'fire'}
+    abil = abilities.Ability(name='Ignite', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[255, 0, 0])
+    proj.add_ability(abil)
+    # === end of projectile
     cond = abilities.Condition('TARGET_IN_RANGE')
-    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (1, 3), 'dmg_type': 'fire'}
+    react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'projectile': proj}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
-    abil = abilities.Ability(name='Ignite', owner=data_set['mob_ifrit'], cooldown=1000,
+    abil = abilities.Ability(name='Firebolt', owner=data_set['mob_ifrit'], cooldown=1000,
                              trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
                              message_color=[255, 50, 0])
     data_set['mob_ifrit'].add_ability(abil)

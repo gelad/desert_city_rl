@@ -229,7 +229,7 @@ def act_move(action, register_call, actor, dx, dy):
 def act_relocate(action, register_call, actor, x, y):
     """ Actor relocate movement """
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed  # relocate needs 1 turn
+        action.t_needed = actor.speed  # relocate needs actor.speed
     else:  # part that is executed when action fires
         actor.relocate(x, y)  # move actor to desired coords
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
