@@ -432,7 +432,7 @@ class AI(events.Observer):
 
     def __init__(self, state, owner=None):
         self.state = state  # state of AI, i.e. 'sleeping', 'wandering', 'chasing'
-        self.owner = owner  # owner Entity of ai object. TODO: hack - owner set externally
+        self.owner = owner  # owner Entity of ai object.
         self.reobserve()
 
     def reobserve(self):
@@ -461,6 +461,61 @@ class SimpleMeleeChaserAI(AI):
     def on_event_location(self, data):
         """ Method handling location-related events """
         if data['type'] == 'entity_moved':
+            if isinstance(data['entity'], Player):  # if player moved - remember its position
+                pl_x = data['entity'].position[0]
+                pl_y = data['entity'].position[1]
+                if hypot(pl_x - self.owner.position[0], pl_y - self.owner.position[1]) <= self.owner.sight_radius:
+                    self.state = 'alert'  # if player new position is within FOV - switch to 'alert' state
+
+    def act(self):
+        """ Method called when monster is ready to act """
+        # TODO: comment this
+        if self.state == 'alert':
+            x = self.owner.position[0]
+            y = self.owner.position[1]
+            for point in self.owner.fov_set:  # check for player in FOV
+                player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
+                if player:  # if there is one
+                    self.seen = True
+                    self.seen_x = player.position[0]  # update last seen position of player
+                    self.seen_y = player.position[1]
+                    # if in melee range - attack
+                    if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
+                        self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
+                        break  # action is performed - stop iterating through FOV
+                    else:  # if not - obtain path
+                        path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
+                        if len(path) > 0:  # if there are path
+                            step_cell = path[0]  # move closer
+                            self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                            break  # action is performed - stop iterating through FOV
+            if self.seen and self.owner.state == 'ready':  # check if still ready to act, and player was seen
+                if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
+                    path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
+                    if len(path) > 0:  # if there are path
+                        step_cell = path[0]  # move closer to last known player position
+                        self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                else:  # if in last seen player position, and no player in FOV - stop searching, go idle
+                    self.seen = False
+                    self.seen_x = -1
+                    self.seen_y = -1
+                    self.state = 'idle'
+        if self.owner.state == 'ready':  # if no action is performed - wait
+            self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
+
+
+class AbilityUserAI(AI):
+    """ A simple AI for monster, that uses abilities """
+
+    def __init__(self, state='idle'):
+        AI.__init__(self, state)
+        self.seen = False  # if player has been seen - set to true. For chasing
+        self.seen_x = -1
+        self.seen_y = -1
+
+    def on_event_location(self, data):
+        """ Method handling location-related events """
+        if data['type'] == 'entity_moved':
             if isinstance(data['entity'], Player):
                 pl_x = data['entity'].position[0]
                 pl_y = data['entity'].position[1]
@@ -473,31 +528,33 @@ class SimpleMeleeChaserAI(AI):
         if self.state == 'alert':
             x = self.owner.position[0]
             y = self.owner.position[1]
-            for point in self.owner.fov_set:
+            for point in self.owner.fov_set:  # check for player in FOV
                 player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
-                if player:
+                if player:  # if there is one
                     self.seen = True
-                    self.seen_x = player.position[0]  # last seen position of player
+                    self.seen_x = player.position[0]  # update last seen position of player
                     self.seen_y = player.position[1]
+                    # if in melee range - attack
                     if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
                         self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
-                    else:
-                        path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])
-                        if len(path) > 0:
-                            step_cell = path[0]
+                        break  # action is performed - stop iterating through FOV
+                    else:  # if not - obtain path
+                        path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
+                        if len(path) > 0:  # if there are path
+                            step_cell = path[0]  # move closer
                             self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
-            if self.seen:
-                if not ((x == self.seen_x) and (y == self.seen_y)):
-                    path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)
-                    if len(path) > 0:
-                        step_cell = path[0]
+                            break  # action is performed - stop iterating through FOV
+            if self.seen and self.owner.state == 'ready':  # check if still ready to act, and player was seen
+                if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
+                    path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
+                    if len(path) > 0:  # if there are path
+                        step_cell = path[0]  # move closer to last known player position
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
-                    else:
-                        self.seen = False
-                        self.seen_x = -1
-                        self.seen_y = -1
-                        self.state = 'idle'
-
+                else:  # if in last seen player position, and no player in FOV - stop searching, go idle
+                    self.seen = False
+                    self.seen_x = -1
+                    self.seen_y = -1
+                    self.state = 'idle'
         if self.owner.state == 'ready':  # if no action is performed - wait
             self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
 

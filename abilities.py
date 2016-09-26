@@ -47,7 +47,7 @@ class Ability(events.Observer):
     """ Base class for Ability object """
 
     def __init__(self, owner, trigger, reactions, conditions=None, enabled=True, cooldown=0, name='', ability_id='',
-                 description='', message_color=None):
+                 description='', message_color=None, ai_info=None):
         self.owner = owner
         if isinstance(owner, game_logic.Item):  # if it's an item - set owner to owning Entity
             self.owner_item = owner  # if Item - Item object
@@ -63,6 +63,7 @@ class Ability(events.Observer):
         self.name = name  # name of the ability
         self.ability_id = ability_id  # ability ID in dataset
         self.description = description  # description of ability
+        self.ai_info = ai_info  # info for AI how and when to use the ability
         if message_color is None:
             self.message_color = [255, 255, 255]
         else:
@@ -96,21 +97,7 @@ class Ability(events.Observer):
                 if self.ticks_to_cd <= 0:  # if ability is ready
                     self.ability_on_cd = False  # finish cooldown
         if data['type'] == self.trigger and self.enabled and not self.ability_on_cd:  # if trigger is valid
-            expression = ''
-            for cond in self.conditions:
-                if isinstance(cond, Condition):
-                    # if other kwargs needed - add here
-                    kwargs = {'owner': self.owner, 'owner_item': self.owner_item}
-                    if data['type'] == 'used_on_self':  # if used on self type - add used item
-                        kwargs.update({'item': data['item']})
-                    if data['type'] == 'entity_moved':  # if moved event type - add moved entity
-                        kwargs.update({'entity': data['entity']})
-                    if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
-                        kwargs.update({'damage': data['damage']})
-                    expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
-                else:
-                    expression += cond  # add '(', ')', 'and', 'or' etc
-            if bool_eval.nested_bool_eval(expression):  # if conditions are passed - react
+            if self.conditions_met(data):  # if conditions are passed - react
                 for reaction in self.reactions:
                     if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
                         if random.randint(1, 100) > reaction['chance']:  # take a chance
@@ -127,6 +114,24 @@ class Ability(events.Observer):
                         self.ticks_to_cd = self.cooldown
                         events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
                         events.Event('location', {'type': 'ability_fired', 'ability': self})
+
+    def conditions_met(self, data):
+        """ Method that checks if conditions are met """
+        expression = ''
+        for cond in self.conditions:
+            if isinstance(cond, Condition):
+                # if other kwargs needed - add here
+                kwargs = {'owner': self.owner, 'owner_item': self.owner_item}
+                if data['type'] == 'used_on_self':  # if used on self type - add used item
+                    kwargs.update({'item': data['item']})
+                if data['type'] == 'entity_moved':  # if moved event type - add moved entity
+                    kwargs.update({'entity': data['entity']})
+                if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
+                    kwargs.update({'damage': data['damage']})
+                expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
+            else:
+                expression += cond  # add '(', ')', 'and', 'or' etc
+        return bool_eval.nested_bool_eval(expression)  # evaluate result expression and return
 
     # TODO: decompose this method - separate each type of reaction to own method (or function)
     def react(self, reaction, event_data):
