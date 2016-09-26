@@ -787,7 +787,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             acc_weapon = weapon.properties['accuracy_ranged']
         else:
             acc_weapon = 1
-        range_to_target =  hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
+        range_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
         hit = ranged_hit_probability(acc_weapon, weapon.range, range_to_target)
         if hit:
             ammo = weapon.ammo[0]
@@ -796,15 +796,15 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.enroute()
         else:
-            if range_to_target > 3:
+            if range_to_target > 3:  # if range too small - make miss circle 3 cell wide
                 radius = range_to_target / 2
-            else:
+            else:  # if missed
                 radius = 1.5
-            miss_circle = circle_points(radius, False)
-            i = random.randrange(len(miss_circle))
+            miss_circle = circle_points(radius, False)  # get points around target location
+            i = random.randrange(len(miss_circle))  # select random point
             tx += miss_circle[i][0]
             ty += miss_circle[i][1]
-            ammo = weapon.ammo[0]
+            ammo = weapon.ammo[0]  # and shoot it
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
             shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])

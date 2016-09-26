@@ -40,10 +40,10 @@ Make some traps. (DONE)
 Periodic damage ability. (DONE)
 Make antidote potion. (DONE)
 Make corpse property to BattleEntity - to destroy props to debris and debris to bits and pieces. (DONE)
+Implement accuracy for ranged. (DONE)
 
 
 Implement accuracy for melee.
-Implement accuracy for ranged.
 Make 'give item' debug command.
 Separate abilities from entities in dataset section.
 Make shield item.
