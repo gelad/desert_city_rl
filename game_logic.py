@@ -787,8 +787,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             acc_weapon = weapon.properties['accuracy_ranged']
         else:
             acc_weapon = 1
-        hit = ranged_hit_probability(acc_weapon, weapon.range, hypot(target.position[0] - self.position[0],
-                                                                     target.position[1] - self.position[1]))
+        range_to_target =  hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
+        hit = ranged_hit_probability(acc_weapon, weapon.range, range_to_target)
         if hit:
             ammo = weapon.ammo[0]
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
@@ -796,9 +796,19 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.enroute()
         else:
-            # TODO: process miss - make projectile his a cell near the target
-            msg = self.name + ' misses.'
-            Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            if range_to_target > 3:
+                radius = range_to_target / 2
+            else:
+                radius = 1.5
+            miss_circle = circle_points(radius, False)
+            i = random.randrange(len(miss_circle))
+            tx += miss_circle[i][0]
+            ty += miss_circle[i][1]
+            ammo = weapon.ammo[0]
+            weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
+            shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
+            self.location.place_entity(shot, self.position[0], self.position[1])
+            shot.ai.enroute()
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
@@ -1155,7 +1165,7 @@ def ranged_hit_probability(weapon_acc, weapon_maxrange, range_to_target, mods=No
     # TODO: implement accuracy modifications
     # goal - to make 70% at range/2, almost 95% one tile away, and very low probability at max range
     # some math ahead (magic numbers included)
-    hit_prob = 1 - random.betavariate(2, 3)  # probability to hit, Expected value 0.75
+    hit_prob = 1 - random.betavariate(2, 3)  # probability to hit, Expected value 0.70
     weapon_halfrange = weapon_maxrange / 2
     if range_to_target >= weapon_halfrange:  # if target is farther than half range of the weapon
         range_coef = 0.01 + weapon_halfrange / range_to_target  # calculate (0.01, 1.01) range coefficient
@@ -1166,6 +1176,25 @@ def ranged_hit_probability(weapon_acc, weapon_maxrange, range_to_target, mods=No
         return True
     else:
         return False
+
+
+def circle_points(r, include_center):
+    """ Function that returns points within the circle at (0, 0). r - radius """
+    points = []
+    for x in range(int(r)):
+        for y in range(int(r)):
+            if x**2 + y**2 <= r**2:  # if point within the circle
+                points.append((x, y))  # add 4 points, because of symmetry
+                points.append((-x, -y))
+                points.append((-x, y))
+                points.append((x, -y))
+    if not include_center:
+        points.remove((0, 0))
+    return points
+
+
+
+
 
 
 
