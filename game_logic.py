@@ -9,7 +9,6 @@ import abilities
 import dataset
 import generation
 
-
 import random
 import pickle
 from math import hypot
@@ -206,8 +205,8 @@ class BattleEntity(Entity):
             prot = self.armor[dmg_type]
         if dmg_type in self.resist.keys():
             prot = self.resist[dmg_type]
-        prot += self.get_effect('RESIST_'+dmg_type.upper())  # add resistance/armor effects if any
-        block = self.get_effect('BLOCK_'+dmg_type.upper())  # damage block ammount
+        prot += self.get_effect('RESIST_' + dmg_type.upper())  # add resistance/armor effects if any
+        block = self.get_effect('BLOCK_' + dmg_type.upper())  # damage block ammount
         return prot, block  # return protection parameters
 
     def death(self):
@@ -218,7 +217,7 @@ class BattleEntity(Entity):
         """ Method to get corpse Entity """
         if self.corpse == '':  # if default corpse
             corpse = Item(name=self.name + "'s corpse.", data_id=self.name + '_corpse',
-                      description='A dead ' + self.name + '.', char='%', color=self.color, weight=self.weight)
+                          description='A dead ' + self.name + '.', char='%', color=self.color, weight=self.weight)
         elif self.corpse == 'no corpse':  # if no corpse
             return None
         else:  # if corpse entity_id specified
@@ -327,6 +326,7 @@ class Abilities(Entity):
     """
         Mixin class, adds Abilities to Entity.
     """
+
     def __init__(self):
         self.abilities = []  # abilities list
 
@@ -469,7 +469,6 @@ class SimpleMeleeChaserAI(AI):
 
     def act(self):
         """ Method called when monster is ready to act """
-        # TODO: comment this
         if self.state == 'alert':
             x = self.owner.position[0]
             y = self.owner.position[1]
@@ -507,8 +506,10 @@ class SimpleMeleeChaserAI(AI):
 class AbilityUserAI(AI):
     """ A simple AI for monster, that uses abilities """
 
-    def __init__(self, state='idle'):
+    def __init__(self, state='idle', behavior='melee', properties=None):
         AI.__init__(self, state)
+        self.behavior = behavior  # overall monster behavior
+        self.properties = properties  # properties of selected behavior (i.e. preferred range for ranged)
         self.seen = False  # if player has been seen - set to true. For chasing
         self.seen_x = -1
         self.seen_y = -1
@@ -524,39 +525,105 @@ class AbilityUserAI(AI):
 
     def act(self):
         """ Method called when monster is ready to act """
-        # TODO: comment this
         if self.state == 'alert':
-            x = self.owner.position[0]
-            y = self.owner.position[1]
-            for point in self.owner.fov_set:  # check for player in FOV
-                player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
-                if player:  # if there is one
-                    self.seen = True
-                    self.seen_x = player.position[0]  # update last seen position of player
-                    self.seen_y = player.position[1]
-                    # if in melee range - attack
-                    if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
-                        self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
-                        break  # action is performed - stop iterating through FOV
-                    else:  # if not - obtain path
-                        path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
-                        if len(path) > 0:  # if there are path
-                            step_cell = path[0]  # move closer
-                            self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
-                            break  # action is performed - stop iterating through FOV
-            if self.seen and self.owner.state == 'ready':  # check if still ready to act, and player was seen
-                if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
-                    path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
-                    if len(path) > 0:  # if there are path
-                        step_cell = path[0]  # move closer to last known player position
-                        self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
-                else:  # if in last seen player position, and no player in FOV - stop searching, go idle
-                    self.seen = False
-                    self.seen_x = -1
-                    self.seen_y = -1
-                    self.state = 'idle'
+            if self.behavior == 'melee':
+                self.melee()
+            elif self.behavior == 'ranged':
+                self.ranged()
         if self.owner.state == 'ready':  # if no action is performed - wait
             self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
+
+    def melee(self):
+        """ Method what to do in alert state if melee behavior """
+        x = self.owner.position[0]
+        y = self.owner.position[1]
+        acted = False  # acted flag
+        for point in self.owner.fov_set:  # check for player in FOV
+            player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
+            if player:  # if there is one
+                self.seen = True
+                self.seen_x = player.position[0]  # update last seen position of player
+                self.seen_y = player.position[1]
+                if len(self.owner.abilities) > 0:  # if there are abilities - try to use them
+                    # get a list of ai-usable abilities
+                    ai_abilities = [a for a in self.owner.abilities if a.ai_info and a.ability_on_cd is False]
+                    ai_abilities.sort(key=lambda abil: abil.ai_info['priority'])  # sort list by ability priority
+                    for ability in ai_abilities:  # list of abilities with ai_info
+                        data = {}  # gather data, needed to determine if ability can be used now
+                        if ability.ai_info['type'] == 'ranged_attack':  # if ranged attack - add range info
+                            data['range'] = ability.ai_info['range']
+                        # determine target of ability
+                        if ability.ai_info['target'] == 'player':
+                            target = player
+                        elif ability.ai_info['target'] == 'self':
+                            target = self.owner
+                        else:
+                            raise Exception('Need to specify target of ability!')
+                        data['target'] = target  # add target info to data
+                        data['type'] = ability.trigger  # set event type to ability trigger
+                        if ability.conditions_met(data):
+                            # use ability action
+                            self.owner.perform(actions.act_use_ability, self.owner, target, ability,
+                                               ability.ai_info['whole_time'], ability.ai_info['use_offset'])
+                            acted = True
+                            break  # one action at a time
+                if not acted and hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
+                    # if in melee range - attack
+                    self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
+                    acted = True
+                    break  # action is performed - stop iterating through FOV
+                else:  # if not - obtain path
+                    path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
+                    if len(path) > 0:  # if there are path
+                        step_cell = path[0]  # move closer
+                        acted = True
+                        self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                        break  # action is performed - stop iterating through FOV
+        if self.seen and not acted:  # check if still ready to act, and player was seen
+            if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
+                path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
+                if len(path) > 0:  # if there are path
+                    step_cell = path[0]  # move closer to last known player position
+                    acted = True
+                    self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+            else:  # if in last seen player position, and no player in FOV - stop searching, go idle
+                self.seen = False
+                self.seen_x = -1
+                self.seen_y = -1
+                self.state = 'idle'
+
+    def ranged(self):
+        """ Method what to do in alert state if ranged behavior """
+        # TODO: change this to actual ranged behavior
+        x = self.owner.position[0]
+        y = self.owner.position[1]
+        for point in self.owner.fov_set:  # check for player in FOV
+            player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
+            if player:  # if there is one
+                self.seen = True
+                self.seen_x = player.position[0]  # update last seen position of player
+                self.seen_y = player.position[1]
+                # if in melee range - attack
+                if hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1]) <= 1.42:
+                    self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
+                    break  # action is performed - stop iterating through FOV
+                else:  # if not - obtain path
+                    path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
+                    if len(path) > 0:  # if there are path
+                        step_cell = path[0]  # move closer
+                        self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                        break  # action is performed - stop iterating through FOV
+        if self.seen and self.owner.state == 'ready':  # check if still ready to act, and player was seen
+            if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
+                path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
+                if len(path) > 0:  # if there are path
+                    step_cell = path[0]  # move closer to last known player position
+                    self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+            else:  # if in last seen player position, and no player in FOV - stop searching, go idle
+                self.seen = False
+                self.seen_x = -1
+                self.seen_y = -1
+                self.state = 'idle'
 
 
 class UnguidedShotAI(AI):
@@ -599,17 +666,39 @@ class UnguidedShotAI(AI):
                     dmg_type = 'pure'
                     # UGLY as hell..
                     ammo = self.owner.ammo
-                    if 'bashing' in ammo.properties.keys(): dmg = ammo.properties['bashing']; dmg_type = 'bashing'
-                    elif 'slashing' in ammo.properties.keys(): dmg = ammo.properties['slashing']; dmg_type = 'slashing'
-                    elif 'piercing' in ammo.properties.keys(): dmg = ammo.properties['piercing']; dmg_type = 'piercing'
-                    elif 'fire' in ammo.properties.keys(): dmg = ammo.properties['fire']; dmg_type = 'fire'
-                    elif 'cold' in ammo.properties.keys(): dmg = ammo.properties['cold']; dmg_type = 'cold'
-                    elif 'lightning' in ammo.properties.keys(): dmg = ammo.properties['lightning']; dmg_type='lightning'
-                    elif 'poison' in ammo.properties.keys(): dmg = ammo.properties['poison']; dmg_type = 'poison'
-                    elif 'acid' in ammo.properties.keys(): dmg = ammo.properties['acid']; dmg_type = 'acid'
-                    elif 'mental' in ammo.properties.keys(): dmg = ammo.properties['mental']; dmg_type = 'mental'
-                    elif 'death' in ammo.properties.keys(): dmg = ammo.properties['death']; dmg_type = 'death'
-                    elif 'strange' in ammo.properties.keys(): dmg = ammo.properties['strange']; dmg_type = 'strange'
+                    if 'bashing' in ammo.properties.keys():
+                        dmg = ammo.properties['bashing'];
+                        dmg_type = 'bashing'
+                    elif 'slashing' in ammo.properties.keys():
+                        dmg = ammo.properties['slashing'];
+                        dmg_type = 'slashing'
+                    elif 'piercing' in ammo.properties.keys():
+                        dmg = ammo.properties['piercing'];
+                        dmg_type = 'piercing'
+                    elif 'fire' in ammo.properties.keys():
+                        dmg = ammo.properties['fire'];
+                        dmg_type = 'fire'
+                    elif 'cold' in ammo.properties.keys():
+                        dmg = ammo.properties['cold'];
+                        dmg_type = 'cold'
+                    elif 'lightning' in ammo.properties.keys():
+                        dmg = ammo.properties['lightning'];
+                        dmg_type = 'lightning'
+                    elif 'poison' in ammo.properties.keys():
+                        dmg = ammo.properties['poison'];
+                        dmg_type = 'poison'
+                    elif 'acid' in ammo.properties.keys():
+                        dmg = ammo.properties['acid'];
+                        dmg_type = 'acid'
+                    elif 'mental' in ammo.properties.keys():
+                        dmg = ammo.properties['mental'];
+                        dmg_type = 'mental'
+                    elif 'death' in ammo.properties.keys():
+                        dmg = ammo.properties['death'];
+                        dmg_type = 'death'
+                    elif 'strange' in ammo.properties.keys():
+                        dmg = ammo.properties['strange'];
+                        dmg_type = 'strange'
                     try:  # if damage is (min, max) tuple
                         random.seed()
                         min_dmg = dmg[0]
@@ -626,7 +715,7 @@ class UnguidedShotAI(AI):
                     else:
                         self.owner.ammo = None
                     res_dmg = self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
-                    Game.add_message(self.owner.name+' hits '+enemy.name+' for '+str(res_dmg)+' damage!',
+                    Game.add_message(self.owner.name + ' hits ' + enemy.name + ' for ' + str(res_dmg) + ' damage!',
                                      'PLAYER', [255, 255, 255])
                     self.state = 'stopped'
                     self.owner.death()
@@ -730,6 +819,7 @@ class ItemRangedWeapon(Item):
     """
         Child class for a ranged weapon.
     """
+
     def __init__(self, name, data_id, description, char, color, range, weight=0, pass_cost=1, ammo_max=1,
                  ammo_type=None, ammo=None, categories=None, properties=None, equip_slots=None):
         super(ItemRangedWeapon, self).__init__(name=name, data_id=data_id,
@@ -796,17 +886,39 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 dmg_type = 'pure'
                 # TODO: make multiple damage type weapons
                 # UGLY as hell..
-                if 'bashing' in weapon.properties.keys(): dmg = weapon.properties['bashing']; dmg_type = 'bashing'
-                elif 'slashing' in weapon.properties.keys(): dmg = weapon.properties['slashing']; dmg_type = 'slashing'
-                elif 'piercing' in weapon.properties.keys(): dmg = weapon.properties['piercing']; dmg_type = 'piercing'
-                elif 'fire' in weapon.properties.keys(): dmg = weapon.properties['fire']; dmg_type = 'fire'
-                elif 'cold' in weapon.properties.keys(): dmg = weapon.properties['cold']; dmg_type = 'cold'
-                elif 'lightning' in weapon.properties.keys(): dmg = weapon.properties['lightning']; dmg_type = 'lightning'
-                elif 'poison' in weapon.properties.keys(): dmg = weapon.properties['poison']; dmg_type = 'poison'
-                elif 'acid' in weapon.properties.keys(): dmg = weapon.properties['acid']; dmg_type = 'acid'
-                elif 'mental' in weapon.properties.keys(): dmg = weapon.properties['mental']; dmg_type = 'mental'
-                elif 'death' in weapon.properties.keys(): dmg = weapon.properties['death']; dmg_type = 'death'
-                elif 'strange' in weapon.properties.keys(): dmg = weapon.properties['strange']; dmg_type = 'strange'
+                if 'bashing' in weapon.properties.keys():
+                    dmg = weapon.properties['bashing'];
+                    dmg_type = 'bashing'
+                elif 'slashing' in weapon.properties.keys():
+                    dmg = weapon.properties['slashing'];
+                    dmg_type = 'slashing'
+                elif 'piercing' in weapon.properties.keys():
+                    dmg = weapon.properties['piercing'];
+                    dmg_type = 'piercing'
+                elif 'fire' in weapon.properties.keys():
+                    dmg = weapon.properties['fire'];
+                    dmg_type = 'fire'
+                elif 'cold' in weapon.properties.keys():
+                    dmg = weapon.properties['cold'];
+                    dmg_type = 'cold'
+                elif 'lightning' in weapon.properties.keys():
+                    dmg = weapon.properties['lightning'];
+                    dmg_type = 'lightning'
+                elif 'poison' in weapon.properties.keys():
+                    dmg = weapon.properties['poison'];
+                    dmg_type = 'poison'
+                elif 'acid' in weapon.properties.keys():
+                    dmg = weapon.properties['acid'];
+                    dmg_type = 'acid'
+                elif 'mental' in weapon.properties.keys():
+                    dmg = weapon.properties['mental'];
+                    dmg_type = 'mental'
+                elif 'death' in weapon.properties.keys():
+                    dmg = weapon.properties['death'];
+                    dmg_type = 'death'
+                elif 'strange' in weapon.properties.keys():
+                    dmg = weapon.properties['strange'];
+                    dmg_type = 'strange'
                 try:  # if damage is (min, max) tuple
                     random.seed()
                     min_dmg = dmg[0]
@@ -818,8 +930,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 # fire Entity event
                 events.Event(self, {'type': 'hit_weapon_attack', 'target': target,
                                     'damage': damage_dealt, 'dmg_type': dmg_type, 'weapon': weapon})
-                msg = self.name + ' attacks ' + target.name + ' with '\
-                    + weapon.name + ' and deals ' + str(damage_dealt) + ' damage!'
+                msg = self.name + ' attacks ' + target.name + ' with ' \
+                      + weapon.name + ' and deals ' + str(damage_dealt) + ' damage!'
                 Game.add_message(msg, 'PLAYER', [255, 255, 255])
                 msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
                     target.position[0]) + ':' + str(target.position[1])
@@ -903,6 +1015,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
 
 class UnguidedShot(Actor, Entity):
     """ Mixed class for unguided projectile """
+
     def __init__(self, weapon, ammo, speed, target):
         self.weapon = weapon  # weapon that fired projectile
         self.ammo = ammo  # ammo piece
@@ -936,8 +1049,8 @@ class Player(Fighter):
         hit_zone = weighted_choice(self.hit_zones)
         armor = self.equipment[hit_zone]
         if armor:  # if there are armor on hit zone - add protection
-            if 'armor_'+dmg_type in armor.properties.keys():
-                prot += armor.properties['armor_'+dmg_type]  # add armor protection
+            if 'armor_' + dmg_type in armor.properties.keys():
+                prot += armor.properties['armor_' + dmg_type]  # add armor protection
                 block += self.get_effect('BLOCK_' + dmg_type.upper())  # add damage block ammount
         return prot, block, hit_zone
 
@@ -1063,7 +1176,7 @@ class Location:
         if self.is_in_boundaries(x, y):  # validate coordinates
             if isinstance(entity, str):  # if entity is not an Entity object, but a string - load from data
                 entity = dataset.get_entity(entity)
-                try:   # if entity has AI component - register event observer
+                try:  # if entity has AI component - register event observer
                     ai = entity.ai
                     ai.reobserve()
                 except AttributeError:
@@ -1181,6 +1294,7 @@ class Game:
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_short_bow', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
+        self.current_loc.place_entity('mob_ifrit', 15, 15)
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
@@ -1240,7 +1354,7 @@ def circle_points(r, include_center):
     points = []
     for x in range(int(r)):
         for y in range(int(r)):
-            if x**2 + y**2 <= r**2:  # if point within the circle
+            if x ** 2 + y ** 2 <= r ** 2:  # if point within the circle
                 points.append((x, y))  # add 4 points, because of symmetry
                 points.append((-x, -y))
                 points.append((-x, y))
@@ -1248,10 +1362,3 @@ def circle_points(r, include_center):
     if not include_center:
         points.remove((0, 0))
     return points
-
-
-
-
-
-
-

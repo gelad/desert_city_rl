@@ -117,6 +117,33 @@ def act_make_ability_active(action, register_call, ability):
             ability.disabled = False  # enable it
 
 
+def act_use_ability(action, register_call, actor, target, ability, whole_time, use_offset):
+    """ Actor uses a usable ability """
+    if register_call:  # part executed when function is registered in ActionMgr
+        if use_offset == 0:  # if ability is used immediately
+            action.t_needed = whole_time
+            events.Event(actor, {'type': 'ability_used', 'ability': ability,
+                                 'target': target})  # fire an event that triggers ability
+            events.Event('location', {'type': 'entity_used_ability',
+                                      'user': actor, 'target': target, 'ability': ability})  # fire ability used event
+        elif 0 < use_offset <= 1:
+            action.t_needed = whole_time * use_offset  # set action fire time according to offset
+        else:
+            raise Exception('Action: ability use_offset must be between 0 and 1, got ' + str(use_offset))
+    else:  # part that is executed when action fires
+        if actor and ability:  # if actor and ability still exist
+            events.Event(actor, {'type': 'ability_used', 'ability': ability,
+                                 'target': target})  # fire an event that triggers ability
+            events.Event('location', {'type': 'entity_used_ability',
+                                      'user': actor, 'target': target, 'ability': ability})  # fire ability used event
+            actor.actions.remove(action)  # remove performed action from actor's list
+            actor.state = 'ready'  # return actor to ready state
+            # withdrawal to make whole action take whole_time
+            withdrawal = int(1 - whole_time * use_offset)
+            if withdrawal > 0:  # if no withdrawal (use_offset = 1) then no withdrawal action
+                actor.perform(act_withdrawal, actor, withdrawal)
+
+
 def act_apply_timed_effect(action, register_call, target, effect):
     """ Applies an effect to target for ammount of time """
     if register_call:  # part executed when function is registered in ActionMgr

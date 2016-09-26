@@ -8,6 +8,7 @@ import bool_eval
 
 import pickle
 import random
+from math import hypot
 
 
 class Condition:
@@ -37,6 +38,17 @@ class Condition:
                 return False
         if self.condition == 'MOVED_ON':  # MOVED_ON condition
             if kwargs['owner'].position == kwargs['entity'].position:  # check if positions of owner and entity match
+                return True
+            else:
+                return False
+        if self.condition == 'TARGET_IN_RANGE':  # TARGET IN RANGE condition
+            if isinstance(kwargs['target'], game_logic.BattleEntity):  # if target is a BE
+                target = (kwargs['target'].position[0], kwargs['target'].position[1])
+            else:  # if not - it must be a point tuple
+                target = kwargs['target']
+            origin = (kwargs['owner'].position[0], kwargs['owner'].position[1])
+            # check if target is in range
+            if hypot(origin[0] - target[0], origin[1] - target[1]) <= float(kwargs['range']):
                 return True
             else:
                 return False
@@ -96,7 +108,7 @@ class Ability(events.Observer):
                 self.ticks_to_cd -= data['ticks']
                 if self.ticks_to_cd <= 0:  # if ability is ready
                     self.ability_on_cd = False  # finish cooldown
-        if data['type'] == self.trigger and self.enabled and not self.ability_on_cd:  # if trigger is valid
+        if data['type'] == self.trigger and not self.ability_on_cd:  # if trigger is valid
             if self.conditions_met(data):  # if conditions are passed - react
                 for reaction in self.reactions:
                     if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
@@ -117,18 +129,18 @@ class Ability(events.Observer):
 
     def conditions_met(self, data):
         """ Method that checks if conditions are met """
+        if not self.enabled:  # if not enabled - conditions aren't met by default
+            return False
         expression = ''
         for cond in self.conditions:
             if isinstance(cond, Condition):
+                # event data is passed to condition as is
                 # if other kwargs needed - add here
-                kwargs = {'owner': self.owner, 'owner_item': self.owner_item}
-                if data['type'] == 'used_on_self':  # if used on self type - add used item
-                    kwargs.update({'item': data['item']})
-                if data['type'] == 'entity_moved':  # if moved event type - add moved entity
-                    kwargs.update({'entity': data['entity']})
-                if data['type'] == 'hit_basic_attack':  # if hit basic attack event type - add damage dealt
-                    kwargs.update({'damage': data['damage']})
-                expression += str(cond.evaluate(**kwargs))  # add evaluation of condition result
+                data.update({'owner': self.owner, 'owner_item': self.owner_item})
+                if self.ai_info:  # if ai_info exists - pass some additional arguments
+                    if self.ai_info['type'] == 'ranged_attack':
+                        data.update({'range': self.ai_info['range']})
+                expression += str(cond.evaluate(**data))  # add evaluation of condition result
             else:
                 expression += cond  # add '(', ')', 'and', 'or' etc
         return bool_eval.nested_bool_eval(expression)  # evaluate result expression and return

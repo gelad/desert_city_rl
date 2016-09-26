@@ -282,11 +282,19 @@ def initialize():
                                                char='F', armor={'bashing': 100, 'slashing': 100, 'piercing': 100},
                                                resist={'cold': -50, 'fire': 1000},
                                                color=[255, 50, 0], hp=25, speed=100, sight_radius=18.5, damage=(3, 5),
-                                               dmg_type='bashing', ai=game_logic.SimpleMeleeChaserAI(), weight=100)
+                                               dmg_type='bashing', ai=game_logic.AbilityUserAI(), weight=100)
     data_set['mob_ifrit'].effects.append(effects.Effect('BLOCK_FIRE', 100))
     react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (3, 6), 'dmg_type': 'fire'}
     abil = abilities.Ability(name='Flaming fists', owner=data_set['mob_ifrit'], cooldown=500,
                              trigger='hit_basic_attack', conditions=[], reactions=[react],
+                             message_color=[255, 50, 0])
+    data_set['mob_ifrit'].add_ability(abil)
+    cond = abilities.Condition('TARGET_IN_RANGE')
+    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (1, 3), 'dmg_type': 'fire'}
+    ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
+               'whole_time': 100, 'use_offset': 0.5}
+    abil = abilities.Ability(name='Ignite', owner=data_set['mob_ifrit'], cooldown=1000,
+                             trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
                              message_color=[255, 50, 0])
     data_set['mob_ifrit'].add_ability(abil)
 
