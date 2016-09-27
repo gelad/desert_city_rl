@@ -800,6 +800,7 @@ class UnguidedProjectileAI(AI):
 
     def enroute(self):
         """ Method to calculate route """
+        # TODO: make projectile fly farther than target
         self.route = fov_los_pf.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
         self.next = iter(self.route)
         next(self.next)
@@ -822,19 +823,19 @@ class UnguidedProjectileAI(AI):
             if enemy:
                 if isinstance(enemy, BattleEntity):  # if enemy can be damaged
                     # fire an event that triggers ability
-                    events.Event(self.owner, {'type': 'projectile_hit', 'target': enemy})
+                    events.Event(self.owner, {'type': 'projectile_hit', 'target': enemy, 'attacker': self.owner})
                     self.state = 'stopped'
                     self.owner.death()
                     return
             try:
                 next_cell = next(self.next)
             except StopIteration:
-                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y)})
+                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y), 'attacker': self.owner})
                 self.state = 'stopped'
                 self.owner.death()
                 return
             if self.power <= 0:
-                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y)})
+                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y), 'attacker': self.owner})
                 self.state = 'stopped'
                 self.owner.death()
                 return

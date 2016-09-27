@@ -4,6 +4,7 @@
 import game_logic
 import events
 
+import pickle
 
 class Action:
     """
@@ -115,6 +116,25 @@ def act_make_ability_active(action, register_call, ability):
     else:  # part that is executed when action fires
         if ability:  # if ability still exists
             ability.disabled = False  # enable it
+
+
+def act_launch_projectile(action, register_call, projectile_type, launcher, target, message_color):
+    """ Launches a projectile """
+    if register_call:  # part executed when function is registered in ActionMgr
+        pass  # nothing to do on action registration
+    else:  # part that is executed when action fires
+        if launcher and projectile_type:  # if all participants still exist
+            projectile = pickle.loads(pickle.dumps(projectile_type))  # pickle create new projectile copy
+            projectile.launcher = launcher  # set launcher
+            projectile.ai.owner = projectile  # set projectile ai component owner
+            projectile.target = target  # set projectile target
+            projectile.ai.target = target
+            launcher.location.place_entity(projectile, launcher.position[0], launcher.position[1])
+            for abil in projectile.abilities:  # set observers for copied projectile
+                abil.reobserve()
+            projectile.ai.enroute()
+            game_logic.Game.add_message(
+                launcher.name + ' launches a ' + projectile.name + '!', 'PLAYER', message_color)
 
 
 def act_use_ability(action, register_call, actor, target, ability, whole_time, use_offset):
