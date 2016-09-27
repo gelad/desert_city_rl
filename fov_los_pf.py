@@ -3,6 +3,8 @@
 """
 import tdl
 
+import math
+
 
 def get_fov(x, y, loc, radius):
     """ Function that calculates FOV. Now just a wrapper around tdl function """
@@ -15,9 +17,28 @@ def get_fov(x, y, loc, radius):
     return q_fov
 
 
-def get_los(x1, y1, x2, y2):
-    """ Function that calculates LOS. Now just a wrapper around tdl function """
+def line(x1, y1, x2, y2):
+    """ Function that returns points in line. Now just a wrapper around tdl function """
     return tdl.map.bresenham(x1, y1, x2, y2)
+
+
+def ray(x1, y1, x2, y2, width, height, power):
+    # TODO: add angle raycasting
+    """ Function that casts a ray through two points """
+    rng = math.hypot(x2 - x1, y2 - y1)
+    ax = (x2 - x1) / rng
+    ay = (y2 - y1) / rng
+    x = x1
+    y = y1
+    ray = []
+    for i in range(power):  # cast the ray
+        x += ax
+        y += ay
+        if x < 0 or y < 0 or x > width or y > height:  # if ray is out of boundaries
+            break
+        ray.append((round(x), round(y)))
+    return ray
+
 
 
 def get_path(loc, x1, y1, x2, y2):

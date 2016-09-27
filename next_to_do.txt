@@ -41,8 +41,9 @@ Periodic damage ability. (DONE)
 Make antidote potion. (DONE)
 Make corpse property to BattleEntity - to destroy props to debris and debris to bits and pieces. (DONE)
 Implement accuracy for ranged. (DONE)
-Implemented monster usable abilities (and AI for this) (DONE)
+Implement monster usable abilities (and AI for this) (DONE)
 Implement ranged monster. (DONE)
+Implement raycasting - for projectile trajectories. (DONE)
 
 
 Implement accuracy for melee.

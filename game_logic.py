@@ -676,9 +676,8 @@ class UnguidedShotAI(AI):
 
     def enroute(self):
         """ Method to calculate route """
-        owner = self.owner
-        target = self.target
-        self.route = fov_los_pf.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
+        self.route = fov_los_pf.ray(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1],
+                                    self.owner.location.width, self.owner.location.height, self.power)
         self.next = iter(self.route)
         next(self.next)
 
@@ -800,8 +799,8 @@ class UnguidedProjectileAI(AI):
 
     def enroute(self):
         """ Method to calculate route """
-        # TODO: make projectile fly farther than target
-        self.route = fov_los_pf.get_los(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
+        self.route = fov_los_pf.ray(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1],
+                                    self.owner.location.width, self.owner.location.height, self.power)
         self.next = iter(self.route)
         next(self.next)
 
@@ -1051,7 +1050,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             acc_weapon = weapon.properties['accuracy_ranged']
         else:
             acc_weapon = 1
-        range_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
+        range_to_target = hypot(tx - self.position[0], ty - self.position[1])
         hit = ranged_hit_probability(acc_weapon, weapon.range, range_to_target)
         if hit:
             ammo = weapon.ammo[0]
@@ -1405,7 +1404,7 @@ class Game:
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_short_bow', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
-        self.current_loc.place_entity('mob_ifrit', 20, 20)
+        #  self.current_loc.place_entity('mob_ifrit', 20, 20)
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)
