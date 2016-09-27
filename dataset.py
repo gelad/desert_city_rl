@@ -289,7 +289,7 @@ def initialize():
                              trigger='hit_basic_attack', conditions=[], reactions=[react],
                              message_color=[255, 50, 0])
     data_set['mob_ifrit'].add_ability(abil)
-    # TODO: remake Firebolt into Fireball
+    # TODO: remake Firebolt into Fireball when explosions will be done
     # === projectile
     proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='firebolt',
                                          description='An arrow of pure flame.', char='*', color=[255, 0, 0])

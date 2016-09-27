@@ -20,7 +20,6 @@ class Condition:
 
     def evaluate(self, **kwargs):
         """ Method to evaluate condition, returning True or False """
-        # TODO: get rid of eval()
         if self.condition == 'OWNER_HP_PERCENT':  # OWNER_HP_PERCENT condition
             sign = self.kwargs['sign']
             number = self.kwargs['number']
@@ -184,7 +183,7 @@ class Ability(events.Observer):
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
-                                                               self.owner, reaction['effect'])
+                                                               self.owner, reaction['effect'], self.message_color)
                 if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
                     game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
                                                 reaction['effect'].description + ' for ' + str(reaction['time']) +
@@ -228,6 +227,7 @@ class Ability(events.Observer):
                                                                pickle.loads(pickle.dumps(reaction['effect'])),
                                                                reaction['damage'],
                                                                reaction['dmg_type'], reaction['period'],
-                                                               reaction['whole_time'], reaction['stackable'])
+                                                               reaction['whole_time'], self.message_color,
+                                                               reaction['stackable'])
                                                         # doing pickle copy of effect to make every stack separate
 

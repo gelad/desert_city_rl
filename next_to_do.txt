@@ -46,9 +46,12 @@ Implement ranged monster. (DONE)
 Implement raycasting - for projectile trajectories. (DONE)
 
 
+Implement universal target picking in UI (for shooting, using abilities, etc).
+Make firebolt and ice spike scrolls (to test targeting).
 Make simple AOE explosions.
 Make ammo with abilities (exploding, freezing arrows, etc)
 Implement accuracy for melee.
+Make door-opening mobs.
 BUG: attempted reload command after player death (player can perform actions after death?)
 Make 'give item' debug command.
 Separate abilities from entities in dataset section.

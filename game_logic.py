@@ -786,7 +786,7 @@ class UnguidedShotAI(AI):
 
 class UnguidedProjectileAI(AI):
     """ An unguided projectile AI """
-    # TODO: refactor this
+    # TODO: refactor this (move duplicated code to method?)
     def __init__(self, power, target, owner, state='set_route'):
         AI.__init__(self, state, owner)
         self.route = None

@@ -164,38 +164,29 @@ def act_use_ability(action, register_call, actor, target, ability, whole_time, u
                 actor.perform(act_withdrawal, actor, withdrawal)
 
 
-def act_apply_timed_effect(action, register_call, target, effect):
+def act_apply_timed_effect(action, register_call, target, effect, message_color):
     """ Applies an effect to target for ammount of time """
     if register_call:  # part executed when function is registered in ActionMgr
         target.effects.append(effect)  # apply effect
     else:  # part that is executed when action fires
         if target and effect in target.effects:  # if target still exists and effect too
             if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect end
-                # TODO: make color argument for this action
-                color = [255, 255, 255]
-                if effect.eff == 'RESIST_POISON':
-                    color = [0, 150, 0]
-                if effect.eff == 'HASTE':
-                    color = [255, 255, 0]
                 game_logic.Game.add_message(effect.eff.capitalize().replace('_', ' ') + ': ' + ' effect fades away.',
-                                            'PLAYER', color)
+                                            'PLAYER', message_color)
             target.effects.remove(effect)  # remove effect
 
 
 def act_deal_periodic_damage(action, register_call, act_mgr, target, effect,
-                             damage, dmg_type, period, whole_time, stackable=False):
+                             damage, dmg_type, period, whole_time, message_color, stackable=False):
     """ Periodically damages target while effect is on target """
     if register_call:  # part executed when function is registered in ActionMgr
         if stackable:  # if effect is stackable
             if effect in target.effects:  # if there is particularly this effect in
                 pass  # do nothing, deal damage further
             else:
-                act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect)  # apply a new timed effect
+                act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect, message_color)  # apply a new timed effect
                 if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
-                    color = [255, 255, 255]
-                    if effect.eff == 'POISONED':
-                        color = [0, 150, 0]
-                    game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', color)
+                    game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', message_color)
         else:  # if not stackable
             if effect in target.effects:  # if there is particularly this effect in
                 pass  # do nothing, do damage further
@@ -204,25 +195,19 @@ def act_deal_periodic_damage(action, register_call, act_mgr, target, effect,
                     act_mgr.remove_action(action)  # stop action
                     return
                 else:
-                    act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect)  # apply a new timed effect
+                    act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect, message_color)  # apply a new timed effect
                     if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
-                        color = [255, 255, 255]
-                        if effect.eff == 'POISONED':
-                            color = [0, 150, 0]
-                        game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', color)
+                        game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', message_color)
         action.t_needed = period  # set needed time to 1 period of damage
     else:  # part that is executed when action fires
         if target:  # if target still exists
             if effect in target.effects:  # if effect still on target
                 damage_dealt = target.take_damage(damage, dmg_type)  # do damage
                 if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
-                    color = [255, 255, 255]
-                    if effect.eff == 'POISONED':
-                        color = [0, 150, 0]
                     game_logic.Game.add_message(effect.eff.capitalize() + ': ' + str(damage_dealt) + ' damage.',
-                                                'PLAYER', color)
+                                                'PLAYER', message_color)
                 act_mgr.register_action(whole_time, act_deal_periodic_damage, act_mgr, target, effect,
-                                        damage, dmg_type, period, whole_time, stackable)  # apply next tick of damage
+                                        damage, dmg_type, period, whole_time, message_color, stackable)  # apply next tick of damage
 
 
 def act_move(action, register_call, actor, dx, dy):
@@ -264,7 +249,7 @@ def act_attack_melee_weapons(action, register_call, actor, target):
         spd = 0
         w_num = 0  # weapons number equipped
         weapons = []
-        # TODO: make attack with non-weapons equipped
+        # TODO: make attack with non-weapons equipped in hands
         for item in actor.equipment.values():  # check if any weapons equipped
             if item:
                 if 'weapon' in item.categories:  # correct speed if weapon(s)

@@ -701,7 +701,7 @@ class WindowMain(Window):
                 elif command == 'move_se':
                     self.map.move_camera(1, 1)
             elif game.state == 'targeting':  # if the game is in 'targeting' mode
-                # exit looking mode
+                # exit targeting mode
                 if command == 'exit':
                     self.map.cam_offset = (0, 0)  # set camera offset to normal
                     self.cell_info.visible = False

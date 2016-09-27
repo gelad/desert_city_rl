@@ -113,7 +113,6 @@ def generate_loc(loc_type, settings, width, height):
                                                              ('mob_rakshasa', 10)])
                         mob_coords = floor_cells[random.randrange(len(floor_cells))]
                         loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
-                # TODO: add destructed buildings
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 
