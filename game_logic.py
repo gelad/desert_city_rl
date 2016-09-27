@@ -695,7 +695,11 @@ class UnguidedShotAI(AI):
             if enemy:
                 if enemy.blocks_shots < 1:  # check if shot pass through (for windows, grates, etc)
                     enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
-            if enemy:
+            if enemy:  # if it finally hits something
+                if random.uniform(0, 1) < self.owner.ammo.properties['break_chance']:  # determine if ammo broken
+                    ammo_broken = True
+                else:
+                    ammo_broken = False
                 if isinstance(enemy, BattleEntity):  # if enemy can be damaged
                     dmg = 0
                     dmg_type = 'pure'
@@ -744,24 +748,21 @@ class UnguidedShotAI(AI):
                     for ef in self.owner.weapon.effects:
                         if ef.eff == 'INCREASE_RANGED_DAMAGE':
                             dmg += ef.magnitude
-                    if isinstance(enemy, Inventory):
-                        enemy.add_item(self.owner.ammo)
-                        self.owner.ammo = None
-                    else:
-                        self.owner.ammo = None
+                    if not ammo_broken:
+                        if isinstance(enemy, Inventory):
+                            enemy.add_item(self.owner.ammo)
+                    self.owner.ammo = None
                     res_dmg = self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
                     Game.add_message(self.owner.name + ' hits ' + enemy.name + ' for ' + str(res_dmg) + ' damage!',
                                      'PLAYER', [255, 255, 255])
                     self.state = 'stopped'
                     self.owner.death()
                     return
-                # TODO: make arrows and bolts break
                 else:  # if enemy cannot be damaged
-                    if isinstance(enemy, Inventory):
-                        enemy.add_item(self.owner.ammo)
-                        self.owner.ammo = None
-                    else:
-                        self.owner.ammo = None
+                    if not ammo_broken:
+                        if isinstance(enemy, Inventory):
+                            enemy.add_item(self.owner.ammo)
+                    self.owner.ammo = None
                     Game.add_message(self.owner.name + ' hits ' + enemy.name + '.', 'PLAYER', [255, 255, 255])
                     self.state = 'stopped'
                     self.owner.death()

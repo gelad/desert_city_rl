@@ -237,7 +237,7 @@ def initialize():
     data_set['item_bronze_bolt'] = game_logic.ItemCharges(name='bronze bolt', data_id='item_bronze_bolt',
                                                           description='A simple bronze bolt for crossbows.',
                                                           categories={'bolt', 'stackable'},
-                                                          properties={'piercing': (1, 4)},
+                                                          properties={'piercing': (1, 4), 'break_chance': 0.5},
                                                           char='=', color=[80, 50, 20],
                                                           charges=5, destroyed_after_use=True, weight=0.2)
 
@@ -245,7 +245,7 @@ def initialize():
                                                                   data_id='item_bronze_tipped_arrow',
                                                                   description='A simple bronze tipped arrow.',
                                                                   categories={'arrow', 'stackable'},
-                                                                  properties={'piercing': (1, 3)},
+                                                                  properties={'piercing': (1, 3), 'break_chance': 0.5},
                                                                   char='=', color=[128, 20, 20],
                                                                   charges=5, destroyed_after_use=True, weight=0.1)
 

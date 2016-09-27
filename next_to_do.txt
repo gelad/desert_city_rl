@@ -46,7 +46,10 @@ Implement ranged monster. (DONE)
 Implement raycasting - for projectile trajectories. (DONE)
 
 
+Make simple AOE explosions.
+Make ammo with abilities (exploding, freezing arrows, etc)
 Implement accuracy for melee.
+BUG: attempted reload command after player death (player can perform actions after death?)
 Make 'give item' debug command.
 Separate abilities from entities in dataset section.
 Make shield item.
