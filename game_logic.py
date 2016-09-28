@@ -667,7 +667,7 @@ class AbilityUserAI(AI):
 class UnguidedShotAI(AI):
     """ An unguided shot AI """
 
-    def __init__(self, power, target, owner, state='set_route'):
+    def __init__(self, power, target, owner, state='flying'):
         AI.__init__(self, state, owner)
         self.route = None
         self.next = None
@@ -683,16 +683,11 @@ class UnguidedShotAI(AI):
         self.route = fov_los_pf.ray(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1],
                                     self.owner.location.width, self.owner.location.height, self.power)
         self.next = iter(self.route)
-        next(self.next)
+        self._fly_next()
 
     def act(self):
         """ Method called when shot is ready to act """
-        if self.state == 'set_route':
-            next_cell = next(self.next)
-            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
-            self.power -= 1
-            self.state = 'flying'
-        elif self.state == 'flying':
+        if self.state == 'flying':
             x = self.owner.position[0]
             y = self.owner.position[1]
             enemy = self.owner.location.cells[x][y].get_occupying_entity()
@@ -700,10 +695,6 @@ class UnguidedShotAI(AI):
                 if enemy.blocks_shots < 1:  # check if shot pass through (for windows, grates, etc)
                     enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
             if enemy:  # if it finally hits something
-                if random.uniform(0, 1) < self.owner.ammo.properties['break_chance']:  # determine if ammo broken
-                    ammo_broken = True
-                else:
-                    ammo_broken = False
                 if isinstance(enemy, BattleEntity):  # if enemy can be damaged
                     dmg = 0
                     dmg_type = 'pure'
@@ -752,46 +743,56 @@ class UnguidedShotAI(AI):
                     for ef in self.owner.weapon.effects:
                         if ef.eff == 'INCREASE_RANGED_DAMAGE':
                             dmg += ef.magnitude
-                    if not ammo_broken:
-                        if isinstance(enemy, Inventory):
-                            enemy.add_item(self.owner.ammo)
-                    self.owner.ammo = None
                     res_dmg = self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
                     Game.add_message(self.owner.name + ' hits ' + enemy.name + ' for ' + str(res_dmg) + ' damage!',
                                      'PLAYER', [255, 255, 255])
-                    self.state = 'stopped'
-                    self.owner.death()
+                    self._hit(enemy)
                     return
                 else:  # if enemy cannot be damaged
-                    if not ammo_broken:
-                        if isinstance(enemy, Inventory):
-                            enemy.add_item(self.owner.ammo)
-                    self.owner.ammo = None
                     Game.add_message(self.owner.name + ' hits ' + enemy.name + '.', 'PLAYER', [255, 255, 255])
-                    self.state = 'stopped'
-                    self.owner.death()
-            try:
-                next_cell = next(self.next)
-            except StopIteration:
-                self.state = 'stopped'
-                self.owner.location.place_entity(self.owner.ammo, x, y)
-                self.owner.ammo = None
-                self.owner.death()
-                return
-            if self.power <= 0:
-                self.state = 'stopped'
-                self.owner.location.place_entity(self.owner.ammo, x, y)
-                self.owner.ammo = None
-                self.owner.death()
-                return
-            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
-            self.power -= 1
+                    self._hit(enemy)
+            self._fly_next()
+
+    def _fly_next(self):
+        """ Method to attempt fly to next cell in route """
+        x = self.owner.position[0]
+        y = self.owner.position[1]
+        try:
+            next_cell = next(self.next)
+        except StopIteration:  # if end of route
+            self._hit((x, y))  # hit ending cell
+            return
+        if self.power <= 0:
+            self._hit((x, y))  # hit last cell
+            return
+        self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])  # if not stopped - fly next
+        self.power -= 1
+
+    def _hit(self, something):
+        """ Method called when shot hit something """
+        x = self.owner.position[0]
+        y = self.owner.position[1]
+        if isinstance(something, Entity):  # if entity is hit
+            if random.uniform(0, 1) < self.owner.ammo.properties['break_chance']:  # determine if ammo broken
+                ammo_broken = True
+            else:
+                ammo_broken = False
+            if not ammo_broken:
+                if isinstance(something, Inventory):
+                    something.add_item(self.owner.ammo)
+                else:
+                    self.owner.location.place_entity(self.owner.ammo, x, y)
+        else:  # must be a point tuple then
+            self.owner.location.place_entity(self.owner.ammo, x, y)
+        events.Event(self.owner, {'type': 'shot_hit', 'target': something, 'attacker': self.owner.shooter})
+        self.state = 'stopped'
+        self.owner.ammo = None
+        self.owner.death()
 
 
 class UnguidedProjectileAI(AI):
     """ An unguided projectile AI """
-    # TODO: refactor this (move duplicated code to method?)
-    def __init__(self, power, target, owner, state='set_route'):
+    def __init__(self, power, target, owner, state='flying'):
         AI.__init__(self, state, owner)
         self.route = None
         self.next = None
@@ -807,16 +808,11 @@ class UnguidedProjectileAI(AI):
         self.route = fov_los_pf.ray(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1],
                                     self.owner.location.width, self.owner.location.height, self.power)
         self.next = iter(self.route)
-        next(self.next)
+        self._fly_next()  # fly to next cell (or stop if out of power or route end)
 
     def act(self):
         """ Method called when projectile is ready to act """
-        if self.state == 'set_route':
-            next_cell = next(self.next)
-            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
-            self.power -= 1
-            self.state = 'flying'
-        elif self.state == 'flying':
+        if self.state == 'flying':
             x = self.owner.position[0]
             y = self.owner.position[1]
             enemy = self.owner.location.cells[x][y].get_occupying_entity()
@@ -827,24 +823,30 @@ class UnguidedProjectileAI(AI):
             if enemy:
                 if isinstance(enemy, BattleEntity):  # if enemy can be damaged
                     # fire an event that triggers ability
-                    events.Event(self.owner, {'type': 'projectile_hit', 'target': enemy, 'attacker': self.owner})
-                    self.state = 'stopped'
-                    self.owner.death()
+                    self._hit(enemy)
                     return
-            try:
-                next_cell = next(self.next)
-            except StopIteration:
-                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y), 'attacker': self.owner})
-                self.state = 'stopped'
-                self.owner.death()
-                return
-            if self.power <= 0:
-                events.Event(self.owner, {'type': 'projectile_hit', 'target': (x, y), 'attacker': self.owner})
-                self.state = 'stopped'
-                self.owner.death()
-                return
-            self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])
-            self.power -= 1
+            self._fly_next()  # fly to next cell (or stop if out of power or route end)
+
+    def _fly_next(self):
+        """ Method to attempt fly to next cell in route """
+        x = self.owner.position[0]
+        y = self.owner.position[1]
+        try:
+            next_cell = next(self.next)
+        except StopIteration:  # if end of route
+            self._hit((x, y))  # hit ending cell
+            return
+        if self.power <= 0:
+            self._hit((x, y))  # hit last cell
+            return
+        self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])  # if not stopped - fly next
+        self.power -= 1
+
+    def _hit(self, something):
+        """ Method called when projectile hit something """
+        events.Event(self.owner, {'type': 'projectile_hit', 'target': something, 'attacker': self.owner.launcher})
+        self.state = 'stopped'
+        self.owner.death()
 
 
 class Item(Abilities, Entity):
@@ -1060,7 +1062,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         if hit:
             ammo = weapon.ammo[0]
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-            shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
+            shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.enroute()
         else:
@@ -1074,7 +1076,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             ty += miss_circle[i][1]
             ammo = weapon.ammo[0]  # and shoot it
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-            shot = UnguidedShot(weapon, ammo, 1, (tx, ty))
+            shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.enroute()
 
@@ -1115,7 +1117,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
 class UnguidedShot(Actor, Entity):
     """ Mixed class for unguided shot (from a weapon) """
 
-    def __init__(self, weapon, ammo, speed, target):
+    def __init__(self, shooter, weapon, ammo, speed, target):
+        self.shooter = shooter  # entity that fired this shot
         self.weapon = weapon  # weapon that fired projectile
         self.ammo = ammo  # ammo piece
         self.target = target  # target (x, y) tuple
