@@ -676,7 +676,9 @@ class UnguidedShotAI(AI):
 
     def on_event_location(self, data):
         """ Method handling location-related events """
-        pass  # currently this AI don't react to map events
+        if data['type'] == 'entity_moved':  # if something moved
+            if self.owner.position == data['entity'].position:  # on projectile - check for hit
+                self._check_if_hit()
 
     def enroute(self):
         """ Method to calculate route """
@@ -688,70 +690,8 @@ class UnguidedShotAI(AI):
     def act(self):
         """ Method called when shot is ready to act """
         if self.state == 'flying':
-            x = self.owner.position[0]
-            y = self.owner.position[1]
-            enemy = self.owner.location.cells[x][y].get_occupying_entity()
-            if enemy:
-                if enemy.blocks_shots < 1:  # check if shot pass through (for windows, grates, etc)
-                    enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
-            if enemy:  # if it finally hits something
-                if isinstance(enemy, BattleEntity):  # if enemy can be damaged
-                    dmg = 0
-                    dmg_type = 'pure'
-                    # UGLY as hell..
-                    ammo = self.owner.ammo
-                    if 'bashing' in ammo.properties.keys():
-                        dmg = ammo.properties['bashing']
-                        dmg_type = 'bashing'
-                    elif 'slashing' in ammo.properties.keys():
-                        dmg = ammo.properties['slashing']
-                        dmg_type = 'slashing'
-                    elif 'piercing' in ammo.properties.keys():
-                        dmg = ammo.properties['piercing']
-                        dmg_type = 'piercing'
-                    elif 'fire' in ammo.properties.keys():
-                        dmg = ammo.properties['fire']
-                        dmg_type = 'fire'
-                    elif 'cold' in ammo.properties.keys():
-                        dmg = ammo.properties['cold']
-                        dmg_type = 'cold'
-                    elif 'lightning' in ammo.properties.keys():
-                        dmg = ammo.properties['lightning']
-                        dmg_type = 'lightning'
-                    elif 'poison' in ammo.properties.keys():
-                        dmg = ammo.properties['poison']
-                        dmg_type = 'poison'
-                    elif 'acid' in ammo.properties.keys():
-                        dmg = ammo.properties['acid']
-                        dmg_type = 'acid'
-                    elif 'mental' in ammo.properties.keys():
-                        dmg = ammo.properties['mental']
-                        dmg_type = 'mental'
-                    elif 'death' in ammo.properties.keys():
-                        dmg = ammo.properties['death']
-                        dmg_type = 'death'
-                    elif 'strange' in ammo.properties.keys():
-                        dmg = ammo.properties['strange']
-                        dmg_type = 'strange'
-                    try:  # if damage is (min, max) tuple
-                        random.seed()
-                        min_dmg = dmg[0]
-                        max_dmg = dmg[1]
-                        dmg = random.randint(min_dmg, max_dmg)
-                    except TypeError:
-                        pass
-                    for ef in self.owner.weapon.effects:
-                        if ef.eff == 'INCREASE_RANGED_DAMAGE':
-                            dmg += ef.magnitude
-                    res_dmg = self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
-                    Game.add_message(self.owner.name + ' hits ' + enemy.name + ' for ' + str(res_dmg) + ' damage!',
-                                     'PLAYER', [255, 255, 255])
-                    self._hit(enemy)
-                    return
-                else:  # if enemy cannot be damaged
-                    Game.add_message(self.owner.name + ' hits ' + enemy.name + '.', 'PLAYER', [255, 255, 255])
-                    self._hit(enemy)
-            self._fly_next()
+            if not self._check_if_hit():  # if nothing is hit - fly farther
+                self._fly_next()
 
     def _fly_next(self):
         """ Method to attempt fly to next cell in route """
@@ -767,6 +707,73 @@ class UnguidedShotAI(AI):
             return
         self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])  # if not stopped - fly next
         self.power -= 1
+
+    def _check_if_hit(self):
+        """ Method that checks current position for acceptable target to hit """
+        x, y = self.owner.position
+        enemy = self.owner.location.cells[x][y].get_occupying_entity()
+        if enemy:
+            if enemy.blocks_shots < 1:  # check if shot pass through (for windows, grates, etc)
+                enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
+        if enemy:  # if it finally hits something
+            if isinstance(enemy, BattleEntity):  # if enemy can be damaged
+                dmg = 0
+                dmg_type = 'pure'
+                # UGLY as hell..
+                ammo = self.owner.ammo
+                if 'bashing' in ammo.properties.keys():
+                    dmg = ammo.properties['bashing']
+                    dmg_type = 'bashing'
+                elif 'slashing' in ammo.properties.keys():
+                    dmg = ammo.properties['slashing']
+                    dmg_type = 'slashing'
+                elif 'piercing' in ammo.properties.keys():
+                    dmg = ammo.properties['piercing']
+                    dmg_type = 'piercing'
+                elif 'fire' in ammo.properties.keys():
+                    dmg = ammo.properties['fire']
+                    dmg_type = 'fire'
+                elif 'cold' in ammo.properties.keys():
+                    dmg = ammo.properties['cold']
+                    dmg_type = 'cold'
+                elif 'lightning' in ammo.properties.keys():
+                    dmg = ammo.properties['lightning']
+                    dmg_type = 'lightning'
+                elif 'poison' in ammo.properties.keys():
+                    dmg = ammo.properties['poison']
+                    dmg_type = 'poison'
+                elif 'acid' in ammo.properties.keys():
+                    dmg = ammo.properties['acid']
+                    dmg_type = 'acid'
+                elif 'mental' in ammo.properties.keys():
+                    dmg = ammo.properties['mental']
+                    dmg_type = 'mental'
+                elif 'death' in ammo.properties.keys():
+                    dmg = ammo.properties['death']
+                    dmg_type = 'death'
+                elif 'strange' in ammo.properties.keys():
+                    dmg = ammo.properties['strange']
+                    dmg_type = 'strange'
+                try:  # if damage is (min, max) tuple
+                    random.seed()
+                    min_dmg = dmg[0]
+                    max_dmg = dmg[1]
+                    dmg = random.randint(min_dmg, max_dmg)
+                except TypeError:
+                    pass
+                for ef in self.owner.weapon.effects:
+                    if ef.eff == 'INCREASE_RANGED_DAMAGE':
+                        dmg += ef.magnitude
+                res_dmg = self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
+                Game.add_message(self.owner.name + ' hits ' + enemy.name + ' for ' + str(res_dmg) + ' damage!',
+                                 'PLAYER', [255, 255, 255])
+                self._hit(enemy)
+                return True
+            else:  # if enemy cannot be damaged
+                Game.add_message(self.owner.name + ' hits ' + enemy.name + '.', 'PLAYER', [255, 255, 255])
+                self._hit(enemy)
+                return True
+        return False
 
     def _hit(self, something):
         """ Method called when shot hit something """
@@ -787,7 +794,8 @@ class UnguidedShotAI(AI):
         events.Event(self.owner, {'type': 'shot_hit', 'target': something, 'attacker': self.owner.shooter})
         self.state = 'stopped'
         self.owner.ammo = None
-        self.owner.death()
+        self.owner.dead = True
+        self.owner.location.dead.append(self.owner)  # add to dead list, waiting for removal
 
 
 class UnguidedProjectileAI(AI):
@@ -801,7 +809,9 @@ class UnguidedProjectileAI(AI):
 
     def on_event_location(self, data):
         """ Method handling location-related events """
-        pass  # currently this AI don't react to map events
+        if data['type'] == 'entity_moved':  # if something moved
+            if self.owner.position == data['entity'].position:  # on projectile - check for hit
+                self._check_if_hit()
 
     def enroute(self):
         """ Method to calculate route """
@@ -813,24 +823,12 @@ class UnguidedProjectileAI(AI):
     def act(self):
         """ Method called when projectile is ready to act """
         if self.state == 'flying':
-            x = self.owner.position[0]
-            y = self.owner.position[1]
-            enemy = self.owner.location.cells[x][y].get_occupying_entity()
-            if enemy:
-                # TODO: make projectile property for traveling through some kinds of Entities ( and opposite too)
-                if enemy.blocks_shots < 1:  # check if projectile pass through (for windows, grates, etc)
-                    enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
-            if enemy:
-                if isinstance(enemy, BattleEntity):  # if enemy can be damaged
-                    # fire an event that triggers ability
-                    self._hit(enemy)
-                    return
-            self._fly_next()  # fly to next cell (or stop if out of power or route end)
+            if not self._check_if_hit():  # if nothing is hit - fly farther
+                self._fly_next()  # fly to next cell (or stop if out of power or route end)
 
     def _fly_next(self):
         """ Method to attempt fly to next cell in route """
-        x = self.owner.position[0]
-        y = self.owner.position[1]
+        x, y = self.owner.position
         try:
             next_cell = next(self.next)
         except StopIteration:  # if end of route
@@ -842,11 +840,27 @@ class UnguidedProjectileAI(AI):
         self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])  # if not stopped - fly next
         self.power -= 1
 
+    def _check_if_hit(self):
+        """ Method that checks current position for acceptable target to hit """
+        x, y = self.owner.position
+        enemy = self.owner.location.cells[x][y].get_occupying_entity()
+        if enemy:
+            # TODO: make projectile property for traveling through some kinds of Entities ( and opposite too)
+            if enemy.blocks_shots < 1:  # check if projectile pass through (for windows, grates, etc)
+                enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
+        if enemy:
+            if isinstance(enemy, BattleEntity):  # if enemy can be damaged
+                # fire an event that triggers ability
+                self._hit(enemy)
+                return True
+        return False
+
     def _hit(self, something):
         """ Method called when projectile hit something """
         events.Event(self.owner, {'type': 'projectile_hit', 'target': something, 'attacker': self.owner.launcher})
         self.state = 'stopped'
-        self.owner.death()
+        self.owner.dead = True
+        self.owner.location.dead.append(self.owner)  # add to dead list, waiting for removal
 
 
 class Item(Abilities, Entity):
