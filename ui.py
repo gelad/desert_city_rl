@@ -461,7 +461,7 @@ class WindowMain(Window):
         if 'usable' in item.properties:
             # TODO: make items usable on self or on target
             if item.properties['usable'] == 'self':  # if item usable on self
-                player.perform(actions.act_use_item, player, item[0])
+                player.perform(actions.act_use_item, player, item)
             elif item.properties['usable'] == 'point':  # if item usable on point
                 self.command_target_choose(item.properties['range'], item, self.command_use_item_on_point, player, item)
             elif item.properties['usable'] == 'battle_entity':  # if item usable on battle entity
@@ -497,10 +497,18 @@ class WindowMain(Window):
                 if action[0] == 'Use':
                     self.command_use_item(player, item)
                 elif action[0] == 'Equip':
-                    slot = show_menu_list(self.win_mgr, list(item.equip_slots),
-                                          'Select a slot:', 0, 0, True, self)
-                    if slot:  # if selected - equip item
-                        player.perform(actions.act_equip_item, player, item, slot[0])
+                    if item:
+                        if len(item[0].equip_slots) > 1:
+                            slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
+                                                  'Select a slot:', 0, 0, True, self)
+                            if slot:
+                                slot = slot[0]
+                        elif len(item[0].equip_slots) == 1:
+                            slot = list(item[0].equip_slots)[0]
+                        else:
+                            slot = False
+                        if slot:  # if selected - equip item
+                            player.perform(actions.act_equip_item, player, item[0], slot)
                 elif action[0] == 'Drop':
                     player.perform(actions.act_drop_item, player, item)
                 elif action[0] == 'Load':
@@ -687,10 +695,17 @@ class WindowMain(Window):
                     # show list menu with items
                     item = show_menu_list(self.win_mgr, player.inventory, 'Equip item:', 0, 0, True, self)
                     if item:
-                        slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
-                                              'Select a slot:', 0, 0, True, self)
+                        if len(item[0].equip_slots) > 1:
+                            slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
+                                                  'Select a slot:', 0, 0, True, self)
+                            if slot:
+                                slot = slot[0]
+                        elif len(item[0].equip_slots) == 1:
+                            slot = list(item[0].equip_slots)[0]
+                        else:
+                            slot = False
                         if slot:  # if selected - equip item
-                            player.perform(actions.act_equip_item, player, item[0], slot[0])
+                            player.perform(actions.act_equip_item, player, item[0], slot)
                 # use command
                 elif command == 'use_item':
                     # show list menu with items
