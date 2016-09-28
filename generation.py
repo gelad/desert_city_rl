@@ -62,11 +62,17 @@ def generate_loc(loc_type, settings, width, height):
                                 floor_cells.append((loc_cell_x, loc_cell_y))
                     item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for i in range(0, item_count):
-                        item_id = game_logic.weighted_choice([('item_healing_potion', 15),
+                        item_id = game_logic.weighted_choice([(game_logic.weighted_choice([('item_healing_potion', 50),
+                                                                                          ('item_haste_potion', 25),
+                                                                                          ('item_antidote_potion', 25)]),
+                                                               20),
                                                               ('item_sabre', 10),
-                                                              ('item_barbed_loincloth', 5),
-                                                              ('item_haste_potion', 5),
                                                               ('item_misurka', 5),
+                                                              (game_logic.weighted_choice([('item_firebolt_scroll', 40),
+                                                                                           ('item_frostbolt_scroll', 40),
+                                                                                           (
+                                                                                           'item_lightning_scroll', 20)]),
+                                                               10),
                                                               ('item_mail_armor', 5),
                                                               ('item_iron_pauldrons', 5),
                                                               ('item_iron_boots', 5),

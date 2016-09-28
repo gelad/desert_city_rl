@@ -6,6 +6,7 @@ import events
 
 import pickle
 
+
 class Action:
     """
         Class for action.
@@ -130,6 +131,7 @@ def act_launch_projectile(action, register_call, projectile_type, launcher, targ
             projectile.target = target  # set projectile target
             projectile.ai.target = target
             launcher.location.place_entity(projectile, launcher.position[0], launcher.position[1])
+            projectile.ai.reobserve()
             for abil in projectile.abilities:  # set observers for copied projectile
                 abil.reobserve()
             projectile.ai.enroute()

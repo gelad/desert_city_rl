@@ -161,12 +161,36 @@ def initialize():
                              message_color=[255, 0, 0])
     proj.add_ability(abil)
     # === end of projectile
-    # cond = abilities.Condition('TARGET_IN_RANGE')
     react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'projectile': proj}
     abil = abilities.Ability(name='Firebolt', owner=data_set['item_firebolt_scroll'],
                              trigger='used_on_target', conditions=[cond], reactions=[react],
                              message_color=[255, 0, 0])
     data_set['item_firebolt_scroll'].add_ability(abil)
+
+    data_set['item_frostbolt_scroll'] = game_logic.ItemCharges(name='scroll of Frostbolt',
+                                                               data_id='item_frostbolt_scroll',
+                                                               description='A scroll that hurls a frostbolt at enemy.',
+                                                               categories={'consumable', 'scroll'},
+                                                               properties={'usable': 'battle_entity_or_point',
+                                                                           'range': 15,
+                                                                           'use_time_coef': 1,
+                                                                           'use_time_offset': 0.7},
+                                                               char='?', color=[100, 100, 255],
+                                                               charges=1, destroyed_after_use=True, weight=0.1)
+    cond = abilities.Condition('USED')
+    # === projectile
+    proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='frostbolt',
+                                         description='An arrow of freezing energy.', char='*', color=[100, 100, 255])
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (3, 6), 'dmg_type': 'cold'}
+    abil = abilities.Ability(name='Freeze', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[100, 100, 255])
+    proj.add_ability(abil)
+    # === end of projectile
+    react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'projectile': proj}
+    abil = abilities.Ability(name='Frostbolt', owner=data_set['item_frostbolt_scroll'],
+                             trigger='used_on_target', conditions=[cond], reactions=[react],
+                             message_color=[100, 100, 255])
+    data_set['item_frostbolt_scroll'].add_ability(abil)
 
     data_set['item_healing_potion'] = game_logic.ItemCharges(name='healing potion', data_id='item_healing_potion',
                                                              description='A potion that heals 5 HP.',

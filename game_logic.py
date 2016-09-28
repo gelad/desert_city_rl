@@ -1078,6 +1078,10 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
             shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
+            shot.ai.reobserve()
+            # TODO: make shots with abilities (copy them from ammo to shot object?)
+            #  abil in shot.abilities:  # set observers for copied projectile
+            #    abil.reobserve()
             shot.ai.enroute()
         else:
             if range_to_target > 3:  # if range too small - make miss circle 3 cell wide
@@ -1092,6 +1096,10 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
             shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
+            shot.ai.reobserve()
+            # TODO: make shots with abilities (copy them from ammo to shot object?)
+            #  abil in shot.abilities:  # set observers for copied projectile
+            #    abil.reobserve()
             shot.ai.enroute()
 
     def reload(self, weapon, ammo):

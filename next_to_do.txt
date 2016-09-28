@@ -45,11 +45,12 @@ Implement monster usable abilities (and AI for this) (DONE)
 Implement ranged monster. (DONE)
 Implement raycasting - for projectile trajectories. (DONE)
 Implement universal target picking in UI (for shooting, using abilities, etc). (DONE)
+Make point_or_entity target mode. (DONE)
+Make firebolt and ice spike scrolls (to test targeting). (DONE)
+BUG: projectiles flying through monsters. (FIXED?)
 
 
 Inform player if targeting failed.
-Make point_or_entity target mode.
-Make firebolt and ice spike scrolls (to test targeting).
 Make simple AOE explosions.
 Make ammo with abilities (exploding, freezing arrows, etc)
 Implement accuracy for melee.
