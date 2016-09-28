@@ -159,7 +159,7 @@ def act_use_ability(action, register_call, actor, target, ability, whole_time, u
             actor.actions.remove(action)  # remove performed action from actor's list
             actor.state = 'ready'  # return actor to ready state
             # withdrawal to make whole action take whole_time
-            withdrawal = int(1 - whole_time * use_offset)
+            withdrawal = whole_time * (1 - use_offset)
             if withdrawal > 0:  # if no withdrawal (use_offset = 1) then no withdrawal action
                 actor.perform(act_withdrawal, actor, withdrawal)
 
@@ -389,13 +389,32 @@ def act_pick_up_item(action, register_call, actor, item):
 
 def act_use_item(action, register_call, actor, item, target):
     """ Actor use item action """
-    # TODO: add use_time item property - read a scroll must be slower than drink a potion
     if register_call:  # part executed when function is registered in ActionMgr
-        action.t_needed = actor.speed / 4  # use action is 1/4 speed (for now)
+        use_time = actor.speed  # default use action is actor speed
+        use_offset = 1  # default use_offset is 1 (use at the end of whole use action)
+        if 'use_time_coef' in item.properties:
+            use_time *= item.properties['use_time_coef']
+        if 'use_time_offset' in item.properties:
+            use_offset = item.properties['use_time_offset']
+        if use_offset == 0:  # if item is used immediately
+            actor.use_item(item, target)  # use item
+            actor.actions.remove(action)  # remove performed action from actor's list
+            actor.state = 'ready'  # return actor to ready state
+        elif 0 < use_offset <= 1:
+            action.t_needed = use_time * use_offset  # set action fire time according to offset
+        else:
+            raise Exception('Action: item use_offset must be between 0 and 1, got ' + str(use_offset))
+        action.data['use_time'] = use_time  # remember action use_time and offset
+        action.data['use_offset'] = use_offset
     else:  # part that is executed when action fires
-        actor.use_item(item, target)  # use item
-        actor.actions.remove(action)  # remove performed action from actor's list
-        actor.state = 'ready'  # return actor to ready state
+        if action.data['use_offset'] > 0:
+            actor.use_item(item, target)  # use item
+            actor.actions.remove(action)  # remove performed action from actor's list
+            actor.state = 'ready'  # return actor to ready state
+            if action.data['use_offset'] < 1:  # if no withdrawal (use_offset = 1) then no withdrawal action
+                withdrawal = action.data['use_time'] * (1 - action.data['use_offset'])
+                actor.perform(act_withdrawal, actor, withdrawal)
+
 
 
 def act_equip_item(action, register_call, actor, item, slot):

@@ -467,17 +467,29 @@ class WindowMain(Window):
             elif item.properties['usable'] == 'battle_entity':  # if item usable on battle entity
                 self.command_target_choose(item.properties['range'], item, self.command_use_item_on_entity,
                                            player, item, game_logic.BattleEntity)
+            elif item.properties['usable'] == 'battle_entity_or_point':  # if item usable on battle entity or point
+                self.command_target_choose(item.properties['range'], item, self.command_use_item_on_entity_or_point,
+                                           player, item, game_logic.BattleEntity)
 
     def command_use_item_on_point(self, target, player, item):
         """ Command method to use item on targeted point """
-        player.perform(actions.act_use_item, player, item, target)  # use item on target
+        player.perform(actions.act_use_item, player, item, target)  # use item on target point
 
     def command_use_item_on_entity(self, target, player, item, ent_type):
         """ Command method to use item on targeted entity """
         x, y = target
         entity = player.location.cells[x][y].is_there_a(ent_type)
         if entity:
-            player.perform(actions.act_use_item, player, item, entity)  # use item on target
+            player.perform(actions.act_use_item, player, item, entity)  # use item on target entity
+
+    def command_use_item_on_entity_or_point(self, target, player, item, ent_type):
+        """ Command method to use item on targeted entity """
+        x, y = target
+        entity = player.location.cells[x][y].is_there_a(ent_type)
+        if entity:
+            player.perform(actions.act_use_item, player, item, entity)  # use item on target entity
+        else:
+            player.perform(actions.act_use_item, player, item, target)  # use item on target point
 
     def command_inventory(self, player):
         """ Command method to show inventory menu """
