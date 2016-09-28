@@ -194,7 +194,7 @@ class ElementMap(Element):
 
     @staticmethod
     def cell_graphics(x, y, cell, loc, visible):
-        """ Method that returns graphic representation of tile. Must be reworked when tileset comes in """
+        """ Method that returns graphic representation of tile. """
         char = ' '
         color = [255, 255, 255]
         bgcolor = [0, 0, 0]
@@ -375,7 +375,10 @@ class WindowMain(Window):
         self.cam_offset = (0, 0)  # camera offset (for looking, shooting, etc)
         self.console = tdl.Console(width, height)  # offscreen console of window
         self.targeting_range = 0  # range in 'targeting' state
-        self.targeting_thing = None  # determines what to do after targeting complete
+        self.targeting_thing = None  # determines what player is targeting - specific scroll, weapon, ability etc
+        self.targeting_command = None  # determines what command execute after targeting complete
+        self.targeting_args = None  # targeting command arguments
+        self.targeting_kwargs = None  # targeting command keyword arguments
 
     def draw(self):
         """ Window drawing method """
@@ -453,6 +456,29 @@ class WindowMain(Window):
                         player.perform(actions.act_pick_up_item, player, item[0])
             return False
 
+    def command_use_item(self, player, item):
+        """ Command method to use item - chooses usage behavior based on item properties """
+        if 'usable' in item.properties:
+            # TODO: make items usable on self or on target
+            if item.properties['usable'] == 'self':  # if item usable on self
+                player.perform(actions.act_use_item, player, item[0])
+            elif item.properties['usable'] == 'point':  # if item usable on point
+                self.command_target_choose(item.properties['range'], item, self.command_use_item_on_point, player, item)
+            elif item.properties['usable'] == 'battle_entity':  # if item usable on battle entity
+                self.command_target_choose(item.properties['range'], item, self.command_use_item_on_entity,
+                                           player, item, game_logic.BattleEntity)
+
+    def command_use_item_on_point(self, target, player, item):
+        """ Command method to use item on targeted point """
+        player.perform(actions.act_use_item, player, item, target)  # use item on target
+
+    def command_use_item_on_entity(self, target, player, item, ent_type):
+        """ Command method to use item on targeted entity """
+        x, y = target
+        entity = player.location.cells[x][y].is_there_a(ent_type)
+        if entity:
+            player.perform(actions.act_use_item, player, item, entity)  # use item on target
+
     def command_inventory(self, player):
         """ Command method to show inventory menu """
         # show inventory menu
@@ -469,7 +495,7 @@ class WindowMain(Window):
                                     'What to do with ' + item.name + '?', 0, 0, 1, self)
             if action:
                 if action[0] == 'Use':
-                    player.perform(actions.act_use_item, player, item)
+                    self.command_use_item(player, item)
                 elif action[0] == 'Equip':
                     slot = show_menu_list(self.win_mgr, list(item.equip_slots),
                                           'Select a slot:', 0, 0, True, self)
@@ -519,11 +545,8 @@ class WindowMain(Window):
         if ranged_weapons:  # check if there are any
             if len(ranged_weapons) == 1:  # if one
                 if len(ranged_weapons[0].ammo) > 0:  # if it has ammo loaded
-                    self.targeting_range = ranged_weapons[0].range
-                    self.targeting_thing = ranged_weapons[0]
-                    self.game.state = 'targeting'
-                    self.log.visible = False
-                    self.cell_info.visible = True
+                    self.command_target_choose(ranged_weapons[0].range, ranged_weapons[0],
+                                               self.command_fire, player, ranged_weapons[0])
                 else:
                     game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
                                                 'PLAYER', [255, 255, 255])
@@ -532,27 +555,52 @@ class WindowMain(Window):
                                         'Fire weapon:', 0, 0, True, self)  # select one
                 if weapon:
                     if len(weapon[0].ammo) > 0:  # check if loaded
-                        self.targeting_range = weapon[0].range
-                        self.targeting_thing = weapon[0]
-                        self.game.state = 'targeting'
-                        self.log.visible = False
-                        self.cell_info.visible = True
+                        self.command_target_choose(weapon[0].range, weapon[0],
+                                                   self.command_fire, player, weapon[0])
                     else:
                         game_logic.Game.add_message(weapon[0].name + " isn't loaded!",
                                                     'PLAYER', [255, 255, 255])
         else:
             game_logic.Game.add_message('Equip ranged weapon to fire.', 'PLAYER', [255, 255, 255])
 
-    def command_fire(self, player, weapon):
+    def command_fire(self, target, player, weapon):
         """ Command method for player wants to fire ranged weapon - target confirmed, fire """
-        tx = player.position[0] + self.map.cam_offset[0]  # target cell coordinates
-        ty = player.position[1] + self.map.cam_offset[1]
+        tx, ty = target  # target cell coordinates
         target = player.location.cells[tx][ty].is_there_a(game_logic.Fighter)  # TODO: if more monster types - add here
         if target:
             player.perform(actions.act_fire_ranged, player, weapon, target)  # if there are a monster - target him
         else:
             player.perform(actions.act_fire_ranged, player, weapon, (tx, ty))  # if not - target cell
+
+    def command_target_choose(self, range, thing, command_function, *args, **kwargs):
+        """ Command method for player wants to select target for some command """
+        self.targeting_range = range
+        self.targeting_thing = thing
+        self.targeting_command = command_function
+        self.targeting_args = args
+        self.targeting_kwargs = kwargs
+        self.game.state = 'targeting'
+        self.log.visible = False
+        self.cell_info.visible = True
+
+    def command_target_confirmed(self, player):
+        """ Command method when target is chosen - execute command """
+        tx = player.position[0] + self.map.cam_offset[0]  # target cell coordinates
+        ty = player.position[1] + self.map.cam_offset[1]
+        self.targeting_command((tx, ty), *self.targeting_args, **self.targeting_kwargs)
     # ===========================================================================================================
+
+    def clear_targeting(self):
+        """ Method that clears targeting info and returns window to playing state """
+        self.map.cam_offset = (0, 0)  # set camera offset to normal
+        self.targeting_range = 0
+        self.targeting_command = None
+        self.targeting_args = None
+        self.targeting_kwargs = None
+        self.targeting_thing = None
+        self.log.visible = True
+        self.cell_info.visible = False
+        self.game.state = 'playing'
 
     def handle_input(self):
         """ Method that translates player input commands to game logic actions and runs them """
@@ -648,7 +696,7 @@ class WindowMain(Window):
                     # show list menu with items
                     item = show_menu_list(self.win_mgr, player.inventory, 'Use item:', 0, 0, True, self)
                     if item:
-                        player.perform(actions.act_use_item, player, item[0])
+                        self.command_use_item(player, item[0])
                 # take off item command
                 elif command == 'take_off_item':
                     # show list menu with equipped items
@@ -703,20 +751,10 @@ class WindowMain(Window):
             elif game.state == 'targeting':  # if the game is in 'targeting' mode
                 # exit targeting mode
                 if command == 'exit':
-                    self.map.cam_offset = (0, 0)  # set camera offset to normal
-                    self.cell_info.visible = False
-                    self.log.visible = True
-                    self.targeting_range = 0
-                    self.targeting_thing = None
-                    game.state = 'playing'  # resume normal game flow
+                    self.clear_targeting()
                 if command == 'confirm':
-                    self.command_fire(player, self.targeting_thing)
-                    self.map.cam_offset = (0, 0)  # set camera offset to normal
-                    self.cell_info.visible = False
-                    self.log.visible = True
-                    self.targeting_range = 0
-                    self.targeting_thing = None
-                    game.state = 'playing'  # resume normal game flow
+                    self.command_target_confirmed(player)
+                    self.clear_targeting()
                 # moving camera commands
                 elif command == 'move_n':
                     self.map.move_camera(0, -1)

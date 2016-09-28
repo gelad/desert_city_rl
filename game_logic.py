@@ -378,10 +378,14 @@ class Inventory(Entity):
         item.abilities_set_owner(None)  # if it has abilities - set their owner
         self.inventory.remove(item)
 
-    def use_item(self, item):
-        """ Item use on self method """
-        events.Event(self, {'type': 'used_on_self', 'item': item})  # fire an event
-        item.use(self)
+    def use_item(self, item, target=None):
+        """ Item use on self or target method """
+        if not target:  # if no target specified - use on self
+            target = self
+            events.Event(self, {'type': 'used_on_self', 'item': item})  # fire an event
+        else:
+            events.Event(self, {'type': 'used_on_target', 'item': item, 'target': target})  # fire an event
+        item.use(target)
 
 
 class Equipment(Entity):
@@ -1405,6 +1409,7 @@ class Game:
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_short_bow', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
+        self.player.add_item(self.current_loc.place_entity('item_lightning_scroll', 11, 11))
         #  self.current_loc.place_entity('mob_ifrit', 20, 20)
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)
         #  self.current_loc.place_entity('item_bronze_bolt', 11, 11)

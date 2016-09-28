@@ -44,9 +44,11 @@ Implement accuracy for ranged. (DONE)
 Implement monster usable abilities (and AI for this) (DONE)
 Implement ranged monster. (DONE)
 Implement raycasting - for projectile trajectories. (DONE)
+Implement universal target picking in UI (for shooting, using abilities, etc). (DONE)
 
 
-Implement universal target picking in UI (for shooting, using abilities, etc).
+Inform player if targeting failed.
+Make point_or_entity target mode.
 Make firebolt and ice spike scrolls (to test targeting).
 Make simple AOE explosions.
 Make ammo with abilities (exploding, freezing arrows, etc)

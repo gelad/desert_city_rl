@@ -102,8 +102,9 @@ def initialize():
 
     data_set['item_haste_potion'] = game_logic.ItemCharges(name='haste potion', data_id='item_haste_potion',
                                                            description='A potion that hastens user by 50%.',
-                                                           categories={'consumable', 'potion'}, char='!',
-                                                           color=[255, 255, 0],
+                                                           categories={'consumable', 'potion'},
+                                                           properties={'usable': 'self'},
+                                                           char='!', color=[255, 255, 0],
                                                            charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
     react = {'type': 'apply_timed_effect', 'target': 'item_owner', 'time': 1000, 'effect': effects.Effect('HASTE', 50)}
@@ -114,8 +115,9 @@ def initialize():
 
     data_set['item_antidote_potion'] = game_logic.ItemCharges(name='antidote potion', data_id='item_antidote_potion',
                     description='A potion that cures all poison effects, and protects from poison for a short time.',
-                                                              categories={'consumable', 'potion'}, char='!',
-                                                              color=[0, 150, 0],
+                                                              categories={'consumable', 'potion'},
+                                                              properties={'usable': 'self'},
+                                                              char='!', color=[0, 150, 0],
                                                               charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
     react1 = {'type': 'remove_effect', 'target': 'item_owner', 'effect': effects.Effect('POISONED', 0),
@@ -127,10 +129,24 @@ def initialize():
                              message_color=[0, 150, 0])
     data_set['item_antidote_potion'].add_ability(abil)
 
+    data_set['item_lightning_scroll'] = game_logic.ItemCharges(name='scroll of Lightning', data_id='item_lightning_scroll',
+                                                    description='A scroll that calls a lightning strike on enemy.',
+                                                               categories={'consumable', 'scroll'},
+                                                               properties={'usable': 'battle_entity', 'range': 15},
+                                                               char='?', color=[255, 255, 0],
+                                                               charges=1, destroyed_after_use=True, weight=0.1)
+    cond = abilities.Condition('USED')
+    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (10, 30), 'dmg_type': 'lightning'}
+    abil = abilities.Ability(name='Lightning', owner=data_set['item_lightning_scroll'],
+                             trigger='used_on_target', conditions=[cond], reactions=[react],
+                             message_color=[255, 255, 0])
+    data_set['item_lightning_scroll'].add_ability(abil)
+
     data_set['item_healing_potion'] = game_logic.ItemCharges(name='healing potion', data_id='item_healing_potion',
                                                              description='A potion that heals 5 HP.',
-                                                             categories={'consumable', 'potion'}, char='!',
-                                                             color=[255, 0, 0],
+                                                             categories={'consumable', 'potion'},
+                                                             properties={'usable': 'self'},
+                                                             char='!', color=[255, 0, 0],
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     data_set['item_healing_potion'].effects.append(effects.Effect('HEAL', 5))
 

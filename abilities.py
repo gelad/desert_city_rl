@@ -180,6 +180,14 @@ class Ability(events.Observer):
                 # register launch projectile action
                 self.owner.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
                                                                self.owner, target, self.message_color)
+            if reaction['target'] == 'targeted_entity':  # if target is targeted entity (i.e. when player uses a scroll)
+                if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
+                    target = (event_data['target'].position[0], event_data['target'].position[1])
+                else:  # if not - it must be a tuple
+                    target = event_data['target']
+                # register launch projectile action
+                self.owner.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
+                                                               self.owner, target, self.message_color)
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,

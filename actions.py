@@ -387,12 +387,13 @@ def act_pick_up_item(action, register_call, actor, item):
         actor.state = 'ready'  # return actor to ready state
 
 
-def act_use_item(action, register_call, actor, item):
+def act_use_item(action, register_call, actor, item, target):
     """ Actor use item action """
+    # TODO: add use_time item property - read a scroll must be slower than drink a potion
     if register_call:  # part executed when function is registered in ActionMgr
         action.t_needed = actor.speed / 4  # use action is 1/4 speed (for now)
     else:  # part that is executed when action fires
-        actor.use_item(item)  # use item
+        actor.use_item(item, target)  # use item
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
 
