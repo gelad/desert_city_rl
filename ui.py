@@ -629,180 +629,184 @@ class WindowMain(Window):
         player = game.player
         loc = game.current_loc
         commands = player_input.get_input(game)  # get list of player commands
-        for command in commands:
-            if game.state == 'playing':
-                # game exit command
-                if command == 'exit':
-                    game.state = 'exit'
-                # moving commands
-                elif command == 'move_n':
-                    self.command_default_direction(player, loc, 0, -1)
-                elif command == 'move_s':
-                    self.command_default_direction(player, loc, 0, 1)
-                elif command == 'move_w':
-                    self.command_default_direction(player, loc, -1, 0)
-                elif command == 'move_e':
-                    self.command_default_direction(player, loc, 1, 0)
-                elif command == 'move_nw':
-                    self.command_default_direction(player, loc, -1, -1)
-                elif command == 'move_ne':
-                    self.command_default_direction(player, loc, 1, -1)
-                elif command == 'move_sw':
-                    self.command_default_direction(player, loc, -1, 1)
-                elif command == 'move_se':
-                    self.command_default_direction(player, loc, 1, 1)
-                elif command == 'wait1step':  # wait for 1 step
-                    player.perform(actions.act_wait, game.player, game.player.speed)
-                # closing door commands
-                elif command == 'close_n':
-                    self.command_close_direction(player, loc, 0, -1)
-                elif command == 'close_s':
-                    self.command_close_direction(player, loc, 0, 1)
-                elif command == 'close_w':
-                    self.command_close_direction(player, loc, -1, 0)
-                elif command == 'close_e':
-                    self.command_close_direction(player, loc, 1, 0)
-                elif command == 'close_nw':
-                    self.command_close_direction(player, loc, -1, -1)
-                elif command == 'close_ne':
-                    self.command_close_direction(player, loc, 1, -1)
-                elif command == 'close_sw':
-                    self.command_close_direction(player, loc, -1, 1)
-                elif command == 'close_se':
-                    self.command_close_direction(player, loc, 1, 1)
-                # smashin' things commands
-                elif command == 'smash_n':
-                    self.command_smash_direction(player, loc, 0, -1)
-                elif command == 'smash_s':
-                    self.command_smash_direction(player, loc, 0, 1)
-                elif command == 'smash_w':
-                    self.command_smash_direction(player, loc, -1, 0)
-                elif command == 'smash_e':
-                    self.command_smash_direction(player, loc, 1, 0)
-                elif command == 'smash_nw':
-                    self.command_smash_direction(player, loc, -1, -1)
-                elif command == 'smash_ne':
-                    self.command_smash_direction(player, loc, 1, -1)
-                elif command == 'smash_sw':
-                    self.command_smash_direction(player, loc, -1, 1)
-                elif command == 'smash_se':
-                    self.command_smash_direction(player, loc, 1, 1)
-                # 'look' command
-                elif command == 'look':
-                    game.state = 'looking'
-                    self.log.visible = False
-                    self.cell_info.visible = True
-                # show/hide debug log command
-                elif command == 'debug_log':
-                    if game.show_debug_log:
-                        game.show_debug_log = False
-                    else:
-                        game.show_debug_log = True
-                # inventory command
-                elif command == 'inventory':
-                    # show inventory menu
-                    self.command_inventory(player)
-                # wield (equip) command
-                elif command == 'wield_item':
-                    # show list menu with items
-                    item = show_menu_list(self.win_mgr, player.inventory, 'Equip item:', 0, 0, True, self)
-                    if item:
-                        if len(item[0].equip_slots) > 1:
-                            slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
-                                                  'Select a slot:', 0, 0, True, self)
-                            if slot:
-                                slot = slot[0]
-                        elif len(item[0].equip_slots) == 1:
-                            slot = list(item[0].equip_slots)[0]
+        if len(commands) > 0:
+            for command in commands:
+                if game.state == 'playing':
+                    # game exit command
+                    if command == 'exit':
+                        game.state = 'exit'
+                    # moving commands
+                    elif command == 'move_n':
+                        self.command_default_direction(player, loc, 0, -1)
+                    elif command == 'move_s':
+                        self.command_default_direction(player, loc, 0, 1)
+                    elif command == 'move_w':
+                        self.command_default_direction(player, loc, -1, 0)
+                    elif command == 'move_e':
+                        self.command_default_direction(player, loc, 1, 0)
+                    elif command == 'move_nw':
+                        self.command_default_direction(player, loc, -1, -1)
+                    elif command == 'move_ne':
+                        self.command_default_direction(player, loc, 1, -1)
+                    elif command == 'move_sw':
+                        self.command_default_direction(player, loc, -1, 1)
+                    elif command == 'move_se':
+                        self.command_default_direction(player, loc, 1, 1)
+                    elif command == 'wait1step':  # wait for 1 step
+                        player.perform(actions.act_wait, game.player, game.player.speed)
+                    # closing door commands
+                    elif command == 'close_n':
+                        self.command_close_direction(player, loc, 0, -1)
+                    elif command == 'close_s':
+                        self.command_close_direction(player, loc, 0, 1)
+                    elif command == 'close_w':
+                        self.command_close_direction(player, loc, -1, 0)
+                    elif command == 'close_e':
+                        self.command_close_direction(player, loc, 1, 0)
+                    elif command == 'close_nw':
+                        self.command_close_direction(player, loc, -1, -1)
+                    elif command == 'close_ne':
+                        self.command_close_direction(player, loc, 1, -1)
+                    elif command == 'close_sw':
+                        self.command_close_direction(player, loc, -1, 1)
+                    elif command == 'close_se':
+                        self.command_close_direction(player, loc, 1, 1)
+                    # smashin' things commands
+                    elif command == 'smash_n':
+                        self.command_smash_direction(player, loc, 0, -1)
+                    elif command == 'smash_s':
+                        self.command_smash_direction(player, loc, 0, 1)
+                    elif command == 'smash_w':
+                        self.command_smash_direction(player, loc, -1, 0)
+                    elif command == 'smash_e':
+                        self.command_smash_direction(player, loc, 1, 0)
+                    elif command == 'smash_nw':
+                        self.command_smash_direction(player, loc, -1, -1)
+                    elif command == 'smash_ne':
+                        self.command_smash_direction(player, loc, 1, -1)
+                    elif command == 'smash_sw':
+                        self.command_smash_direction(player, loc, -1, 1)
+                    elif command == 'smash_se':
+                        self.command_smash_direction(player, loc, 1, 1)
+                    # 'look' command
+                    elif command == 'look':
+                        game.state = 'looking'
+                        self.log.visible = False
+                        self.cell_info.visible = True
+                    # show/hide debug log command
+                    elif command == 'debug_log':
+                        if game.show_debug_log:
+                            game.show_debug_log = False
                         else:
-                            slot = False
-                        if slot:  # if selected - equip item
-                            player.perform(actions.act_equip_item, player, item[0], slot)
-                # use command
-                elif command == 'use_item':
-                    # show list menu with items
-                    item = show_menu_list(self.win_mgr, player.inventory, 'Use item:', 0, 0, True, self)
-                    if item:
-                        self.command_use_item(player, item[0])
-                # take off item command
-                elif command == 'take_off_item':
-                    # show list menu with equipped items
-                    item = show_menu_list(self.win_mgr, [sl for sl in list(player.equipment.values()) if sl],
-                                          'Take off item:', 0, 0, True, self)
-                    if item:  # if selected - take off
-                        player.perform(actions.act_unequip_item, player, item[0])
-                # drop item command
-                elif command == 'drop':
-                    # show inventory menu
-                    item = show_menu_inventory(self.win_mgr, player.inventory, 'Drop item:', 0, 0, 1, self)
-                    if item:
-                        player.perform(actions.act_drop_item, player, item[0])
-                # pick up from ground command
-                elif command == 'ground':
-                    self.command_pick_up(player, loc, 0, 0)
-                # reload ranged weapon (in hands) command
-                elif command == 'reload':
-                    self.command_reload(player)
-                # unload ranged weapon (in hands) command
-                elif command == 'unload':
-                    for item in player.equipment.values():  # unload every equipped item
-                        if isinstance(item, game_logic.ItemRangedWeapon):
-                            player.perform(actions.act_unload, player, item)
-                # fire ranged weapon (in hands) command
-                elif command == 'fire':
-                    self.command_fire_choose(player)
-            elif game.state == 'looking':  # if the game is in 'looking' mode
-                # exit looking mode
-                if command == 'exit':
-                    self.map.cam_offset = (0, 0)  # set camera offset to normal
-                    self.cell_info.visible = False
-                    self.log.visible = True
-                    game.state = 'playing'  # resume normal game flow
-                # moving camera commands
-                elif command == 'move_n':
-                    self.map.move_camera(0, -1)
-                elif command == 'move_s':
-                    self.map.move_camera(0, 1)
-                elif command == 'move_w':
-                    self.map.move_camera(-1, 0)
-                elif command == 'move_e':
-                    self.map.move_camera(1, 0)
-                elif command == 'move_nw':
-                    self.map.move_camera(-1, -1)
-                elif command == 'move_ne':
-                    self.map.move_camera(1, -1)
-                elif command == 'move_sw':
-                    self.map.move_camera(-1, 1)
-                elif command == 'move_se':
-                    self.map.move_camera(1, 1)
-            elif game.state == 'targeting':  # if the game is in 'targeting' mode
-                # exit targeting mode
-                if command == 'exit':
-                    self.clear_targeting()
-                if command == 'confirm':
-                    self.command_target_confirmed(player)
-                    self.clear_targeting()
-                # moving camera commands
-                elif command == 'move_n':
-                    self.map.move_camera(0, -1)
-                elif command == 'move_s':
-                    self.map.move_camera(0, 1)
-                elif command == 'move_w':
-                    self.map.move_camera(-1, 0)
-                elif command == 'move_e':
-                    self.map.move_camera(1, 0)
-                elif command == 'move_nw':
-                    self.map.move_camera(-1, -1)
-                elif command == 'move_ne':
-                    self.map.move_camera(1, -1)
-                elif command == 'move_sw':
-                    self.map.move_camera(-1, 1)
-                elif command == 'move_se':
-                    self.map.move_camera(1, 1)
-            elif game.state == 'dead':  # if game is in dead state
-                # game exit command
-                if command == 'exit':
-                    game.state = 'exit'
+                            game.show_debug_log = True
+                    # inventory command
+                    elif command == 'inventory':
+                        # show inventory menu
+                        self.command_inventory(player)
+                    # wield (equip) command
+                    elif command == 'wield_item':
+                        # show list menu with items
+                        item = show_menu_list(self.win_mgr, player.inventory, 'Equip item:', 0, 0, True, self)
+                        if item:
+                            if len(item[0].equip_slots) > 1:
+                                slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
+                                                      'Select a slot:', 0, 0, True, self)
+                                if slot:
+                                    slot = slot[0]
+                            elif len(item[0].equip_slots) == 1:
+                                slot = list(item[0].equip_slots)[0]
+                            else:
+                                slot = False
+                            if slot:  # if selected - equip item
+                                player.perform(actions.act_equip_item, player, item[0], slot)
+                    # use command
+                    elif command == 'use_item':
+                        # show list menu with items
+                        item = show_menu_list(self.win_mgr, player.inventory, 'Use item:', 0, 0, True, self)
+                        if item:
+                            self.command_use_item(player, item[0])
+                    # take off item command
+                    elif command == 'take_off_item':
+                        # show list menu with equipped items
+                        item = show_menu_list(self.win_mgr, [sl for sl in list(player.equipment.values()) if sl],
+                                              'Take off item:', 0, 0, True, self)
+                        if item:  # if selected - take off
+                            player.perform(actions.act_unequip_item, player, item[0])
+                    # drop item command
+                    elif command == 'drop':
+                        # show inventory menu
+                        item = show_menu_inventory(self.win_mgr, player.inventory, 'Drop item:', 0, 0, 1, self)
+                        if item:
+                            player.perform(actions.act_drop_item, player, item[0])
+                    # pick up from ground command
+                    elif command == 'ground':
+                        self.command_pick_up(player, loc, 0, 0)
+                    # reload ranged weapon (in hands) command
+                    elif command == 'reload':
+                        self.command_reload(player)
+                    # unload ranged weapon (in hands) command
+                    elif command == 'unload':
+                        for item in player.equipment.values():  # unload every equipped item
+                            if isinstance(item, game_logic.ItemRangedWeapon):
+                                player.perform(actions.act_unload, player, item)
+                    # fire ranged weapon (in hands) command
+                    elif command == 'fire':
+                        self.command_fire_choose(player)
+                elif game.state == 'looking':  # if the game is in 'looking' mode
+                    # exit looking mode
+                    if command == 'exit':
+                        self.map.cam_offset = (0, 0)  # set camera offset to normal
+                        self.cell_info.visible = False
+                        self.log.visible = True
+                        game.state = 'playing'  # resume normal game flow
+                    # moving camera commands
+                    elif command == 'move_n':
+                        self.map.move_camera(0, -1)
+                    elif command == 'move_s':
+                        self.map.move_camera(0, 1)
+                    elif command == 'move_w':
+                        self.map.move_camera(-1, 0)
+                    elif command == 'move_e':
+                        self.map.move_camera(1, 0)
+                    elif command == 'move_nw':
+                        self.map.move_camera(-1, -1)
+                    elif command == 'move_ne':
+                        self.map.move_camera(1, -1)
+                    elif command == 'move_sw':
+                        self.map.move_camera(-1, 1)
+                    elif command == 'move_se':
+                        self.map.move_camera(1, 1)
+                elif game.state == 'targeting':  # if the game is in 'targeting' mode
+                    # exit targeting mode
+                    if command == 'exit':
+                        self.clear_targeting()
+                    if command == 'confirm':
+                        self.command_target_confirmed(player)
+                        self.clear_targeting()
+                    # moving camera commands
+                    elif command == 'move_n':
+                        self.map.move_camera(0, -1)
+                    elif command == 'move_s':
+                        self.map.move_camera(0, 1)
+                    elif command == 'move_w':
+                        self.map.move_camera(-1, 0)
+                    elif command == 'move_e':
+                        self.map.move_camera(1, 0)
+                    elif command == 'move_nw':
+                        self.map.move_camera(-1, -1)
+                    elif command == 'move_ne':
+                        self.map.move_camera(1, -1)
+                    elif command == 'move_sw':
+                        self.map.move_camera(-1, 1)
+                    elif command == 'move_se':
+                        self.map.move_camera(1, 1)
+                elif game.state == 'dead':  # if game is in dead state
+                    # game exit command
+                    if command == 'exit':
+                        game.state = 'exit'
+                return True  # if any commands
+            else:
+                return False  # if not
 
 
 # TODO: refactor ListMenu and InventoryMenu, to minimize code duplication (make one inherit another)
@@ -868,40 +872,44 @@ class WindowInventoryMenu(Window):
     def handle_input(self):
         """ Input handling method """
         events = player_input.get_raw_input()  # get a raw input from player
-        for event in events:
-            if event.type == 'KEYDOWN':
-                if event.key == 'ESCAPE':
-                    self.state = 'cancelled'
-                    self.win_mgr.close_window(self)
-                if event.key == 'ENTER':  # if player hits Enter
-                    if self.selected:
-                        self.state = 'finished'
-                        self.win_mgr.close_window(self)
-                    else:  # if no options - cancel selection
+        if events:
+            for event in events:
+                if event.type == 'KEYDOWN':
+                    if event.key == 'ESCAPE':
                         self.state = 'cancelled'
                         self.win_mgr.close_window(self)
-                elif event.key == 'UP' or event.key == 'KP8':  # selection movement
-                    if self.selected_index > 0:  # if up - select previous option
-                        self.selected_index -= 1
-                        self.selected = self.options[self.selected_index]
-                        self.item_info.item = self.selected
-                    else:  # if attempted to scroll up at top - jump to bottom
-                        self.selected_index = len(self.options) - 1
-                elif event.key == 'DOWN' or event.key == 'KP2':
-                    if self.selected_index < len(self.options) - 1:  # if down - select next option
-                        self.selected_index += 1
-                        self.selected = self.options[self.selected_index]
-                        self.item_info.item = self.selected
-                    else:  # if attempted to scroll down at bottom - jump to top
-                        self.selected_index = 0
-                elif event.key == 'CHAR':
-                    # convert the ASCII code to an index; if it corresponds to an option, return it
-                    index = ord(event.keychar) - ord('a')
-                    if 0 <= index < len(self.options):
-                        self.selected = self.options[index]
-                        self.selected_index = index
-                        self.state = 'finished'
-                        self.win_mgr.close_window(self)
+                    if event.key == 'ENTER':  # if player hits Enter
+                        if self.selected:
+                            self.state = 'finished'
+                            self.win_mgr.close_window(self)
+                        else:  # if no options - cancel selection
+                            self.state = 'cancelled'
+                            self.win_mgr.close_window(self)
+                    elif event.key == 'UP' or event.key == 'KP8':  # selection movement
+                        if self.selected_index > 0:  # if up - select previous option
+                            self.selected_index -= 1
+                            self.selected = self.options[self.selected_index]
+                            self.item_info.item = self.selected
+                        else:  # if attempted to scroll up at top - jump to bottom
+                            self.selected_index = len(self.options) - 1
+                    elif event.key == 'DOWN' or event.key == 'KP2':
+                        if self.selected_index < len(self.options) - 1:  # if down - select next option
+                            self.selected_index += 1
+                            self.selected = self.options[self.selected_index]
+                            self.item_info.item = self.selected
+                        else:  # if attempted to scroll down at bottom - jump to top
+                            self.selected_index = 0
+                    elif event.key == 'CHAR':
+                        # convert the ASCII code to an index; if it corresponds to an option, return it
+                        index = ord(event.keychar) - ord('a')
+                        if 0 <= index < len(self.options):
+                            self.selected = self.options[index]
+                            self.selected_index = index
+                            self.state = 'finished'
+                            self.win_mgr.close_window(self)
+            return True
+        else:
+            return False
 
 
 class WindowListMenu(Window):
@@ -955,38 +963,42 @@ class WindowListMenu(Window):
     def handle_input(self):
         """ Input handling method """
         events = player_input.get_raw_input()  # get a raw input from player
-        for event in events:
-            if event.type == 'KEYDOWN':
-                if event.key == 'ESCAPE':
-                    self.state = 'cancelled'
-                    self.win_mgr.close_window(self)
-                if event.key == 'ENTER':  # if player hits Enter
-                    if self.selected:
-                        self.state = 'finished'
-                        self.win_mgr.close_window(self)
-                    else:  # if no options - cancel selection
+        if events:
+            for event in events:
+                if event.type == 'KEYDOWN':
+                    if event.key == 'ESCAPE':
                         self.state = 'cancelled'
                         self.win_mgr.close_window(self)
-                elif event.key == 'UP' or event.key == 'KP8':  # selection movement
-                    if self.selected_index > 0:  # if up - select previous option
-                        self.selected_index -= 1
-                        self.selected = self.options[self.selected_index]
-                    else:  # if attempted to scroll up at top - jump to bottom
-                        self.selected_index = len(self.options) - 1
-                elif event.key == 'DOWN' or event.key == 'KP2':
-                    if self.selected_index < len(self.options) - 1:  # if down - select next option
-                        self.selected_index += 1
-                        self.selected = self.options[self.selected_index]
-                    else:  # if attempted to scroll down at bottom - jump to top
-                        self.selected_index = 0
-                elif event.key == 'CHAR':
-                    # convert the ASCII code to an index; if it corresponds to an option, return it
-                    index = ord(event.keychar) - ord('a')
-                    if 0 <= index < len(self.options):
-                        self.selected = self.options[index]
-                        self.selected_index = index
-                        self.state = 'finished'
-                        self.win_mgr.close_window(self)
+                    if event.key == 'ENTER':  # if player hits Enter
+                        if self.selected:
+                            self.state = 'finished'
+                            self.win_mgr.close_window(self)
+                        else:  # if no options - cancel selection
+                            self.state = 'cancelled'
+                            self.win_mgr.close_window(self)
+                    elif event.key == 'UP' or event.key == 'KP8':  # selection movement
+                        if self.selected_index > 0:  # if up - select previous option
+                            self.selected_index -= 1
+                            self.selected = self.options[self.selected_index]
+                        else:  # if attempted to scroll up at top - jump to bottom
+                            self.selected_index = len(self.options) - 1
+                    elif event.key == 'DOWN' or event.key == 'KP2':
+                        if self.selected_index < len(self.options) - 1:  # if down - select next option
+                            self.selected_index += 1
+                            self.selected = self.options[self.selected_index]
+                        else:  # if attempted to scroll down at bottom - jump to top
+                            self.selected_index = 0
+                    elif event.key == 'CHAR':
+                        # convert the ASCII code to an index; if it corresponds to an option, return it
+                        index = ord(event.keychar) - ord('a')
+                        if 0 <= index < len(self.options):
+                            self.selected = self.options[index]
+                            self.selected_index = index
+                            self.state = 'finished'
+                            self.win_mgr.close_window(self)
+            return True
+        else:
+            return False
 
 
 class WindowManager:
