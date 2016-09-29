@@ -764,7 +764,7 @@ class UnguidedShotAI(AI):
                 for ef in self.owner.weapon.effects:
                     if ef.eff == 'INCREASE_RANGED_DAMAGE':
                         dmg += ef.magnitude
-                res_dmg = self.owner.weapon.owner.deal_damage(enemy, dmg, dmg_type)
+                res_dmg = self.owner.shooter.deal_damage(enemy, dmg, dmg_type)
                 Game.add_message(self.owner.name + ' hits ' + enemy.name + ' for ' + str(res_dmg) + ' damage!',
                                  'PLAYER', [255, 255, 255])
                 self._hit(enemy)
@@ -1080,8 +1080,10 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.reobserve()
             # TODO: make shots with abilities (copy them from ammo to shot object?)
-            #  abil in shot.abilities:  # set observers for copied projectile
-            #    abil.reobserve()
+            shot.abilities = ammo.abilities
+            for abil in shot.abilities:  # set observers for copied projectile
+                abil.owner = shot
+                abil.reobserve()
             shot.ai.enroute()
         else:
             if range_to_target > 3:  # if range too small - make miss circle 3 cell wide
@@ -1097,9 +1099,10 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.reobserve()
-            # TODO: make shots with abilities (copy them from ammo to shot object?)
-            #  abil in shot.abilities:  # set observers for copied projectile
-            #    abil.reobserve()
+            shot.abilities = ammo.abilities
+            for abil in shot.abilities:  # set observers for copied projectile
+                abil.owner = shot
+                abil.reobserve()
             shot.ai.enroute()
 
     def reload(self, weapon, ammo):
@@ -1136,7 +1139,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         self.ai.close()  # unregister Observer
 
 
-class UnguidedShot(Actor, Entity):
+class UnguidedShot(Actor, Abilities, Entity):
     """ Mixed class for unguided shot (from a weapon) """
 
     def __init__(self, shooter, weapon, ammo, speed, target):
@@ -1146,6 +1149,7 @@ class UnguidedShot(Actor, Entity):
         self.target = target  # target (x, y) tuple
         Entity.__init__(self, name=ammo.name, description=ammo.description, char=ammo.char, color=ammo.color)
         Actor.__init__(self, speed=speed, ai=UnguidedShotAI(power=weapon.range, target=target, owner=self))
+        Abilities.__init__(self)
 
     def death(self):
         """ Death function """
@@ -1436,7 +1440,7 @@ class Game:
         self.player.add_item(self.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
         self.player.add_item(self.current_loc.place_entity('item_firebolt_scroll', 11, 11))
         self.player.add_item(self.current_loc.place_entity('item_firebolt_scroll', 11, 11))
-        self.player.add_item(self.current_loc.place_entity('item_firebolt_scroll', 11, 11))
+        self.player.add_item(self.current_loc.place_entity('item_poisoned_arrow', 11, 11))
         self.player.add_item(self.current_loc.place_entity('item_firebolt_scroll', 11, 11))
         #  self.current_loc.place_entity('mob_ifrit', 20, 20)
         #  self.current_loc.place_entity('item_hunting_crossbow', 11, 11)

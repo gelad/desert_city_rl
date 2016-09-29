@@ -53,6 +53,8 @@ BUG: projectiles flying through monsters. (FIXED?)
 Inform player if targeting failed.
 Make simple AOE explosions.
 Make ammo with abilities (exploding, freezing arrows, etc)
+Stop poisonous arrows poisoning walls.
+Make menu lists scrollable.
 Implement accuracy for melee.
 Make door-opening mobs.
 BUG: attempted reload command after player death (player can perform actions after death?)

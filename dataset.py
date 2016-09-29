@@ -315,6 +315,21 @@ def initialize():
                                                                   char='=', color=[128, 20, 20],
                                                                   charges=5, destroyed_after_use=True, weight=0.1)
 
+    data_set['item_poisoned_arrow'] = game_logic.ItemCharges(name='poisoned arrow',
+                                                                  data_id='item_poisoned_arrow',
+                                                    description='A simple bronze tipped arrow, coated in weak poison.',
+                                                                  categories={'arrow', 'stackable'},
+                                                                  properties={'piercing': (1, 3), 'break_chance': 0.5},
+                                                                  char='=', color=[128, 150, 20],
+                                                                  charges=5, destroyed_after_use=True, weight=0.1)
+    react = {'type': 'deal_periodic_damage', 'target': 'attacked_entity', 'damage': (0, 2),
+             'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 5000,
+             'stackable': False}
+    abil = abilities.Ability(name='Poisoned arrow', owner=data_set['item_poisoned_arrow'],
+                             trigger='shot_hit', conditions=[], reactions=[react],
+                             message_color=[0, 150, 0])
+    data_set['item_poisoned_arrow'].add_ability(abil)
+
     data_set['mob_mindless_body'] = game_logic.Fighter(name='Mindless body', data_id='mob_mindless_body', char='b',
                                     description='Shaking, dehydrated human body, raised by strange magic of the City.',
                                                        armor={'bashing': 0, 'slashing': 0, 'piercing': 0},
