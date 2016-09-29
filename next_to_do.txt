@@ -50,6 +50,8 @@ Make firebolt and ice spike scrolls (to test targeting). (DONE)
 BUG: projectiles flying through monsters. (FIXED?)
 
 
+Make a main menu - new/load game.
+BUG?: arrow don't poison on each shot.
 Inform player if targeting failed.
 Make simple AOE explosions.
 Make ammo with abilities (exploding, freezing arrows, etc)
