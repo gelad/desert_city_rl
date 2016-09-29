@@ -321,7 +321,7 @@ def initialize():
                                                                   categories={'arrow', 'stackable'},
                                                                   properties={'piercing': (1, 3), 'break_chance': 0.5},
                                                                   char='=', color=[128, 150, 20],
-                                                                  charges=5, destroyed_after_use=True, weight=0.1)
+                                                                  charges=3, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_periodic_damage', 'target': 'attacked_entity', 'damage': (0, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 5000,
              'stackable': False}

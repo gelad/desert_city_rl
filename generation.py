@@ -81,9 +81,12 @@ def generate_loc(loc_type, settings, width, height):
                                                               ('item_dagger', 10),
                                                               ('item_bronze_maul', 10),
                                                               (game_logic.weighted_choice([('item_hunting_crossbow', 50),
-                                                                                          ('item_short_bow', 50)]), 5),
+                                                                                          ('item_short_bow', 50)]),
+                                                               5),
                                                               (game_logic.weighted_choice([('item_bronze_bolt', 50),
-                                                                                          ('item_bronze_tipped_arrow', 50)]), 10)])
+                                                                                          ('item_bronze_tipped_arrow', 30),
+                                                                                          ('item_poisoned_arrow', 20)]),
+                                                               10)])
                         item_coords = floor_cells[random.randrange(len(floor_cells))]
                         loc.place_entity(item_id, item_coords[0], item_coords[1])
                     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
