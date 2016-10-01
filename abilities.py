@@ -51,6 +51,11 @@ class Condition:
                 return True
             else:
                 return False
+        if self.condition == 'MOVER_IS_A_BE':  # MOVER IS A BE condition
+            if isinstance(kwargs['entity'], game_logic.BattleEntity):  # if target is a BE
+                return True
+            else:
+                return False
         return True
 
 

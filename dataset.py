@@ -80,10 +80,11 @@ def initialize():
     data_set['trap_corrosive_moss'].effects.append(effects.Effect('BLOCK_BASHING', 30))
     data_set['trap_corrosive_moss'].effects.append(effects.Effect('BLOCK_SLASHING', 2))
     data_set['trap_corrosive_moss'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
-    cond = abilities.Condition('MOVED_ON')
+    cond1 = abilities.Condition('MOVED_ON')
+    cond2 = abilities.Condition('MOVER_IS_A_BE')
     react = {'type': 'deal_damage', 'target': 'mover', 'damage': (1, 3), 'dmg_type': 'acid'}
     abil = abilities.Ability(name='Corrosive acid', owner=data_set['trap_corrosive_moss'],
-                             trigger='entity_moved', conditions=[cond], reactions=[react],
+                             trigger='entity_moved', conditions=[cond1, ' and ', cond2], reactions=[react],
                              message_color=[100, 220, 100])
     data_set['trap_corrosive_moss'].add_ability(abil)
 
