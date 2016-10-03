@@ -1,4 +1,5 @@
 import render
+import ui
 import game_logic
 import events
 import dataset
@@ -7,8 +8,15 @@ import pickle
 import os
 import time
 
+# TODO: load settings from file
+SCREEN_WIDTH = 80
+SCREEN_HEIGHT = 50
+MAP_WIDTH = 50
+MAP_HEIGHT = 50
+
 
 # =========================== global functions, save/load, loop, etc =================================
+# TODO: move save/load functions to Game class?
 def save_game(game):
     """ Game saving function """
     # save game object instance, and observers
@@ -75,15 +83,57 @@ def main_loop():
             time.sleep(sleep_time)
         last_frame_time = current_time
 
-
+# HERE PROGRAM RUN STARTS
 dataset.initialize()
-loaded = load_game()
-if not loaded:
-    game = game_logic.Game()
-else:
-    game = loaded[0]
+graphics = render.Graphics(screen_width=SCREEN_WIDTH, screen_height=SCREEN_HEIGHT)
+main_menu_options = []
+loaded = load_game()  # try to load game
+if loaded:
+    main_menu_options.append('Continue')
+main_menu_options.append('New Game')
+main_menu_options.append('Exit')
+main_menu_choice = ui.show_menu_list(graphics.win_mgr, main_menu_options, 'Welcome to Desert City!')
+if main_menu_choice[0] == 'Continue':
+    game = loaded[0]  # load saved game
     events.Observer._observers = loaded[1]
-graphics = render.Graphics(game)
+elif main_menu_choice[0] == 'New Game':
+    class_choice = ui.show_menu_list(graphics.win_mgr, ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
+                                     'Choose your character background:')
+    game = game_logic.Game()  # start a new game
+    # TODO: need to make some templates for different starting classes (in dataset?)
+    if class_choice[0] == 'Adventurer':
+        game.player.add_item(game.current_loc.place_entity('item_short_bow', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_dagger', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_firebolt_scroll', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_antidote_potion', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
+    elif class_choice[0] == 'Warrior':
+        game.player.add_item(game.current_loc.place_entity('item_sabre', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_mail_armor', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_misurka', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_antidote_potion', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
+    elif class_choice[0] == 'Gantra mercenary':
+        game.player.add_item(game.current_loc.place_entity('item_hunting_crossbow', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_bronze_bolt', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_dagger', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_antidote_potion', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
+    elif class_choice[0] == 'Magic seeker':
+        game.player.add_item(game.current_loc.place_entity('item_dagger', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_firebolt_scroll', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_frostbolt_scroll', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_antidote_potion', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_haste_potion', 10, 10))
+elif main_menu_choice[0] == 'Exit':
+    exit()
+else:
+    exit()
+main_window = ui.WindowMain(game, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, MAP_WIDTH, MAP_HEIGHT)
+graphics.win_mgr.add_window(main_window)  # add main window to WinMgr
+graphics.win_mgr.active_window = main_window  # make it active
 main_loop()
 if game.player.state == 'dead':
     try:

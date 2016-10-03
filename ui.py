@@ -1020,9 +1020,7 @@ class WindowManager:
             self.active_window = window.prev_window
             self.windows.remove(window)
         else:
-            raise Exception(
-                "Attempted to close active window with no previous. Change active window first.",
-                str(type(self.active_window)))
+            self.windows.remove(window)  # if no previous - just remove window
 
     def handle_input(self, commands):
         """ Pass handling input to active window """
