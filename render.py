@@ -15,7 +15,7 @@ class Graphics:
             self.screen_width = screen_width  # screen width in tiles
             self.screen_height = screen_height  # screen height in tiles
             # TDL initialization block
-            tdl.set_font('data/fonts/consolas_unicode_16x16.png', greyscale=True)
+            tdl.set_font('data/fonts/font_test2_unicode_16x16.png', greyscale=True)
             self.console = tdl.init(screen_width, screen_height, title="Desert City")  # main console, displayed
             tdl.set_fps(fps_limit)  # set fps limit
             # window stuff
