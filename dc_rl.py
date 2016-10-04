@@ -93,6 +93,8 @@ if loaded:
 main_menu_options.append('New Game')
 main_menu_options.append('Exit')
 main_menu_choice = ui.show_menu_list(graphics.win_mgr, main_menu_options, 'Welcome to Desert City!')
+if not main_menu_choice:
+    exit()
 if main_menu_choice[0] == 'Continue':
     game = loaded[0]  # load saved game
     events.Observer._observers = loaded[1]
@@ -128,8 +130,6 @@ elif main_menu_choice[0] == 'New Game':
         game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_haste_potion', 10, 10))
 elif main_menu_choice[0] == 'Exit':
-    exit()
-else:
     exit()
 main_window = ui.WindowMain(game, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, MAP_WIDTH, MAP_HEIGHT)
 graphics.win_mgr.add_window(main_window)  # add main window to WinMgr

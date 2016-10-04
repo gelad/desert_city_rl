@@ -22,7 +22,7 @@ def initialize():
     # loading Entity templates
     data_set['wall_sandstone'] = game_logic.Prop(name='Wall', data_id='wall_sandstone', description='A sandstone wall.',
                                                  armor={'bashing': 100, 'slashing': 500, 'piercing': 300},
-                                                 char='#', color=[255, 250, 205], hp=100, weight=1000,
+                                                 char='Ж', color=[255, 250, 205], hp=100, weight=1000,
                                                  corpse='debris_large_sandstone')
     data_set['wall_sandstone'].effects.append(effects.Effect('BLOCK_BASHING', 10))
     data_set['wall_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
