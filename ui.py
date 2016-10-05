@@ -892,6 +892,8 @@ class WindowInventoryMenu(Window):
                             self.item_info.item = self.selected
                         else:  # if attempted to scroll up at top - jump to bottom
                             self.selected_index = len(self.options) - 1
+                            self.selected = self.options[self.selected_index]
+                            self.item_info.item = self.selected
                     elif event.key == 'DOWN' or event.key == 'KP2':
                         if self.selected_index < len(self.options) - 1:  # if down - select next option
                             self.selected_index += 1
@@ -899,6 +901,8 @@ class WindowInventoryMenu(Window):
                             self.item_info.item = self.selected
                         else:  # if attempted to scroll down at bottom - jump to top
                             self.selected_index = 0
+                            self.selected = self.options[self.selected_index]
+                            self.item_info.item = self.selected
                     elif event.key == 'CHAR':
                         # convert the ASCII code to an index; if it corresponds to an option, return it
                         index = ord(event.keychar) - ord('a')
@@ -982,12 +986,14 @@ class WindowListMenu(Window):
                             self.selected = self.options[self.selected_index]
                         else:  # if attempted to scroll up at top - jump to bottom
                             self.selected_index = len(self.options) - 1
+                            self.selected = self.options[self.selected_index]
                     elif event.key == 'DOWN' or event.key == 'KP2':
                         if self.selected_index < len(self.options) - 1:  # if down - select next option
                             self.selected_index += 1
                             self.selected = self.options[self.selected_index]
                         else:  # if attempted to scroll down at bottom - jump to top
                             self.selected_index = 0
+                            self.selected = self.options[self.selected_index]
                     elif event.key == 'CHAR':
                         # convert the ASCII code to an index; if it corresponds to an option, return it
                         index = ord(event.keychar) - ord('a')

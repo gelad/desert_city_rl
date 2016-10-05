@@ -248,3 +248,4 @@ class Ability(events.Observer):
                                                 reaction['effect'].eff.lower() + '.',
                                                 'PLAYER', self.message_color)
 
+

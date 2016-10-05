@@ -48,17 +48,17 @@ Implement universal target picking in UI (for shooting, using abilities, etc). (
 Make point_or_entity target mode. (DONE)
 Make firebolt and ice spike scrolls (to test targeting). (DONE)
 BUG: projectiles flying through monsters. (FIXED?)
+BUG: when last item is selected in inventory - operations performed with previous selected instead. (FIXED)
+Make a main menu - new/load game. (DONE)
 
 
-BUG: when last item is selected in inventory (jump from top) - operations performed with previous selected instead.
-Make a main menu - new/load game.
 BUG?: arrow don't poison on each shot.
 Inform player if targeting failed.
 Make simple AOE explosions.
 Make ammo with abilities (exploding, freezing arrows, etc)
 Stop poisonous arrows poisoning walls.
 Make menu lists scrollable.
-Implement accuracy for melee.
+Implement accuracy for melee. ?
 Make door-opening mobs.
 BUG: attempted reload command after player death (player can perform actions after death?)
 Make 'give item' debug command.

@@ -380,7 +380,7 @@ class Inventory(Entity):
 
     def use_item(self, item, target=None):
         """ Item use on self or target method """
-        if not target:  # if no target specified - use on self
+        if not target or target == self:  # if no target specified or target is self - use on self
             target = self
             events.Event(self, {'type': 'used_on_self', 'item': item})  # fire an event
         else:
@@ -981,7 +981,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 dmg = self.damage
                 damage_dealt = self.deal_damage(target, dmg, self.dmg_type)  # deal damage
                 # fire Entity event
-                events.Event(self, {'type': 'hit_basic_attack', 'target': target,
+                events.Event(self, {'type': 'hit_basic_attack', 'target': target, 'attacker': self,
                                     'damage': damage_dealt, 'dmg_type': self.dmg_type})
                 msg = self.name + ' attacks ' + target.name + ' and deals ' + str(damage_dealt) + ' damage!'
                 Game.add_message(msg, 'PLAYER', [255, 255, 255])
