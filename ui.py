@@ -121,6 +121,7 @@ class ElementTextRect(Element):
 
     def __init__(self, owner, x, y, width, height, text='', color=None, bgcolor=None, visible=True):
         super(ElementTextRect, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+        self._text = ''  # private property that stores text after wrapping
         self.text = text  # text to be displayed
         if color:  # check if color specified
             self.color = color
@@ -131,13 +132,24 @@ class ElementTextRect(Element):
         else:  # if not - black
             self.bgcolor = [0, 0, 0]
 
+    @property
+    def text(self):
+        return self.text
+
+    @text.setter
+    def text(self, text):
+        self._text = ''
+        for line in text.splitlines(True):
+            for l in textwrap.wrap(line, self.width, replace_whitespace=False, drop_whitespace=False):
+                self._text += l.lstrip() + '\n'
+
     def draw(self):
         """ Method returns tdl.Console with single line of text """
         console = tdl.Console(self.width, self.height)
         console.set_mode('scroll')
         console.move(0, 0)
         console.set_colors(self.color, self.bgcolor)
-        console.print_str(self.text)  # draw text on console
+        console.print_str(self._text)  # draw text on console
         return console
 
 
