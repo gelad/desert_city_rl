@@ -33,6 +33,45 @@ class Element:
         self.elements.append(element)
 
 
+class ElementBorder(Element):
+    """ Decorative UI element - a border around window or something similar """
+    def __init__(self, owner, x=0, y=0, width=1, height=1, pattern='*', borders='tblr',
+                 color=None, bgcolor=None, visible=True):
+        super(ElementBorder, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+        self.pattern = pattern  # border pattern
+        self.borders = borders
+        if color:  # check if color specified
+            self.color = color
+        else:  # if not - white
+            self.color = [255, 255, 255]
+        if bgcolor:  # check if background color specified
+            self.bgcolor = bgcolor
+        else:  # if not - black
+            self.bgcolor = [0, 0, 0]
+        self.console = tdl.Console(self.width, self.height)  # a TDL console with border
+        self._draw_border()
+
+    def _draw_border(self):
+        """ Method that draws selected border pattern on console """
+        if len(self.pattern) == 1:  # if pattern is a single symbol - make a border of that symbols
+            if 't' in self.borders:  # top border
+                for x in range(self.width):
+                    self.console.draw_char(x, 0, self.pattern, self.color, self.bgcolor)
+            if 'b' in self.borders:  # bottom border
+                for x in range(self.width):
+                    self.console.draw_char(x, -1, self.pattern, self.color, self.bgcolor)
+            if 'l' in self.borders:  # left border
+                for y in range(self.height):
+                    self.console.draw_char(0, y, self.pattern, self.color, self.bgcolor)
+            if 'r' in self.borders:  # right border
+                for y in range(self.height):
+                    self.console.draw_char(-1, y, self.pattern, self.color, self.bgcolor)
+
+    def draw(self):
+        """ Method returns tdl.Console with border """
+        return self.console
+
+
 class ElementTextLine(Element):
     """ Simple UI element - line of text """
 
@@ -363,7 +402,9 @@ class WindowMain(Window):
         super(WindowMain, self).__init__(x, y, width, height, z, True, None)  # call parent constructor
         self.game = game  # a Game object
         # elements
-        self.map = ElementMap(self, game.current_loc, game.player, 0, 0, map_width, map_height)  # a map element
+        self.map_border = ElementBorder(self, 0, 0, map_width, map_height, '*', 'tblr')
+        self.add_element(self.map_border)
+        self.map = ElementMap(self, game.current_loc, game.player, 1, 1, map_width-1, map_height-1)  # a map element
         self.add_element(self.map)
         self.panel = ElementMainPanel(self, game.player, map_width, 0, width - map_width, height // 2)  # panel element
         self.add_element(self.panel)
