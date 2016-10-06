@@ -66,6 +66,23 @@ class ElementBorder(Element):
             if 'r' in self.borders:  # right border
                 for y in range(self.height):
                     self.console.draw_char(-1, y, self.pattern, self.color, self.bgcolor)
+        elif self.pattern == 'double_line':  # like this - ═
+            if 't' in self.borders:  # top border
+                for x in range(self.width):
+                    self.console.draw_char(x, 0, '═', self.color, self.bgcolor)
+            if 'b' in self.borders:  # bottom border
+                for x in range(self.width):
+                    self.console.draw_char(x, -1, '═', self.color, self.bgcolor)
+            if 'l' in self.borders:  # left border
+                for y in range(self.height):
+                    self.console.draw_char(0, y, '║', self.color, self.bgcolor)
+            if 'r' in self.borders:  # right border
+                for y in range(self.height):
+                    self.console.draw_char(-1, y, '║', self.color, self.bgcolor)
+            self.console.draw_char(0, 0, '╔', self.color, self.bgcolor)  # corners
+            self.console.draw_char(0, -1, '╚', self.color, self.bgcolor)
+            self.console.draw_char(-1, 0, '╗', self.color, self.bgcolor)
+            self.console.draw_char(-1, -1, '╝', self.color, self.bgcolor)
 
     def draw(self):
         """ Method returns tdl.Console with border """
@@ -402,9 +419,9 @@ class WindowMain(Window):
         super(WindowMain, self).__init__(x, y, width, height, z, True, None)  # call parent constructor
         self.game = game  # a Game object
         # elements
-        self.map_border = ElementBorder(self, 0, 0, map_width, map_height, '*', 'tblr')
+        self.map_border = ElementBorder(self, 0, 0, map_width, map_height, 'double_line', 'tblr')  # border around map
         self.add_element(self.map_border)
-        self.map = ElementMap(self, game.current_loc, game.player, 1, 1, map_width-1, map_height-1)  # a map element
+        self.map = ElementMap(self, game.current_loc, game.player, 1, 1, map_width - 2, map_height - 2)  # a map element
         self.add_element(self.map)
         self.panel = ElementMainPanel(self, game.player, map_width, 0, width - map_width, height // 2)  # panel element
         self.add_element(self.panel)
@@ -852,7 +869,7 @@ class WindowMain(Window):
 
 # TODO: refactor ListMenu and InventoryMenu, to minimize code duplication (make one inherit another)
 class WindowInventoryMenu(Window):
-    """ Class for simple inventory menu (list of selectable items, on selection performs player_function with item) """
+    """ Class for simple inventory menu (list of selectable items) """
 
     def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
         self.options = options  # a list of menu items
@@ -960,29 +977,38 @@ class WindowInventoryMenu(Window):
 class WindowListMenu(Window):
     """ Class for simple list menu (list of selectable options) """
 
-    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
+    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, text_color=(255, 255, 255),
+                 highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
         self.options = options  # a list of menu options
         self.x = x
         self.y = y
+        self.text_color = text_color  # color of menu text
+        self.highlight_color = highlight_color  # color of highligted element background
+        self.bg_color = bg_color  # color of menu background
         width = 0  # width is calculated accordingly to options length
-        y = 0
+        y = 1  # start from 1 - border is at 0
         letter_index = ord('a')  # start menu item indexing from 'a'
-        elems = []
+        self.option_elements = []  # a list of selectable elements representing options
         for option in options:
             y += 1
             # add menu options as text line objects
             text_line = str(option)
-            elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + text_line))
+            self.option_elements.append(ElementTextLine(self, 1, y, chr(letter_index) + ') ' + text_line))
             letter_index += 1
             if len(text_line) > width:
                 width = len(text_line)
         width += 3
         if width < len(str(caption)):
             width = len(str(caption))
-        elems.append(ElementTextLine(self, 0, 0, caption))  # add menu caption as text line
+        width += 2  # add width and height for border
+        height = len(options) + 3
         # call parent constructor
-        super(WindowListMenu, self).__init__(self.x, self.y, width, len(options) + 1, z, visible)
-        for elem in elems:
+        super(WindowListMenu, self).__init__(self.x, self.y, width, height, z, visible)
+        self.add_element(ElementBorder(self, 0, 0, width, height, 'double_line', 'tblr',
+                                       self.text_color, self.bg_color))  # add border
+        self.add_element(ElementTextLine(self, 1, 1, caption,
+                                         self.text_color, self.bg_color))  # add menu caption as text line
+        for elem in self.option_elements:
             self.add_element(elem)
         self.selected = None  # if no options - selected remains None
         self.selected_index = 0
@@ -997,12 +1023,15 @@ class WindowListMenu(Window):
         """ Drawing method """
         i = 0
         for element in self.elements:  # blit every element to console
-            if i == self.selected_index and self.selected:  # highlight selected element
-                element.bgcolor = [0, 100, 0]
-            else:  # if not highligted - set background color to color of menu caption
-                element.bgcolor = self.elements[-1].bgcolor
-            self.console.blit(element.draw(), element.x, element.y)
-            i += 1
+            if element in self.option_elements:  # process option_elements separately - they may need to be highlighted
+                if i == self.selected_index and self.selected:  # highlight selected element
+                    element.bgcolor = self.highlight_color
+                else:  # if not highligted - set background color
+                    element.bgcolor = self.bg_color
+                self.console.blit(element.draw(), element.x, element.y)
+                i += 1
+            else:
+                self.console.blit(element.draw(), element.x, element.y)
         return self.console
 
     def handle_input(self):
