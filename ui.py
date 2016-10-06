@@ -867,42 +867,47 @@ class WindowMain(Window):
                 return False  # if not
 
 
-# TODO: refactor ListMenu and InventoryMenu, to minimize code duplication (make one inherit another)
 class WindowInventoryMenu(Window):
     """ Class for simple inventory menu (list of selectable items) """
-
-    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None):
+    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, text_color=(255, 255, 255),
+                 highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
         self.options = options  # a list of menu items
         self.x = x
         self.y = y
+        self.text_color = text_color  # color of menu text
+        self.highlight_color = highlight_color  # color of highligted element background
+        self.bg_color = bg_color  # color of menu background
         width = 0  # width is calculated accordingly to options length
-        y = 0
+        y = 1
         letter_index = ord('a')  # start menu item indexing from 'a'
-        elems = []
+        self.option_elements = []
         for option in options:
             y += 1
             # add menu items as text line objects
             text_line = str(option)
             if isinstance(option, game_logic.ItemCharges):
                 text_line += '[' + str(option.charges) + ']'
-            elems.append(ElementTextLine(self, 0, y, chr(letter_index) + ') ' + text_line))
+            self.option_elements.append(ElementTextLine(self, 1, y, chr(letter_index) + ') ' + text_line))
             letter_index += 1
             if len(text_line) > width:
                 width = len(text_line)
         width += 3
         if width < len(str(caption)):
             width = len(str(caption))
-        self.caption = ElementTextLine(self, 0, 0, caption)
-        elems.append(self.caption)  # add menu caption as text line
-        width += 1
-        self.item_info = ElementItemInfo(owner=self, x=width, y=0, width=20, height=30)  # add item info panel
-        elems.append(self.item_info)
+        width += 1  # add width and height for border
+        height = len(options) + 3
+        self.item_info = ElementItemInfo(owner=self, x=width, y=1, width=20, height=30)  # add item info panel
+        self.option_elements.append(self.item_info)
         # call parent constructor
-        height = len(options) + 1
         if height < self.item_info.height:
             height = self.item_info.height
-        super(WindowInventoryMenu, self).__init__(self.x, self.y, width + self.item_info.width, height, z, visible)
-        for elem in elems:
+        super(WindowInventoryMenu, self).__init__(self.x, self.y, width + self.item_info.width + 1, height + 2, z,
+                                                  visible)
+        self.add_element(ElementBorder(self, 0, 0, width + self.item_info.width + 1, height + 2, 'double_line', 'tblr',
+                                       self.text_color, self.bg_color))  # add border
+        self.add_element(ElementTextLine(self, 1, 1, caption,
+                                         self.text_color, self.bg_color))  # add menu caption as text line
+        for elem in self.option_elements:
             self.add_element(elem)
         self.selected = None  # if no options - selected remains None
         self.selected_index = 0
@@ -918,13 +923,15 @@ class WindowInventoryMenu(Window):
         """ Drawing method """
         i = 0
         for element in self.elements:  # blit every element to console
-            if isinstance(element, ElementTextLine):
+            if element in self.option_elements:  # process option_elements separately - they may need to be highlighted
                 if i == self.selected_index and self.selected:  # highlight selected element
-                    element.bgcolor = [0, 100, 0]
+                    element.bgcolor = self.highlight_color
                 else:  # if not highligted - set background color to color of menu caption
-                    element.bgcolor = self.caption.bgcolor
-            self.console.blit(element.draw(), element.x, element.y)
-            i += 1
+                    element.bgcolor = self.bg_color
+                self.console.blit(element.draw(), element.x, element.y)
+                i += 1
+            else:
+                self.console.blit(element.draw(), element.x, element.y)
         return self.console
 
     def handle_input(self):
@@ -1026,7 +1033,7 @@ class WindowListMenu(Window):
             if element in self.option_elements:  # process option_elements separately - they may need to be highlighted
                 if i == self.selected_index and self.selected:  # highlight selected element
                     element.bgcolor = self.highlight_color
-                else:  # if not highligted - set background color
+                else:  # if not highligted - set background color to color of menu caption
                     element.bgcolor = self.bg_color
                 self.console.blit(element.draw(), element.x, element.y)
                 i += 1
