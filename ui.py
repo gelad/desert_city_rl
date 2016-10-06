@@ -573,16 +573,16 @@ class WindowMain(Window):
                     add_options.append('Load')
                 if len(item.ammo) > 0:
                     add_options.append('Unload')
-            action = show_menu_list(self.win_mgr, ['Use', 'Equip', 'Drop']+add_options,
-                                    'What to do with ' + item.name + '?', 0, 0, 1, self)
+            action = show_menu_list(self.win_mgr, 'What to do with ' + item.name + '?',
+                                    ['Use', 'Equip', 'Drop'] + add_options, None, 0, 0, 1, self)
             if action:
                 if action[0] == 'Use':
                     self.command_use_item(player, item)
                 elif action[0] == 'Equip':
                     if item:
                         if len(item.equip_slots) > 1:
-                            slot = show_menu_list(self.win_mgr, list(item.equip_slots),
-                                                  'Select a slot:', 0, 0, True, self)
+                            slot = show_menu_list(self.win_mgr,  'Select a slot:',
+                                                  list(item.equip_slots), None, 0, 0, True, self)
                             if slot:
                                 slot = slot[0]
                         elif len(item.equip_slots) == 1:
@@ -641,8 +641,8 @@ class WindowMain(Window):
                     game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
                                                 'PLAYER', [255, 255, 255])
             else:  # if multiple ranged equipped
-                weapon = show_menu_list(self.win_mgr, ranged_weapons,
-                                        'Fire weapon:', 0, 0, True, self)  # select one
+                weapon = show_menu_list(self.win_mgr, 'Fire weapon:',
+                                        ranged_weapons, None, 0, 0, True, self)  # select one
                 if weapon:
                     if len(weapon[0].ammo) > 0:  # check if loaded
                         self.command_target_choose(weapon[0].range, weapon[0],
@@ -776,11 +776,11 @@ class WindowMain(Window):
                     # wield (equip) command
                     elif command == 'wield_item':
                         # show list menu with items
-                        item = show_menu_list(self.win_mgr, player.inventory, 'Equip item:', 0, 0, True, self)
+                        item = show_menu_list(self.win_mgr, 'Equip item:', player.inventory, None, 0, 0, True, self)
                         if item:
                             if len(item[0].equip_slots) > 1:
-                                slot = show_menu_list(self.win_mgr, list(item[0].equip_slots),
-                                                      'Select a slot:', 0, 0, True, self)
+                                slot = show_menu_list(self.win_mgr, 'Select a slot:',
+                                                      list(item[0].equip_slots), None, 0, 0, True, self)
                                 if slot:
                                     slot = slot[0]
                             elif len(item[0].equip_slots) == 1:
@@ -792,14 +792,15 @@ class WindowMain(Window):
                     # use command
                     elif command == 'use_item':
                         # show list menu with items
-                        item = show_menu_list(self.win_mgr, player.inventory, 'Use item:', 0, 0, True, self)
+                        item = show_menu_list(self.win_mgr, 'Use item:', player.inventory, None, 0, 0, True, self)
                         if item:
                             self.command_use_item(player, item[0])
                     # take off item command
                     elif command == 'take_off_item':
                         # show list menu with equipped items
-                        item = show_menu_list(self.win_mgr, [sl for sl in list(player.equipment.values()) if sl],
-                                              'Take off item:', 0, 0, True, self)
+                        item = show_menu_list(self.win_mgr, 'Take off item:',
+                                              [sl for sl in list(player.equipment.values()) if sl], None,
+                                              0, 0, True, self)
                         if item:  # if selected - take off
                             player.perform(actions.act_unequip_item, player, item[0])
                     # drop item command
@@ -996,9 +997,10 @@ class WindowInventoryMenu(Window):
 class WindowListMenu(Window):
     """ Class for simple list menu (list of selectable options) """
 
-    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, text_color=(255, 255, 255),
+    def __init__(self, caption, options, keys=None, x=0, y=0, z=0, visible=True, prev_window=None, text_color=(255, 255, 255),
                  highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
         self.options = options  # a list of menu options
+        self.keys = keys
         self.x = x
         self.y = y
         self.text_color = text_color  # color of menu text
@@ -1006,16 +1008,33 @@ class WindowListMenu(Window):
         self.bg_color = bg_color  # color of menu background
         width = 0  # width is calculated accordingly to options length
         y = 1  # start from 1 - border is at 0
-        letter_index = ord('a')  # start menu item indexing from 'a'
-        self.option_elements = []  # a list of selectable elements representing options
-        for option in options:
-            y += 1
-            # add menu options as text line objects
-            text_line = str(option)
-            self.option_elements.append(ElementTextLine(self, 1, y, chr(letter_index) + ') ' + text_line))
-            letter_index += 1
-            if len(text_line) > width:
-                width = len(text_line)
+        if keys is None:
+            letter_index = ord('a')  # start menu item indexing from 'a'
+            self.option_elements = []  # a list of selectable elements representing options
+            for option in options:
+                y += 1
+                # add menu options as text line objects
+                text_line = str(option)
+                self.option_elements.append(ElementTextLine(self, 1, y, chr(letter_index) + ') ' + text_line))
+                letter_index += 1
+                if len(text_line) > width:
+                    width = len(text_line)
+        else:  # if keys supplied
+            i = 0  # index of keys list
+            one_line_has_index = ''
+            self.option_elements = []  # a list of selectable elements representing options
+            for option in options:
+                y += 1
+                # add menu options as text line objects
+                text_line = str(option)
+                try:
+                    self.option_elements.append(ElementTextLine(self, 1, y, keys[i] + ') ' + text_line))
+                    one_line_has_index = '   '  # if at least one line has index - add spaces to lines without indices
+                except IndexError:
+                    self.option_elements.append(ElementTextLine(self, 1, y, one_line_has_index + text_line))
+                if len(text_line) > width:
+                    width = len(text_line)
+                i += 1
         width += 3
         if width < len(str(caption)):
             width = len(str(caption))
@@ -1085,7 +1104,13 @@ class WindowListMenu(Window):
                             self.selected = self.options[self.selected_index]
                     elif event.key == 'CHAR':
                         # convert the ASCII code to an index; if it corresponds to an option, return it
-                        index = ord(event.keychar) - ord('a')
+                        if not self.keys:
+                            index = ord(event.keychar) - ord('a')
+                        else:
+                            try:
+                                index = self.keys.index(event.keychar)
+                            except ValueError:  # if no such key in list - nothing selected
+                                index = -1
                         if 0 <= index < len(self.options):
                             self.selected = self.options[index]
                             self.selected_index = index
@@ -1122,9 +1147,9 @@ class WindowManager:
         self.active_window.handle_input(commands)
 
 
-def show_menu_list(win_mgr, options, caption, x_offset=0, y_offset=0, z=1, prev_window=None):
+def show_menu_list(win_mgr, caption, options, keys=None, x_offset=0, y_offset=0, z=1, prev_window=None):
     """ A function to show a list menu, and return result """
-    menu = WindowListMenu(options, caption, x_offset, y_offset, z, True, prev_window)  # create a list menu
+    menu = WindowListMenu(caption, options, keys, x_offset, y_offset, z, True, prev_window)  # create a list menu
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager

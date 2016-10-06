@@ -92,17 +92,19 @@ if loaded:
     main_menu_options.append('Continue')
 main_menu_options.append('New Game')
 main_menu_options.append('Exit')
-main_menu_choice = ui.show_menu_list(graphics.win_mgr, main_menu_options, 'Welcome to Desert City!')
+main_menu_choice = ui.show_menu_list(graphics.win_mgr, 'Welcome to Desert City!', main_menu_options, [])
 if not main_menu_choice:
     exit()
 if main_menu_choice[0] == 'Continue':
     game = loaded[0]  # load saved game
     events.Observer._observers = loaded[1]
 elif main_menu_choice[0] == 'New Game':
-    class_choice = ui.show_menu_list(graphics.win_mgr, ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
-                                     'Choose your character background:')
+    class_choice = ui.show_menu_list(graphics.win_mgr, 'Choose your character background:',
+                                     ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'])
     game = game_logic.Game()  # start a new game
     # TODO: need to make some templates for different starting classes (in dataset?)
+    if not class_choice:  # if nothing selected (esc hit)
+        quit()
     if class_choice[0] == 'Adventurer':
         game.player.add_item(game.current_loc.place_entity('item_short_bow', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_bronze_tipped_arrow', 10, 10))
