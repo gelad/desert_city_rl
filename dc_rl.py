@@ -92,7 +92,8 @@ if loaded:
     main_menu_options.append('Continue')
 main_menu_options.append('New Game')
 main_menu_options.append('Exit')
-main_menu_choice = ui.show_menu_list(graphics.win_mgr, 'Welcome to Desert City!', main_menu_options, [])
+# main_menu_choice = ui.show_menu_list(graphics.win_mgr, 'Welcome to Desert City!', main_menu_options, [])
+main_menu_choice = ui.show_menu(win_mgr=graphics.win_mgr, options=main_menu_options)
 if not main_menu_choice:
     exit()
 if main_menu_choice[0] == 'Continue':
