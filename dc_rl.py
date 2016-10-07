@@ -100,9 +100,29 @@ if main_menu_choice[0] == 'Continue':
     game = loaded[0]  # load saved game
     events.Observer._observers = loaded[1]
 elif main_menu_choice[0] == 'New Game':
-    class_choice = ui.show_menu_list(win_mgr=graphics.win_mgr, caption='Choose your character background:',
+    class_choice = ui.show_menu_text(win_mgr=graphics.win_mgr, caption='Choose your character background:',
                                      options=['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
-                                     keys='alphabet')
+                                     keys='alphabet', text_width=40, text_height=30,
+                                     texts=['Many adventurers are lured to the City - in search of treasures, power,' +
+                                            ' glory or something else. You are among the others - jack of all trades,' +
+                                            ' master of nothing.'
+                                            ,
+                                            'Mighty warriors visit the City to prove their strength by fighting' +
+                                            ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
+                                            'such warrior, proficient in melee combat and wearing a set of armor.'
+                                            ,
+                                            'Mercenaries from distant Northern country called Gantra are well-known ' +
+                                            'as trustworthy soldiers. One of them - with your sturdy crossbow' +
+                                            ' and shooting skills - you headed south, to obtain treasures of mysterious'
+                                            + ' City.'
+                                            ,
+                                            'A talent to use magic is rare among the people of >>INSERT WORLD ' +
+                                            'NAME HERE<<. You lack one, but unlike others, you desperately crave ' +
+                                            'for magic. One man told you a rumor, that in the sands lies a magic City' +
+                                            ', where among the other wonders, ordinary people can become powerful ' +
+                                            'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
+                                            ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
+                                            ' magic gift.'])
     game = game_logic.Game()  # start a new game
     # TODO: need to make some templates for different starting classes (in dataset?)
     if not class_choice:  # if nothing selected (esc hit)

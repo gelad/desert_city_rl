@@ -1105,6 +1105,61 @@ class WindowInventoryMenu(WindowMenu):
         return super(WindowInventoryMenu, self).draw()
 
 
+class WindowTextMenu(WindowMenu):
+    """ Class for menu that shows a text along with an option  """
+    def __init__(self, caption, options, keys, texts, x=0, y=0, width=0, height=0, text_width=20, text_height=30,
+                 z=0, visible=True, prev_window=None,
+                 text_color=(255, 255, 255), highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
+        # width and height of base menu is adjusted - border, item description and caption must fit
+        super(WindowTextMenu, self).__init__(options=options, keys=keys, x=x, y=y, z=z,
+                                             width=width - 2, height=height - 5,
+                                             visible=visible, text_color=text_color, bg_color=bg_color,
+                                             highlight_color=highlight_color, prev_window=prev_window)
+        self.texts = texts
+        self.width += 2 + text_width  # make window of desired width and height (parent init call made it smaller)
+        if self.width < len(caption) + 2:
+            self.width = len(caption) + 2
+        self.height += 5
+        if self.height < text_height + 4:
+            self.height = text_height + 4
+        self.opts.x = 1  # set position of menu options
+        self.opts.y = 3
+        self.text_area = ElementTextRect(owner=self, x=self.opts.width + self.opts.x, y=3,
+                                         width=text_width, height=text_height, color=text_color, bgcolor=bg_color)
+        self.add_element(self.text_area)  # an item information element
+        self._set_text()
+        self.add_element(ElementBorder(owner=self, x=0, y=0, width=self.width, height=self.height, z=-1,
+                                       pattern='double_line', borders='tblr', color=self.text_color,
+                                       bgcolor=self.bg_color))  # add border
+        self.add_element(ElementBorder(owner=self, x=self.opts.width+self.opts.x-1, y=3,
+                                       width=1, height=self.height-4, z=0,
+                                       pattern='|', borders='l', color=self.text_color,
+                                       bgcolor=self.bg_color))  # add vertical line between list and text
+        self.add_element(ElementBorder(owner=self, x=1, y=2,
+                                       width=self.width-2, height=1, z=0,
+                                       pattern='~', borders='t', color=self.text_color,
+                                       bgcolor=self.bg_color))  # add horizontal line between caption and rest
+        self.add_element(ElementTextLine(owner=self, x=1, y=1, line=caption,
+                                         color=self.text_color, bgcolor=self.bg_color))  # add menu caption as text line
+
+    def _set_text(self):
+        """ Method to obtain text for selected index """
+        if self.texts is None:
+            self.text_area.text = ''
+        elif isinstance(self.texts, str):  # if single text
+            self.text_area.text = self.texts
+        else:  # if a text for each option
+            try:
+                self.text_area.text = self.texts[self.opts.selected_index]
+            except IndexError:  # if no corresponding text - show nothing
+                self.text_area.text = ''
+
+    def draw(self):
+        """ Overrides parent method to change text before draw """
+        self._set_text()
+        return super(WindowTextMenu, self).draw()
+
+
 class WindowListMenu(WindowMenu):
     """ Child class for list menu (list of selectable options with a caption and border) """
 
@@ -1186,10 +1241,31 @@ def show_menu_list(win_mgr, caption, options, keys=None, x_offset=0, y_offset=0,
         return menu.opts.selected, menu.opts.selected_index
 
 
-def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0, z=1, prev_window=None):
+def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0, z=1, info_width=20,
+                        info_height=30, prev_window=None):
     """ A function to show an inventory menu, and return result """
-    menu = WindowInventoryMenu(caption=caption, options=options, keys=keys, x=x_offset, y=y_offset,
-                               prev_window=prev_window)  # create inventory menu
+    # create inventory menu
+    menu = WindowInventoryMenu(caption=caption, options=options, keys=keys, x=x_offset, y=y_offset, z=z,
+                               info_width=info_width, info_height=info_height, prev_window=prev_window)
+    menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
+    menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
+    win_mgr.add_window(menu)  # add menu to window manager
+    win_mgr.active_window = menu
+    while menu.state == 'working':  # a loop until menu does it job (or cancelled)
+        menu.handle_input()
+        win_mgr.graphics.render_all()
+    if menu.state == 'cancelled':  # if menu cancelled return false
+        return False
+    if menu.state == 'finished':  # if option selected - return it
+        return menu.opts.selected, menu.opts.selected_index
+
+
+def show_menu_text(win_mgr, caption, options, keys, texts, x_offset=0, y_offset=0, z=1, text_width=20,
+                   text_height=30, prev_window=None):
+    """ A function to show a text menu, and return result """
+    # create inventory menu
+    menu = WindowTextMenu(caption=caption, options=options, keys=keys, texts=texts, x=x_offset, y=y_offset, z=z,
+                          text_width=text_width, text_height=text_height, prev_window=prev_window)
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager
