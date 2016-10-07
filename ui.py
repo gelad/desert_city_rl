@@ -475,33 +475,35 @@ class ElementCellInfo(Element):
         console = tdl.Console(self.width, self.height)
         console.clear()
         self.elements.clear()
-        entities = self.game.current_loc.cells[self.game.player.position[0] + self.owner.map.cam_offset[0]][
-            self.game.player.position[1] + self.owner.map.cam_offset[1]].entities  # get entities @ selected cell
-        creatures = [ent for ent in entities if ent.occupies_tile]
-        items = [ent for ent in entities if isinstance(ent, game_logic.Item)]
-        other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
-        cur_y = 0  # a 'cursor' y position
-        for creature in creatures:  # show creature info if any
-            if creature.color[0]+creature.color[1]+creature.color[2] < 100:  # if creature color is too dark
-                col = (255, 255, 255)  # show name in white
-            else:
-                col = creature.color
-            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=creature.name + ' is here.', color=col))
-            cur_y += 1
-            for ln in textwrap.wrap(creature.description, self.width):
-                self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=ln))
+        if (self.game.player.position[0] + self.owner.map.cam_offset[0],
+            self.game.player.position[1] + self.owner.map.cam_offset[1]) in self.game.player.fov_set:  # show if in FOV
+            entities = self.game.current_loc.cells[self.game.player.position[0] + self.owner.map.cam_offset[0]][
+                self.game.player.position[1] + self.owner.map.cam_offset[1]].entities  # get entities @ selected cell
+            creatures = [ent for ent in entities if ent.occupies_tile]
+            items = [ent for ent in entities if isinstance(ent, game_logic.Item)]
+            other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
+            cur_y = 0  # a 'cursor' y position
+            for creature in creatures:  # show creature info if any
+                if creature.color[0]+creature.color[1]+creature.color[2] < 100:  # if creature color is too dark
+                    col = (255, 255, 255)  # show name in white
+                else:
+                    col = creature.color
+                self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=creature.name + ' is here.', color=col))
                 cur_y += 1
-        self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line='Items:'))
-        cur_y += 1
-        for item in items:  # show items if any
-            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=item.name, color=item.color))
+                for ln in textwrap.wrap(creature.description, self.width):
+                    self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=ln))
+                    cur_y += 1
+            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line='Items:'))
             cur_y += 1
-        self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line='Other:'))
-        cur_y += 1
-        for other in other:  # show other objects
-            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y,
-                                             line=other.name + ' is here.', color=other.color))
+            for item in items:  # show items if any
+                self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=item.name, color=item.color))
+                cur_y += 1
+            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line='Other:'))
             cur_y += 1
+            for other in other:  # show other objects
+                self.add_element(ElementTextLine(owner=self, x=0, y=cur_y,
+                                                 line=other.name + ' is here.', color=other.color))
+                cur_y += 1
         for element in self.elements:  # blit every element to console
             if element.visible:
                 console.blit(element.draw(), element.x, element.y)
