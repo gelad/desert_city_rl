@@ -121,13 +121,14 @@ class Ability(events.Observer):
                             if self.cooldown > 0:  # if ability has cooldown
                                 self.ability_on_cd = True  # start cooldown
                                 self.ticks_to_cd = self.cooldown
-                                events.Event(self.owner,
-                                             {'type': 'ability_fired', 'ability': self})  # fire an ability event
-                                events.Event('location', {'type': 'ability_fired', 'ability': self})
+                            events.Event(self.owner,
+                                         {'type': 'ability_fired', 'ability': self})  # fire an ability event
+                            events.Event('location', {'type': 'ability_fired', 'ability': self})
                     else:  # if not - react
                         self.react(reaction, data)
-                        self.ability_on_cd = True  # start cooldown
-                        self.ticks_to_cd = self.cooldown
+                        if self.cooldown > 0:  # if ability has cooldown
+                            self.ability_on_cd = True  # start cooldown
+                            self.ticks_to_cd = self.cooldown
                         events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
                         events.Event('location', {'type': 'ability_fired', 'ability': self})
 
