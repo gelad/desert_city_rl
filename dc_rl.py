@@ -4,9 +4,11 @@ import game_logic
 import events
 import dataset
 
-import pickle
+import dill
+
 import os
 import time
+import gc
 
 # TODO: load settings from file
 SCREEN_WIDTH = 80
@@ -19,15 +21,16 @@ MAP_HEIGHT = 50
 # TODO: move save/load functions to Game class?
 def save_game(game):
     """ Game saving function """
+    gc.collect()  # run garbage collect - remove weakref object without references and so on
     # save game object instance, and observers
-    pickle.dump((game, events.Observer._observers), open('savegame', 'wb'))
+    dill.dump((game, events.Observer._observers), open('savegame', 'wb'))
 
 
 def load_game():
     """ Game loading function """
     try:
         # load game object instance, and observers
-        loaded_game, events.Observer._observers = pickle.load(open('savegame', 'rb'))
+        loaded_game, events.Observer._observers = dill.load(open('savegame', 'rb'))
         if loaded_game.state == 'exit':
             print('Saved game state was exit, changed to playing')  # debug output
             loaded_game.state = 'playing'

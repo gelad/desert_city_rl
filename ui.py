@@ -2,6 +2,7 @@
     This file contains user interface. For now uses tdl (maybe need to move all render work to render?)
 """
 import tdl
+
 import textwrap
 import math
 
@@ -9,6 +10,7 @@ import game_logic
 import actions
 import player_input
 import dataset
+import generation
 
 
 class Element:
@@ -354,9 +356,9 @@ class ElementItemInfo(Element):
 class ElementMap(Element):
     """ Location map element  """
 
-    def __init__(self, loc, player, owner=None, x=0, y=0, width=0, height=0, z=0, visible=True):
+    def __init__(self, game, player, owner=None, x=0, y=0, width=0, height=0, z=0, visible=True):
         super(ElementMap, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z, visible=visible)
-        self.loc = loc  # Location object, to obtain location-related info
+        self.game = game  # game object, to obtain location-related info
         self.player = player  # Player object, to obtain player-related info
         self.cam_offset = (0, 0)  # camera offset (if at (0, 0) - centered on player)
 
@@ -422,9 +424,10 @@ class ElementMap(Element):
                 rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
                 rel_y = y - player_scr_y + player_y
                 # checks if location coordinates are valid (in boundaries)
-                if self.loc.is_in_boundaries(rel_x, rel_y):
+                if self.game.current_loc.is_in_boundaries(rel_x, rel_y):
                     # obtain cell graphics
-                    cg = self.cell_graphics(rel_x, rel_y, self.loc.cells[rel_x][rel_y], self.loc,
+                    cg = self.cell_graphics(rel_x, rel_y, self.game.current_loc.cells[rel_x][rel_y],
+                                            self.game.current_loc,
                                             self.player.is_in_fov(rel_x, rel_y))
                     console.draw_char(x, y, cg[0], cg[1], cg[2])  # draw it on map_console
                 else:
@@ -549,7 +552,7 @@ class WindowMain(Window):
         self.map_border = ElementBorder(owner=self, x=0, y=0, width=map_width, height=map_height, pattern='double_line',
                                         borders='tblr')  # border around map
         self.add_element(self.map_border)
-        self.map = ElementMap(owner=self, loc=game.current_loc, player=game.player, x=1, y=1, width=map_width - 2,
+        self.map = ElementMap(owner=self, game=game, player=game.player, x=1, y=1, width=map_width - 2,
                               height=map_height - 2)  # a map element
         self.add_element(self.map)
         self.panel = ElementMainPanel(owner=self, player=game.player, x=map_width, y=0, width=width - map_width,
@@ -579,8 +582,7 @@ class WindowMain(Window):
         return self.console
 
     # ========================== COMMAND METHODS (special cases, to prevent code duplication) ====================
-    @staticmethod
-    def command_default_direction(player, loc, dx, dy):
+    def command_default_direction(self, player, loc, dx, dy):
         """ Command method for player pressed direction key - move/open/attack/use default action for each type
             of object in desired cell
         """
@@ -602,6 +604,25 @@ class WindowMain(Window):
                     player.perform(actions.act_attack_melee_weapons, player, enemy)  # attack it in melee with weapon
                 else:
                     player.perform(actions.act_attack_melee_basic, player, enemy)  # attack it in melee with hands
+        else:  # TODO: PLACEHOLDER - moving to another level
+            leave = show_menu_list(win_mgr=self.win_mgr, caption='Do you want to leave this location?',
+                                   options=['No, I want to stay here.', 'Yes, I need to move further.'],
+                                   keys=['n', 'y'], prev_window=self)
+            if not leave:
+                return
+            if leave[1] == 1:  # if yes - leave location
+                self.command_leave_loc()
+
+    def command_leave_loc(self):
+        """ PLACEHOLDER method for moving to another loc """
+        old_loc = self.game.current_loc
+        self.game.current_loc = generation.generate_loc('ruins', None, 200, 200)
+        self.game.add_location(self.game.current_loc)
+        self.game.player.location.remove_entity(self.game.player)
+        self.game.current_loc.place_entity(self.game.player, 0, 0)
+        self.game.current_loc.actors.remove(self.game.player)  # A hack, to make player act first if acting in one tick
+        self.game.current_loc.actors.insert(0, self.game.player)
+        self.game.remove_location(old_loc)
 
     @staticmethod
     def command_close_direction(player, loc, dx, dy):

@@ -1442,7 +1442,7 @@ class Game:
         self.add_location(self.current_loc)
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1, weight=70)
-        self.current_loc.place_entity(self.player, 10, 10)
+        self.current_loc.place_entity(self.player, 0, 0)
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         #  self.current_loc.place_entity('mob_ifrit', 20, 20)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
@@ -1454,6 +1454,12 @@ class Game:
         """ Method that adds a location to the game """
         self.time_system.register_act_mgr(location.action_mgr)  # register act manager to time system
         self.locations.append(location)
+
+    def remove_location(self, location):
+        """ Method that removes location from the game """
+        self.time_system.unregister_act_mgr(location.action_mgr)  # unregister act manager to time system
+        self.locations.remove(location)
+        del location
 
     @staticmethod
     def add_message(message, level, color):
