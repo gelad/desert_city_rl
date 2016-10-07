@@ -50,6 +50,7 @@ Make firebolt and ice spike scrolls (to test targeting). (DONE)
 BUG: projectiles flying through monsters. (FIXED?)
 BUG: when last item is selected in inventory - operations performed with previous selected instead. (FIXED)
 Make a main menu - new/load game. (DONE)
+Menus refactor - to easier make new ones. (DONE)
 
 
 BUG?: arrow don't poison on each shot.

@@ -11,18 +11,29 @@ import player_input
 import dataset
 
 
-# TODO: make Z-order of drawing for elements
 class Element:
     """ Base class for UI element """
 
-    def __init__(self, owner, x=0, y=0, width=0, height=0, visible=True):
+    def __init__(self, owner=None, x=0, y=0, width=0, height=0, z=0, visible=True):
         self.owner = owner  # owner (other element or window)
         self.x = x  # position in window
         self.y = y
         self.width = width  # element width
         self.height = height  # element height
+        self._z = z
+        self.z = z  # z of element - they are drawn in order from higher to lower z
         self.elements = []  # child elements
         self.visible = visible  # is element visible
+
+    @property
+    def z(self):
+        return self._z
+
+    @z.setter
+    def z(self, z_value):
+        self._z = z_value
+        if self.owner:  # if has owner
+            self.owner.elements.sort(key=lambda elem: elem.z)  # sort owner elements in z order
 
     def draw(self):
         """ Abstract method, must return element appearance, ready to draw (tdl.Console for now) """
@@ -32,13 +43,14 @@ class Element:
         """ Method for adding child elements """
         element.owner = self
         self.elements.append(element)
+        self.elements.sort(key=lambda elem: elem.z)  # sort elements in z order
 
 
 class ElementBorder(Element):
     """ Decorative UI element - a border around window or something similar """
-    def __init__(self, owner, x=0, y=0, width=1, height=1, pattern='*', borders='tblr',
+    def __init__(self, owner=None, x=0, y=0, width=1, height=1, z=0, pattern='*', borders='tblr',
                  color=None, bgcolor=None, visible=True):
-        super(ElementBorder, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+        super(ElementBorder, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z, visible=visible)
         self.pattern = pattern  # border pattern
         self.borders = borders
         if color:  # check if color specified
@@ -93,8 +105,8 @@ class ElementBorder(Element):
 class ElementTextLine(Element):
     """ Simple UI element - line of text """
 
-    def __init__(self, owner, x=0, y=0, line='', color=None, bgcolor=None, visible=True):
-        super(ElementTextLine, self).__init__(owner=owner, x=x, y=y, width=len(line), height=1, visible=visible)
+    def __init__(self, owner=None, x=0, y=0, z=0, line='', color=None, bgcolor=None, visible=True):
+        super(ElementTextLine, self).__init__(owner=owner, x=x, y=y, z=z, width=len(line), height=1, visible=visible)
         self._line = line  # line of text
         if color:  # check if color specified
             self.color = color
@@ -120,8 +132,8 @@ class ElementTextLine(Element):
 class ElementTextRect(Element):
     """ Simple UI element - rectangle with text (wrapped) """
 
-    def __init__(self, owner, x, y, width, height, text='', color=None, bgcolor=None, visible=True):
-        super(ElementTextRect, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+    def __init__(self, owner=None, x=0, y=0, width=0, height=0, z=0, text='', color=None, bgcolor=None, visible=True):
+        super(ElementTextRect, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z, visible=visible)
         self._text = ''  # private property that stores text after wrapping
         self.text = text  # text to be displayed
         if color:  # check if color specified
@@ -157,7 +169,7 @@ class ElementTextRect(Element):
 # TODO: make scrollable options list
 class ElementMenuOptions(Element):
     """ Element that contains menu options """
-    def __init__(self, owner, x, y, options=None, keys=None, width=0, height=0,
+    def __init__(self, owner=None, x=0, y=0, options=None, keys=None, width=0, height=0, z=0,
                  color=(255, 255, 255), bgcolor=(0, 0, 0), highlight_color=(0, 100, 0), visible=True):
         if width < 0:
             width = 0
@@ -193,7 +205,7 @@ class ElementMenuOptions(Element):
                 text_line = one_line_has_index + text_line
             except TypeError:  # if no keys at all - None type
                 pass
-            option_elements.append(ElementTextLine(self, 0, opt_y, text_line, self.color))
+            option_elements.append(ElementTextLine(x=0, y=opt_y, line=text_line, z=0, color=self.color))
             if len(text_line) > line_max_width:
                 line_max_width = len(text_line)
             i += 1
@@ -204,7 +216,8 @@ class ElementMenuOptions(Element):
             height = len(options)
             if height == 0:  # if height still 0 - no options - set it to 1
                 height = 1
-        super(ElementMenuOptions, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+        super(ElementMenuOptions, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z,
+                                                 visible=visible)
         for elem in option_elements:  # add generated option lines
             self.add_element(elem)
         self.console = tdl.Console(self.width, self.height)
@@ -256,19 +269,21 @@ class ElementMenuOptions(Element):
 class ElementMainPanel(Element):
     """ Main panel with player stats, etc """
 
-    def __init__(self, owner, player, x=0, y=0, width=0, height=0, visible=True):
-        super(ElementMainPanel, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+    def __init__(self, player, owner=None, x=0, y=0, width=0, height=0, z=0, visible=True):
+        super(ElementMainPanel, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z, visible=visible)
         self.player = player  # Player object, to obtain player-related info
-        self.add_element(ElementTextLine(self, 0, 0, player.name))  # player name on top of panel
-        self.player_hp = ElementTextLine(self, 0, 1, str(player.hp) + '/' + str(player.maxhp) + ' HP')  # player hp bar
+        self.add_element(ElementTextLine(owner=self, x=0, y=0, z=0, line=player.name))  # player name on top of panel
+        self.player_hp = ElementTextLine(owner=self, x=0, y=1, z=0,
+                                         line=str(player.hp) + '/' + str(player.maxhp) + ' HP')  # player hp bar
         self.add_element(self.player_hp)
         # player position (for debug)
-        self.player_pos = ElementTextLine(self, 0, 2, 'X:' + str(player.position[0]) + ' Y:' + str(player.position[1]))
+        self.player_pos = ElementTextLine(owner=self, x=0, y=2, z=0,
+                                          line='X:' + str(player.position[0]) + ' Y:' + str(player.position[1]))
         self.add_element(self.player_pos)
         # player equipment in hands
-        self.player_hands = ElementTextLine(self, 0, 3,
-                                            (', '.join([str(player.equipment['RIGHT_HAND']),
-                                                        str(player.equipment['LEFT_HAND'])])))
+        self.player_hands = ElementTextLine(owner=self, x=0, y=3, z=0,
+                                            line=(', '.join([str(player.equipment['RIGHT_HAND']),
+                                                             str(player.equipment['LEFT_HAND'])])))
         self.add_element(self.player_hands)
 
     def draw(self):
@@ -278,15 +293,7 @@ class ElementMainPanel(Element):
         self.player_pos.set_line('X:' + str(self.player.position[0]) + ' Y:' + str(self.player.position[1]))
         right = self.player.equipment['RIGHT_HAND']
         left = self.player.equipment['LEFT_HAND']
-        if isinstance(right, game_logic.ItemRangedWeapon):  # display ammo loaded to ranged weapon
-            right = str(right) + '[' + str(len(right.ammo)) + ']'
-        else:
-            right = str(right)
-        if isinstance(left, game_logic.ItemRangedWeapon):
-            left = str(left) + '[' + str(len(left.ammo)) + ']'
-        else:
-            left = str(left)
-        self.player_hands.set_line(', '.join([right, left]))
+        self.player_hands.set_line(', '.join([str(right), str(left)]))
         console = tdl.Console(self.width, self.height)
         for element in self.elements:  # blit every element to console
             console.blit(element.draw(), element.x, element.y)
@@ -296,12 +303,12 @@ class ElementMainPanel(Element):
 class ElementItemInfo(Element):
     """ Item info for inventory """
 
-    def __init__(self, owner, item=None, x=0, y=0, width=0, height=0, visible=True):
-        super(ElementItemInfo, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+    def __init__(self, owner=None, item=None, x=0, y=0, width=0, height=0, z=0, visible=True):
+        super(ElementItemInfo, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z, visible=visible)
         self._item = item  # Item object, to obtain player-related info
-        self.item_name = ElementTextLine(self, 0, 0, ' ')
+        self.item_name = ElementTextLine(owner=self, x=0, y=0, line=' ')
         self.add_element(self.item_name)  # item name on top of panel
-        self.item_desc = ElementTextRect(self, 0, 1, width, height - 1)  # description of item
+        self.item_desc = ElementTextRect(owner=self, x=0, y=1, width=width, height=height - 1)  # description of item
         self.add_element(self.item_desc)
         self.item = item
 
@@ -347,8 +354,8 @@ class ElementItemInfo(Element):
 class ElementMap(Element):
     """ Location map element  """
 
-    def __init__(self, owner, loc, player, x=0, y=0, width=0, height=0, visible=True):
-        super(ElementMap, self).__init__(owner=owner, x=x, y=y, width=width, height=height, visible=visible)
+    def __init__(self, loc, player, owner=None, x=0, y=0, width=0, height=0, z=0, visible=True):
+        super(ElementMap, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z, visible=visible)
         self.loc = loc  # Location object, to obtain location-related info
         self.player = player  # Player object, to obtain player-related info
         self.cam_offset = (0, 0)  # camera offset (if at (0, 0) - centered on player)
@@ -431,8 +438,8 @@ class ElementMap(Element):
 class ElementLog(Element):
     """ Game log element """
 
-    def __init__(self, owner, game, x=0, y=0, width=0, height=0, visible=True):
-        super(ElementLog, self).__init__(owner=owner, x=x, y=y, height=height, width=width, visible=visible)
+    def __init__(self, game, owner=None, x=0, y=0, width=0, height=0, z=0, visible=True):
+        super(ElementLog, self).__init__(owner=owner, x=x, y=y, height=height, width=width, z=z, visible=visible)
         self.game = game  # game object to obtain log level
 
     def draw(self):
@@ -459,8 +466,8 @@ class ElementLog(Element):
 class ElementCellInfo(Element):
     """ Selected cell info element """
 
-    def __init__(self, owner, game, x=0, y=0, width=0, height=0, visible=False):  # not visible by default
-        super(ElementCellInfo, self).__init__(owner=owner, x=x, y=y, height=height, width=width, visible=visible)
+    def __init__(self, game, owner=None, x=0, y=0, width=0, height=0, z=0, visible=False):  # not visible by default
+        super(ElementCellInfo, self).__init__(owner=owner, x=x, y=y, height=height, width=width, z=z, visible=visible)
         self.game = game  # game object to obtain info
 
     def draw(self):
@@ -475,20 +482,25 @@ class ElementCellInfo(Element):
         other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
         cur_y = 0  # a 'cursor' y position
         for creature in creatures:  # show creature info if any
-            self.add_element(ElementTextLine(self, 0, cur_y, creature.name + ' is here.', creature.color))
+            if creature.color[0]+creature.color[1]+creature.color[2] < 100:  # if creature color is too dark
+                col = (255, 255, 255)  # show name in white
+            else:
+                col = creature.color
+            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=creature.name + ' is here.', color=col))
             cur_y += 1
             for ln in textwrap.wrap(creature.description, self.width):
-                self.add_element(ElementTextLine(self, 0, cur_y, ln))
+                self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=ln))
                 cur_y += 1
-        self.add_element(ElementTextLine(self, 0, cur_y, 'Items:'))
+        self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line='Items:'))
         cur_y += 1
         for item in items:  # show items if any
-            self.add_element(ElementTextLine(self, 0, cur_y, item.name, item.color))
+            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line=item.name, color=item.color))
             cur_y += 1
-        self.add_element(ElementTextLine(self, 0, cur_y, 'Other:'))
+        self.add_element(ElementTextLine(owner=self, x=0, y=cur_y, line='Other:'))
         cur_y += 1
         for other in other:  # show other objects
-            self.add_element(ElementTextLine(self, 0, cur_y, other.name + ' is here.', other.color))
+            self.add_element(ElementTextLine(owner=self, x=0, y=cur_y,
+                                             line=other.name + ' is here.', color=other.color))
             cur_y += 1
         for element in self.elements:  # blit every element to console
             if element.visible:
@@ -522,6 +534,7 @@ class Window:
         """ Method for adding child elements """
         element.owner = self
         self.elements.append(element)
+        self.elements.sort(key=lambda elem: elem.z)  # sort in z order
 
 
 class WindowMain(Window):
@@ -531,16 +544,21 @@ class WindowMain(Window):
         super(WindowMain, self).__init__(x, y, width, height, z, True, None)  # call parent constructor
         self.game = game  # a Game object
         # elements
-        self.map_border = ElementBorder(self, 0, 0, map_width, map_height, 'double_line', 'tblr')  # border around map
+        self.map_border = ElementBorder(owner=self, x=0, y=0, width=map_width, height=map_height, pattern='double_line',
+                                        borders='tblr')  # border around map
         self.add_element(self.map_border)
-        self.map = ElementMap(self, game.current_loc, game.player, 1, 1, map_width - 2, map_height - 2)  # a map element
+        self.map = ElementMap(owner=self, loc=game.current_loc, player=game.player, x=1, y=1, width=map_width - 2,
+                              height=map_height - 2)  # a map element
         self.add_element(self.map)
-        self.panel = ElementMainPanel(self, game.player, map_width, 0, width - map_width, height // 2)  # panel element
+        self.panel = ElementMainPanel(owner=self, player=game.player, x=map_width, y=0, width=width - map_width,
+                                      height=height // 2)  # panel element
         self.add_element(self.panel)
-        self.log = ElementLog(self, game, map_width, height // 2, width - map_width, height // 2 - 1)  # log element
+        self.log = ElementLog(owner=self, game=game, x=map_width, y=height // 2, width=width - map_width,
+                              height=height // 2 - 1)  # log element
         self.add_element(self.log)
         # cell info element
-        self.cell_info = ElementCellInfo(self, game, map_width, height // 2, width - map_width, height // 2 - 1)
+        self.cell_info = ElementCellInfo(owner=self, game=game, x=map_width, y=height // 2, width=width - map_width,
+                                         height=height // 2 - 1)
         self.add_element(self.cell_info)
         self.cam_offset = (0, 0)  # camera offset (for looking, shooting, etc)
         self.console = tdl.Console(width, height)  # offscreen console of window
@@ -621,7 +639,8 @@ class WindowMain(Window):
                 if len(items) == 1:
                     player.perform(actions.act_pick_up_item, player, items[0])
                 else:
-                    item = show_menu_inventory(self.win_mgr, items, 'Pick up item:', 0, 0, 1, self)
+                    item = show_menu_inventory(win_mgr=self.win_mgr, options=items, caption='Pick up item:',
+                                               keys='alphabet', prev_window=self)
                     if item:
                         player.perform(actions.act_pick_up_item, player, item[0])
             return False
@@ -664,7 +683,8 @@ class WindowMain(Window):
     def command_inventory(self, player):
         """ Command method to show inventory menu """
         # show inventory menu
-        item = show_menu_inventory(self.win_mgr, player.inventory, 'Inventory:', 0, 0, 1, self)
+        item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, caption='Inventory:',
+                                   keys='alphabet', prev_window=self)
         if item:
             add_options = []
             item = item[0]
@@ -699,7 +719,8 @@ class WindowMain(Window):
                         if len(ammos) == 1:
                             player.perform(actions.act_reload, player, item, ammos[0])
                         else:
-                            ammo = show_menu_inventory(self.win_mgr, ammos, 'Select ammunition:', 0, 0, 1, self)
+                            ammo = show_menu_inventory(win_mgr=self.win_mgr, options=ammos, keys='alphabet',
+                                                       caption='Select ammunition:', prev_window=self)
                             if ammo:
                                 player.perform(actions.act_reload, player, item, ammo[0])
                     else:
@@ -719,7 +740,8 @@ class WindowMain(Window):
                         if len(ammos) == 1:
                             player.perform(actions.act_reload, player, item, ammos[0])
                         else:
-                            ammo = show_menu_inventory(self.win_mgr, ammos, 'Select ammunition:', 0, 0, 1, self)
+                            ammo = show_menu_inventory(win_mgr=self.win_mgr, options=ammos, keys='alphabet',
+                                                       caption='Select ammunition:', prev_window=self)
                             if ammo:
                                 player.perform(actions.act_reload, player, item, ammo[0])
                     else:
@@ -909,7 +931,8 @@ class WindowMain(Window):
                     # drop item command
                     elif command == 'drop':
                         # show inventory menu
-                        item = show_menu_inventory(self.win_mgr, player.inventory, 'Drop item:', 0, 0, 1, self)
+                        item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, caption='Drop item:',
+                                                   keys='alphabet', prev_window=self)
                         if item:
                             player.perform(actions.act_drop_item, player, item[0])
                     # pick up from ground command
@@ -982,9 +1005,6 @@ class WindowMain(Window):
             else:
                 return False  # if not
 
-# TODO: make one base class for all menus - that handles input and list of options
-# subclass all others - make them add some additional visual elements and minor behavior
-
 
 class WindowMenu(Window):
     """ Base class for menu (just a list of selectable options) """
@@ -992,7 +1012,7 @@ class WindowMenu(Window):
     def __init__(self, options, keys=None, x=0, y=0, width=0, height=0, z=0, visible=True,
                  prev_window=None, text_color=(255, 255, 255), highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
         # make a menu options element first - to determine height and width if auto
-        self.opts = ElementMenuOptions(owner=self, x=x, y=y, options=options, keys=keys, width=width, height=height,
+        self.opts = ElementMenuOptions(x=x, y=y, options=options, keys=keys, width=width, height=height,
                                        color=text_color, bgcolor=bg_color, highlight_color=highlight_color)
         if width <= 0:
             width = self.opts.width
@@ -1049,118 +1069,40 @@ class WindowMenu(Window):
             return False
 
 
-class WindowInventoryMenu(Window):
+class WindowInventoryMenu(WindowMenu):
     """ Class for simple inventory menu (list of selectable items) """
-    def __init__(self, options, caption, x=0, y=0, z=0, visible=True, prev_window=None, text_color=(255, 255, 255),
-                 highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
-        self.options = options  # a list of menu items
-        self.x = x
-        self.y = y
-        self.text_color = text_color  # color of menu text
-        self.highlight_color = highlight_color  # color of highligted element background
-        self.bg_color = bg_color  # color of menu background
-        width = 0  # width is calculated accordingly to options length
-        y = 1
-        letter_index = ord('a')  # start menu item indexing from 'a'
-        self.option_elements = []
-        for option in options:
-            y += 1
-            # add menu items as text line objects
-            text_line = str(option)
-            if isinstance(option, game_logic.ItemCharges):
-                text_line += '[' + str(option.charges) + ']'
-            self.option_elements.append(ElementTextLine(self, 1, y, chr(letter_index) + ') ' + text_line))
-            letter_index += 1
-            if len(text_line) > width:
-                width = len(text_line)
-        width += 3
-        if width < len(str(caption)):
-            width = len(str(caption))
-        width += 1  # add width and height for border
-        height = len(options) + 3
-        self.item_info = ElementItemInfo(owner=self, x=width, y=1, width=20, height=30)  # add item info panel
-        self.option_elements.append(self.item_info)
-        # call parent constructor
-        if height < self.item_info.height:
-            height = self.item_info.height
-        super(WindowInventoryMenu, self).__init__(self.x, self.y, width + self.item_info.width + 1, height + 2, z,
-                                                  visible)
-        self.add_element(ElementBorder(self, 0, 0, width + self.item_info.width + 1, height + 2, 'double_line', 'tblr',
-                                       self.text_color, self.bg_color))  # add border
-        self.add_element(ElementTextLine(self, 1, 1, caption,
-                                         self.text_color, self.bg_color))  # add menu caption as text line
-        for elem in self.option_elements:
-            self.add_element(elem)
-        self.selected = None  # if no options - selected remains None
-        self.selected_index = 0
-        if len(self.options) > 0:
-            self.selected = self.options[0]  # set selection to first option
-            self.selected_index = 0
-            self.item_info.item = self.selected
-        self.state = 'working'  # set menu state to working
-        self.prev_window = prev_window  # previous window
-        self.console = tdl.Console(self.width, self.height)
+    def __init__(self, caption, options, keys, x=0, y=0, width=0, height=0, info_width=20, info_height=30,
+                 z=0, visible=True, prev_window=None,
+                 text_color=(255, 255, 255), highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
+        # width and height of base menu is adjusted - border, item description and caption must fit
+        super(WindowInventoryMenu, self).__init__(options=options, keys=keys, x=x, y=y, z=z,
+                                                  width=width - 2, height=height - 3,
+                                                  visible=visible, text_color=text_color, bg_color=bg_color,
+                                                  highlight_color=highlight_color, prev_window=prev_window)
+        self.width += 2 + info_width  # make window of desired width and height (parent init call made it smaller)
+        self.height += 3
+        if self.height < info_height + 2:
+            self.height = info_height + 2
+        self.opts.x = 1  # set position of menu options
+        self.opts.y = 2
+        self.info = ElementItemInfo(owner=self, x=self.opts.width+self.opts.x, y=1,
+                                    width=info_width, height=info_height)
+        self.add_element(self.info)  # an item information element
+        self.info.item = self.opts.selected
+        self.add_element(ElementBorder(owner=self, x=0, y=0, width=self.width, height=self.height, z=-1,
+                                       pattern='double_line', borders='tblr', color=self.text_color,
+                                       bgcolor=self.bg_color))  # add border
+        self.add_element(ElementBorder(owner=self, x=self.opts.width+self.opts.x-1, y=1,
+                                       width=1, height=self.height-2, z=0,
+                                       pattern='|', borders='l', color=self.text_color,
+                                       bgcolor=self.bg_color))  # add vertical line between list and description
+        self.add_element(ElementTextLine(owner=self, x=1, y=1, line=caption,
+                                         color=self.text_color, bgcolor=self.bg_color))  # add menu caption as text line
 
     def draw(self):
-        """ Drawing method """
-        i = 0
-        for element in self.elements:  # blit every element to console
-            if element in self.option_elements:  # process option_elements separately - they may need to be highlighted
-                if i == self.selected_index and self.selected:  # highlight selected element
-                    element.bgcolor = self.highlight_color
-                else:  # if not highligted - set background color to color of menu caption
-                    element.bgcolor = self.bg_color
-                self.console.blit(element.draw(), element.x, element.y)
-                i += 1
-            else:
-                self.console.blit(element.draw(), element.x, element.y)
-        return self.console
-
-    def handle_input(self):
-        """ Input handling method """
-        events = player_input.get_raw_input()  # get a raw input from player
-        if events:
-            for event in events:
-                if event.type == 'KEYDOWN':
-                    if event.key == 'ESCAPE':
-                        self.state = 'cancelled'
-                        self.win_mgr.close_window(self)
-                    if event.key == 'ENTER':  # if player hits Enter
-                        if self.selected:
-                            self.state = 'finished'
-                            self.win_mgr.close_window(self)
-                        else:  # if no options - cancel selection
-                            self.state = 'cancelled'
-                            self.win_mgr.close_window(self)
-                    elif event.key == 'UP' or event.key == 'KP8':  # selection movement
-                        if self.selected_index > 0:  # if up - select previous option
-                            self.selected_index -= 1
-                            self.selected = self.options[self.selected_index]
-                            self.item_info.item = self.selected
-                        else:  # if attempted to scroll up at top - jump to bottom
-                            self.selected_index = len(self.options) - 1
-                            self.selected = self.options[self.selected_index]
-                            self.item_info.item = self.selected
-                    elif event.key == 'DOWN' or event.key == 'KP2':
-                        if self.selected_index < len(self.options) - 1:  # if down - select next option
-                            self.selected_index += 1
-                            self.selected = self.options[self.selected_index]
-                            self.item_info.item = self.selected
-                        else:  # if attempted to scroll down at bottom - jump to top
-                            self.selected_index = 0
-                            self.selected = self.options[self.selected_index]
-                            self.item_info.item = self.selected
-                    elif event.key == 'CHAR':
-                        # convert the ASCII code to an index; if it corresponds to an option, return it
-                        index = ord(event.keychar) - ord('a')
-                        if 0 <= index < len(self.options):
-                            self.selected = self.options[index]
-                            self.selected_index = index
-                            self.state = 'finished'
-                            self.win_mgr.close_window(self)
-            return True
-        else:
-            return False
+        """ Overrides parent method to change item description before draw """
+        self.info.item = self.opts.selected
+        return super(WindowInventoryMenu, self).draw()
 
 
 class WindowListMenu(WindowMenu):
@@ -1178,138 +1120,11 @@ class WindowListMenu(WindowMenu):
         self.height += 3
         self.opts.x = 1  # set position of menu options
         self.opts.y = 2
-        self.add_element(ElementBorder(self, 0, 0, self.width, self.height, 'double_line', 'tblr',
-                                       self.text_color, self.bg_color))  # add border
-        self.elements.reverse()  # make border draw before other elements
-        self.add_element(ElementTextLine(self, 1, 1, caption,
-                                         self.text_color, self.bg_color))  # add menu caption as text line
-
-
-class WindowListWithTextMenu(Window):
-    """ Class for simple list menu (list of selectable options) """
-
-    def __init__(self, caption, options, keys=None, x=0, y=0, z=0, visible=True, prev_window=None, text_color=(255, 255, 255),
-                 highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
-        self.options = options  # a list of menu options
-        self.keys = keys
-        self.x = x
-        self.y = y
-        self.text_color = text_color  # color of menu text
-        self.highlight_color = highlight_color  # color of highligted element background
-        self.bg_color = bg_color  # color of menu background
-        width = 0  # width is calculated accordingly to options length
-        y = 1  # start from 1 - border is at 0
-        if keys is None:
-            letter_index = ord('a')  # start menu item indexing from 'a'
-            self.option_elements = []  # a list of selectable elements representing options
-            for option in options:
-                y += 1
-                # add menu options as text line objects
-                text_line = str(option)
-                self.option_elements.append(ElementTextLine(self, 1, y, chr(letter_index) + ') ' + text_line))
-                letter_index += 1
-                if len(text_line) > width:
-                    width = len(text_line)
-        else:  # if keys supplied
-            i = 0  # index of keys list
-            one_line_has_index = ''
-            self.option_elements = []  # a list of selectable elements representing options
-            for option in options:
-                y += 1
-                # add menu options as text line objects
-                text_line = str(option)
-                try:
-                    self.option_elements.append(ElementTextLine(self, 1, y, keys[i] + ') ' + text_line))
-                    one_line_has_index = '   '  # if at least one line has index - add spaces to lines without indices
-                except IndexError:
-                    self.option_elements.append(ElementTextLine(self, 1, y, one_line_has_index + text_line))
-                if len(text_line) > width:
-                    width = len(text_line)
-                i += 1
-        width += 3
-        if width < len(str(caption)):
-            width = len(str(caption))
-        width += 2  # add width and height for border
-        height = len(options) + 3
-        # call parent constructor
-        super(WindowListWithTextMenu, self).__init__(self.x, self.y, width, height, z, visible)
-        self.add_element(ElementBorder(self, 0, 0, width, height, 'double_line', 'tblr',
-                                       self.text_color, self.bg_color))  # add border
-        self.add_element(ElementTextLine(self, 1, 1, caption,
-                                         self.text_color, self.bg_color))  # add menu caption as text line
-        for elem in self.option_elements:
-            self.add_element(elem)
-        self.selected = None  # if no options - selected remains None
-        self.selected_index = 0
-        if len(self.options) > 0:
-            self.selected = self.options[0]  # set selection to first option
-            self.selected_index = 0
-        self.state = 'working'  # set menu state to working
-        self.prev_window = prev_window  # previous window
-        self.console = tdl.Console(self.width, self.height)
-
-    def draw(self):
-        """ Drawing method """
-        i = 0
-        for element in self.elements:  # blit every element to console
-            if element in self.option_elements:  # process option_elements separately - they may need to be highlighted
-                if i == self.selected_index and self.selected:  # highlight selected element
-                    element.bgcolor = self.highlight_color
-                else:  # if not highligted - set background color to color of menu caption
-                    element.bgcolor = self.bg_color
-                self.console.blit(element.draw(), element.x, element.y)
-                i += 1
-            else:
-                self.console.blit(element.draw(), element.x, element.y)
-        return self.console
-
-    def handle_input(self):
-        """ Input handling method """
-        events = player_input.get_raw_input()  # get a raw input from player
-        if events:
-            for event in events:
-                if event.type == 'KEYDOWN':
-                    if event.key == 'ESCAPE':
-                        self.state = 'cancelled'
-                        self.win_mgr.close_window(self)
-                    if event.key == 'ENTER':  # if player hits Enter
-                        if self.selected:
-                            self.state = 'finished'
-                            self.win_mgr.close_window(self)
-                        else:  # if no options - cancel selection
-                            self.state = 'cancelled'
-                            self.win_mgr.close_window(self)
-                    elif event.key == 'UP' or event.key == 'KP8':  # selection movement
-                        if self.selected_index > 0:  # if up - select previous option
-                            self.selected_index -= 1
-                            self.selected = self.options[self.selected_index]
-                        else:  # if attempted to scroll up at top - jump to bottom
-                            self.selected_index = len(self.options) - 1
-                            self.selected = self.options[self.selected_index]
-                    elif event.key == 'DOWN' or event.key == 'KP2':
-                        if self.selected_index < len(self.options) - 1:  # if down - select next option
-                            self.selected_index += 1
-                            self.selected = self.options[self.selected_index]
-                        else:  # if attempted to scroll down at bottom - jump to top
-                            self.selected_index = 0
-                            self.selected = self.options[self.selected_index]
-                    elif event.key == 'CHAR':
-                        # convert the ASCII code to an index; if it corresponds to an option, return it
-                        if not self.keys:
-                            index = ord(event.keychar) - ord('a')
-                        else:
-                            try:
-                                index = self.keys.index(event.keychar)
-                            except ValueError:  # if no such key in list - nothing selected
-                                index = -1
-                        if 0 <= index < len(self.options):
-                            self.selected = self.options[index]
-                            self.selected_index = index
-                            self.state = 'finished'
-                            self.win_mgr.close_window(self)
-            return True
-        else:
-            return False
+        self.add_element(ElementBorder(owner=self, x=0, y=0, width=self.width, height=self.height, z=-1,
+                                       pattern='double_line', borders='tblr', color=self.text_color,
+                                       bgcolor=self.bg_color))  # add border
+        self.add_element(ElementTextLine(owner=self, x=1, y=1, line=caption,
+                                         color=self.text_color, bgcolor=self.bg_color))  # add menu caption as text line
 
 
 class WindowManager:
@@ -1371,9 +1186,10 @@ def show_menu_list(win_mgr, caption, options, keys=None, x_offset=0, y_offset=0,
         return menu.opts.selected, menu.opts.selected_index
 
 
-def show_menu_inventory(win_mgr, options, caption, x_offset=0, y_offset=0, z=1, prev_window=None):
+def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0, z=1, prev_window=None):
     """ A function to show an inventory menu, and return result """
-    menu = WindowInventoryMenu(options, caption, x_offset, y_offset, z, True, prev_window)  # create a list menu
+    menu = WindowInventoryMenu(caption=caption, options=options, keys=keys, x=x_offset, y=y_offset,
+                               prev_window=prev_window)  # create inventory menu
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager
@@ -1384,4 +1200,4 @@ def show_menu_inventory(win_mgr, options, caption, x_offset=0, y_offset=0, z=1, 
     if menu.state == 'cancelled':  # if menu cancelled return false
         return False
     if menu.state == 'finished':  # if option selected - return it
-        return menu.selected, menu.selected_index
+        return menu.opts.selected, menu.opts.selected_index

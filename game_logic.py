@@ -908,6 +908,10 @@ class ItemCharges(Item):
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
         self.charges = charges  # number of uses
 
+    def __str__(self):
+        """ Method returns string representation of ItemCharges - it's name with charges """
+        return self.name + '[' + str(self.charges) + ']'
+
     def use(self, target):
         """ Overrides the use() method, to manage charges and item destruction """
         if self.charges > 0:  # if there are remaining charges
@@ -948,6 +952,10 @@ class ItemRangedWeapon(Item):
         else:
             self.ammo = []
         self.ammo_max = ammo_max  # maximum ammo ammount
+
+    def __str__(self):
+        """ Method returns string representation of ItemRangedWeapon - it's name with number of ammo loaded """
+        return self.name + '[' + str(len(self.ammo)) + ']'
 
 
 class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity):
