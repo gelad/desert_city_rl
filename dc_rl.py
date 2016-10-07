@@ -4,11 +4,12 @@ import game_logic
 import events
 import dataset
 
-import dill
+import pickle
 
 import os
 import time
 import gc
+import zlib
 
 # TODO: load settings from file
 SCREEN_WIDTH = 80
@@ -18,23 +19,27 @@ MAP_HEIGHT = 50
 
 
 # =========================== global functions, save/load, loop, etc =================================
-# TODO: move save/load functions to Game class?
 def save_game(game):
     """ Game saving function """
     gc.collect()  # run garbage collect - remove weakref object without references and so on
     # save game object instance, and observers
-    dill.dump((game, events.Observer._observers), open('savegame', 'wb'))
+    uncompressed = pickle.dumps(game)
+    compressed = zlib.compress(uncompressed)
+    open('savegame', 'wb').write(compressed)
 
 
 def load_game():
     """ Game loading function """
     try:
         # load game object instance, and observers
-        loaded_game, events.Observer._observers = dill.load(open('savegame', 'rb'))
+        compressed = open('savegame', 'rb').read()
+        uncompressed = zlib.decompress(compressed)
+        loaded_game = pickle.loads(uncompressed)
+        loaded_game.locations_reobserve()
         if loaded_game.state == 'exit':
             print('Saved game state was exit, changed to playing')  # debug output
             loaded_game.state = 'playing'
-        return loaded_game, events.Observer._observers
+        return loaded_game
     except FileNotFoundError:
         return False
 
@@ -95,13 +100,12 @@ if loaded:
     main_menu_options.append('Continue')
 main_menu_options.append('New Game')
 main_menu_options.append('Exit')
-main_menu_choice = ui.show_menu_list(win_mgr=graphics.win_mgr, caption='Welcome to Desert City!',
+main_menu_choice = ui.show_menu_list(win_mgr=graphics.win_mgr, caption='Welcome to ancient city of Neth-Nikakh!',
                                      options=main_menu_options)
 if not main_menu_choice:
     exit()
 if main_menu_choice[0] == 'Continue':
-    game = loaded[0]  # load saved game
-    events.Observer._observers = loaded[1]
+    game = loaded  # load saved game
 elif main_menu_choice[0] == 'New Game':
     class_choice = ui.show_menu_text(win_mgr=graphics.win_mgr, caption='Choose your character background:',
                                      options=['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
@@ -110,7 +114,7 @@ elif main_menu_choice[0] == 'New Game':
                                             ' glory or something else. You are among the others - jack of all trades,' +
                                             ' master of nothing.'
                                             ,
-                                            'Mighty warriors visit the City to prove their strength by fighting' +
+                                            'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
                                             ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
                                             'such warrior, proficient in melee combat and wearing a set of armor.'
                                             ,
@@ -119,10 +123,11 @@ elif main_menu_choice[0] == 'New Game':
                                             ' and shooting skills - you headed south, to obtain treasures of mysterious'
                                             + ' City.'
                                             ,
-                                            'A talent to use magic is rare among the people of >>INSERT WORLD ' +
-                                            'NAME HERE<<. You lack one, but unlike others, you desperately crave ' +
-                                            'for magic. One man told you a rumor, that in the sands lies a magic City' +
-                                            ', where among the other wonders, ordinary people can become powerful ' +
+                                            'A talent to use magic is rare among the people of Vaerthol. ' +
+                                            'You lack one, but unlike others, you desperately crave ' +
+                                            'for magic. One man told you a rumor, that in the sands lies a magic city' +
+                                            ' of Neth-Nikakh, where among the other wonders, ordinary people can' +
+                                            ' become powerful ' +
                                             'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
                                             ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
                                             ' magic gift.'])

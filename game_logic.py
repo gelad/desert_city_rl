@@ -357,13 +357,17 @@ class Inventory(Entity):
                     if i.name == item.name:  # add a charge number to existing stack
                         i.charges += item.charges
                         if item.location:  # if it's placed somewhere in location
-                            item.location.remove_entity(item)
+                            item.location.cells[item.position[0]][item.position[1]].entities.remove(item)
+                            item.location = None
+                            item.position = None
                         return
         self.inventory.append(item)  # add item to inventory
         item.owner = self  # set item's owner
         item.abilities_set_owner(self)  # if it has abilities - set their owner
         if item.location:  # if it's placed somewhere in location
-            item.location.remove_entity(item)
+            item.location.cells[item.position[0]][item.position[1]].entities.remove(item)
+            item.location = None
+            item.position = None
 
     def drop_item(self, item):
         """ Item dropping method (in a location) """
@@ -1309,7 +1313,7 @@ class Location:
         self.width = width  # width of location in tiles
         self.cells = []  # list of Cell objects
         self.action_mgr = actions.ActionMgr()  # action manager for this location
-        # self.entities = []  # a list of Entities
+        self.entities = []  # a list of Entities
         self.seers = []  # a list of Seer objects, to recompute their FOV if map changes
         self.actors = []  # a list of Actor objects
         self.dead = []  # list of dead BattleEntities to be removed
@@ -1323,22 +1327,42 @@ class Location:
             return True
         return False
 
+    def entities_reobserve(self):
+        """ Register all entities observers - i.e. when game loads """
+        for ent in self.entities:
+            self.reobserve_entity(ent)
+
+    def reobserve_entity(self, entity):
+        """ Register entity's observers if needed """
+        if entity in self.entities:
+            try:  # if entity has AI component - register event observer
+                ai = entity.ai
+                ai.reobserve()
+            except AttributeError:
+                pass
+            if isinstance(entity, Abilities):  # if entity has abilities - register them as event observers
+                for ability in entity.abilities:
+                    ability.reobserve()
+        else:
+            raise Exception('Tried to reobserve entity not from this loc.')
+
+    # TODO: make separate methods to reg entity in loc and place it. Refactor this, to avoid problems.
     def place_entity(self, entity, x, y):
         """ Method that places given entity on the location (and loads a new one from data, if needed) """
         if self.is_in_boundaries(x, y):  # validate coordinates
             if isinstance(entity, str):  # if entity is not an Entity object, but a string - load from data
                 entity = dataset.get_entity(entity)
-                try:  # if entity has AI component - register event observer
-                    ai = entity.ai
-                    ai.reobserve()
-                except AttributeError:
-                    pass
-                if isinstance(entity, Abilities):  # if entity has abilities - register them as event observers
-                    for ability in entity.abilities:
-                        ability.reobserve()
+                self.entities.append(entity)
+                self.reobserve_entity(entity)
+            else:
+                self.entities.append(entity)
             self.cells[x][y].entities.append(entity)  # add entity to Cell list
             entity.position = (x, y)  # update entity position
             entity.location = self  # update entity location
+            if isinstance(entity, Inventory):  # check if entity has inventory
+                for item in entity.inventory:  # reobserve every item and add to entities list
+                    self.entities.append(item)
+                    self.reobserve_entity(item)
             if isinstance(entity, Seer):  # check if entity is a Seer
                 entity.compute_fov()  # recompute it's FOV
                 self.seers.append(entity)  # add it to Seers list
@@ -1367,6 +1391,14 @@ class Location:
             for action in entity.actions:  # remove actions from ActMgr
                 self.action_mgr.remove_action(action)
             self.actors.remove(entity)  # remove from actors list
+        if isinstance(entity, Abilities):  # check if entity has abilities
+            for abil in entity.abilities:  # remove them from observers
+                abil.close()
+        try:  # if entity has AI component - remove it from observers
+            ai = entity.ai
+            ai.close()
+        except AttributeError:
+            pass
         if entity.blocks_los:  # if removed entity blocked los, recompute fov for adjacent Seers
             for seer in self.seers:
                 if hypot(entity.position[0] - seer.position[0],
@@ -1376,6 +1408,7 @@ class Location:
             self.path_map_update(entity.position[0], entity.position[1])  # update path map
         entity.position = None
         entity.location = None
+        self.entities.remove(entity)  # remove from entities list
         del entity
 
     def reap(self):
@@ -1460,6 +1493,11 @@ class Game:
         self.time_system.unregister_act_mgr(location.action_mgr)  # unregister act manager to time system
         self.locations.remove(location)
         del location
+
+    def locations_reobserve(self):
+        """ Method to register observer for all locations """
+        for loc in self.locations:
+            loc.entities_reobserve()
 
     @staticmethod
     def add_message(message, level, color):

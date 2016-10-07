@@ -51,6 +51,8 @@ class ActionMgr:
     def remove_action(self, action):
         """ Method removes an action """
         self.actions.remove(action)
+        # TODO: delete actions
+        # del action
 
     def pass_ticks(self, ticks=1):
         """ Method that increments tick count on actions, and makes them fire if ready """
