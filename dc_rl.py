@@ -100,8 +100,9 @@ if main_menu_choice[0] == 'Continue':
     game = loaded[0]  # load saved game
     events.Observer._observers = loaded[1]
 elif main_menu_choice[0] == 'New Game':
-    class_choice = ui.show_menu_list(graphics.win_mgr, 'Choose your character background:',
-                                     ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'])
+    class_choice = ui.show_menu_list(win_mgr=graphics.win_mgr, caption='Choose your character background:',
+                                     options=['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
+                                     keys='alphabet')
     game = game_logic.Game()  # start a new game
     # TODO: need to make some templates for different starting classes (in dataset?)
     if not class_choice:  # if nothing selected (esc hit)
