@@ -36,10 +36,10 @@ def generate_loc(loc_type, settings, width, height):
                              range(plot_x, plot_x + grid_size)],
                              b_x=build_x, b_y=build_y, b_w=build_w, b_h=build_h, b_type=build_type)
                     floor_cells = []  # empty floor cells for item gen
-                    building = subgen_building('house', grid_size // 2, grid_size // 2,
+                    building = subgen_building('house', build_w, build_h,
                                                {'destruct': random.randint(1, 8)})
-                    for x in range(grid_size // 2):
-                        for y in range(grid_size // 2):
+                    for x in range(build_w):
+                        for y in range(build_h):
                             loc_cell_x = x + build_x + plot_x * 20
                             loc_cell_y = y + build_y + plot_y * 20
                             loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
