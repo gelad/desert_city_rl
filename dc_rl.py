@@ -142,6 +142,7 @@ elif main_menu_choice[0] == 'New Game':
         game.player.add_item(game.current_loc.place_entity('item_firebolt_scroll', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_antidote_potion', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
     elif class_choice[0] == 'Warrior':
         game.player.add_item(game.current_loc.place_entity('item_sabre', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_mail_armor', 10, 10))
@@ -149,6 +150,8 @@ elif main_menu_choice[0] == 'New Game':
         game.player.add_item(game.current_loc.place_entity('item_antidote_potion', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
     elif class_choice[0] == 'Gantra mercenary':
+        game.player.add_item(game.current_loc.place_entity('item_leather_armor', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_leather_cap', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_hunting_crossbow', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_bronze_bolt', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_dagger', 10, 10))
@@ -158,6 +161,7 @@ elif main_menu_choice[0] == 'New Game':
         game.player.add_item(game.current_loc.place_entity('item_dagger', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_firebolt_scroll', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_frostbolt_scroll', 10, 10))
+        game.player.add_item(game.current_loc.place_entity('item_lightning_scroll', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_antidote_potion', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_healing_potion', 10, 10))
         game.player.add_item(game.current_loc.place_entity('item_haste_potion', 10, 10))

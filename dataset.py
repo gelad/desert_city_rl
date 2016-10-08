@@ -201,12 +201,6 @@ def initialize():
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     data_set['item_healing_potion'].effects.append(effects.Effect('HEAL', 5))
 
-    data_set['item_sabre'] = game_logic.Item(name='sabre', data_id='item_sabre',
-                                             description='A sharp sabre with pointy tip.',
-                                             categories={'weapon', 'sword'},
-                                             properties={'slashing': (4, 6), 'attack_speed_mod': 1},
-                                             char='/', color=[200, 200, 255], weight=2)
-
     data_set['item_barbed_loincloth'] = game_logic.Item(name='barbed loincloth', data_id='item_barbed_loincloth',
                                                         description='It is covered in spikes. Ouch!',
                                                         categories={'armor', 'waist'}, char='~', color=[200, 0, 100],
@@ -218,15 +212,45 @@ def initialize():
                              message_color=[200, 0, 100])
     data_set['item_barbed_loincloth'].add_ability(abil)
 
+    data_set['item_ring_poison_res'] = game_logic.Item(name='ring of poison resistance', data_id='item_ring_poison_res',
+                                                       description='Ring that grants protection from poison.',
+                                                       categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                       char='˚', color=[0, 100, 0],
+                                                       weight=0.1)
+    data_set['item_ring_poison_res'].effects.append(effects.Effect('RESIST_POISON', 100))
+
+    data_set['item_ring_fire_res'] = game_logic.Item(name='ring of fire resistance', data_id='item_ring_fire_res',
+                                                     description='Ring that grants protection from fire.',
+                                                     categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                     char='˚', color=[180, 0, 0],
+                                                     weight=0.1)
+    data_set['item_ring_fire_res'].effects.append(effects.Effect('RESIST_FIRE', 100))
+
+    data_set['item_ring_cold_res'] = game_logic.Item(name='ring of cold resistance', data_id='item_ring_cold_res',
+                                                     description='Ring that grants protection from cold.',
+                                                     categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                     char='˚', color=[0, 0, 150],
+                                                     weight=0.1)
+    data_set['item_ring_cold_res'].effects.append(effects.Effect('RESIST_COLD', 100))
+
+    data_set['item_ring_lightning_res'] = game_logic.Item(name='ring of lightning resistance',
+                                                          data_id='item_ring_lightning_res',
+                                                          description='Ring that grants protection from lightning.',
+                                                          categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                          char='˚', color=[255, 255, 0],
+                                                          weight=0.1)
+    data_set['item_ring_lightning_res'].effects.append(effects.Effect('RESIST_LIGHTNING', 100))
+
+    # set of iron armor=====================================================
     data_set['item_misurka'] = game_logic.Item(name='misurka', data_id='item_misurka',
                                                description='A light iron helmet with spike on top.',
                                                categories={'armor'},
                                                properties={'armor_bashing': 100, 'armor_slashing': 80,
                                                            'armor_piercing': 60},
-                                               char=']', color=[50, 50, 200], equip_slots={'HEAD'}, weight=1)
+                                               char='ˀ', color=[50, 50, 200], equip_slots={'HEAD'}, weight=1)
 
     data_set['item_mail_armor'] = game_logic.Item(name='mail armor', data_id='item_mail_armor',
-                                                  description='A light armor made of overlapping layers of metal rings.',
+                                                  description='An armor made of overlapping layers of metal rings.',
                                                   categories={'armor'},
                                                   properties={'armor_bashing': 60, 'armor_slashing': 120,
                                                               'armor_piercing': 60},
@@ -260,6 +284,61 @@ def initialize():
                                                      properties={'armor_bashing': 60, 'armor_slashing': 120,
                                                                  'armor_piercing': 60},
                                                      char=']', color=[50, 50, 200], equip_slots={'LEGS'}, weight=4)
+    # set of leather armor =========================================================
+    data_set['item_leather_cap'] = game_logic.Item(name='leather cap', data_id='item_leather_cap',
+                                                   description='A leather cap offers light protection.',
+                                                   categories={'armor'},
+                                                   properties={'armor_bashing': 50, 'armor_slashing': 50,
+                                                               'armor_piercing': 40},
+                                                   char='ˀ', color=[160, 82, 45], equip_slots={'HEAD'}, weight=0.5)
+
+    data_set['item_leather_armor'] = game_logic.Item(name='leather armor', data_id='item_leather_armor',
+                                                     description='A light armor made of leather.',
+                                                     categories={'armor'},
+                                                     properties={'armor_bashing': 50, 'armor_slashing': 50,
+                                                                 'armor_piercing': 40},
+                                                     char=']', color=[160, 82, 45], equip_slots={'BODY'}, weight=3)
+
+    data_set['item_leather_pauldrons'] = game_logic.Item(name='leather pauldrons', data_id='item_leather_pauldrons',
+                                                         description='A pair of leather pauldrons.',
+                                                         categories={'armor'},
+                                                         properties={'armor_bashing': 50, 'armor_slashing': 50,
+                                                                     'armor_piercing': 40},
+                                                         char=']', color=[160, 82, 45], equip_slots={'SHOULDERS'},
+                                                         weight=1.5)
+
+    data_set['item_leather_boots'] = game_logic.Item(name='leather boots', data_id='item_leather_boots',
+                                                     description='A pair of leather boots.',
+                                                     categories={'armor'},
+                                                     properties={'armor_bashing': 50, 'armor_slashing': 50,
+                                                                 'armor_piercing': 40},
+                                                     char=']', color=[160, 82, 45], equip_slots={'FEET'}, weight=2.5)
+
+    data_set['item_leather_armguards'] = game_logic.Item(name='leather armguards', data_id='item_leather_armguards',
+                                                         description='A pair of leather armguards.',
+                                                         categories={'armor'},
+                                                         properties={'armor_bashing': 50, 'armor_slashing': 50,
+                                                                     'armor_piercing': 40},
+                                                         char=']', color=[160, 82, 45], equip_slots={'ARMS'}, weight=1)
+
+    data_set['item_leather_leggings'] = game_logic.Item(name='leather leggings', data_id='item_leather_leggings',
+                                                        description='A pair of leather leggings.',
+                                                        categories={'armor'},
+                                                        properties={'armor_bashing': 50, 'armor_slashing': 50,
+                                                                    'armor_piercing': 40},
+                                                        char=']', color=[160, 82, 45], equip_slots={'LEGS'}, weight=2)
+    # WEAPONS
+    data_set['item_sabre'] = game_logic.Item(name='sabre', data_id='item_sabre',
+                                             description='A sharp sabre with pointy tip.',
+                                             categories={'weapon', 'sword'},
+                                             properties={'slashing': (4, 6), 'attack_speed_mod': 1},
+                                             char='/', color=[200, 200, 255], weight=2)
+
+    data_set['item_longsword'] = game_logic.Item(name='longsword', data_id='item_longsword',
+                                                 description='A double-edged straight sword.',
+                                                 categories={'weapon', 'sword'},
+                                                 properties={'slashing': (5, 9), 'attack_speed_mod': 1.2},
+                                                 char='/', color=[150, 150, 255], weight=4)
 
     data_set['item_dagger'] = game_logic.Item(name='dagger', data_id='item_dagger',
                                               description='A dagger about 20cm long.',
@@ -267,10 +346,22 @@ def initialize():
                                               properties={'piercing': (1, 4), 'attack_speed_mod': 0.75},
                                               char=',', color=[200, 200, 255], weight=0.5)
 
+    data_set['item_assegai'] = game_logic.Item(name='assegai', data_id='item_assegai',
+                                               description='Short spear, used for melee combat.',
+                                               categories={'weapon', 'spear'},
+                                               properties={'piercing': (2, 8), 'attack_speed_mod': 1},
+                                               char=chr(92), color=[128, 0, 0], weight=4)
+
+    data_set['item_mace'] = game_logic.Item(name='mace', data_id='item_mace',
+                                            description='A short club with iron head.',
+                                            categories={'weapon', 'blunt'},
+                                            properties={'bashing': (3, 5), 'attack_speed_mod': 1},
+                                            char='/', color=[128, 0, 0], weight=3)
+
     data_set['item_bronze_maul'] = game_logic.Item(name='bronze maul', data_id='item_bronze_maul',
                                                    description='A huge bronze sphere ot top of wooden pole.',
                                                    categories={'weapon', 'blunt'},
-                                                   properties={'bashing': (8, 12), 'attack_speed_mod': 1.5},
+                                                   properties={'bashing': (8, 12), 'attack_speed_mod': 1.8},
                                                    char='/', color=[80, 50, 20], weight=10)
 
     data_set['item_wall_smasher'] = game_logic.Item(name='wall smasher', data_id='item_wall_smasher',
@@ -321,7 +412,7 @@ def initialize():
                                                     description='A simple bronze tipped arrow, coated in weak poison.',
                                                                   categories={'arrow', 'stackable'},
                                                                   properties={'piercing': (1, 3), 'break_chance': 0.5},
-                                                                  char='=', color=[128, 150, 20],
+                                                                  char='=', color=[0, 150, 0],
                                                                   charges=3, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_periodic_damage', 'target': 'attacked_entity', 'damage': (0, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 5000,
