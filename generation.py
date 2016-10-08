@@ -144,7 +144,12 @@ def subgen_building(building, build_w, build_h, settings=None):
         for y in range(0, build_h):  # draw vertical walls
             pattern[0][y] = 'wall'
             pattern[-1][y] = 'wall'
-        for n in range(1, 8): # make windows
+        for i in range(random.randrange(10)):  # make some walls inside
+            x = random.randrange(build_w)
+            y = random.randrange(build_h)
+            if pattern[x][y] == 'floor':
+                pattern[x][y] = 'wall'
+        for n in range(1, 8):  # make windows
             x = random.randrange(1, build_w - 1)
             y = random.randrange(1, build_h - 1)
             direction = random.randint(1, 4)
