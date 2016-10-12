@@ -194,6 +194,9 @@ class Ability(events.Observer):
                 # register launch projectile action
                 self.owner.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
                                                                self.owner, target, self.message_color)
+        if reaction['type'] == 'heal':  # healing reaction
+            if reaction['target'] == 'item_owner':  # if target is item owner
+                self.owner.heal(reaction['heal'], self.owner)
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,

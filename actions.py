@@ -51,8 +51,7 @@ class ActionMgr:
     def remove_action(self, action):
         """ Method removes an action """
         self.actions.remove(action)
-        # TODO: delete actions
-        # del action
+        del action
 
     def pass_ticks(self, ticks=1):
         """ Method that increments tick count on actions, and makes them fire if ready """
@@ -248,12 +247,11 @@ def act_relocate(action, register_call, actor, x, y):
 
 
 def act_attack_melee_weapons(action, register_call, actor, target):
-    """ Actor melee attack with all equipped weapons """
+    """ Actor melee attack with all equipped weapons or if anything in hands - with it """
     if register_call:  # part executed when function is registered in ActionMgr
         spd = 0
         w_num = 0  # weapons number equipped
         weapons = []
-        # TODO: make attack with non-weapons equipped in hands
         for item in actor.equipment.values():  # check if any weapons equipped
             if item:
                 if 'weapon' in item.categories:  # correct speed if weapon(s)
@@ -418,7 +416,6 @@ def act_use_item(action, register_call, actor, item, target):
             if action.data['use_offset'] < 1:  # if no withdrawal (use_offset = 1) then no withdrawal action
                 withdrawal = action.data['use_time'] * (1 - action.data['use_offset'])
                 actor.perform(act_withdrawal, actor, withdrawal)
-
 
 
 def act_equip_item(action, register_call, actor, item, slot):

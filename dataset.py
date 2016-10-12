@@ -199,7 +199,12 @@ def initialize():
                                                              properties={'usable': 'self'},
                                                              char='!', color=[255, 0, 0],
                                                              charges=1, destroyed_after_use=True, weight=0.2)
-    data_set['item_healing_potion'].effects.append(effects.Effect('HEAL', 5))
+    cond = abilities.Condition('USED')
+    react = {'type': 'heal', 'target': 'item_owner', 'heal': 5}
+    abil = abilities.Ability(name='Haste', owner=data_set['item_healing_potion'],
+                             trigger='used_on_self', conditions=[cond], reactions=[react],
+                             message_color=[0, 255, 0])
+    data_set['item_healing_potion'].add_ability(abil)
 
     data_set['item_barbed_loincloth'] = game_logic.Item(name='barbed loincloth', data_id='item_barbed_loincloth',
                                                         description='It is covered in spikes. Ouch!',

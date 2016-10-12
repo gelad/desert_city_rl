@@ -135,8 +135,8 @@ class BattleEntity(Entity):
     """
 
     def __init__(self, hp, armor=None, resist=None, dead=False, corpse=''):
-        self.hp = hp  # current hitpoints
-        self.base_maxhp = hp  # maximum hitpoints
+        self._hp = hp  # current hitpoints
+        self._maxhp = hp  # maximum hitpoints
         self.corpse = corpse  # corpse entity, generated when BE dies. If empty - generic corpse is generated.
         if armor:  # physical armor
             self.armor = armor
@@ -152,7 +152,21 @@ class BattleEntity(Entity):
     @property
     def maxhp(self):
         """ Maximum hp getter (with effects) """
-        return self.base_maxhp
+        return self._maxhp
+
+    @property
+    def hp(self):
+        """ Current hp getter """
+        return self._hp
+
+    @hp.setter
+    def hp(self, value):
+        """ Current hp setter """
+        result_hp = value
+        if result_hp > self.maxhp:  # if hp raised higher than max - lower it to max
+            self._hp = self.maxhp
+        else:
+            self._hp = result_hp
 
     def take_damage(self, damage, dmg_type='pure', attacker=None):
         """ This method should be called if entity is damaged
@@ -196,6 +210,27 @@ class BattleEntity(Entity):
             return target.take_damage(damage=damage, dmg_type=dmg_type, attacker=self)  # inflict that damage to target
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
+
+    def heal(self, heal, healer=None):
+        """ This method should be called if entity is healed  """
+        try:  # if heal is (min, max) tuple
+            random.seed()
+            min_heal = heal[0]
+            max_heal = heal[1]
+            heal = random.randint(min_heal, max_heal)
+        except TypeError:
+            pass
+        hp_before = self.hp  # remember hp before heal to calculate actual healed ammount
+        self.hp += heal  # add hp
+        healed_hp = self.hp - hp_before
+        msg = self.name + ' is healed for ' + str(healed_hp) + ' HP.'
+        Game.add_message(msg, 'PLAYER', [0, 255, 0])
+        # fire an Entity event
+        events.Event(self, {'type': 'healed', 'healer': healer, 'heal': healed_hp})
+        # fire location event
+        events.Event('location', {'type': 'entity_healed', 'healer': healer,
+                                  'target': self, 'heal': healed_hp})
+        return healed_hp
 
     def get_protection(self, dmg_type):
         """ Method to get protection (both armor and block) to specific damage type """
@@ -389,7 +424,6 @@ class Inventory(Entity):
             events.Event(self, {'type': 'used_on_self', 'item': item})  # fire an event
         else:
             events.Event(self, {'type': 'used_on_target', 'item': item, 'target': target})  # fire an event
-        item.use(target)
 
 
 class Equipment(Entity):
@@ -886,18 +920,6 @@ class Item(Abilities, Entity):
             self.equip_slots = dict.fromkeys(['RIGHT_HAND', 'LEFT_HAND'])
         Abilities.__init__(self)
 
-    def use(self, target):
-        """ Item using method """
-        for effect in self.effects:
-            if effect.eff == 'HEAL':  # if item has HEAL effect - heal the user
-                result_hp = target.hp + effect.magnitude
-                if result_hp > target.maxhp:
-                    target.hp = target.maxhp
-                else:
-                    target.hp = result_hp
-                msg = self.name + ' heals ' + target.name + ' for ' + str(effect.magnitude) + ' HP.'
-                Game.add_message(msg, 'PLAYER', [0, 255, 0])
-
 
 class ItemCharges(Item):
     """
@@ -919,7 +941,6 @@ class ItemCharges(Item):
     def use(self, target):
         """ Overrides the use() method, to manage charges and item destruction """
         if self.charges > 0:  # if there are remaining charges
-            super(ItemCharges, self).use(target)  # call parent method
             self.charges -= 1  # use 1 charge
         else:
             msg = self.name + ' is depleted!'
@@ -1091,7 +1112,6 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.reobserve()
-            # TODO: make shots with abilities (copy them from ammo to shot object?)
             shot.abilities = ammo.abilities
             for abil in shot.abilities:  # set observers for copied projectile
                 abil.owner = shot
