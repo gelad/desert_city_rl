@@ -37,5 +37,5 @@ class Effect:
         elif eff == 'INCREASE_RANGED_DAMAGE': self.description = 'Increases ranged damage by ' + str(magnitude)
         elif eff == 'HASTE': self.description = 'Quickens all actions by ' + str(magnitude) + '%'
         elif eff == 'POISONED': self.description = 'Affected by poison'
-        elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints'  # TODO: move healing to abilities
+        elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints'
         else: self.description = eff  # if no description - simply set description to effect name
