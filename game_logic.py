@@ -391,17 +391,15 @@ class Inventory(Entity):
                 for i in self.inventory:
                     if i.name == item.name:  # add a charge number to existing stack
                         i.charges += item.charges
-                        if item.location:  # if it's placed somewhere in location
+                        if item.position:  # if it's placed somewhere in location
                             item.location.cells[item.position[0]][item.position[1]].entities.remove(item)
-                            item.location = None
                             item.position = None
                         return
         self.inventory.append(item)  # add item to inventory
         item.owner = self  # set item's owner
         item.abilities_set_owner(self)  # if it has abilities - set their owner
-        if item.location:  # if it's placed somewhere in location
+        if item.position:  # if it's placed somewhere in location
             item.location.cells[item.position[0]][item.position[1]].entities.remove(item)
-            item.location = None
             item.position = None
 
     def drop_item(self, item):
@@ -1333,7 +1331,7 @@ class Location:
         self.width = width  # width of location in tiles
         self.cells = []  # list of Cell objects
         self.action_mgr = actions.ActionMgr()  # action manager for this location
-        self.entities = []  # a list of Entities
+        self.entities = set()  # a set of Entities
         self.seers = []  # a list of Seer objects, to recompute their FOV if map changes
         self.actors = []  # a list of Actor objects
         self.dead = []  # list of dead BattleEntities to be removed
@@ -1366,28 +1364,33 @@ class Location:
         else:
             raise Exception('Tried to reobserve entity not from this loc.')
 
-    # TODO: make separate methods to reg entity in loc and place it. Refactor this, to avoid problems.
+    def reg_entity(self, entity):
+        """ Method that registers entity to location (and loads a new one from data, if needed) """
+        if entity not in self.entities:
+            if isinstance(entity, str):  # if entity is not an Entity object, but a string - load from data
+                entity = dataset.get_entity(entity)
+                self.entities.add(entity)
+                self.reobserve_entity(entity)
+            else:
+                self.entities.add(entity)
+            entity.location = self  # update entity location
+            if isinstance(entity, Actor):  # check if entity is an Actor
+                self.actors.append(entity)  # add it to Actors list
+            if isinstance(entity, Inventory):  # check if entity has inventory
+                for item in entity.inventory:  # register every item
+                    self.reg_entity(item)
+            events.Event('location', {'type': 'entity_registered', 'entity': entity})  # fire an event
+        return entity
+
     def place_entity(self, entity, x, y):
         """ Method that places given entity on the location (and loads a new one from data, if needed) """
         if self.is_in_boundaries(x, y):  # validate coordinates
-            if isinstance(entity, str):  # if entity is not an Entity object, but a string - load from data
-                entity = dataset.get_entity(entity)
-                self.entities.append(entity)
-                self.reobserve_entity(entity)
-            else:
-                self.entities.append(entity)
+            entity = self.reg_entity(entity)  # register entity before placing
             self.cells[x][y].entities.append(entity)  # add entity to Cell list
             entity.position = (x, y)  # update entity position
-            entity.location = self  # update entity location
-            if isinstance(entity, Inventory):  # check if entity has inventory
-                for item in entity.inventory:  # reobserve every item and add to entities list
-                    self.entities.append(item)
-                    self.reobserve_entity(item)
             if isinstance(entity, Seer):  # check if entity is a Seer
                 entity.compute_fov()  # recompute it's FOV
                 self.seers.append(entity)  # add it to Seers list
-            if isinstance(entity, Actor):  # check if entity is an Actor
-                self.actors.append(entity)  # add it to Actors list
             if entity.blocks_los:  # if placed entity blocks los, recompute fov for adjacent Seers
                 for seer in self.seers:
                     if hypot(entity.position[0] - seer.position[0],
@@ -1428,7 +1431,7 @@ class Location:
             self.path_map_update(entity.position[0], entity.position[1])  # update path map
         entity.position = None
         entity.location = None
-        self.entities.remove(entity)  # remove from entities list
+        self.entities.remove(entity)  # remove from entities set
         del entity
 
     def reap(self):
