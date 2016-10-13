@@ -375,6 +375,11 @@ class Abilities(Entity):
         for ability in self.abilities:
             ability.set_owner(owner)
 
+    def abilities_reobserve(self):
+        """ A method that reobserves abilities """
+        for abil in self.abilities:
+            abil.reobserve()
+
 
 class Inventory(Entity):
     """
@@ -1056,13 +1061,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             ammo = weapon.ammo[0]
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
             shot = UnguidedShot(shooter=self, weapon=weapon, ammo=ammo, speed=shot_speed, target=(tx, ty))
-            self.location.place_entity(shot, self.position[0], self.position[1])
-            shot.ai.reobserve()
-            shot.abilities = ammo.abilities
-            for abil in shot.abilities:  # set observers for copied projectile
-                abil.owner = shot
-                abil.reobserve()
-            shot.ai.enroute()
+            self.location.reg_entity(shot)  # register shot entity to location
+            shot.launch(self.position[0], self.position[1])
         else:
             if range_to_target > 3:  # if range too small - make miss circle 3 cell wide
                 radius = range_to_target / 2
@@ -1075,13 +1075,9 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             ammo = weapon.ammo[0]  # and shoot it
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
             shot = UnguidedShot(shooter=self, weapon=weapon, ammo=ammo, speed=shot_speed, target=(tx, ty))
-            self.location.place_entity(shot, self.position[0], self.position[1])
-            shot.ai.reobserve()
-            shot.abilities = ammo.abilities
-            for abil in shot.abilities:  # set observers for copied projectile
-                abil.owner = shot
-                abil.reobserve()
-            shot.ai.enroute()
+            # TODO: may need further refactoring - entity reobserves 2 times
+            self.location.reg_entity(shot)  # register shot entity to location
+            shot.launch(self.position[0], self.position[1])
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
@@ -1127,6 +1123,14 @@ class UnguidedProjectile(Actor, Abilities, Entity):
         Abilities.__init__(self)
         Actor.__init__(self, speed=speed, ai=UnguidedProjectileAI(power=power, target=target, owner=self))
 
+    def launch(self, origin_x, origin_y):
+        """ Method that launches a projectile from (origin_x, origin_y) to target """
+        self.location.place_entity(self, origin_x, origin_y)
+        self.ai.reobserve()
+        self.abilities_set_owner(self)  # refresh abilities owner at launch (in case if projectile was loaded or copied)
+        self.abilities_reobserve()  # refresh abilities as observer at launch
+        self.ai.enroute()
+
     def death(self):
         """ Death function """
         self.location.remove_entity(self)
@@ -1144,6 +1148,11 @@ class UnguidedShot(UnguidedProjectile):
         self.ai = UnguidedShotAI(power=weapon.range, target=target, owner=self)
         self.weapon = weapon  # weapon that fired projectile
         self.ammo = ammo  # ammo piece
+
+    def launch(self, origin_x, origin_y):
+        """ Method that launches a projectile from (origin_x, origin_y) to target """
+        self.abilities = self.ammo.abilities  # copy abilities from ammo to projectile
+        super(UnguidedShot, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
 
     def death(self):
         """ Death function """

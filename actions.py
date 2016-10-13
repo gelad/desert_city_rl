@@ -131,11 +131,8 @@ def act_launch_projectile(action, register_call, projectile_type, launcher, targ
             projectile.ai.owner = projectile  # set projectile ai component owner
             projectile.target = target  # set projectile target
             projectile.ai.target = target
-            launcher.location.place_entity(projectile, launcher.position[0], launcher.position[1])
-            projectile.ai.reobserve()
-            for abil in projectile.abilities:  # set observers for copied projectile
-                abil.reobserve()
-            projectile.ai.enroute()
+            launcher.location.reg_entity(projectile)  # register projectile to location
+            projectile.launch(launcher.position[0], launcher.position[1])
             game_logic.Game.add_message(
                 launcher.name + ' launches a ' + projectile.name + '!', 'PLAYER', message_color)
 
