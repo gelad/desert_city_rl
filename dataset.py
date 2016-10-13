@@ -382,7 +382,8 @@ def initialize():
                                                                     categories={'weapon', 'blunt', 'crossbow'},
                                                                     properties={'bashing': (1, 3),
                                                                                 'attack_speed_mod': 1.5,
-                                                                                'accuracy_ranged': 1},
+                                                                                'accuracy_ranged': 1,
+                                                                                'shot_speed': 2},
                                                                     char=')', color=[200, 200, 200], weight=3)
     data_set['item_hunting_crossbow'].effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 4))
 
@@ -393,7 +394,8 @@ def initialize():
                                                              categories={'weapon', 'blunt', 'bow'},
                                                              properties={'bashing': (1, 2),
                                                                          'attack_speed_mod': 1.1,
-                                                                         'accuracy_ranged': 0.9},
+                                                                         'accuracy_ranged': 0.9,
+                                                                         'shot_speed': 3},
                                                              char=')', color=[128, 0, 0], weight=1.5)
     data_set['item_short_bow'].effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 1))
 

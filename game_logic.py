@@ -700,140 +700,6 @@ class AbilityUserAI(AI):
                 self.state = 'idle'
 
 
-class UnguidedShotAI(AI):
-    """ An unguided shot AI """
-
-    def __init__(self, power, target, owner, state='flying'):
-        AI.__init__(self, state, owner)
-        self.route = None
-        self.next = None
-        self.power = power
-        self.target = target
-
-    def on_event_location(self, data):
-        """ Method handling location-related events """
-        if data['type'] == 'entity_moved':  # if something moved
-            if self.owner.position == data['entity'].position:  # on projectile - check for hit
-                self._check_if_hit()
-
-    def enroute(self):
-        """ Method to calculate route """
-        self.route = fov_los_pf.ray(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1],
-                                    self.owner.location.width, self.owner.location.height, self.power)
-        self.next = iter(self.route)
-        self._fly_next()
-
-    def act(self):
-        """ Method called when shot is ready to act """
-        if self.state == 'flying':
-            if not self._check_if_hit():  # if nothing is hit - fly farther
-                self._fly_next()
-
-    def _fly_next(self):
-        """ Method to attempt fly to next cell in route """
-        x = self.owner.position[0]
-        y = self.owner.position[1]
-        try:
-            next_cell = next(self.next)
-        except StopIteration:  # if end of route
-            self._hit((x, y))  # hit ending cell
-            return
-        if self.power <= 0:
-            self._hit((x, y))  # hit last cell
-            return
-        self.owner.perform(actions.act_relocate, self.owner, next_cell[0], next_cell[1])  # if not stopped - fly next
-        self.power -= 1
-
-    def _check_if_hit(self):
-        """ Method that checks current position for acceptable target to hit """
-        x, y = self.owner.position
-        enemy = self.owner.location.cells[x][y].get_occupying_entity()
-        if enemy:
-            if enemy.blocks_shots < 1:  # check if shot pass through (for windows, grates, etc)
-                enemy = weighted_choice([(enemy, enemy.blocks_shots * 100), (None, 100 - enemy.blocks_shots * 100)])
-        if enemy:  # if it finally hits something
-            if isinstance(enemy, BattleEntity):  # if enemy can be damaged
-                dmg = 0
-                dmg_type = 'pure'
-                # UGLY as hell..
-                ammo = self.owner.ammo
-                if 'bashing' in ammo.properties.keys():
-                    dmg = ammo.properties['bashing']
-                    dmg_type = 'bashing'
-                elif 'slashing' in ammo.properties.keys():
-                    dmg = ammo.properties['slashing']
-                    dmg_type = 'slashing'
-                elif 'piercing' in ammo.properties.keys():
-                    dmg = ammo.properties['piercing']
-                    dmg_type = 'piercing'
-                elif 'fire' in ammo.properties.keys():
-                    dmg = ammo.properties['fire']
-                    dmg_type = 'fire'
-                elif 'cold' in ammo.properties.keys():
-                    dmg = ammo.properties['cold']
-                    dmg_type = 'cold'
-                elif 'lightning' in ammo.properties.keys():
-                    dmg = ammo.properties['lightning']
-                    dmg_type = 'lightning'
-                elif 'poison' in ammo.properties.keys():
-                    dmg = ammo.properties['poison']
-                    dmg_type = 'poison'
-                elif 'acid' in ammo.properties.keys():
-                    dmg = ammo.properties['acid']
-                    dmg_type = 'acid'
-                elif 'mental' in ammo.properties.keys():
-                    dmg = ammo.properties['mental']
-                    dmg_type = 'mental'
-                elif 'death' in ammo.properties.keys():
-                    dmg = ammo.properties['death']
-                    dmg_type = 'death'
-                elif 'strange' in ammo.properties.keys():
-                    dmg = ammo.properties['strange']
-                    dmg_type = 'strange'
-                try:  # if damage is (min, max) tuple
-                    random.seed()
-                    min_dmg = dmg[0]
-                    max_dmg = dmg[1]
-                    dmg = random.randint(min_dmg, max_dmg)
-                except TypeError:
-                    pass
-                for ef in self.owner.weapon.effects:
-                    if ef.eff == 'INCREASE_RANGED_DAMAGE':
-                        dmg += ef.magnitude
-                res_dmg = self.owner.shooter.deal_damage(enemy, dmg, dmg_type)
-                Game.add_message(self.owner.name + ' hits ' + enemy.name + ' for ' + str(res_dmg) + ' damage!',
-                                 'PLAYER', [255, 255, 255])
-                self._hit(enemy)
-                return True
-            else:  # if enemy cannot be damaged
-                Game.add_message(self.owner.name + ' hits ' + enemy.name + '.', 'PLAYER', [255, 255, 255])
-                self._hit(enemy)
-                return True
-        return False
-
-    def _hit(self, something):
-        """ Method called when shot hit something """
-        x = self.owner.position[0]
-        y = self.owner.position[1]
-        if isinstance(something, Entity):  # if entity is hit
-            if random.uniform(0, 1) < self.owner.ammo.properties['break_chance']:  # determine if ammo broken
-                ammo_broken = True
-            else:
-                ammo_broken = False
-            if not ammo_broken:
-                if isinstance(something, Inventory):
-                    something.add_item(self.owner.ammo)
-                else:
-                    self.owner.location.place_entity(self.owner.ammo, x, y)
-        else:  # must be a point tuple then
-            self.owner.location.place_entity(self.owner.ammo, x, y)
-        events.Event(self.owner, {'type': 'shot_hit', 'target': something, 'attacker': self.owner.shooter})
-        self.state = 'stopped'
-        self.owner.ammo = None
-        self.owner.dead = True
-        self.owner.location.dead.append(self.owner)  # add to dead list, waiting for removal
-
-
 class UnguidedProjectileAI(AI):
     """ An unguided projectile AI """
     def __init__(self, power, target, owner, state='flying'):
@@ -897,6 +763,84 @@ class UnguidedProjectileAI(AI):
         self.state = 'stopped'
         self.owner.dead = True
         self.owner.location.dead.append(self.owner)  # add to dead list, waiting for removal
+
+
+class UnguidedShotAI(UnguidedProjectileAI):
+    """ An unguided shot AI (based on projectile ai)
+    Differences from base projectile: has some damage (weapon + ammo), contains ammo dropped if not broken
+    """
+
+    def __init__(self, power, target, owner, state='flying'):
+        super(UnguidedShotAI, self).__init__(power=power, target=target, owner=owner, state=state)
+
+    def _hit(self, something):
+        """ Method called when shot hit something """
+        x = self.owner.position[0]
+        y = self.owner.position[1]
+        if isinstance(something, Entity):  # if entity is hit
+            if random.uniform(0, 1) < self.owner.ammo.properties['break_chance']:  # determine if ammo broken
+                ammo_broken = True
+            else:
+                ammo_broken = False
+            if not ammo_broken:
+                if isinstance(something, Inventory):
+                    something.add_item(self.owner.ammo)
+                else:
+                    self.owner.location.place_entity(self.owner.ammo, x, y)
+        else:  # must be a point tuple then
+            self.owner.location.place_entity(self.owner.ammo, x, y)
+        if isinstance(something, BattleEntity):  # if enemy can be damaged
+            dmg = 0
+            dmg_type = 'pure'
+            # UGLY as hell..
+            ammo = self.owner.ammo
+            if 'bashing' in ammo.properties.keys():
+                dmg = ammo.properties['bashing']
+                dmg_type = 'bashing'
+            elif 'slashing' in ammo.properties.keys():
+                dmg = ammo.properties['slashing']
+                dmg_type = 'slashing'
+            elif 'piercing' in ammo.properties.keys():
+                dmg = ammo.properties['piercing']
+                dmg_type = 'piercing'
+            elif 'fire' in ammo.properties.keys():
+                dmg = ammo.properties['fire']
+                dmg_type = 'fire'
+            elif 'cold' in ammo.properties.keys():
+                dmg = ammo.properties['cold']
+                dmg_type = 'cold'
+            elif 'lightning' in ammo.properties.keys():
+                dmg = ammo.properties['lightning']
+                dmg_type = 'lightning'
+            elif 'poison' in ammo.properties.keys():
+                dmg = ammo.properties['poison']
+                dmg_type = 'poison'
+            elif 'acid' in ammo.properties.keys():
+                dmg = ammo.properties['acid']
+                dmg_type = 'acid'
+            elif 'mental' in ammo.properties.keys():
+                dmg = ammo.properties['mental']
+                dmg_type = 'mental'
+            elif 'death' in ammo.properties.keys():
+                dmg = ammo.properties['death']
+                dmg_type = 'death'
+            elif 'strange' in ammo.properties.keys():
+                dmg = ammo.properties['strange']
+                dmg_type = 'strange'
+            try:  # if damage is (min, max) tuple
+                random.seed()
+                min_dmg = dmg[0]
+                max_dmg = dmg[1]
+                dmg = random.randint(min_dmg, max_dmg)
+            except TypeError:
+                pass
+            for ef in self.owner.weapon.effects:
+                if ef.eff == 'INCREASE_RANGED_DAMAGE':
+                    dmg += ef.magnitude
+            res_dmg = self.owner.launcher.deal_damage(something, dmg, dmg_type)
+            Game.add_message(self.owner.name + ' hits ' + something.name + ' for ' + str(res_dmg) + ' damage!',
+                             'PLAYER', [255, 255, 255])
+        super(UnguidedShotAI, self)._hit(something)  # call parent _hit function
 
 
 class Item(Abilities, Entity):
@@ -1102,12 +1046,16 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             acc_weapon = weapon.properties['accuracy_ranged']
         else:
             acc_weapon = 1
+        if 'shot_speed' in weapon.properties:  # get weapon shot speed, if no - use default 1
+            shot_speed = weapon.properties['shot_speed']
+        else:
+            shot_speed = 1
         range_to_target = hypot(tx - self.position[0], ty - self.position[1])
         hit = ranged_hit_probability(acc_weapon, weapon.range, range_to_target)
         if hit:
             ammo = weapon.ammo[0]
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-            shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
+            shot = UnguidedShot(shooter=self, weapon=weapon, ammo=ammo, speed=shot_speed, target=(tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.reobserve()
             shot.abilities = ammo.abilities
@@ -1126,7 +1074,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             ty += miss_circle[i][1]
             ammo = weapon.ammo[0]  # and shoot it
             weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-            shot = UnguidedShot(self, weapon, ammo, 1, (tx, ty))
+            shot = UnguidedShot(shooter=self, weapon=weapon, ammo=ammo, speed=shot_speed, target=(tx, ty))
             self.location.place_entity(shot, self.position[0], self.position[1])
             shot.ai.reobserve()
             shot.abilities = ammo.abilities
@@ -1169,26 +1117,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         self.ai.close()  # unregister Observer
 
 
-class UnguidedShot(Actor, Abilities, Entity):
-    """ Mixed class for unguided shot (from a weapon) """
-
-    def __init__(self, shooter, weapon, ammo, speed, target):
-        self.shooter = shooter  # entity that fired this shot
-        self.weapon = weapon  # weapon that fired projectile
-        self.ammo = ammo  # ammo piece
-        self.target = target  # target (x, y) tuple
-        Entity.__init__(self, name=ammo.name, description=ammo.description, char=ammo.char, color=ammo.color)
-        Actor.__init__(self, speed=speed, ai=UnguidedShotAI(power=weapon.range, target=target, owner=self))
-        Abilities.__init__(self)
-
-    def death(self):
-        """ Death function """
-        self.location.remove_entity(self)
-        self.ai.close()  # unregister Observer
-
-
 class UnguidedProjectile(Actor, Abilities, Entity):
-    """ Mixed class for unguided projectile (thrown, magic, etc) """
+    """ Mixed base class for unguided projectile (thrown, magic, etc) """
 
     def __init__(self, launcher, speed, power, target, name='', description='', char=' ', color=None):
         self.launcher = launcher  # Entity, that launched projectile
@@ -1196,6 +1126,24 @@ class UnguidedProjectile(Actor, Abilities, Entity):
         Entity.__init__(self, name=name, description=description, char=char, color=color)
         Abilities.__init__(self)
         Actor.__init__(self, speed=speed, ai=UnguidedProjectileAI(power=power, target=target, owner=self))
+
+    def death(self):
+        """ Death function """
+        self.location.remove_entity(self)
+        self.ai.close()  # unregister Observer
+
+
+class UnguidedShot(UnguidedProjectile):
+    """ Child class for unguided shot (from a weapon) """
+
+    def __init__(self, shooter, weapon, ammo, speed, target):
+        super(UnguidedShot, self).__init__(launcher=shooter, speed=speed, power=weapon.range, target=target,
+                                           name=ammo.name, description=ammo.description, char=ammo.char,
+                                           color=ammo.color)
+        self.ai.close()  # replace AI with Shot AI
+        self.ai = UnguidedShotAI(power=weapon.range, target=target, owner=self)
+        self.weapon = weapon  # weapon that fired projectile
+        self.ammo = ammo  # ammo piece
 
     def death(self):
         """ Death function """
