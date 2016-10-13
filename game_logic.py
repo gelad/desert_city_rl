@@ -929,6 +929,23 @@ class ItemRangedWeapon(Item):
         """ Method returns string representation of ItemRangedWeapon - it's name with number of ammo loaded """
         return self.name + '[' + str(len(self.ammo)) + ']'
 
+    def shoot(self, target):
+        """ Method that shoots the weapon """
+        if self.owner:  # if someone holds a weapon - set him as shooter
+            shooter = self.owner
+        else:
+            shooter = self
+        if 'shot_speed' in self.properties:  # get weapon shot speed, if no - use default 1
+            shot_speed = self.properties['shot_speed']
+        else:
+            shot_speed = 1
+        ammo = self.ammo[0]
+        self.ammo.remove(ammo)  # remove ammo item from weapon
+        # TODO: may need further refactoring - entity reobserves 2 times
+        shot = UnguidedShot(shooter=shooter, weapon=self, ammo=ammo, speed=shot_speed, target=target)
+        shooter.location.reg_entity(shot)  # register shot entity to location
+        shot.launch(shooter.position[0], shooter.position[1])
+
 
 class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity):
     """
@@ -1051,18 +1068,10 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             acc_weapon = weapon.properties['accuracy_ranged']
         else:
             acc_weapon = 1
-        if 'shot_speed' in weapon.properties:  # get weapon shot speed, if no - use default 1
-            shot_speed = weapon.properties['shot_speed']
-        else:
-            shot_speed = 1
         range_to_target = hypot(tx - self.position[0], ty - self.position[1])
         hit = ranged_hit_probability(acc_weapon, weapon.range, range_to_target)
         if hit:
-            ammo = weapon.ammo[0]
-            weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-            shot = UnguidedShot(shooter=self, weapon=weapon, ammo=ammo, speed=shot_speed, target=(tx, ty))
-            self.location.reg_entity(shot)  # register shot entity to location
-            shot.launch(self.position[0], self.position[1])
+            weapon.shoot((tx, ty))
         else:
             if range_to_target > 3:  # if range too small - make miss circle 3 cell wide
                 radius = range_to_target / 2
@@ -1072,12 +1081,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             i = random.randrange(len(miss_circle))  # select random point
             tx += miss_circle[i][0]
             ty += miss_circle[i][1]
-            ammo = weapon.ammo[0]  # and shoot it
-            weapon.ammo.remove(weapon.ammo[0])  # remove ammo item from weapon
-            shot = UnguidedShot(shooter=self, weapon=weapon, ammo=ammo, speed=shot_speed, target=(tx, ty))
-            # TODO: may need further refactoring - entity reobserves 2 times
-            self.location.reg_entity(shot)  # register shot entity to location
-            shot.launch(self.position[0], self.position[1])
+            weapon.shoot((tx, ty))
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
