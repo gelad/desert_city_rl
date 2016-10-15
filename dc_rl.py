@@ -147,6 +147,7 @@ elif main_menu_choice[0] == 'New Game':
         game.player.add_item(game.current_loc.reg_entity('item_sabre'))
         game.player.add_item(game.current_loc.reg_entity('item_mail_armor'))
         game.player.add_item(game.current_loc.reg_entity('item_misurka'))
+        game.player.add_item(game.current_loc.reg_entity('item_throwing_knife'))
         game.player.add_item(game.current_loc.reg_entity('item_antidote_potion'))
         game.player.add_item(game.current_loc.reg_entity('item_healing_potion'))
     elif class_choice[0] == 'Gantra mercenary':

@@ -425,9 +425,22 @@ def initialize():
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 5000,
              'stackable': False}
     abil = abilities.Ability(name='Poisoned arrow', owner=data_set['item_poisoned_arrow'],
-                             trigger='shot_hit', conditions=[], reactions=[react],
+                             trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[0, 150, 0])
     data_set['item_poisoned_arrow'].add_ability(abil)
+
+    data_set['item_throwing_knife'] = game_logic.ItemCharges(name='throwing knife',
+                                                             data_id='item_throwing_knife',
+                                                             description='A knife, balanced for throwing.',
+                                                             categories={'throwing', 'stackable', 'sticks_to_target'},
+                                                             properties={'break_chance': 0.3},
+                                                             char="'", color=[110, 110, 110],
+                                                             charges=1, destroyed_after_use=True, weight=0.1)
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (1, 3), 'dmg_type': 'piercing'}
+    abil = abilities.Ability(name='Shank', owner=data_set['item_throwing_knife'],
+                             trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[255, 255, 255])
+    data_set['item_throwing_knife'].add_ability(abil)
 
     data_set['mob_mindless_body'] = game_logic.Fighter(name='Mindless body', data_id='mob_mindless_body', char='b',
                                     description='Shaking, dehydrated human body, raised by strange magic of the City.',

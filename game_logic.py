@@ -1237,7 +1237,7 @@ class UnguidedShot(UnguidedProjectile):
 
     def launch(self, origin_x, origin_y):
         """ Method that launches a projectile from (origin_x, origin_y) to target """
-        self.abilities = self.ammo.abilities  # copy abilities from ammo to projectile
+        self.abilities = pickle.loads(pickle.dumps(self.ammo.abilities))  # copy abilities from ammo to projectile
         super(UnguidedShot, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
 
 
@@ -1254,7 +1254,7 @@ class UnguidedThrown(UnguidedProjectile):
 
     def launch(self, origin_x, origin_y):
         """ Method that launches a projectile from (origin_x, origin_y) to target """
-        self.abilities = self.thrown.abilities  # copy abilities from thrown to projectile
+        self.abilities = pickle.loads(pickle.dumps(self.thrown.abilities))  # copy abilities from thrown to projectile
         super(UnguidedThrown, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
 
 
