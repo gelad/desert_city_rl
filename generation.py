@@ -93,7 +93,10 @@ def generate_loc(loc_type, settings, width, height):
                                                               (game_logic.weighted_choice([('item_bronze_bolt', 50),
                                                                                           ('item_bronze_tipped_arrow', 30),
                                                                                           ('item_poisoned_arrow', 20)]),
-                                                               10)])
+                                                               7),
+                                                              (game_logic.weighted_choice([('item_throwing_knife', 60),
+                                                                                           ('item_javelin', 40)]),
+                                                               3)])
                         item_coords = floor_cells[random.randrange(len(floor_cells))]
                         loc.place_entity(item_id, item_coords[0], item_coords[1])
                     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])

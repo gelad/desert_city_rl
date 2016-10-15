@@ -431,16 +431,30 @@ def initialize():
 
     data_set['item_throwing_knife'] = game_logic.ItemCharges(name='throwing knife',
                                                              data_id='item_throwing_knife',
-                                                             description='A knife, balanced for throwing.',
+                                                             description='A knife, balanced for quick throwing.',
                                                              categories={'throwing', 'stackable', 'sticks_to_target'},
-                                                             properties={'break_chance': 0.3},
+                                                             properties={'break_chance': 0.3,
+                                                                         'throw_speed': 0.75},
                                                              char="'", color=[110, 110, 110],
-                                                             charges=1, destroyed_after_use=True, weight=0.1)
+                                                             charges=1, destroyed_after_use=True, weight=0.2)
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (1, 3), 'dmg_type': 'piercing'}
     abil = abilities.Ability(name='Shank', owner=data_set['item_throwing_knife'],
                              trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[255, 255, 255])
     data_set['item_throwing_knife'].add_ability(abil)
+
+    data_set['item_javelin'] = game_logic.ItemCharges(name='javelin',
+                                                      data_id='item_javelin',
+                                                      description='A short spear, made for throwing.',
+                                                      categories={'throwing', 'stackable', 'sticks_to_target'},
+                                                      properties={'break_chance': 0.3},
+                                                      char=chr(92), color=[160, 50, 50],
+                                                      charges=1, destroyed_after_use=True, weight=1.5)
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (2, 8), 'dmg_type': 'piercing'}
+    abil = abilities.Ability(name='Pierce', owner=data_set['item_javelin'],
+                             trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[255, 255, 255])
+    data_set['item_javelin'].add_ability(abil)
 
     data_set['mob_mindless_body'] = game_logic.Fighter(name='Mindless body', data_id='mob_mindless_body', char='b',
                                     description='Shaking, dehydrated human body, raised by strange magic of the City.',
