@@ -52,8 +52,10 @@ BUG: when last item is selected in inventory - operations performed with previou
 Make a main menu - new/load game. (DONE)
 Menus refactor - to easier make new ones. (DONE)
 Implement throwing. (DONE)
+Make shield item. (DONE)
 
 
+Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.
 BUG?: arrow don't poison on each shot.
 Inform player if targeting failed.
 Make simple AOE explosions.
@@ -65,5 +67,4 @@ Make door-opening mobs.
 BUG: attempted reload command after player death (player can perform actions after death?)
 Make 'give item' debug command.
 Separate abilities from entities in dataset section.
-Make shield item.
 Add some config files (at least mechanism for them)

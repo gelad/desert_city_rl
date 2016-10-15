@@ -185,6 +185,19 @@ class BattleEntity(Entity):
         if dmg_type == 'pure':  # if 'pure' damage inflict it without any protection
             resulting_damage = damage
         else:
+            if isinstance(self, Equipment):  # shield blocking if BE has equipment
+                shield = None
+                for shield in self.equipment.values():  # check if any shields equipped
+                    if shield:
+                        if isinstance(shield, ItemShield):
+                            if shield.durability > 0:
+                                break  # shield found - break
+                if shield:  # if valid shield found
+                    dmg_before_block = damage  # remember damage before block
+                    damage = shield.block(damage=damage, dmg_type=dmg_type)  # damage is damage passed through shield
+                    if damage != dmg_before_block and isinstance(self, Player):
+                        msg = 'Your ' + shield.name + ' blocks ' + str(dmg_before_block - damage) + ' damage.'
+                        Game.add_message(msg, 'PLAYER', [255, 255, 255])
             protection = self.get_protection(dmg_type)  # get (armor, block) tuple
             # at 100 armor - 50% reduction
             if protection[0] == -100:  # to prevent division by zero
@@ -984,31 +997,42 @@ class ItemShield(Item):
         self.max_durability = durability  # durability of shield, its 'hp'
         self.durability = durability
 
+    def __str__(self):
+        """ Method returns string representation of ItemShield - it's name with durability """
+        return self.name + '(' + str(self.durability) + ')'
+
     def block(self, damage, dmg_type):
         """ Method is called when shield blocks damage. Returns damage that passed through shield """
         block = 0  # shield blocking ammount
         self_prot = 0  # shield protection from damage (used to calculate durability damage)
         if 'armor_' + dmg_type in self.properties.keys():
             self_prot += self.properties['armor_' + dmg_type]  # add armor protection
-        if 'armor_' + dmg_type in self.properties.keys():
+        if 'block_' + dmg_type in self.properties.keys():
             block += self.properties['block_' + dmg_type]  # add armor protection
+        if block == 0:  # TODO: PLACEHOLDER - makes shield ignore damage type it can't block. Must have conditions.
+            return damage
         # at 100 armor - 50% reduction
         if self_prot == -100:  # to prevent division by zero
             reduce = self_prot
         else:
             reduce = self_prot / (100 + self_prot)
-        shield_damage = ceil(damage * (1 - reduce) - self_prot)  # calculate durability damage
-        if shield_damage < 0:
+        shield_damage = ceil(damage * (1 - reduce))  # calculate durability damage
+        # MAYBE randomize durability loss?
+        if shield_damage < 0:  # TODO: comment this sh*t
             shield_damage = 0
         if shield_damage <= self.durability:
             blocked = block
+            self.durability -= shield_damage
         else:
             blocked = shield_damage - self.durability
             if blocked > block:
                 blocked = block
+            self.durability = 0
         passed = damage - blocked
         if passed > damage:
             passed = damage
+        elif passed < 0:
+            passed = 0
         return passed
 
 

@@ -246,6 +246,15 @@ def initialize():
                                                           weight=0.1)
     data_set['item_ring_lightning_res'].effects.append(effects.Effect('RESIST_LIGHTNING', 100))
 
+    data_set['item_wooden_buckler'] = game_logic.ItemShield(name='wooden buckler', data_id='item_wooden_buckler',
+                                                            description='A light wooden shield.', durability=10,
+                                                            categories={'shield'},
+                                                            properties={'armor_bashing': 50, 'armor_slashing': 100,
+                                                                        'armor_piercing': 150,
+                                                                        'block_bashing': 3, 'block_slashing': 6,
+                                                                        'block_piercing': 10},
+                                                            char='(', color=[128, 0, 0], weight=4)
+
     # set of iron armor=====================================================
     data_set['item_misurka'] = game_logic.Item(name='misurka', data_id='item_misurka',
                                                description='A light iron helmet with spike on top.',
