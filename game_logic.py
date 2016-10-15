@@ -11,6 +11,7 @@ import generation
 
 import random
 import pickle
+import copy
 from math import hypot
 from math import ceil
 
@@ -423,17 +424,21 @@ class Inventory(Entity):
 
     def use_item(self, item, target=None):
         """ Item use on self or target method """
-        if not target or target == self:  # if no target specified or target is self - use on self
-            target = self
-            events.Event(self, {'type': 'used_on_self', 'item': item})  # fire an event
-        else:
-            events.Event(self, {'type': 'used_on_target', 'item': item, 'target': target})  # fire an event
+        item.use(user=self, target=target)
 
     def throw(self, item, target, power):
         """ Method that throws the Item """
-        if isinstance(self, Equipment):
-            self.unequip_item(item)  # unequip if equipped
-        self.discard_item(item)  # discard item from inventory
+        if isinstance(item, ItemCharges) and 'stackable' in item.categories:
+            if item.charges > 0:
+                orig_item = item
+                item = copy.copy(item)  # create a copy of item with quantity 1
+                # pickle.loads(pickle.dumps(item, -1))
+                item.charges = 1
+                orig_item.decrease()
+        else:
+            if isinstance(self, Equipment):
+                self.unequip_item(item)  # unequip if equipped
+            self.discard_item(item)  # discard item from inventory
         if 'thrown_speed' in item.properties:  # get weapon shot speed, if no - use default 5
             thrown_speed = item.properties['thrown_speed']
         else:
@@ -918,6 +923,14 @@ class Item(Abilities, Entity):
             self.equip_slots = dict.fromkeys(['RIGHT_HAND', 'LEFT_HAND'])
         Abilities.__init__(self)
 
+    def use(self, user, target):
+        """ Call this method when item is used - return True if successiful """
+        if target == user:  # if no target specified or target is user - use on self
+            events.Event(user, {'type': 'used_on_self', 'item': self})  # fire an event
+        else:
+            events.Event(user, {'type': 'used_on_target', 'item': self, 'target': target})  # fire an event
+        return True
+
 
 class ItemCharges(Item):
     """
@@ -936,25 +949,27 @@ class ItemCharges(Item):
         """ Method returns string representation of ItemCharges - it's name with charges """
         return self.name + '[' + str(self.charges) + ']'
 
-    def use(self, target):
+    def use(self, user, target):
         """ Overrides the use() method, to manage charges and item destruction """
-        if self.charges > 0:  # if there are remaining charges
-            self.charges -= 1  # use 1 charge
+        if self.charges > 0:
+            result = super(ItemCharges, self).use(user=user, target=target)
+            if result:
+                self.decrease()
+            return result
         else:
             msg = self.name + ' is depleted!'
             Game.add_message(msg, 'PLAYER', [255, 255, 255])
-        if self.destroyed_after_use and self.charges == 0:
-            self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
+            return False
 
     def decrease(self):
         """ Decrease charges by 1 """
         if self.charges > 0:  # if there are remaining charges
             self.charges -= 1  # use 1 charge
-        else:
-            msg = self.name + ' is depleted!'
-            Game.add_message(msg, 'PLAYER', [255, 255, 255])
         if self.destroyed_after_use and self.charges == 0:
-            self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
+            if isinstance(self.owner, Equipment):
+                self.owner.unequip_item(self)  # unequip if equipped
+            if isinstance(self.owner, Inventory):
+                self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
 
 
 class ItemRangedWeapon(Item):
