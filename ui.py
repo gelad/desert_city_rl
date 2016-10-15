@@ -786,7 +786,7 @@ class WindowMain(Window):
                     game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
                                                 'PLAYER', [255, 255, 255])
             else:  # if multiple ranged equipped
-                weapon = show_menu_list(win_mgr=self.win_mgr, caption='Fire weapon:',options=ranged_weapons,
+                weapon = show_menu_list(win_mgr=self.win_mgr, caption='Fire weapon:', options=ranged_weapons,
                                         keys='alphabet', prev_window=self)  # select one
                 if weapon:
                     if len(weapon[0].ammo) > 0:  # check if loaded
@@ -806,6 +806,33 @@ class WindowMain(Window):
             player.perform(actions.act_fire_ranged, player, weapon, target)  # if there are a monster - target him
         else:
             player.perform(actions.act_fire_ranged, player, weapon, (tx, ty))  # if not - target cell
+
+    def command_throw_choose(self, player):
+        """ Command method for player wants to throw an item in hands - choose target """
+        right = player.equipment['RIGHT_HAND']
+        left = player.equipment['LEFT_HAND']
+        items = [i for i in [right, left] if i is not None]  # pick equipment in hands
+        if items:  # check if there are any
+            if len(items) == 1:  # if one
+                self.command_target_choose(player.get_throw_range(items[0]), items[0], self.command_throw,
+                                           player, items[0])
+            else:  # if multiple items in hands
+                item = show_menu_list(win_mgr=self.win_mgr, caption='Throw item:', options=items,
+                                      keys='alphabet', prev_window=self)  # select one
+                if item:
+                    self.command_target_choose(player.get_throw_range(items[0]), items[0], self.command_throw,
+                                               player, items[0])
+        else:
+            game_logic.Game.add_message('Take something in hand to throw it.', 'PLAYER', [255, 255, 255])
+
+    def command_throw(self, target, player, item):
+        """ Command method for player wants to throw item - target confirmed, throw """
+        tx, ty = target  # target cell coordinates
+        target = player.location.cells[tx][ty].is_there_a(game_logic.Fighter)  # TODO: if more monster types - add here
+        if target:
+            player.perform(actions.act_throw, player, item, target)  # if there are a monster - target him
+        else:
+            player.perform(actions.act_throw, player, item, (tx, ty))  # if not - target cell
 
     def command_target_choose(self, range, thing, command_function, *args, **kwargs):
         """ Command method for player wants to select target for some command """
@@ -972,6 +999,9 @@ class WindowMain(Window):
                     # fire ranged weapon (in hands) command
                     elif command == 'fire':
                         self.command_fire_choose(player)
+                    # throw item (in hands) command
+                    elif command == 'throw_hands':
+                        self.command_throw_choose(player)
                 elif game.state == 'looking':  # if the game is in 'looking' mode
                     # exit looking mode
                     if command == 'exit':

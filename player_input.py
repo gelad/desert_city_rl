@@ -83,7 +83,7 @@ def get_input(game):
                         player_input.append('inventory')
                     if event.keychar == 'w':  # wield (equip) item command
                         player_input.append('wield_item')
-                    if event.keychar == 't':  # take off command
+                    if event.keychar == 'o':  # take 'o'ff command
                         player_input.append('take_off_item')
                     if event.keychar == 'u':  # use command
                         player_input.append('use_item')
@@ -97,6 +97,8 @@ def get_input(game):
                         player_input.append('unload')
                     if event.keychar == 'f':  # fire ranged weapon command
                         player_input.append('fire')
+                    if event.keychar == 't':  # throw item in hands command
+                        player_input.append('throw_hands')
             elif event.type == "QUIT":
                 player_input.append('exit')
         return player_input

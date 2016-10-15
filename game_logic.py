@@ -416,9 +416,10 @@ class Inventory(Entity):
 
     def discard_item(self, item):
         """ Method that removes item from inventory, without placing it anywhere """
-        item.owner = None
-        item.abilities_set_owner(None)  # if it has abilities - set their owner
-        self.inventory.remove(item)
+        if item in self.inventory:
+            item.owner = None
+            item.abilities_set_owner(None)  # if it has abilities - set their owner
+            self.inventory.remove(item)
 
     def use_item(self, item, target=None):
         """ Item use on self or target method """
@@ -427,6 +428,20 @@ class Inventory(Entity):
             events.Event(self, {'type': 'used_on_self', 'item': item})  # fire an event
         else:
             events.Event(self, {'type': 'used_on_target', 'item': item, 'target': target})  # fire an event
+
+    def throw(self, item, target, power):
+        """ Method that throws the Item """
+        if isinstance(self, Equipment):
+            self.unequip_item(item)  # unequip if equipped
+        self.discard_item(item)  # discard item from inventory
+        if 'thrown_speed' in item.properties:  # get weapon shot speed, if no - use default 5
+            thrown_speed = item.properties['thrown_speed']
+        else:
+            thrown_speed = 5  # 5 - default thrown speed
+        # TODO: may need further refactoring - entity reobserves 2 times
+        throw = UnguidedThrown(thrower=self, thrown=item, power=power, speed=thrown_speed, target=target)
+        self.location.reg_entity(throw)  # register throw entity to location
+        throw.launch(self.position[0], self.position[1])  # launch thrown from thrower position
 
 
 class Equipment(Entity):
@@ -788,7 +803,7 @@ class UnguidedShotAI(UnguidedProjectileAI):
             else:
                 ammo_broken = False
             if not ammo_broken:
-                if isinstance(something, Inventory):
+                if isinstance(something, Inventory) and 'sticks_to_target' in self.owner.ammo.categories:
                     something.add_item(self.owner.ammo)
                 else:
                     self.owner.location.place_entity(self.owner.ammo, x, y)
@@ -846,6 +861,42 @@ class UnguidedShotAI(UnguidedProjectileAI):
             Game.add_message(self.owner.name + ' hits ' + something.name + ' for ' + str(res_dmg) + ' damage!',
                              'PLAYER', [255, 255, 255])
         super(UnguidedShotAI, self)._hit(something)  # call parent _hit function
+
+
+class UnguidedThrownAI(UnguidedProjectileAI):
+    """ An unguided throw AI (based on projectile ai)
+    Differences from Shot: flies to a selected cell, instead of trajectory crossing it, has some damage and contains
+    Entity.
+    """
+
+    def __init__(self, power, target, owner, state='flying'):
+        super(UnguidedThrownAI, self).__init__(power=power, target=target, owner=owner, state=state)
+
+    def enroute(self):
+        """ Method to calculate route (overridden: line to target instead of trajectory that crosses it) """
+        self.route = fov_los_pf.line(self.owner.position[0], self.owner.position[1], self.target[0],
+                                     self.target[1])
+        self.route.pop(0)  # pop first item from path, it's thrower position
+        self.next = iter(self.route)
+        self._fly_next()  # fly to next cell (or stop if out of power or route end)
+
+    def _hit(self, something):
+        """ Method called when thrown hit something """
+        x = self.owner.position[0]
+        y = self.owner.position[1]
+        if isinstance(something, Entity):  # if entity is hit
+            thrown_broken = False
+            if 'break_chance' in self.owner.thrown.properties:  # if thrown item has chance to break
+                if random.uniform(0, 1) < self.owner.thrown.properties['break_chance']:  # determine if thrown broken
+                    thrown_broken = True
+            if not thrown_broken:
+                if isinstance(something, Inventory) and 'sticks_to_target' in self.owner.thrown.categories:
+                    something.add_item(self.owner.thrown)
+                else:
+                    self.owner.location.place_entity(self.owner.thrown, x, y)
+        else:  # must be a point tuple then
+            self.owner.location.place_entity(self.owner.thrown, x, y)
+        super(UnguidedThrownAI, self)._hit(something)  # call parent _hit function
 
 
 class Item(Abilities, Entity):
@@ -1070,9 +1121,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             acc_weapon = 1
         range_to_target = hypot(tx - self.position[0], ty - self.position[1])
         hit = ranged_hit_probability(acc_weapon, weapon.range, range_to_target)
-        if hit:
-            weapon.shoot((tx, ty))
-        else:
+        if not hit:  # if not hit - determine where to miss
             if range_to_target > 3:  # if range too small - make miss circle 3 cell wide
                 radius = range_to_target / 2
             else:  # if missed
@@ -1081,7 +1130,40 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             i = random.randrange(len(miss_circle))  # select random point
             tx += miss_circle[i][0]
             ty += miss_circle[i][1]
-            weapon.shoot((tx, ty))
+        weapon.shoot((tx, ty))
+
+    def attack_throw(self, thrown, target):
+        """ Throw item method """
+        # check if target is a cell or a monster
+        if isinstance(target, BattleEntity):
+            if target.position:
+                tx = target.position[0]  # set projectile target to target current position
+                ty = target.position[1]
+            else:
+                return  # if target has no position - stop shooting, it might be dead
+        else:  # if a cell - set tx:ty as target cell
+            tx = target[0]
+            ty = target[1]
+        if 'accuracy_thrown' in thrown.properties:  # get thrown accuracy, if no - use default 0.5
+            acc = thrown.properties['accuracy_thrown']
+        else:
+            acc = 0.5
+        range_to_target = hypot(tx - self.position[0], ty - self.position[1])
+        hit = ranged_hit_probability(acc, self.get_throw_range(thrown), range_to_target)
+        if not hit:  # if not hit - determine where to miss
+            if range_to_target > 3:  # if range too small - make miss circle 3 cell wide
+                radius = range_to_target / 2
+            else:  # if missed
+                radius = 1.5
+            miss_circle = circle_points(radius, False)  # get points around target location
+            i = random.randrange(len(miss_circle))  # select random point
+            tx += miss_circle[i][0]
+            ty += miss_circle[i][1]
+        self.throw(thrown, (tx, ty), self.get_throw_range(thrown))
+
+    def get_throw_range(self, item):
+        """ PLACEHOLDER method, until some role system will be implemented (must be based on strength) """
+        return 12  # some MAGIC number
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
@@ -1158,10 +1240,22 @@ class UnguidedShot(UnguidedProjectile):
         self.abilities = self.ammo.abilities  # copy abilities from ammo to projectile
         super(UnguidedShot, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
 
-    def death(self):
-        """ Death function """
-        self.location.remove_entity(self)
-        self.ai.close()  # unregister Observer
+
+class UnguidedThrown(UnguidedProjectile):
+    """ Child class for unguided thrown (weapon or entity) """
+
+    def __init__(self, thrower, thrown, power, speed, target):
+        super(UnguidedThrown, self).__init__(launcher=thrower, speed=speed, power=power, target=target,
+                                             name=thrown.name, description=thrown.description, char=thrown.char,
+                                             color=thrown.color)
+        self.ai.close()  # replace AI with Shot AI
+        self.ai = UnguidedThrownAI(power=power, target=target, owner=self)
+        self.thrown = thrown  # ammo piece
+
+    def launch(self, origin_x, origin_y):
+        """ Method that launches a projectile from (origin_x, origin_y) to target """
+        self.abilities = self.thrown.abilities  # copy abilities from thrown to projectile
+        super(UnguidedThrown, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
 
 
 class Player(Fighter):

@@ -401,7 +401,7 @@ def initialize():
 
     data_set['item_bronze_bolt'] = game_logic.ItemCharges(name='bronze bolt', data_id='item_bronze_bolt',
                                                           description='A simple bronze bolt for crossbows.',
-                                                          categories={'bolt', 'stackable'},
+                                                          categories={'bolt', 'stackable', 'sticks_to_target'},
                                                           properties={'piercing': (1, 4), 'break_chance': 0.5},
                                                           char='=', color=[80, 50, 20],
                                                           charges=5, destroyed_after_use=True, weight=0.2)
@@ -409,7 +409,7 @@ def initialize():
     data_set['item_bronze_tipped_arrow'] = game_logic.ItemCharges(name='bronze tipped arrow',
                                                                   data_id='item_bronze_tipped_arrow',
                                                                   description='A simple bronze tipped arrow.',
-                                                                  categories={'arrow', 'stackable'},
+                                                                  categories={'arrow', 'stackable', 'sticks_to_target'},
                                                                   properties={'piercing': (1, 3), 'break_chance': 0.5},
                                                                   char='=', color=[128, 20, 20],
                                                                   charges=5, destroyed_after_use=True, weight=0.1)
@@ -417,7 +417,7 @@ def initialize():
     data_set['item_poisoned_arrow'] = game_logic.ItemCharges(name='poisoned arrow',
                                                                   data_id='item_poisoned_arrow',
                                                     description='A simple bronze tipped arrow, coated in weak poison.',
-                                                                  categories={'arrow', 'stackable'},
+                                                                  categories={'arrow', 'stackable', 'sticks_to_target'},
                                                                   properties={'piercing': (1, 3), 'break_chance': 0.5},
                                                                   char='=', color=[0, 150, 0],
                                                                   charges=3, destroyed_after_use=True, weight=0.1)

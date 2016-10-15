@@ -300,6 +300,20 @@ def act_fire_ranged(action, register_call, actor, weapon, target):
         actor.perform(act_withdrawal, actor, action.t_needed * 2)
 
 
+def act_throw(action, register_call, actor, thrown, target):
+    """ Actor throw item """
+    if register_call:  # part executed when function is registered in ActionMgr
+        action.data['spd'] = actor.speed  # by default throwing takes 1 turn
+        if 'throw_speed' in thrown.properties:  # if thrown has throwing speed modifier
+            action.data['spd'] = actor.speed * thrown.properties['throw_speed']
+        action.t_needed = action.data['spd'] / 2  # throwing occurs on 1/2 throwing action duration
+    else:  # part that is executed when action fires
+        actor.attack_throw(thrown, target)  # throw an item at target
+        actor.actions.remove(action)  # remove performed action from actor's list
+        actor.state = 'ready'  # return actor to ready state
+        actor.perform(act_withdrawal, actor, action.data['spd'] - action.t_needed)
+
+
 def act_reload(action, register_call, actor, weapon, ammo):
     """ Actor reloading ranged weapon """
     if register_call:  # part executed when function is registered in ActionMgr
