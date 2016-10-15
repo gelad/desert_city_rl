@@ -971,6 +971,47 @@ class ItemCharges(Item):
                 self.owner.discard_item(self)  # if item is depleted and destroys when empty - remove it from inventory
 
 
+class ItemShield(Item):
+    """
+        Child class of shield item. Has durability and armor
+    """
+
+    def __init__(self, name, data_id, description, char, color, weight=0, pass_cost=1, durability=1,
+                 categories=None, properties=None, equip_slots=None):
+        super(ItemShield, self).__init__(name=name, data_id=data_id, description=description, categories=categories,
+                                         properties=properties, weight=weight, pass_cost=pass_cost,
+                                         char=char, color=color, equip_slots=equip_slots)
+        self.max_durability = durability  # durability of shield, its 'hp'
+        self.durability = durability
+
+    def block(self, damage, dmg_type):
+        """ Method is called when shield blocks damage. Returns damage that passed through shield """
+        block = 0  # shield blocking ammount
+        self_prot = 0  # shield protection from damage (used to calculate durability damage)
+        if 'armor_' + dmg_type in self.properties.keys():
+            self_prot += self.properties['armor_' + dmg_type]  # add armor protection
+        if 'armor_' + dmg_type in self.properties.keys():
+            block += self.properties['block_' + dmg_type]  # add armor protection
+        # at 100 armor - 50% reduction
+        if self_prot == -100:  # to prevent division by zero
+            reduce = self_prot
+        else:
+            reduce = self_prot / (100 + self_prot)
+        shield_damage = ceil(damage * (1 - reduce) - self_prot)  # calculate durability damage
+        if shield_damage < 0:
+            shield_damage = 0
+        if shield_damage <= self.durability:
+            blocked = block
+        else:
+            blocked = shield_damage - self.durability
+            if blocked > block:
+                blocked = block
+        passed = damage - blocked
+        if passed > damage:
+            passed = damage
+        return passed
+
+
 class ItemRangedWeapon(Item):
     """
         Child class for a ranged weapon.
@@ -1294,7 +1335,7 @@ class Player(Fighter):
         if armor:  # if there are armor on hit zone - add protection
             if 'armor_' + dmg_type in armor.properties.keys():
                 prot += armor.properties['armor_' + dmg_type]  # add armor protection
-                block += self.get_effect('BLOCK_' + dmg_type.upper())  # add damage block ammount
+        block += self.get_effect('BLOCK_' + dmg_type.upper())  # add damage block ammount
         return prot, block, hit_zone
 
     def death(self):
