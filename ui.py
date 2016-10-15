@@ -814,14 +814,22 @@ class WindowMain(Window):
         items = [i for i in [right, left] if i is not None]  # pick equipment in hands
         if items:  # check if there are any
             if len(items) == 1:  # if one
-                self.command_target_choose(player.get_throw_range(items[0]), items[0], self.command_throw,
-                                           player, items[0])
+                if player.get_throw_range(items[0]) > 0:
+                    self.command_target_choose(player.get_throw_range(items[0]), items[0], self.command_throw,
+                                               player, items[0])
+                else:
+                    game_logic.Game.add_message(items[0].name.capitalize() + ' is too heavy!',
+                                                'PLAYER', [255, 255, 255])
             else:  # if multiple items in hands
                 item = show_menu_list(win_mgr=self.win_mgr, caption='Throw item:', options=items,
                                       keys='alphabet', prev_window=self)  # select one
                 if item:
-                    self.command_target_choose(player.get_throw_range(items[0]), items[0], self.command_throw,
-                                               player, items[0])
+                    if player.get_throw_range(items[0]) > 0:
+                        self.command_target_choose(player.get_throw_range(item[0]), item[0], self.command_throw,
+                                                   player, item[0])
+                    else:
+                        game_logic.Game.add_message(items[0].name.capitalize() + ' is too heavy!',
+                                                    'PLAYER', [255, 255, 255])
         else:
             game_logic.Game.add_message('Take something in hand to throw it.', 'PLAYER', [255, 255, 255])
 

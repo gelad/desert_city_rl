@@ -432,7 +432,6 @@ class Inventory(Entity):
             if item.charges > 0:
                 orig_item = item
                 item = copy.copy(item)  # create a copy of item with quantity 1
-                # pickle.loads(pickle.dumps(item, -1))
                 item.charges = 1
                 orig_item.decrease()
         else:
@@ -1178,14 +1177,14 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
 
     def get_throw_range(self, item):
         """ PLACEHOLDER method, until some role system will be implemented (must be based on strength) """
-        return 12  # some MAGIC number
+        return round(12 - item.weight * 2)  # some MAGIC number
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
         if weapon.ammo_type in ammo.categories:
             if len(weapon.ammo) < weapon.ammo_max:
-                ammo_copy = pickle.loads(pickle.dumps(ammo, -1))
-                # ammo_copy = copy.deepcopy(ammo)  # make a copy of ammo object
+                # ammo_copy = pickle.loads(pickle.dumps(ammo, -1))
+                ammo_copy = copy.copy(ammo)  # make a copy of ammo object
                 ammo_copy.charges = 1  # with one charge
                 ammo.decrease()  # decrease ammount of ammo left
                 weapon.ammo.append(ammo_copy)  # add copy to weapon.ammo
