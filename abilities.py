@@ -92,7 +92,8 @@ class Ability(events.Observer):
         """ Method that registers Ability to observe events """
         events.Observer.__init__(self)  # register self as observer
         self.observe(self.owner, self.on_event)
-        self.observe('location', self.on_event)
+        if self.owner.location:
+            self.observe(self.owner.location, self.on_event)
         self.observe('time', self.on_event)
 
     def set_owner(self, owner):

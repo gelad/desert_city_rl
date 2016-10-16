@@ -144,8 +144,9 @@ def act_use_ability(action, register_call, actor, target, ability, whole_time, u
             action.t_needed = whole_time
             events.Event(actor, {'type': 'ability_used', 'ability': ability,
                                  'target': target})  # fire an event that triggers ability
-            events.Event('location', {'type': 'entity_used_ability',
-                                      'user': actor, 'target': target, 'ability': ability})  # fire ability used event
+            if actor.location:
+                events.Event(actor.location, {'type': 'entity_used_ability',
+                                              'user': actor, 'target': target, 'ability': ability})
         elif 0 < use_offset <= 1:
             action.t_needed = whole_time * use_offset  # set action fire time according to offset
         else:
@@ -154,8 +155,9 @@ def act_use_ability(action, register_call, actor, target, ability, whole_time, u
         if actor and ability:  # if actor and ability still exist
             events.Event(actor, {'type': 'ability_used', 'ability': ability,
                                  'target': target})  # fire an event that triggers ability
-            events.Event('location', {'type': 'entity_used_ability',
-                                      'user': actor, 'target': target, 'ability': ability})  # fire ability used event
+            if actor.location:
+                events.Event(actor.location, {'type': 'entity_used_ability',
+                                              'user': actor, 'target': target, 'ability': ability})
             actor.actions.remove(action)  # remove performed action from actor's list
             actor.state = 'ready'  # return actor to ready state
             # withdrawal to make whole action take whole_time

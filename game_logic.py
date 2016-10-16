@@ -186,9 +186,9 @@ class BattleEntity(Entity):
         self.hp -= damage
         # fire an Entity event
         events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': damage, 'dmg_type': dmg_type})
-        # fire location event
-        events.Event('location', {'type': 'entity_damaged', 'attacker': attacker,
-                                  'target': self, 'damage': damage, 'dmg_type': dmg_type})
+        if self.location:  # fire location event
+            events.Event(self.location, {'type': 'entity_damaged', 'attacker': attacker,
+                                         'target': self, 'damage': damage, 'dmg_type': dmg_type})
         if self.hp <= 0 and not self.dead:  # check if self is < 0 hp and not dead
             self.dead = True
             self.location.dead.append(self)  # add BE to dead list, waiting for removal
@@ -261,9 +261,9 @@ class BattleEntity(Entity):
         Game.add_message(msg, 'PLAYER', [0, 255, 0])
         # fire an Entity event
         events.Event(self, {'type': 'healed', 'healer': healer, 'heal': healed_hp})
-        # fire location event
-        events.Event('location', {'type': 'entity_healed', 'healer': healer,
-                                  'target': self, 'heal': healed_hp})
+        if self.location:  # fire location event
+            events.Event(self.location, {'type': 'entity_healed', 'healer': healer,
+                                         'target': self, 'heal': healed_hp})
         return healed_hp
 
     def get_protection(self, dmg_type):
@@ -355,7 +355,7 @@ class Actor(Entity):
                     if self.occupies_tile or self.pass_cost != 1:  # if entity blocks or impairs movement
                         self.location.path_map_update(new_x, new_y)  # update path map
                         self.location.path_map_update(old_x, old_y)  # update path map
-                    events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
+                    events.Event(self.location, {'type': 'entity_moved', 'entity': self})  # fire an event
                     msg = self.name + 'moved to ' + str(new_x) + ':' + str(new_y)
                     Game.add_message(msg, 'DEBUG', [255, 255, 255])
                     return True
@@ -535,14 +535,18 @@ class AI(events.Observer):
     def reobserve(self):
         """ Method that registers AI to observe events """
         events.Observer.__init__(self)  # register self as observer
-        self.observe('location', self.on_event_location)
+        if self.owner:
+            if self.owner.location:
+                self.observe(self.owner.location, self.on_event_location)
+        #else:
+        #    raise Exception('Attempted to reobserve AI of Entity without a location')
 
     def act(self):
         """ Abstract method of AI class that is called when AI should decide what to do """
         raise NotImplementedError
 
     def on_event_location(self, data):
-        """ Abstract method of 'location' event handler """
+        """ Abstract method of location event handler """
         raise NotImplementedError
 
 
@@ -1288,7 +1292,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         """ Death method """
         Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
-        events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
+        events.Event(self.location, {'type': 'entity_died', 'entity': self})  # fire an event
         corpse = self.get_corpse()  # get corpse entity
         if corpse:
             self.location.place_entity(corpse, self.position[0], self.position[1])
@@ -1409,7 +1413,7 @@ class Prop(BattleEntity, Abilities, Entity):
 
     def death(self):
         """ Death method """
-        events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
+        events.Event(self.location, {'type': 'entity_died', 'entity': self})  # fire an event
         corpse = self.get_corpse()  # get corpse entity
         if corpse:
             self.location.place_entity(corpse, self.position[0], self.position[1])
@@ -1471,7 +1475,7 @@ class Door(BattleEntity, Entity):
 
     def death(self):
         """ Death method """
-        events.Event('location', {'type': 'entity_died', 'entity': self})  # fire an event
+        events.Event(self.location, {'type': 'entity_died', 'entity': self})  # fire an event
         corpse = self.get_corpse()  # get corpse entity
         if corpse:
             self.location.place_entity(corpse, self.position[0], self.position[1])
@@ -1526,17 +1530,18 @@ class Location:
         if entity not in self.entities:
             if isinstance(entity, str):  # if entity is not an Entity object, but a string - load from data
                 entity = dataset.get_entity(entity)
+                entity.location = self  # update entity location
                 self.entities.add(entity)
                 self.reobserve_entity(entity)
             else:
+                entity.location = self  # update entity location
                 self.entities.add(entity)
-            entity.location = self  # update entity location
             if isinstance(entity, Actor):  # check if entity is an Actor
                 self.actors.append(entity)  # add it to Actors list
             if isinstance(entity, Inventory):  # check if entity has inventory
                 for item in entity.inventory:  # register every item
                     self.reg_entity(item)
-            events.Event('location', {'type': 'entity_registered', 'entity': entity})  # fire an event
+            events.Event(self, {'type': 'entity_registered', 'entity': entity})  # fire an event
         return entity
 
     def place_entity(self, entity, x, y):
@@ -1555,14 +1560,14 @@ class Location:
                         seer.compute_fov()
             if entity.occupies_tile or entity.pass_cost != 1:  # if entity blocks or impairs movement
                 self.path_map_update(x, y)  # update path map
-            events.Event('location', {'type': 'entity_placed', 'entity': entity})  # fire an event
+            events.Event(self, {'type': 'entity_placed', 'entity': entity})  # fire an event
             return entity
         else:
             raise Exception('Attempted to place entity outside of location.', entity.name)
 
     def remove_entity(self, entity):
         """ Method that removes entity from location """
-        events.Event('location', {'type': 'entity_removed', 'entity': entity})  # fire an event
+        events.Event(self, {'type': 'entity_removed', 'entity': entity})  # fire an event
         # remove entity from cell
         entity.location.cells[entity.position[0]][entity.position[1]].entities.remove(entity)
         if isinstance(entity, Seer):  # check if entity is a Seer
