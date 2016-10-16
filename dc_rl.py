@@ -116,7 +116,7 @@ elif main_menu_choice[0] == 'New Game':
                                             ,
                                             'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
                                             ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
-                                            'such warrior, proficient in melee combat and wearing a set of armor.'
+                                            'such warrior, proficient4 in melee combat and wearing a set of armor.'
                                             ,
                                             'Mercenaries from distant Northern country called Gantra are well-known ' +
                                             'as trustworthy soldiers. One of them - with your sturdy crossbow' +

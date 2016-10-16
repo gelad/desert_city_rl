@@ -214,10 +214,11 @@ class BattleEntity(Entity):
                 if isinstance(self, Equipment):  # shield blocking if BE has equipment
                     if 'ignore_shield' not in strike.mods:
                         shield = None
-                        for shield in self.equipment.values():  # check if any shields equipped
-                            if shield:
-                                if isinstance(shield, ItemShield):
-                                    if shield.durability > 0:
+                        for item in self.equipment.values():  # check if any shields equipped
+                            if item:
+                                if isinstance(item, ItemShield):
+                                    if item.durability > 0:
+                                        shield = item
                                         break  # shield found - break
                         if shield:  # if valid shield found
                             dmg_before_block = damage  # remember damage before block
