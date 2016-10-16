@@ -36,7 +36,9 @@ class Condition:
             else:
                 return False
         if self.condition == 'MOVED_ON':  # MOVED_ON condition
-            if kwargs['owner'].position == kwargs['entity'].position:  # check if positions of owner and entity match
+            # check if positions and locations of owner and entity match
+            if kwargs['owner'].position == kwargs['entity'].position and \
+                            kwargs['owner'].location == kwargs['entity'].location:
                 return True
             else:
                 return False
@@ -269,10 +271,8 @@ class Ability(events.Observer):
                                                                reaction['dmg_type'], reaction['period'],
                                                                reaction['whole_time'], self.message_color,
                                                                reaction['stackable'])
-                                                        # doing pickle copy of effect to make every stack separate
+                # doing pickle copy of effect to make every stack separate
                 if isinstance(event_data['attacker'], game_logic.Player):  # if player applies - inform him of effect
                     game_logic.Game.add_message(event_data['target'].name.capitalize() + ' is ' +
                                                 reaction['effect'].eff.lower() + '.',
                                                 'PLAYER', self.message_color)
-
-
