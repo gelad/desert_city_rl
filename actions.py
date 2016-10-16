@@ -202,10 +202,10 @@ def act_deal_periodic_damage(action, register_call, act_mgr, target, effect,
     else:  # part that is executed when action fires
         if target:  # if target still exists
             if effect in target.effects:  # if effect still on target
-                damage_dealt = target.take_damage(damage, dmg_type)  # do damage
-                if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
-                    game_logic.Game.add_message(effect.eff.capitalize() + ': ' + str(damage_dealt) + ' damage.',
-                                                'PLAYER', message_color)
+                strike = game_logic.Strike(strike_type='periodic', damage=damage, dmg_type=dmg_type)
+                damage_dealt = target.take_strike(strike=strike)  # strike
+                game_logic.Game.add_message(effect.eff.capitalize() + ': ' + str(damage_dealt) + ' damage.',
+                                            'PLAYER', message_color)
                 act_mgr.register_action(whole_time, act_deal_periodic_damage, act_mgr, target, effect,
                                         damage, dmg_type, period, whole_time, message_color, stackable)  # apply next tick of damage
 

@@ -155,25 +155,48 @@ class Ability(events.Observer):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             if reaction['target'] == 'attacker':  # if target is attacker
-                damage_dealt = self.owner.deal_damage(event_data['attacker'], reaction['damage'], reaction['dmg_type'])
+                if 'strike_type' in reaction:  # determine strike type
+                    strike_type = reaction['strike_type']
+                else:
+                    strike_type = 'default'
+                strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
+                                           dmg_type=reaction['dmg_type'])
+                damage_dealt = self.owner.land_strike(strike=strike, target=event_data['target'])  # land strike
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['attacker'].name + ' takes ' + str(damage_dealt) + ' ' +
                     str(reaction['dmg_type']) + ' damage!', 'PLAYER', self.message_color)
             if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
-                damage_dealt = self.owner.deal_damage(event_data['target'], reaction['damage'], reaction['dmg_type'])
+                if 'strike_type' in reaction:
+                    strike_type = reaction['strike_type']
+                else:
+                    strike_type = 'default'
+                strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
+                                           dmg_type=reaction['dmg_type'])
+                damage_dealt = self.owner.land_strike(strike=strike, target=event_data['target'])  # land strike
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['target'].name + ' takes ' + str(damage_dealt) + ' ' +
                     reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
             if reaction['target'] == 'projectile_hit_entity':  # if target is hit by projectile
                 if isinstance(event_data['target'], game_logic.BattleEntity):  # if target is a damageable BE
                     # deal damage
-                    damage_dealt = event_data['target'].take_damage(reaction['damage'], reaction['dmg_type'],
-                                                                    event_data['attacker'])
+                    if 'strike_type' in reaction:
+                        strike_type = reaction['strike_type']
+                    else:
+                        strike_type = 'projectile'
+                    strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
+                                               dmg_type=reaction['dmg_type'])
+                    damage_dealt = event_data['target'].take_strike(strike=strike, attacker=event_data['attacker'])
                     game_logic.Game.add_message(
                         self.name + ': ' + event_data['target'].name + ' takes ' + str(damage_dealt) + ' ' +
                         reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
             if reaction['target'] == 'mover':  # if target is mover
-                damage_dealt = self.owner.deal_damage(event_data['entity'], reaction['damage'], reaction['dmg_type'])
+                if 'strike_type' in reaction:  # determine strike type
+                    strike_type = reaction['strike_type']
+                else:
+                    strike_type = 'default'
+                strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
+                                           dmg_type=reaction['dmg_type'])
+                damage_dealt = self.owner.land_strike(strike=strike, target=event_data['entity'])  # land strike
                 game_logic.Game.add_message(
                     self.name + ': ' + event_data['entity'].name + ' takes ' + str(damage_dealt) + ' ' +
                     str(reaction['dmg_type']) + ' damage!', 'PLAYER', self.message_color)

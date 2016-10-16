@@ -129,6 +129,18 @@ class Entity:
         return magn
 
 
+class Strike:
+    """ Class for strike - damage, dmg_type, strike type, modificators """
+    def __init__(self, strike_type, damage=0, dmg_type='pure', mods=None):
+        self.strike_type = strike_type  # type of strike - melee, projectile, dot_tick etc
+        self.damage = damage  # damage value
+        self.dmg_type = dmg_type  # damage type
+        if mods:  # strike modificators dict
+            self.mods = mods
+        else:
+            self.mods = {}
+
+
 class BattleEntity(Entity):
     """
         Mixin class, adds combat related functionality to the Entity.
@@ -170,35 +182,53 @@ class BattleEntity(Entity):
             self._hp = result_hp
 
     def take_damage(self, damage, dmg_type='pure', attacker=None):
-        """ This method should be called if entity is damaged
-        :param dmg_type: damage type
-        :param damage: damage ammount
-        :param attacker: Entity, that inflicted damage
-        """
-        try:  # if damage is (min, max) tuple
-            random.seed()
-            min_dmg = damage[0]
-            max_dmg = damage[1]
-            damage = random.randint(min_dmg, max_dmg)
-        except TypeError:
-            pass
-        if dmg_type == 'pure':  # if 'pure' damage inflict it without any protection
-            resulting_damage = damage
+        """ This method should be called if entity is damaged """
+        self.hp -= damage
+        # fire an Entity event
+        events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': damage, 'dmg_type': dmg_type})
+        # fire location event
+        events.Event('location', {'type': 'entity_damaged', 'attacker': attacker,
+                                  'target': self, 'damage': damage, 'dmg_type': dmg_type})
+        if self.hp <= 0 and not self.dead:  # check if self is < 0 hp and not dead
+            self.dead = True
+            self.location.dead.append(self)  # add BE to dead list, waiting for removal
+        return damage
+
+    def deal_damage(self, target, damage, dmg_type):
+        """ Method for dealing damage """
+        if isinstance(target, BattleEntity):
+            damage = determine_number(damage)
+            return target.take_damage(damage=damage, dmg_type=dmg_type, attacker=self)  # inflict that damage to target
         else:
-            if isinstance(self, Equipment):  # shield blocking if BE has equipment
-                shield = None
-                for shield in self.equipment.values():  # check if any shields equipped
-                    if shield:
-                        if isinstance(shield, ItemShield):
-                            if shield.durability > 0:
-                                break  # shield found - break
-                if shield:  # if valid shield found
-                    dmg_before_block = damage  # remember damage before block
-                    damage = shield.block(damage=damage, dmg_type=dmg_type)  # damage is damage passed through shield
-                    if damage != dmg_before_block and isinstance(self, Player):
-                        msg = 'Your ' + shield.name + ' blocks ' + str(dmg_before_block - damage) + ' damage.'
-                        Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
+
+    def take_strike(self, strike, attacker=None):
+        """ Method that is called when BattleEntity receives a strike """
+        strike.damage = determine_number(strike.damage) # determine exact damage before striking
+        if strike.dmg_type == 'pure':  # if 'pure' damage inflict it without any protection
+            resulting_damage = strike.damage
+        else:
+            damage = strike.damage
+            dmg_type = strike.dmg_type
+            if strike.strike_type is 'melee' or strike.strike_type is 'projectile':
+                if isinstance(self, Equipment):  # shield blocking if BE has equipment
+                    if 'ignore_shield' not in strike.mods:
+                        shield = None
+                        for shield in self.equipment.values():  # check if any shields equipped
+                            if shield:
+                                if isinstance(shield, ItemShield):
+                                    if shield.durability > 0:
+                                        break  # shield found - break
+                        if shield:  # if valid shield found
+                            dmg_before_block = damage  # remember damage before block
+                            # damage is damage passed through shield
+                            damage = shield.block(damage=damage, dmg_type=dmg_type)
+                            if damage != dmg_before_block and isinstance(self, Player):  # TODO: move this elsewhere
+                                msg = 'Your ' + shield.name + ' blocks ' + str(dmg_before_block - damage) + ' damage.'
+                                Game.add_message(msg, 'PLAYER', [255, 255, 255])
             protection = self.get_protection(dmg_type)  # get (armor, block) tuple
+            if protection[0] > 0 and 'ignore_protection' in strike.mods:
+                protection = (0, 0)
             # at 100 armor - 50% reduction
             if protection[0] == -100:  # to prevent division by zero
                 reduce = protection[0]
@@ -207,33 +237,22 @@ class BattleEntity(Entity):
             resulting_damage = ceil(damage * (1 - reduce) - protection[1])
         if resulting_damage < 0:
             resulting_damage = 0
-        self.hp -= resulting_damage
-        # fire an Entity event
-        events.Event(self, {'type': 'damaged', 'attacker': attacker, 'damage': resulting_damage, 'dmg_type': dmg_type})
-        # fire location event
-        events.Event('location', {'type': 'entity_damaged', 'attacker': attacker,
-                                  'target': self, 'damage': resulting_damage, 'dmg_type': dmg_type})
-        if self.hp <= 0 and not self.dead:  # check if self is alive and < 0 hp
-            self.dead = True
-            self.location.dead.append(self)  # add BE to dead list, waiting for removal
-        return resulting_damage
+        # if resulting_damage > 0:  # if resulting damage above 0
+        return self.take_damage(damage=resulting_damage, dmg_type=strike.dmg_type, attacker=attacker)  # take damage
 
-    def deal_damage(self, target, damage, dmg_type):
-        """ Method for dealing damage """
+    def land_strike(self, strike, target):
+        """ Method that lands a strike on target """
         if isinstance(target, BattleEntity):
-            return target.take_damage(damage=damage, dmg_type=dmg_type, attacker=self)  # inflict that damage to target
+            strike.damage = determine_number(strike.damage)  # determine exact damage before striking
+            # fire an Entity event before strike - can be modified by abilities
+            events.Event(target, {'type': 'before_strike', 'attacker': self, 'strike': strike})
+            return target.take_strike(strike=strike, attacker=self)  # inflict that strike to target
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
 
     def heal(self, heal, healer=None):
         """ This method should be called if entity is healed  """
-        try:  # if heal is (min, max) tuple
-            random.seed()
-            min_heal = heal[0]
-            max_heal = heal[1]
-            heal = random.randint(min_heal, max_heal)
-        except TypeError:
-            pass
+        heal = determine_number(heal)  # determine exact healing before striking
         hp_before = self.hp  # remember hp before heal to calculate actual healed ammount
         self.hp += heal  # add hp
         healed_hp = self.hp - hp_before
@@ -874,7 +893,9 @@ class UnguidedShotAI(UnguidedProjectileAI):
             for ef in self.owner.weapon.effects:
                 if ef.eff == 'INCREASE_RANGED_DAMAGE':
                     dmg += ef.magnitude
-            res_dmg = self.owner.launcher.deal_damage(something, dmg, dmg_type)
+            strike = Strike(strike_type='projectile', damage=dmg,
+                            dmg_type=dmg_type)
+            res_dmg = self.owner.launcher.land_strike(strike=strike, target=something)  # land strike
             Game.add_message(self.owner.name + ' hits ' + something.name + ' for ' + str(res_dmg) + ' damage!',
                              'PLAYER', [255, 255, 255])
         super(UnguidedShotAI, self)._hit(something)  # call parent _hit function
@@ -1105,8 +1126,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         if target:  # check if target exists
             dist_to_target = hypot(target.position[0] - self.position[0], target.position[1] - self.position[1])
             if dist_to_target <= 1.42:
-                dmg = self.damage
-                damage_dealt = self.deal_damage(target, dmg, self.dmg_type)  # deal damage
+                strike = Strike(strike_type='melee', damage=self.damage, dmg_type=self.dmg_type)
+                damage_dealt = self.land_strike(strike=strike, target=target)  # land melee strike
                 # fire Entity event
                 events.Event(self, {'type': 'hit_basic_attack', 'target': target, 'attacker': self,
                                     'damage': damage_dealt, 'dmg_type': self.dmg_type})
@@ -1168,7 +1189,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                     dmg = random.randint(min_dmg, max_dmg)
                 except TypeError:
                     pass
-                damage_dealt = self.deal_damage(target, dmg, dmg_type)  # deal damage
+                strike = Strike(strike_type='melee', damage=dmg, dmg_type=dmg_type)
+                damage_dealt = self.land_strike(strike=strike, target=target)  # land melee strike
                 # fire Entity event
                 events.Event(self, {'type': 'hit_weapon_attack', 'target': target,
                                     'damage': damage_dealt, 'dmg_type': dmg_type, 'weapon': weapon})
@@ -1673,6 +1695,18 @@ def weighted_choice(choices):
             return c
         upto += w
     assert False, "Shouldn't get here"
+
+
+def determine_number(dmg):
+    """ Function that determines number if it's a (min, max) tuple """
+    try:  # if damage is (min, max) tuple
+        random.seed()
+        min_dmg = dmg[0]
+        max_dmg = dmg[1]
+        dmg = random.randint(min_dmg, max_dmg)
+    except TypeError:  # if not a tuple - must be int
+        pass
+    return dmg
 
 
 def ranged_hit_probability(weapon_acc, weapon_maxrange, range_to_target, mods=None):
