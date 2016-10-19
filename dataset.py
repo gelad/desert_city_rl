@@ -430,11 +430,13 @@ def initialize():
                                                                   properties={'piercing': (1, 3), 'break_chance': 0.5},
                                                                   char='=', color=[0, 150, 0],
                                                                   charges=3, destroyed_after_use=True, weight=0.1)
+    cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
+    cond2 = abilities.Condition('TARGET_IS_CATEGORY', category='living')
     react = {'type': 'deal_periodic_damage', 'target': 'attacked_entity', 'damage': (0, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 5000,
              'stackable': False}
     abil = abilities.Ability(name='Poisoned arrow', owner=data_set['item_poisoned_arrow'],
-                             trigger='projectile_hit', conditions=[], reactions=[react],
+                             trigger='shot_hit', conditions=[cond1, ' and ', cond2], reactions=[react],
                              message_color=[0, 150, 0])
     data_set['item_poisoned_arrow'].add_ability(abil)
 
@@ -465,24 +467,29 @@ def initialize():
                              message_color=[255, 255, 255])
     data_set['item_javelin'].add_ability(abil)
 
+    # ==================================== MONSTERS ============================================================
     data_set['mob_mindless_body'] = game_logic.Fighter(name='Mindless body', data_id='mob_mindless_body', char='b',
                                     description='Shaking, dehydrated human body, raised by strange magic of the City.',
                                                        armor={'bashing': 0, 'slashing': 0, 'piercing': 0},
                                                        color=[109, 49, 9], hp=5, speed=100, sight_radius=14.5,
                                                        damage=(1, 2),
                                                        dmg_type='bashing', ai=game_logic.SimpleMeleeChaserAI(),
+                                                       categories={'living'},
                                                        weight=60)
 
     data_set['mob_scorpion'] = game_logic.Fighter(name='Scorpion', data_id='mob_scorpion',
                                                   description='Huge black scorpion, about 1 meter long.', char='s',
                                                   armor={'bashing': -50, 'slashing': 50, 'piercing': 50},
                                                   color=[5, 5, 5], hp=3, speed=100, sight_radius=14.5, damage=(1, 4),
-                                                  dmg_type='piercing', ai=game_logic.SimpleMeleeChaserAI(), weight=15)
+                                                  dmg_type='piercing', ai=game_logic.SimpleMeleeChaserAI(),
+                                                  categories={'living'}, weight=15)
+    cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
+    cond2 = abilities.Condition('TARGET_IS_CATEGORY', category='living')
     react = {'type': 'deal_periodic_damage', 'chance': 50, 'target': 'attacked_entity', 'damage': (1, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 10000,
              'stackable': False}
     abil = abilities.Ability(name='Poisonous stinger', owner=data_set['mob_scorpion'],
-                             trigger='hit_basic_attack', conditions=[], reactions=[react],
+                             trigger='hit_basic_attack', conditions=[cond1, ' and ', cond2], reactions=[react],
                              message_color=[0, 150, 0])
     data_set['mob_scorpion'].add_ability(abil)
 
@@ -490,13 +497,13 @@ def initialize():
                                                   description='A bipedal tiger with very sharp claws.', char='R',
                                                   armor={'bashing': 0, 'slashing': 0, 'piercing': 0},
                                                   color=[255, 127, 80], hp=8, speed=80, sight_radius=18.5,
-                                                  damage=(3, 7),
+                                                  damage=(3, 7), categories={'living'},
                                                   dmg_type='slashing', ai=game_logic.SimpleMeleeChaserAI(), weight=70)
 
     data_set['mob_ifrit'] = game_logic.Fighter(name='Ifrit', data_id='mob_ifrit',
                             description='A magical creature with human upper body floating over column of flame.',
                                                char='F', armor={'bashing': 100, 'slashing': 100, 'piercing': 100},
-                                               resist={'cold': -50, 'fire': 1000},
+                                               resist={'cold': -50, 'fire': 1000}, categories={'living', 'magical'},
                                                color=[255, 50, 0], hp=25, speed=100, sight_radius=18.5, damage=(3, 5),
                                                dmg_type='bashing', ai=game_logic.AbilityUserAI(), weight=100)
     data_set['mob_ifrit'].effects.append(effects.Effect('BLOCK_FIRE', 100))
@@ -514,7 +521,7 @@ def initialize():
                              message_color=[255, 0, 0])
     proj.add_ability(abil)
     # === end of projectile
-    cond = abilities.Condition('TARGET_IN_RANGE')
+
     react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'projectile': proj}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
@@ -528,7 +535,7 @@ def initialize():
                                                         armor={'bashing': 100, 'slashing': 100, 'piercing': 1000},
                                                         resist={'cold': -100, 'lightning': 1000},
                                                         color=[255, 255, 0], hp=2, speed=100, sight_radius=15.5,
-                                                        damage=(1, 2), dmg_type='lightning',
+                                                        damage=(1, 2), dmg_type='lightning', categories={'magical'},
                                                         ai=game_logic.AbilityUserAI(behavior='ranged',
                                                                                     properties={'preferred_range': 6}),
                                                         weight=1)
@@ -547,7 +554,7 @@ def initialize():
                                         description='Magic-formed sand, resembling a human figure about 3m high.',
                                                     armor={'bashing': 100, 'slashing': 75, 'piercing': 300},
                                                     color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5,
-                                                    damage=(6, 10),
+                                                    damage=(6, 10), categories={'golem', 'magical'},
                                                     dmg_type='bashing', ai=game_logic.SimpleMeleeChaserAI(), weight=300)
     data_set['mob_sand_golem'].effects.append(effects.Effect('BLOCK_BASHING', 2))
     data_set['mob_sand_golem'].effects.append(effects.Effect('BLOCK_SLASHING', 1))

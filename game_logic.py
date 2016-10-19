@@ -246,8 +246,10 @@ class BattleEntity(Entity):
         if isinstance(target, BattleEntity):
             strike.damage = determine_number(strike.damage)  # determine exact damage before striking
             # fire an Entity event before strike - can be modified by abilities
-            events.Event(target, {'type': 'before_strike', 'attacker': self, 'strike': strike})
-            return target.take_strike(strike=strike, attacker=self)  # inflict that strike to target
+            events.Event(self, {'type': 'before_strike', 'target': target, 'strike': strike})
+            res_dmg = target.take_strike(strike=strike, attacker=self)  # inflict that strike to target
+            events.Event(self, {'type': 'after_strike', 'target': target, 'strike': strike, 'damage': res_dmg})
+            return res_dmg
         else:
             raise Exception('Attempted to damage non-BattleEntity entity. ', self.name)
 
@@ -444,7 +446,7 @@ class Inventory(Entity):
     def drop_item(self, item):
         """ Item dropping method (in a location) """
         item.owner = None
-        item.abilities_set_owner(None)  # if it has abilities - set their owner
+        item.abilities_set_owner(item)  # if it has abilities - set their owner
         self.location.place_entity(item, self.position[0], self.position[1])  # place it on the map
         self.inventory.remove(item)
 
@@ -901,6 +903,8 @@ class UnguidedShotAI(UnguidedProjectileAI):
             strike = Strike(strike_type='projectile', damage=dmg,
                             dmg_type=dmg_type)
             res_dmg = self.owner.launcher.land_strike(strike=strike, target=something)  # land strike
+            events.Event(self.owner, {'type': 'shot_hit', 'target': something, 'strike': strike,
+                                      'attacker': self.owner.launcher, 'damage': res_dmg})
             Game.add_message(self.owner.name + ' hits ' + something.name + ' for ' + str(res_dmg) + ' damage!',
                              'PLAYER', [255, 255, 255])
         super(UnguidedShotAI, self)._hit(something)  # call parent _hit function
@@ -1382,10 +1386,12 @@ class Player(Fighter):
         Child class, adds player-specific functionality to Fighter.
     """
 
-    def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius, damage, weight):
+    def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius, damage, categories,
+                 properties, weight):
         # calling constructor of parent class
         Fighter.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color, hp=hp,
-                         speed=speed, sight_radius=sight_radius, damage=damage, ai=None, weight=weight)
+                         speed=speed, sight_radius=sight_radius, damage=damage, categories=categories,
+                         properties=properties, ai=None, weight=weight)
         # hit zones with percent to hit (monsters doesn't have them)
         self.hit_zones = [('HEAD', 10), ('BODY', 40), ('ARMS', 15), ('SHOULDERS', 15), ('LEGS', 15), ('FEET', 5)]
 
@@ -1672,7 +1678,8 @@ class Game:
         self.current_loc = generation.generate_loc('ruins', None, 200, 200)
         self.add_location(self.current_loc)
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
-                             color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1, weight=70)
+                             color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1,
+                             categories={'living'}, properties={}, weight=70)
         self.current_loc.place_entity(self.player, 0, 0)
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         #  self.current_loc.place_entity('mob_ifrit', 20, 20)

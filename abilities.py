@@ -20,29 +20,44 @@ class Condition:
 
     def evaluate(self, **kwargs):
         """ Method to evaluate condition, returning True or False """
-        if self.condition == 'OWNER_HP_PERCENT':  # OWNER_HP_PERCENT condition
+        if self.kwargs:  # if any arguments given on condition creation - add them
+            kwargs.update(self.kwargs)
+        if self.condition == 'TARGET_IS_CATEGORY':  # TARGET_IS_CATEGORY condition
+            category = self.kwargs['category']
+            try:
+                if category in kwargs['target'].categories:
+                    return True
+                else:
+                    return False
+            except AttributeError:  # if no categories at all - False
+                return False
+        elif self.condition == 'OWNER_HP_PERCENT':  # OWNER_HP_PERCENT condition
             sign = self.kwargs['sign']
             number = self.kwargs['number']
             return eval(
                 str(kwargs['owner'].hp / kwargs['owner'].maxhp) + sign + str(number))  # check hp percent condition
-        if self.condition == 'EQUIPPED' and kwargs['owner']:  # EQUIPPED condition
+        elif self.condition == 'DEALT_DAMAGE':  # DEALT_DAMAGE condition
+            sign = self.kwargs['sign']
+            number = self.kwargs['number']
+            return eval(str(kwargs['damage']) + sign + str(number))  # check damage condition
+        elif self.condition == 'EQUIPPED' and kwargs['owner']:  # EQUIPPED condition
             if kwargs['owner_item'] in kwargs['owner'].equipment.values():  # check if item equipped
                 return True
             else:
                 return False
-        if self.condition == 'USED':  # USED condition
+        elif self.condition == 'USED':  # USED condition
             if kwargs['owner_item'] == kwargs['item']:  # check if item used is item with ability
                 return True
             else:
                 return False
-        if self.condition == 'MOVED_ON':  # MOVED_ON condition
+        elif self.condition == 'MOVED_ON':  # MOVED_ON condition
             # check if positions and locations of owner and entity match
             if kwargs['owner'].position == kwargs['entity'].position and \
                             kwargs['owner'].location == kwargs['entity'].location:
                 return True
             else:
                 return False
-        if self.condition == 'TARGET_IN_RANGE':  # TARGET IN RANGE condition
+        elif self.condition == 'TARGET_IN_RANGE':  # TARGET IN RANGE condition
             if isinstance(kwargs['target'], game_logic.BattleEntity):  # if target is a BE
                 target = (kwargs['target'].position[0], kwargs['target'].position[1])
             else:  # if not - it must be a point tuple
@@ -53,7 +68,7 @@ class Condition:
                 return True
             else:
                 return False
-        if self.condition == 'MOVER_IS_A_BE':  # MOVER IS A BE condition
+        elif self.condition == 'MOVER_IS_A_BE':  # MOVER IS A BE condition
             if isinstance(kwargs['entity'], game_logic.BattleEntity):  # if target is a BE
                 return True
             else:

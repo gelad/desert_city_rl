@@ -138,6 +138,7 @@ elif main_menu_choice[0] == 'New Game':
     if class_choice[0] == 'Adventurer':
         game.player.add_item(game.current_loc.reg_entity('item_short_bow'))
         game.player.add_item(game.current_loc.reg_entity('item_bronze_tipped_arrow'))
+        game.player.add_item(game.current_loc.reg_entity('item_poisoned_arrow'))
         game.player.add_item(game.current_loc.reg_entity('item_dagger'))
         game.player.add_item(game.current_loc.reg_entity('item_firebolt_scroll'))
         game.player.add_item(game.current_loc.reg_entity('item_antidote_potion'))
