@@ -1043,13 +1043,12 @@ class ItemShield(Item):
         else:
             reduce = self_prot / (100 + self_prot)
         shield_damage = ceil(damage * (1 - reduce))  # calculate durability damage
-        # MAYBE randomize durability loss?
-        if shield_damage < 0:  # TODO: comment this sh*t
+        if shield_damage < 0:  # if shield damage negative - do not heal shield ;)
             shield_damage = 0
-        if shield_damage <= self.durability:
+        if shield_damage <= self.durability:  # if shield still holds - absorb full block
             blocked = block
             self.durability -= shield_damage
-        else:
+        else:  # if shield is destroyed by attack - absorb only part of damage
             blocked = shield_damage - self.durability
             if blocked > block:
                 blocked = block
@@ -1059,7 +1058,7 @@ class ItemShield(Item):
             passed = damage
         elif passed < 0:
             passed = 0
-        return passed
+        return passed  # return damage, passed through shield
 
 
 class ItemRangedWeapon(Item):
