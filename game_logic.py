@@ -452,7 +452,7 @@ class Inventory(Entity):
         """ Method that removes item from inventory, without placing it anywhere """
         if item in self.inventory:
             item.owner = None
-            item.abilities_set_owner(None)  # if it has abilities - set their owner
+            item.abilities_set_owner(item)  # if it has abilities - set their owner to item
             self.inventory.remove(item)
 
     def use_item(self, item, target=None):
@@ -953,8 +953,14 @@ class Item(Abilities, Entity):
         Entity.__init__(self, name=name, data_id=data_id, description=description, weight=weight, pass_cost=pass_cost,
                         char=char, color=color, occupies_tile=False, blocks_shots=0)
         self.owner = None  # owner of item - entity with inventory
-        self.categories = categories  # item categories - a potion, a sword, etc
-        self.properties = properties  # item properties - armor values, accuracy for weapons, etc
+        if categories:
+            self.categories = categories  # item categories - a potion, a sword, etc
+        else:
+            self.categories = set()
+        if properties:
+            self.properties = properties  # item properties - armor values, accuracy for weapons, etc
+        else:
+            self.properties = {}
         if equip_slots:  # equipment slots, in which item can be placed
             self.equip_slots = equip_slots
         else:  # by default - can be taken to hands
@@ -1108,7 +1114,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
     """
 
     def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius,
-                 damage, weight=0, dmg_type='bashing',
+                 damage, weight=0, dmg_type='bashing', categories=None, properties=None,
                  armor=None, resist=None, corpse='', equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
@@ -1123,6 +1129,14 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         Abilities.__init__(self)
         self.damage = damage  # damage from basic melee 'punch in da face' attack
         self.dmg_type = dmg_type  # damage type of basic attack
+        if categories:
+            self.categories = categories  # monster categories - living, undead, magical etc
+        else:
+            self.categories = set()
+        if properties:
+            self.properties = properties  # monster properties - stats, etc
+        else:
+            self.properties = {}
 
     def attack_melee_basic(self, target):
         """ Attack in melee with basic attack method (mostly for monsters)"""
