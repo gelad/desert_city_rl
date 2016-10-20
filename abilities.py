@@ -212,19 +212,7 @@ class Ability(events.Observer):
                                                             reaction['effect'].eff.upper() + ' effects.',
                                                             'PLAYER', self.message_color)
         if reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
-            if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
-                self.owner.location.action_mgr.register_action(1, actions.act_deal_periodic_damage,
-                                                               self.owner.location.action_mgr, event_data['target'],
-                                                               pickle.loads(pickle.dumps(reaction['effect'])),
-                                                               reaction['damage'],
-                                                               reaction['dmg_type'], reaction['period'],
-                                                               reaction['whole_time'], self.message_color,
-                                                               reaction['stackable'])
-                # doing pickle copy of effect to make every stack separate
-                if isinstance(event_data['attacker'], game_logic.Player):  # if player applies - inform him of effect
-                    game_logic.Game.add_message(event_data['target'].name.capitalize() + ' is ' +
-                                                reaction['effect'].eff.lower() + '.',
-                                                'PLAYER', self.message_color)
+            self.react_deal_periodic_damage(reaction=reaction, event_data=event_data)
 
     # ===========================================REACTIONS=================================================
     def react_deal_damage(self, reaction, event_data):
@@ -279,5 +267,22 @@ class Ability(events.Observer):
             game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
                                         reaction['effect'].description + ' for ' + str(reaction['time']) +
                                         ' ticks.', 'PLAYER', self.message_color)
+
+    def react_deal_periodic_damage(self, reaction, event_data):
+        """ Reaction, that applies periodic damage """
+        # if there will be different reaction targets - specify here
+        target = event_data['target']  # default target and attacker
+        attacker = event_data['attacker']
+        self.owner.location.action_mgr.register_action(1, actions.act_deal_periodic_damage,
+                                                       self.owner.location.action_mgr, target,
+                                                       pickle.loads(pickle.dumps(reaction['effect'])),
+                                                       reaction['damage'],
+                                                       reaction['dmg_type'], reaction['period'],
+                                                       reaction['whole_time'], self.message_color,
+                                                       reaction['stackable'])
+        # doing pickle copy of effect to make every stack separate
+        if isinstance(attacker, game_logic.Player):  # if player applies - inform him of effect
+            game_logic.Game.add_message(target.name.capitalize() + ' is ' + reaction['effect'].eff.lower() + '.',
+                                        'PLAYER', self.message_color)
 
 
