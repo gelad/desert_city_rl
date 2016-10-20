@@ -173,46 +173,18 @@ class Ability(events.Observer):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             self.react_deal_damage(reaction=reaction, event_data=event_data)
-        if reaction['type'] == 'launch_projectile':  # launch projectile reaction
+        elif reaction['type'] == 'launch_projectile':  # launch projectile reaction
             self.react_launch_projectile(reaction=reaction, event_data=event_data)
-        if reaction['type'] == 'heal':  # healing reaction
+        elif reaction['type'] == 'heal':  # healing reaction
             self.react_heal(reaction=reaction, event_data=event_data)
-        if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
+        elif reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
             self.react_apply_timed_effect(reaction=reaction, event_data=event_data)
-        if reaction['type'] == 'remove_effect':  # remove effect reaction
-            if reaction['target'] == 'item_owner':  # if target is owner of item
-                if reaction['effects_number'] == 'all':  # if all effects has to be removed
-                    for effect in self.owner.effects[:]:  # remove all such effects
-                        if effect.eff == reaction['effect'].eff:
-                            self.owner.effects.remove(effect)
-                    if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
-                        game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
-                                                    reaction['effect'].eff.upper() + ' effects.',
-                                                    'PLAYER', self.message_color)
-                else:  # if specific number of effects has to be removed
-                    # choose needed effects
-                    needed_effects = [e for e in self.owner.effects if e.eff == reaction['effect'].eff]
-                    if len(needed_effects) > 0:  # if there are
-                        # if effects to be removed number less than present effects
-                        if len(needed_effects) < reaction['effects_number']:
-                            # remove random effects
-                            for effect in random.sample(needed_effects, reaction['effects_number']):
-                                self.owner.effects.remove(effect)
-                            if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
-                                game_logic.Game.add_message(self.name.capitalize() + ': removed ' +
-                                                            str(len(needed_effects)) + ' ' +
-                                                            reaction['effect'].eff.upper() + ' effects.',
-                                                            'PLAYER', self.message_color)
-                        else:  # if not
-                            for effect in self.owner.effects[:]:  # remove all such effects
-                                if effect.eff == reaction['effect'].eff:
-                                    self.owner.effects.remove(effect)
-                            if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
-                                game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
-                                                            reaction['effect'].eff.upper() + ' effects.',
-                                                            'PLAYER', self.message_color)
-        if reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
+        elif reaction['type'] == 'remove_effect':  # remove effect reaction
+            self.react_remove_effect(reaction=reaction, event_data=event_data)
+        elif reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
             self.react_deal_periodic_damage(reaction=reaction, event_data=event_data)
+        else:
+            raise Exception('Unknown reaction - ' + reaction['type'])
 
     # ===========================================REACTIONS=================================================
     def react_deal_damage(self, reaction, event_data):
@@ -237,7 +209,7 @@ class Ability(events.Observer):
                                         ' ' + reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
         else:  # tried to deal damage to not BattleEntity
             game_logic.Game.add_message(
-                self.name + ': ' + event_data['entity'].name + ' attempted to deal damage to not BE.',
+                self.name + ': ' + target.name + ' attempted to deal damage to not BE.',
                 'DEBUG', self.message_color)
 
     def react_launch_projectile(self, reaction, event_data):
@@ -267,6 +239,40 @@ class Ability(events.Observer):
             game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
                                         reaction['effect'].description + ' for ' + str(reaction['time']) +
                                         ' ticks.', 'PLAYER', self.message_color)
+    
+    def react_remove_effect(self, reaction, event_data):
+        """ Reaction, that removes effects """
+        # if there will be different reaction targets - specify here
+        target = self.owner  # default
+        if reaction['effects_number'] == 'all':  # if all effects has to be removed
+            for effect in target.effects[:]:  # remove all such effects
+                if effect.eff == reaction['effect'].eff:
+                    target.effects.remove(effect)
+            if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
+                game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
+                                            reaction['effect'].eff.upper() + ' effects.', 'PLAYER', self.message_color)
+        else:  # if specific number of effects has to be removed
+            # choose needed effects
+            needed_effects = [e for e in target.effects if e.eff == reaction['effect'].eff]
+            if len(needed_effects) > 0:  # if there are
+                # if effects to be removed number less than present effects
+                if len(needed_effects) < reaction['effects_number']:
+                    # remove random effects
+                    for effect in random.sample(needed_effects, reaction['effects_number']):
+                        target.effects.remove(effect)
+                    if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
+                        game_logic.Game.add_message(self.name.capitalize() + ': removed ' +
+                                                    str(len(needed_effects)) + ' ' +
+                                                    reaction['effect'].eff.upper() + ' effects.',
+                                                    'PLAYER', self.message_color)
+                else:  # if not
+                    for effect in target.effects[:]:  # remove all such effects
+                        if effect.eff == reaction['effect'].eff:
+                            target.effects.remove(effect)
+                    if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
+                        game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
+                                                    reaction['effect'].eff.upper() + ' effects.',
+                                                    'PLAYER', self.message_color)
 
     def react_deal_periodic_damage(self, reaction, event_data):
         """ Reaction, that applies periodic damage """
