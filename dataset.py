@@ -157,12 +157,13 @@ def initialize():
     # === projectile
     proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='firebolt',
                                          description='An arrow of pure flame.', char='*', color=[255, 0, 0])
-    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (3, 6), 'dmg_type': 'fire'}
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (3, 6), 'dmg_type': 'fire'}
     abil = abilities.Ability(name='Ignite', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[255, 0, 0])
     proj.add_ability(abil)
     # === end of projectile
-    react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'projectile': proj}
+    react = {'type': 'launch_projectile', 'target': 'attacked_entity',  'projectile': proj}
     abil = abilities.Ability(name='Firebolt', owner=data_set['item_firebolt_scroll'],
                              trigger='used_on_target', conditions=[cond], reactions=[react],
                              message_color=[255, 0, 0])
@@ -182,7 +183,8 @@ def initialize():
     # === projectile
     proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='frostbolt',
                                          description='An arrow of freezing energy.', char='*', color=[100, 100, 255])
-    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (3, 6), 'dmg_type': 'cold'}
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (3, 6), 'dmg_type': 'cold'}
     abil = abilities.Ability(name='Freeze', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[100, 100, 255])
     proj.add_ability(abil)
@@ -211,7 +213,8 @@ def initialize():
                                                         categories={'armor', 'waist'}, char='~', color=[200, 0, 100],
                                                         equip_slots={'WAIST'}, weight=0.5)
     cond = abilities.Condition('EQUIPPED')
-    react = {'type': 'deal_damage', 'target': 'attacker', 'damage': 1, 'dmg_type': 'piercing'}
+    react = {'type': 'deal_damage', 'target': 'attacker', 'strike_type': 'melee',
+             'damage': 1, 'dmg_type': 'piercing'}
     abil = abilities.Ability(name='Barbs', owner=data_set['item_barbed_loincloth'],
                              trigger='damaged', conditions=[cond], reactions=[react],
                              message_color=[200, 0, 100])
@@ -448,7 +451,8 @@ def initialize():
                                                                          'throw_speed': 0.75},
                                                              char="'", color=[110, 110, 110],
                                                              charges=1, destroyed_after_use=True, weight=0.2)
-    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (1, 3), 'dmg_type': 'piercing'}
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (1, 3), 'dmg_type': 'piercing'}
     abil = abilities.Ability(name='Shank', owner=data_set['item_throwing_knife'],
                              trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[255, 255, 255])
@@ -461,7 +465,8 @@ def initialize():
                                                       properties={'break_chance': 0.3},
                                                       char=chr(92), color=[160, 50, 50],
                                                       charges=1, destroyed_after_use=True, weight=1.5)
-    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (2, 8), 'dmg_type': 'piercing'}
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (2, 8), 'dmg_type': 'piercing'}
     abil = abilities.Ability(name='Pierce', owner=data_set['item_javelin'],
                              trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[255, 255, 255])
@@ -507,7 +512,8 @@ def initialize():
                                                color=[255, 50, 0], hp=25, speed=100, sight_radius=18.5, damage=(3, 5),
                                                dmg_type='bashing', ai=game_logic.AbilityUserAI(), weight=100)
     data_set['mob_ifrit'].effects.append(effects.Effect('BLOCK_FIRE', 100))
-    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (3, 6), 'dmg_type': 'fire'}
+    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'strike_type': 'melee',
+             'damage': (3, 6), 'dmg_type': 'fire'}
     abil = abilities.Ability(name='Flaming fists', owner=data_set['mob_ifrit'], cooldown=500,
                              trigger='hit_basic_attack', conditions=[], reactions=[react],
                              message_color=[255, 50, 0])
@@ -522,7 +528,7 @@ def initialize():
     proj.add_ability(abil)
     # === end of projectile
 
-    react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'projectile': proj}
+    react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'strike_type': 'projectile', 'projectile': proj}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
     abil = abilities.Ability(name='Firebolt', owner=data_set['mob_ifrit'], cooldown=1000,

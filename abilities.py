@@ -172,52 +172,7 @@ class Ability(events.Observer):
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
-            if reaction['target'] == 'attacker':  # if target is attacker
-                if 'strike_type' in reaction:  # determine strike type
-                    strike_type = reaction['strike_type']
-                else:
-                    strike_type = 'default'
-                strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
-                                           dmg_type=reaction['dmg_type'])
-                damage_dealt = self.owner.land_strike(strike=strike, target=event_data['target'])  # land strike
-                game_logic.Game.add_message(
-                    self.name + ': ' + event_data['attacker'].name + ' takes ' + str(damage_dealt) + ' ' +
-                    str(reaction['dmg_type']) + ' damage!', 'PLAYER', self.message_color)
-            if reaction['target'] == 'attacked_entity':  # if target is attacked entity (by melee attack i.e. )
-                if 'strike_type' in reaction:
-                    strike_type = reaction['strike_type']
-                else:
-                    strike_type = 'default'
-                strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
-                                           dmg_type=reaction['dmg_type'])
-                damage_dealt = self.owner.land_strike(strike=strike, target=event_data['target'])  # land strike
-                game_logic.Game.add_message(
-                    self.name + ': ' + event_data['target'].name + ' takes ' + str(damage_dealt) + ' ' +
-                    reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
-            if reaction['target'] == 'projectile_hit_entity':  # if target is hit by projectile
-                if isinstance(event_data['target'], game_logic.BattleEntity):  # if target is a damageable BE
-                    # deal damage
-                    if 'strike_type' in reaction:
-                        strike_type = reaction['strike_type']
-                    else:
-                        strike_type = 'projectile'
-                    strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
-                                               dmg_type=reaction['dmg_type'])
-                    damage_dealt = event_data['target'].take_strike(strike=strike, attacker=event_data['attacker'])
-                    game_logic.Game.add_message(
-                        self.name + ': ' + event_data['target'].name + ' takes ' + str(damage_dealt) + ' ' +
-                        reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
-            if reaction['target'] == 'mover':  # if target is mover
-                if 'strike_type' in reaction:  # determine strike type
-                    strike_type = reaction['strike_type']
-                else:
-                    strike_type = 'default'
-                strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'],
-                                           dmg_type=reaction['dmg_type'])
-                damage_dealt = self.owner.land_strike(strike=strike, target=event_data['entity'])  # land strike
-                game_logic.Game.add_message(
-                    self.name + ': ' + event_data['entity'].name + ' takes ' + str(damage_dealt) + ' ' +
-                    str(reaction['dmg_type']) + ' damage!', 'PLAYER', self.message_color)
+            self.react_deal_damage(reaction=reaction, event_data=event_data)
         if reaction['type'] == 'launch_projectile':  # launch projectile reaction
             if reaction['target'] == 'attacked_entity':  # if target is attacked entity
                 if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
@@ -292,3 +247,31 @@ class Ability(events.Observer):
                     game_logic.Game.add_message(event_data['target'].name.capitalize() + ' is ' +
                                                 reaction['effect'].eff.lower() + '.',
                                                 'PLAYER', self.message_color)
+
+    # ===========================================REACTIONS=================================================
+    def react_deal_damage(self, reaction, event_data):
+        """ Reaction, that deals damage """
+        if 'strike_type' in reaction:  # determine strike type
+            strike_type = reaction['strike_type']
+        else:
+            strike_type = 'default'
+        strike = game_logic.Strike(strike_type=strike_type, damage=reaction['damage'], dmg_type=reaction['dmg_type'])
+        if reaction['target'] == 'projectile_hit_entity':  # if target is hit by projectile
+            target = event_data['target']
+            attacker = event_data['attacker']
+        elif reaction['target'] == 'mover':  # if target is mover
+            target = event_data['entity']
+            attacker = self.owner
+        else:  # default target and attacker
+            target = event_data['target']
+            attacker = self.owner
+        if isinstance(target, game_logic.BattleEntity):  # if target is a damageable BE
+            damage_dealt = attacker.land_strike(strike=strike, target=target)  # land strike
+            game_logic.Game.add_message(self.name + ': ' + target.name + ' takes ' + str(damage_dealt) +
+                                        ' ' + reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
+        else:  # tried to deal damage to not BattleEntity
+            game_logic.Game.add_message(
+                self.name + ': ' + event_data['entity'].name + ' attempted to deal damage to not BE.',
+                'DEBUG', self.message_color)
+
+
