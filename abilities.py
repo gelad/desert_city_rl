@@ -136,19 +136,8 @@ class Ability(events.Observer):
                     if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
                         if random.randint(1, 100) > reaction['chance']:  # take a chance
                             self.react(reaction, data)
-                            if self.cooldown > 0:  # if ability has cooldown
-                                self.ability_on_cd = True  # start cooldown
-                                self.ticks_to_cd = self.cooldown
-                            events.Event(self.owner,
-                                         {'type': 'ability_fired', 'ability': self})  # fire an ability event
-                            events.Event('location', {'type': 'ability_fired', 'ability': self})
                     else:  # if not - react
                         self.react(reaction, data)
-                        if self.cooldown > 0:  # if ability has cooldown
-                            self.ability_on_cd = True  # start cooldown
-                            self.ticks_to_cd = self.cooldown
-                        events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
-                        events.Event('location', {'type': 'ability_fired', 'ability': self})
 
     def conditions_met(self, data):
         """ Method that checks if conditions are met """
@@ -184,6 +173,11 @@ class Ability(events.Observer):
             self.react_deal_periodic_damage(reaction=reaction, event_data=event_data)
         else:
             raise Exception('Unknown reaction - ' + reaction['type'])
+        if self.cooldown > 0:  # if ability has cooldown
+            self.ability_on_cd = True  # start cooldown
+            self.ticks_to_cd = self.cooldown
+        events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
+        events.Event('location', {'type': 'ability_fired', 'ability': self})
 
     # ===========================================REACTIONS=================================================
     def react_deal_damage(self, reaction, event_data):
