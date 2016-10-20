@@ -168,7 +168,6 @@ class Ability(events.Observer):
                 expression += cond  # add '(', ')', 'and', 'or' etc
         return bool_eval.nested_bool_eval(expression)  # evaluate result expression and return
 
-    # TODO: decompose this method - separate each type of reaction to own method (or function)
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
