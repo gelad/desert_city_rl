@@ -143,6 +143,10 @@ elif main_menu_choice[0] == 'New Game':
         game.player.add_item(game.current_loc.reg_entity('item_antidote_potion'))
         game.player.add_item(game.current_loc.reg_entity('item_healing_potion'))
         game.player.add_item(game.current_loc.reg_entity('item_exploding_potion'))
+        game.player.add_item(game.current_loc.reg_entity('item_exploding_potion'))
+        game.player.add_item(game.current_loc.reg_entity('item_exploding_potion'))
+        game.player.add_item(game.current_loc.reg_entity('item_exploding_potion'))
+        game.player.add_item(game.current_loc.reg_entity('item_exploding_potion'))
     elif class_choice[0] == 'Warrior':
         game.player.add_item(game.current_loc.reg_entity('item_sabre'))
         game.player.add_item(game.current_loc.reg_entity('item_mail_armor'))

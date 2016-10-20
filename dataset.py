@@ -464,13 +464,15 @@ def initialize():
                                                                description='Unstable potion, that explodes if breaked.',
                                                                categories={'throwing', 'stackable', 'sticks_to_target'},
                                                                properties={'break_chance': 1,
-                                                                           'throw_speed': 0.75},
+                                                                           'throw_speed': 0.75,
+                                                                           'accuracy_thrown': 1},
                                                                char="!", color=[255, 127, 80],
                                                                charges=1, destroyed_after_use=True, weight=0.5)
-    react = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 3, 'include_center': True,
-             'target': 'projectile_hit_entity', 'strike_type': 'projectile', 'damage': (7, 15), 'dmg_type': 'bashing'}
-    abil = abilities.Ability(name='Boom', owner=data_set['item_exploding_potion'],
-                             trigger='projectile_hit', conditions=[], reactions=[react],
+    react1 = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 3, 'include_center': True,
+              'target': 'projectile_hit_entity', 'strike_type': 'projectile', 'damage': (7, 15), 'dmg_type': 'bashing'}
+    react2 = {'type': 'kill_entity', 'target': 'thrown'}
+    abil = abilities.Ability(name='BOOM!', owner=data_set['item_exploding_potion'],
+                             trigger='projectile_hit', conditions=[], reactions=[react1, react2],
                              message_color=[255, 255, 255])
     data_set['item_exploding_potion'].add_ability(abil)
 

@@ -163,6 +163,8 @@ class Ability(events.Observer):
             self.react_deal_damage(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'deal_damage_aoe':  # dealing damage in AOE reaction
             self.react_deal_damage_aoe(reaction=reaction, event_data=event_data)
+        elif reaction['type'] == 'kill_entity':  # removing entity reaction
+            self.react_kill_entity(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'launch_projectile':  # launch projectile reaction
             self.react_launch_projectile(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'heal':  # healing reaction
@@ -242,6 +244,14 @@ class Ability(events.Observer):
         # if there will be different reaction targets - specify here
         target = self.owner  # default
         self.owner.heal(reaction['heal'], target)
+
+    def react_kill_entity(self, reaction, event_data):
+        """ Reaction, that kills reaction target from location """
+        # if there will be different reaction targets - specify here
+        target = self.owner  # default
+        if reaction['target'] == 'thrown':
+            target = self.owner.thrown  # set target to thrown item
+        target.location.dead.append(target)
 
     def react_apply_timed_effect(self, reaction, event_data):
         """ Reaction, that applies a timed effect """

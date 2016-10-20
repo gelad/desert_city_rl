@@ -1588,7 +1588,8 @@ class Location:
         """ Method that removes entity from location """
         events.Event(self, {'type': 'entity_removed', 'entity': entity})  # fire an event
         # remove entity from cell
-        entity.location.cells[entity.position[0]][entity.position[1]].entities.remove(entity)
+        if entity.position:
+            entity.location.cells[entity.position[0]][entity.position[1]].entities.remove(entity)
         if isinstance(entity, Seer):  # check if entity is a Seer
             self.seers.remove(entity)  # remove from seers list
         if isinstance(entity, Actor):  # check if entity is an Actor
@@ -1612,13 +1613,17 @@ class Location:
             self.path_map_update(entity.position[0], entity.position[1])  # update path map
         entity.position = None
         entity.location = None
-        self.entities.remove(entity)  # remove from entities set
+        if entity in self.entities:
+            self.entities.remove(entity)  # remove from entities set
         del entity
 
     def reap(self):
         """ Method that removes all dead entities at the end of tick """
         for victim in self.dead[:]:
-            victim.death()
+            try:
+                victim.death()
+            except AttributeError:  # if no death method specified - just remove from location
+                self.remove_entity(victim)
             self.dead.remove(victim)
 
     def is_cell_transparent(self, x, y):
