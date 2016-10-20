@@ -137,7 +137,7 @@ def initialize():
                                                                char='?', color=[255, 255, 0],
                                                                charges=1, destroyed_after_use=True, weight=0.1)
     cond = abilities.Condition('USED')
-    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (10, 30), 'dmg_type': 'lightning'}
+    react = {'type': 'deal_damage', 'target': 'default', 'damage': (10, 30), 'dmg_type': 'lightning'}
     abil = abilities.Ability(name='Lightning', owner=data_set['item_lightning_scroll'],
                              trigger='used_on_target', conditions=[cond], reactions=[react],
                              message_color=[255, 255, 0])
@@ -163,7 +163,7 @@ def initialize():
                              message_color=[255, 0, 0])
     proj.add_ability(abil)
     # === end of projectile
-    react = {'type': 'launch_projectile', 'target': 'attacked_entity',  'projectile': proj}
+    react = {'type': 'launch_projectile', 'target': 'default',  'projectile': proj}
     abil = abilities.Ability(name='Firebolt', owner=data_set['item_firebolt_scroll'],
                              trigger='used_on_target', conditions=[cond], reactions=[react],
                              message_color=[255, 0, 0])
@@ -189,7 +189,7 @@ def initialize():
                              message_color=[100, 100, 255])
     proj.add_ability(abil)
     # === end of projectile
-    react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'projectile': proj}
+    react = {'type': 'launch_projectile', 'target': 'default', 'projectile': proj}
     abil = abilities.Ability(name='Frostbolt', owner=data_set['item_frostbolt_scroll'],
                              trigger='used_on_target', conditions=[cond], reactions=[react],
                              message_color=[100, 100, 255])
@@ -213,7 +213,7 @@ def initialize():
                                                         categories={'armor', 'waist'}, char='~', color=[200, 0, 100],
                                                         equip_slots={'WAIST'}, weight=0.5)
     cond = abilities.Condition('EQUIPPED')
-    react = {'type': 'deal_damage', 'target': 'attacker', 'strike_type': 'melee',
+    react = {'type': 'deal_damage', 'target': 'default', 'strike_type': 'melee',
              'damage': 1, 'dmg_type': 'piercing'}
     abil = abilities.Ability(name='Barbs', owner=data_set['item_barbed_loincloth'],
                              trigger='damaged', conditions=[cond], reactions=[react],
@@ -435,7 +435,7 @@ def initialize():
                                                                   charges=3, destroyed_after_use=True, weight=0.1)
     cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
     cond2 = abilities.Condition('TARGET_IS_CATEGORY', category='living')
-    react = {'type': 'deal_periodic_damage', 'target': 'attacked_entity', 'damage': (0, 2),
+    react = {'type': 'deal_periodic_damage', 'target': 'default', 'damage': (0, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 5000,
              'stackable': False}
     abil = abilities.Ability(name='Poisoned arrow', owner=data_set['item_poisoned_arrow'],
@@ -490,7 +490,7 @@ def initialize():
                                                   categories={'living'}, weight=15)
     cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
     cond2 = abilities.Condition('TARGET_IS_CATEGORY', category='living')
-    react = {'type': 'deal_periodic_damage', 'chance': 50, 'target': 'attacked_entity', 'damage': (1, 2),
+    react = {'type': 'deal_periodic_damage', 'chance': 50, 'target': 'default', 'damage': (1, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 10000,
              'stackable': False}
     abil = abilities.Ability(name='Poisonous stinger', owner=data_set['mob_scorpion'],
@@ -512,7 +512,7 @@ def initialize():
                                                color=[255, 50, 0], hp=25, speed=100, sight_radius=18.5, damage=(3, 5),
                                                dmg_type='bashing', ai=game_logic.AbilityUserAI(), weight=100)
     data_set['mob_ifrit'].effects.append(effects.Effect('BLOCK_FIRE', 100))
-    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'strike_type': 'melee',
+    react = {'type': 'deal_damage', 'target': 'default', 'strike_type': 'melee',
              'damage': (3, 6), 'dmg_type': 'fire'}
     abil = abilities.Ability(name='Flaming fists', owner=data_set['mob_ifrit'], cooldown=500,
                              trigger='hit_basic_attack', conditions=[], reactions=[react],
@@ -528,7 +528,7 @@ def initialize():
     proj.add_ability(abil)
     # === end of projectile
 
-    react = {'type': 'launch_projectile', 'target': 'attacked_entity', 'strike_type': 'projectile', 'projectile': proj}
+    react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile', 'projectile': proj}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
     abil = abilities.Ability(name='Firebolt', owner=data_set['mob_ifrit'], cooldown=1000,
@@ -548,7 +548,7 @@ def initialize():
     data_set['mob_lightning_wisp'].effects.append(effects.Effect('BLOCK_PIERCING', 100))
     data_set['mob_lightning_wisp'].effects.append(effects.Effect('BLOCK_LIGHTNING', 100))
     cond = abilities.Condition('TARGET_IN_RANGE')
-    react = {'type': 'deal_damage', 'target': 'attacked_entity', 'damage': (2, 4), 'dmg_type': 'lightning'}
+    react = {'type': 'deal_damage', 'target': 'default', 'damage': (2, 4), 'dmg_type': 'lightning'}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '8', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
     abil = abilities.Ability(name='Zap', owner=data_set['mob_lightning_wisp'], cooldown=300,
