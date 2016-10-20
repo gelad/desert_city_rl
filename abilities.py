@@ -161,6 +161,8 @@ class Ability(events.Observer):
         """ Method that converts reaction dicts to game actions """
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             self.react_deal_damage(reaction=reaction, event_data=event_data)
+        elif reaction['type'] == 'deal_damage_aoe':  # dealing damage in AOE reaction
+            self.react_deal_damage_aoe(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'launch_projectile':  # launch projectile reaction
             self.react_launch_projectile(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'heal':  # healing reaction
@@ -202,8 +204,27 @@ class Ability(events.Observer):
                                         ' ' + reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
         else:  # tried to deal damage to not BattleEntity
             game_logic.Game.add_message(
-                self.name + ': ' + target.name + ' attempted to deal damage to not BE.',
+                self.name + ': attempted to deal damage to not BE.',
                 'DEBUG', self.message_color)
+
+    def react_deal_damage_aoe(self, reaction, event_data):
+        """ Reaction, that deals damage in AOE """
+        # if reaction is AOE - apply reaction to all cells in specified area
+        if reaction['aoe'] == 'circle':
+            radius = reaction['radius']
+            include_center = reaction['include_center']
+            points = game_logic.circle_points(r=radius, include_center=include_center)  # get points in AOE
+            if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
+                target = (event_data['target'].position[0], event_data['target'].position[1])
+            else:  # if not - it must be a tuple
+                target = event_data['target']
+            for point in points:  # iterate through every point in AOE and deal damage to BattleEntities
+                cell = (point[0] + target[0], point[1] + target[1])
+                if self.owner.location.is_in_boundaries(cell[0], cell[1]):
+                    be = self.owner.location.cells[cell[0]][cell[1]].is_there_a(game_logic.BattleEntity)
+                    if be:
+                        event_data['target'] = be
+                        self.react_deal_damage(reaction, event_data)
 
     def react_launch_projectile(self, reaction, event_data):
         """ Reaction, that launches projectile """

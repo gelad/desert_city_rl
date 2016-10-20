@@ -448,7 +448,8 @@ def initialize():
                                                              description='A knife, balanced for quick throwing.',
                                                              categories={'throwing', 'stackable', 'sticks_to_target'},
                                                              properties={'break_chance': 0.3,
-                                                                         'throw_speed': 0.75},
+                                                                         'throw_speed': 0.75,
+                                                                         'accuracy_thrown': 1},
                                                              char="'", color=[110, 110, 110],
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
@@ -458,11 +459,27 @@ def initialize():
                              message_color=[255, 255, 255])
     data_set['item_throwing_knife'].add_ability(abil)
 
+    data_set['item_exploding_potion'] = game_logic.ItemCharges(name='exploding potion',
+                                                               data_id='item_exploding_potion',
+                                                               description='Unstable potion, that explodes if breaked.',
+                                                               categories={'throwing', 'stackable', 'sticks_to_target'},
+                                                               properties={'break_chance': 1,
+                                                                           'throw_speed': 0.75},
+                                                               char="!", color=[255, 127, 80],
+                                                               charges=1, destroyed_after_use=True, weight=0.5)
+    react = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 3, 'include_center': True,
+             'target': 'projectile_hit_entity', 'strike_type': 'projectile', 'damage': (7, 15), 'dmg_type': 'bashing'}
+    abil = abilities.Ability(name='Boom', owner=data_set['item_exploding_potion'],
+                             trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[255, 255, 255])
+    data_set['item_exploding_potion'].add_ability(abil)
+
     data_set['item_javelin'] = game_logic.ItemCharges(name='javelin',
                                                       data_id='item_javelin',
                                                       description='A short spear, made for throwing.',
                                                       categories={'throwing', 'stackable', 'sticks_to_target'},
-                                                      properties={'break_chance': 0.3},
+                                                      properties={'break_chance': 0.3,
+                                                                  'accuracy_thrown': 1},
                                                       char=chr(92), color=[160, 50, 50],
                                                       charges=1, destroyed_after_use=True, weight=1.5)
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',

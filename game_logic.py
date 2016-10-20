@@ -1250,9 +1250,9 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             else:  # if missed
                 radius = 1.5
             miss_circle = circle_points(radius, False)  # get points around target location
-            i = random.randrange(len(miss_circle))  # select random point
-            tx += miss_circle[i][0]
-            ty += miss_circle[i][1]
+            cell = random.sample(miss_circle, 1)[0]  # select random point
+            tx += cell[0]
+            ty += cell[1]
         weapon.shoot((tx, ty))
 
     def attack_throw(self, thrown, target):
@@ -1279,9 +1279,9 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             else:  # if missed
                 radius = 1.5
             miss_circle = circle_points(radius, False)  # get points around target location
-            i = random.randrange(len(miss_circle))  # select random point
-            tx += miss_circle[i][0]
-            ty += miss_circle[i][1]
+            cell = random.sample(miss_circle, 1)[0]  # select random point
+            tx += cell[0]
+            ty += cell[1]
         self.throw(thrown, (tx, ty), self.get_throw_range(thrown))
 
     def get_throw_range(self, item):
@@ -1755,14 +1755,15 @@ def ranged_hit_probability(weapon_acc, weapon_maxrange, range_to_target, mods=No
 
 def circle_points(r, include_center):
     """ Function that returns points within the circle at (0, 0). r - radius """
-    points = []
-    for x in range(int(r)):
-        for y in range(int(r)):
+    points = set()
+    for x in range(int(r) + 1):
+        for y in range(int(r) + 1):
             if x ** 2 + y ** 2 <= r ** 2:  # if point within the circle
-                points.append((x, y))  # add 4 points, because of symmetry
-                points.append((-x, -y))
-                points.append((-x, y))
-                points.append((x, -y))
-    if not include_center:
-        points.remove((0, 0))
+                if not (x == 0 and y == 0):
+                    points.add((x, y))  # add 4 points, because of symmetry
+                    points.add((-x, -y))
+                    points.add((-x, y))
+                    points.add((x, -y))
+    if include_center:
+        points.add((0, 0))
     return points
