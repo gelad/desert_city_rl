@@ -176,16 +176,9 @@ class Ability(events.Observer):
         if reaction['type'] == 'launch_projectile':  # launch projectile reaction
             self.react_launch_projectile(reaction=reaction, event_data=event_data)
         if reaction['type'] == 'heal':  # healing reaction
-            if reaction['target'] == 'item_owner':  # if target is item owner
-                self.owner.heal(reaction['heal'], self.owner)
+            self.react_heal(reaction=reaction, event_data=event_data)
         if reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
-            if reaction['target'] == 'item_owner':  # if target is owner of item
-                self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
-                                                               self.owner, reaction['effect'], self.message_color)
-                if isinstance(self.owner, game_logic.Player):  # if player uses - inform him of effect
-                    game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
-                                                reaction['effect'].description + ' for ' + str(reaction['time']) +
-                                                ' ticks.', 'PLAYER', self.message_color)
+            self.react_apply_timed_effect(reaction=reaction, event_data=event_data)
         if reaction['type'] == 'remove_effect':  # remove effect reaction
             if reaction['target'] == 'item_owner':  # if target is owner of item
                 if reaction['effects_number'] == 'all':  # if all effects has to be removed
@@ -261,12 +254,30 @@ class Ability(events.Observer):
 
     def react_launch_projectile(self, reaction, event_data):
         """ Reaction, that launches projectile """
+        # if there will be different reaction targets - specify here
         if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
             target = (event_data['target'].position[0], event_data['target'].position[1])
         else:  # if not - it must be a tuple
             target = event_data['target']
-        launcher = self.owner
+        launcher = self.owner  # default
         launcher.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
                                                      launcher, target, self.message_color)
+
+    def react_heal(self, reaction, event_data):
+        """ Reaction, that heals """
+        # if there will be different reaction targets - specify here
+        target = self.owner  # default
+        self.owner.heal(reaction['heal'], target)
+
+    def react_apply_timed_effect(self, reaction, event_data):
+        """ Reaction, that applies a timed effect """
+        # if there will be different reaction targets - specify here
+        target = self.owner  # default
+        self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
+                                                       target, reaction['effect'], self.message_color)
+        if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
+            game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
+                                        reaction['effect'].description + ' for ' + str(reaction['time']) +
+                                        ' ticks.', 'PLAYER', self.message_color)
 
 

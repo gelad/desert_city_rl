@@ -108,7 +108,7 @@ def initialize():
                                                            char='!', color=[255, 255, 0],
                                                            charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
-    react = {'type': 'apply_timed_effect', 'target': 'item_owner', 'time': 1000, 'effect': effects.Effect('HASTE', 50)}
+    react = {'type': 'apply_timed_effect', 'target': 'default', 'time': 1000, 'effect': effects.Effect('HASTE', 50)}
     abil = abilities.Ability(name='Haste', owner=data_set['item_haste_potion'],
                              trigger='used_on_self', conditions=[cond], reactions=[react],
                              message_color=[255, 255, 0])
@@ -121,9 +121,9 @@ def initialize():
                                                               char='!', color=[0, 150, 0],
                                                               charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
-    react1 = {'type': 'remove_effect', 'target': 'item_owner', 'effect': effects.Effect('POISONED', 0),
+    react1 = {'type': 'remove_effect', 'target': 'default', 'effect': effects.Effect('POISONED', 0),
               'effects_number': 'all'}
-    react2 = {'type': 'apply_timed_effect', 'target': 'item_owner', 'time': 500,
+    react2 = {'type': 'apply_timed_effect', 'target': 'default', 'time': 500,
               'effect': effects.Effect('RESIST_POISON', 500)}
     abil = abilities.Ability(name='Antidote', owner=data_set['item_antidote_potion'],
                              trigger='used_on_self', conditions=[cond], reactions=[react1, react2],
@@ -202,7 +202,7 @@ def initialize():
                                                              char='!', color=[255, 0, 0],
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
-    react = {'type': 'heal', 'target': 'item_owner', 'heal': 5}
+    react = {'type': 'heal', 'target': 'default', 'heal': 5}
     abil = abilities.Ability(name='Haste', owner=data_set['item_healing_potion'],
                              trigger='used_on_self', conditions=[cond], reactions=[react],
                              message_color=[0, 255, 0])
