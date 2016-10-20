@@ -174,22 +174,7 @@ class Ability(events.Observer):
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             self.react_deal_damage(reaction=reaction, event_data=event_data)
         if reaction['type'] == 'launch_projectile':  # launch projectile reaction
-            if reaction['target'] == 'attacked_entity':  # if target is attacked entity
-                if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
-                    target = (event_data['target'].position[0], event_data['target'].position[1])
-                else:  # if not - it must be a tuple
-                    target = event_data['target']
-                # register launch projectile action
-                self.owner.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
-                                                               self.owner, target, self.message_color)
-            if reaction['target'] == 'targeted_entity':  # if target is targeted entity (i.e. when player uses a scroll)
-                if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
-                    target = (event_data['target'].position[0], event_data['target'].position[1])
-                else:  # if not - it must be a tuple
-                    target = event_data['target']
-                # register launch projectile action
-                self.owner.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
-                                                               self.owner, target, self.message_color)
+            self.react_launch_projectile(reaction=reaction, event_data=event_data)
         if reaction['type'] == 'heal':  # healing reaction
             if reaction['target'] == 'item_owner':  # if target is item owner
                 self.owner.heal(reaction['heal'], self.owner)
@@ -273,5 +258,15 @@ class Ability(events.Observer):
             game_logic.Game.add_message(
                 self.name + ': ' + event_data['entity'].name + ' attempted to deal damage to not BE.',
                 'DEBUG', self.message_color)
+
+    def react_launch_projectile(self, reaction, event_data):
+        """ Reaction, that launches projectile """
+        if isinstance(event_data['target'], game_logic.Entity):  # if target is an entity - target cell with it
+            target = (event_data['target'].position[0], event_data['target'].position[1])
+        else:  # if not - it must be a tuple
+            target = event_data['target']
+        launcher = self.owner
+        launcher.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
+                                                     launcher, target, self.message_color)
 
 
