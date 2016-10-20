@@ -224,9 +224,15 @@ class Ability(events.Observer):
                 cell = (point[0] + target[0], point[1] + target[1])
                 if self.owner.location.is_in_boundaries(cell[0], cell[1]):
                     be = self.owner.location.cells[cell[0]][cell[1]].is_there_a(game_logic.BattleEntity)
-                    if be:
-                        event_data['target'] = be
-                        self.react_deal_damage(reaction, event_data)
+                    if be:  # if BE found
+                        conds_met = True  # conditions met flag - true by default
+                        event_data['target'] = be  # set target in event data to found BE
+                        if 'aoe_conditions' in reaction:
+                            conds = reaction['aoe_conditions']
+                            if not check_conditions(conditions=conds, data=event_data):
+                                conds_met = False
+                        if conds_met:
+                            self.react_deal_damage(reaction, event_data)
 
     def react_launch_projectile(self, reaction, event_data):
         """ Reaction, that launches projectile """
@@ -315,4 +321,15 @@ class Ability(events.Observer):
             game_logic.Game.add_message(target.name.capitalize() + ' is ' + reaction['effect'].eff.lower() + '.',
                                         'PLAYER', self.message_color)
 
+# ============================== UTILITY FUNCTIONS ===========================================
 
+
+def check_conditions(conditions, data):
+    """ Function that checks if conditions are met """
+    expression = ''
+    for cond in conditions:
+        if isinstance(cond, Condition):
+            expression += str(cond.evaluate(**data))  # add evaluation of condition result
+        else:
+            expression += cond  # add '(', ')', 'and', 'or' etc
+    return bool_eval.nested_bool_eval(expression)  # evaluate result expression and return
