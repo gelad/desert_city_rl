@@ -468,6 +468,7 @@ def initialize():
                                                                            'accuracy_thrown': 1},
                                                                char="!", color=[255, 127, 80],
                                                                charges=1, destroyed_after_use=True, weight=0.5)
+    # TODO: remove condition - explosion must hit walls
     cond_aoe = abilities.Condition('TARGET_IS_CATEGORY', category='living')
     react1 = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 2.5, 'include_center': True,
               'aoe_conditions': [cond_aoe], 'target': 'projectile_hit_entity', 'strike_type': 'projectile',

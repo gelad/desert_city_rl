@@ -54,11 +54,11 @@ Menus refactor - to easier make new ones. (DONE)
 Implement throwing. (DONE)
 Make shield item. (DONE)
 Stop poisonous arrows poisoning walls. (DONE)
+Make simple AOE explosions. (DONE)
 
 
 Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.
 Inform player if targeting failed.
-Make simple AOE explosions.
 Make ammo with abilities (exploding, freezing arrows, etc)
 Make menu lists scrollable.
 Make door-opening mobs.
