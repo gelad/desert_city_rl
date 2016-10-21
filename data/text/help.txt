@@ -1,0 +1,17 @@
+Arrow keys and Numpad 1-4, 6-9 - movement, target selection, etc.
+
+Numpad 5 - wait for 1 turn (time equivalent to 1 attack or 1 step).
+l - look around
+c - close door (choose direction with movement keys)
+s - smash (choose direction with movement keys)
+g - pick up item from tile you're standing on
+i - inventory menu
+e - equipped items menu
+w - wield (equip) item
+o - take off equipped item
+d - drop item from inventory
+u - use item from inventory
+t - throw item in hands
+f - shoot ranged weapon
+r - reload ranged weapon
+U - unload ranged weapon

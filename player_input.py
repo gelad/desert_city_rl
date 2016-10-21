@@ -18,8 +18,10 @@ def get_input(game):
             if event.type == 'KEYDOWN':
                 if event.key == 'ESCAPE':  # exiting the game
                     player_input.append('exit')
-                if event.key == 'ENTER':  # confirm some action (targeting, etc)
+                elif event.key == 'ENTER':  # confirm some action (targeting, etc)
                     player_input.append('confirm')
+                elif event.key == 'F1':  # show help information
+                    player_input.append('help')
                 elif event.key == 'UP' or event.key == 'KP8':  # movement
                     player_input.append('move_n')
                 elif event.key == 'DOWN' or event.key == 'KP2':
