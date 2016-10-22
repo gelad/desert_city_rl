@@ -1,0 +1,26 @@
+[
+  {
+    "py/tuple": [
+      "item_healing_potion",
+      50
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_haste_potion",
+      15
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_antidote_potion",
+      30
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_exploding_potion",
+      15
+    ]
+  }
+]

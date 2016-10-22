@@ -4,6 +4,9 @@
 
 import game_logic
 import fov_los_pf
+import dataset
+
+import jsonpickle
 
 import random
 from collections import namedtuple
@@ -62,44 +65,9 @@ def generate_loc(loc_type, settings, width, height):
                                 floor_cells.append((loc_cell_x, loc_cell_y))
                     item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for i in range(0, item_count):
-                        item_id = game_logic.weighted_choice([(game_logic.weighted_choice([('item_healing_potion', 50),
-                                                                                          ('item_haste_potion', 25),
-                                                                                          ('item_antidote_potion', 25)]),
-                                                               20),
-                                                              (game_logic.weighted_choice([('item_sabre', 20),
-                                                                                           ('item_dagger', 20),
-                                                                                           ('item_longsword', 15),
-                                                                                           ('item_bronze_maul', 15),
-                                                                                           ('item_mace', 15),
-                                                                                           ('item_assegai', 15)]),
-                                                               30),
-                                                              (game_logic.weighted_choice([('item_firebolt_scroll', 35),
-                                                                                           ('item_frostbolt_scroll', 35),
-                                                                                           ('item_lightning_scroll', 15),
-                                                                                           ('item_ring_poison_res', 5),
-                                                                                           ('item_ring_fire_res', 4),
-                                                                                           ('item_ring_cold_res', 3),
-                                                                                           ('item_ring_lightning_res', 3),]),
-                                                               10),
-                                                              ('item_misurka', 2), ('item_leather_cap', 3),
-                                                              ('item_mail_armor', 1), ('item_leather_armor', 3),
-                                                              ('item_iron_pauldrons', 2), ('item_leather_pauldrons', 2),
-                                                              ('item_iron_boots', 2), ('item_leather_boots', 2),
-                                                              ('item_iron_armguards', 2), ('item_leather_armguards', 3),
-                                                              ('item_mail_leggings', 1), ('item_leather_leggings', 2),
-                                                              ('item_wooden_buckler', 5),
-                                                              (game_logic.weighted_choice([('item_hunting_crossbow', 50),
-                                                                                          ('item_short_bow', 50)]),
-                                                               5),
-                                                              (game_logic.weighted_choice([('item_bronze_bolt', 50),
-                                                                                          ('item_bronze_tipped_arrow', 30),
-                                                                                          ('item_poisoned_arrow', 20)]),
-                                                               7),
-                                                              (game_logic.weighted_choice([('item_throwing_knife', 60),
-                                                                                           ('item_javelin', 40)]),
-                                                               3)])
+                        item = dataset.get_item_from_loot_list('house_default')
                         item_coords = floor_cells[random.randrange(len(floor_cells))]
-                        loc.place_entity(item_id, item_coords[0], item_coords[1])
+                        loc.place_entity(item, item_coords[0], item_coords[1])
                     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for m in range(0, mob_count):
                         mob_id = game_logic.weighted_choice([('mob_mindless_body', 55),

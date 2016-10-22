@@ -6,7 +6,9 @@ import effects
 import abilities
 import events
 
+import random
 import pickle
+
 import simplejson
 import jsonpickle
 
@@ -599,3 +601,27 @@ def get_entity(data_id):
 def get_tile(tile_id):
     """ Function that returns entity template by ID """
     return tile_set[tile_id]
+
+
+def get_item_from_loot_list(list_name):
+    """
+        Function that returns item from loot list (random item, based on weights in list)
+        Supports recursion - loot list can be supplied instead of item ID
+    """
+    file = open('data/loot_lists/' + list_name + '.json', 'r')  # load and decode loot list
+    loot_list = jsonpickle.loads(file.read())
+    file.close()
+    chosen = game_logic.weighted_choice(loot_list)
+    if chosen == 'None':  # None string can be supplied to return no item
+        chosen_item = None
+    elif chosen[0:5] == 'list_':  # if chosen is another list - choose from it
+        chosen_item = get_item_from_loot_list(chosen[5:])  # <--- recursion here!
+    elif chosen[0:4] == 'qty_':  # if items quantity specified - now only for ItemCharges
+        min_qty = int(chosen[chosen.find('(')+1:chosen.find(';')])
+        max_qty = int(chosen[chosen.find(';')+1:chosen.find(')')])
+        quantity = random.randint(min_qty, max_qty)
+        chosen_item = get_entity(chosen[chosen.find(')')+1:])
+        chosen_item.charges = quantity  # item must be ItemCharges
+    else:
+        chosen_item = get_entity(chosen)
+    return chosen_item

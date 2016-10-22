@@ -1,0 +1,20 @@
+[
+  {
+    "py/tuple": [
+      "list_leather_armor",
+      50
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_iron_armor",
+      30
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_wooden_buckler",
+      20
+    ]
+  }
+]
