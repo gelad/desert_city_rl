@@ -501,10 +501,9 @@ def initialize():
                                                                            'accuracy_thrown': 1},
                                                                char="!", color=[255, 127, 80],
                                                                charges=1, destroyed_after_use=True, weight=0.5)
-    # TODO: remove condition - explosion must hit walls
-    cond_aoe = abilities.Condition('TARGET_IS_CATEGORY', category='living')
+    # cond_aoe = abilities.Condition('TARGET_IS_CATEGORY', category='living')  if needed add 'aoe_conditions': [cond_aoe],
     react1 = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 2.5, 'include_center': True,
-              'aoe_conditions': [cond_aoe], 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+              'target': 'projectile_hit_entity', 'strike_type': 'projectile',
               'damage': (7, 15), 'dmg_type': 'bashing'}
     react2 = {'type': 'kill_entity', 'target': 'thrown'}
     abil = abilities.Ability(name='BOOM!', owner=data_set['item_explosive_potion'],
@@ -573,12 +572,13 @@ def initialize():
                              trigger='hit_basic_attack', conditions=[], reactions=[react],
                              message_color=[255, 50, 0])
     data_set['mob_ifrit'].add_ability(abil)
-    # TODO: remake Firebolt into Fireball when explosions will be done
     # === projectile
-    proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='firebolt',
-                                         description='An arrow of pure flame.', char='*', color=[255, 0, 0])
-    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'damage': (1, 5), 'dmg_type': 'fire'}
-    abil = abilities.Ability(name='Ignite', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
+    proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='fireball',
+                                         description='Explosive ball of pure flame.', char='*', color=[255, 0, 0])
+    react = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 2, 'include_center': True,
+             'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (1, 5), 'dmg_type': 'fire'}
+    abil = abilities.Ability(name='Fireball!', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[255, 0, 0])
     proj.add_ability(abil)
     # === end of projectile
