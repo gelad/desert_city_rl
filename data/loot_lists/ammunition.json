@@ -2,7 +2,13 @@
   {
     "py/tuple": [
       "qty_(1;6)item_bronze_bolt",
-      50
+      40
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_explosive_bolt",
+      10
     ]
   },
   {

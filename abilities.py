@@ -257,6 +257,8 @@ class Ability(events.Observer):
         target = self.owner  # default
         if reaction['target'] == 'thrown':
             target = self.owner.thrown  # set target to thrown item
+        if reaction['target'] == 'ammo':
+            target = self.owner.ammo  # set target to ammo item
         target.location.dead.append(target)
 
     def react_apply_timed_effect(self, reaction, event_data):

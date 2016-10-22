@@ -457,8 +457,24 @@ def initialize():
              'effect': effects.Effect('SLOWED', 200)}
     abil = abilities.Ability(name='Frost arrow', owner=data_set['item_frost_arrow'],
                              trigger='shot_hit', conditions=[cond1], reactions=[react],
-                             message_color=[0, 150, 0])
+                             message_color=[100, 100, 255])
     data_set['item_frost_arrow'].add_ability(abil)
+
+    data_set['item_explosive_bolt'] = game_logic.ItemCharges(name='explosive bolt',
+                                                             data_id='item_explosive_bolt',
+                    description='Crossbow bolt with attached alchemical explosive head.',
+                                                             categories={'bolt', 'stackable', 'sticks_to_target'},
+                                                             properties={'bashing': (0, 3), 'break_chance': 1},
+                                                             char='=', color=[255, 127, 80],
+                                                             charges=1, destroyed_after_use=True, weight=0.1)
+    react1 = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 2.5, 'include_center': True,
+              'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+              'damage': (7, 15), 'dmg_type': 'bashing'}
+    react2 = {'type': 'kill_entity', 'target': 'ammo'}
+    abil = abilities.Ability(name='BOOM!', owner=data_set['item_explosive_bolt'],
+                             trigger='projectile_hit', conditions=[], reactions=[react1, react2],
+                             message_color=[255, 127, 80])
+    data_set['item_explosive_bolt'].add_ability(abil)
 
     data_set['item_throwing_knife'] = game_logic.ItemCharges(name='throwing knife',
                                                              data_id='item_throwing_knife',

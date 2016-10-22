@@ -1256,6 +1256,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             cell = random.sample(miss_circle, 1)[0]  # select random point
             tx += cell[0]
             ty += cell[1]
+            msg = self.name + 'ranged_miss,hit_cell=' + str((tx, ty))
+            Game.add_message(msg, 'DEBUG', [255, 255, 255])
         weapon.shoot((tx, ty))
 
     def attack_throw(self, thrown, target):
@@ -1285,6 +1287,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             cell = random.sample(miss_circle, 1)[0]  # select random point
             tx += cell[0]
             ty += cell[1]
+            msg = self.name + 'throw_miss,hit_cell=' + str((tx, ty))
+            Game.add_message(msg, 'DEBUG', [255, 255, 255])
         self.throw(thrown, (tx, ty), self.get_throw_range(thrown))
 
     def get_throw_range(self, item):
