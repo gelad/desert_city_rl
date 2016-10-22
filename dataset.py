@@ -445,6 +445,21 @@ def initialize():
                              message_color=[0, 150, 0])
     data_set['item_poisoned_arrow'].add_ability(abil)
 
+    data_set['item_frost_arrow'] = game_logic.ItemCharges(name='frost arrow',
+                                                          data_id='item_frost_arrow',
+                                                          description='Magical arrow, that deals cold damage and slows target.',
+                                                          categories={'arrow', 'stackable', 'sticks_to_target'},
+                                                          properties={'cold': (2, 5), 'break_chance': 0.7},
+                                                          char='=', color=[100, 100, 255],
+                                                          charges=1, destroyed_after_use=True, weight=0.1)
+    cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
+    react = {'type': 'apply_timed_effect', 'target': 'projectile_hit_entity', 'time': 1000,
+             'effect': effects.Effect('SLOWED', 200)}
+    abil = abilities.Ability(name='Frost arrow', owner=data_set['item_frost_arrow'],
+                             trigger='shot_hit', conditions=[cond1], reactions=[react],
+                             message_color=[0, 150, 0])
+    data_set['item_frost_arrow'].add_ability(abil)
+
     data_set['item_throwing_knife'] = game_logic.ItemCharges(name='throwing knife',
                                                              data_id='item_throwing_knife',
                                                              description='A knife, balanced for quick throwing.',
@@ -461,8 +476,8 @@ def initialize():
                              message_color=[255, 255, 255])
     data_set['item_throwing_knife'].add_ability(abil)
 
-    data_set['item_exploding_potion'] = game_logic.ItemCharges(name='exploding potion',
-                                                               data_id='item_exploding_potion',
+    data_set['item_explosive_potion'] = game_logic.ItemCharges(name='explosive potion',
+                                                               data_id='item_explosive_potion',
                                                                description='Unstable potion, that explodes if breaked.',
                                                                categories={'throwing', 'stackable', 'sticks_to_target'},
                                                                properties={'break_chance': 1,
@@ -476,10 +491,10 @@ def initialize():
               'aoe_conditions': [cond_aoe], 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
               'damage': (7, 15), 'dmg_type': 'bashing'}
     react2 = {'type': 'kill_entity', 'target': 'thrown'}
-    abil = abilities.Ability(name='BOOM!', owner=data_set['item_exploding_potion'],
+    abil = abilities.Ability(name='BOOM!', owner=data_set['item_explosive_potion'],
                              trigger='projectile_hit', conditions=[], reactions=[react1, react2],
                              message_color=[255, 127, 80])
-    data_set['item_exploding_potion'].add_ability(abil)
+    data_set['item_explosive_potion'].add_ability(abil)
 
     data_set['item_javelin'] = game_logic.ItemCharges(name='javelin',
                                                       data_id='item_javelin',

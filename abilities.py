@@ -263,6 +263,8 @@ class Ability(events.Observer):
         """ Reaction, that applies a timed effect """
         # if there will be different reaction targets - specify here
         target = self.owner  # default
+        if reaction['target'] == 'projectile_hit_entity':
+            target = event_data['target']
         self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
                                                        target, reaction['effect'], self.message_color)
         if isinstance(target, game_logic.Player):  # if player uses - inform him of effect

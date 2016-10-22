@@ -336,7 +336,10 @@ class Actor(Entity):
         haste = self.get_effect('HASTE')
         if haste == 0:  # if no haste effect
             haste = 100  # set haste coefficient to 1
-        return int(self.base_speed * haste / 100)
+        slow = self.get_effect('SLOWED')
+        if slow == 0:  # if no slow effect
+            slow = 100  # set slow coefficient to 1
+        return int(self.base_speed * (haste / 100) * (slow / 100))
 
     def move(self, dx, dy):
         """ Movement method, checks if it is allowed to move. For player, monster movement. """
