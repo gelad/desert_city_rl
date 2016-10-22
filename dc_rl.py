@@ -5,17 +5,12 @@ import events
 import dataset
 
 import pickle
-
 import os
 import time
 import gc
 import zlib
 
-# TODO: load settings from file
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
-MAP_WIDTH = 50
-MAP_HEIGHT = 50
+import jsonpickle
 
 
 # =========================== global functions, save/load, loop, etc =================================
@@ -93,7 +88,10 @@ def main_loop():
 
 # HERE PROGRAM RUN STARTS
 dataset.initialize()
-graphics = render.Graphics(screen_width=SCREEN_WIDTH, screen_height=SCREEN_HEIGHT)
+settings_file = open('data/settings.json')  # open settings file
+settings = jsonpickle.loads(settings_file.read())  # load settings
+settings_file.close()
+graphics = render.Graphics(screen_width=settings['screen_width'], screen_height=settings['screen_height'])
 main_menu_options = []
 loaded = load_game()  # try to load game
 if loaded:
@@ -116,7 +114,7 @@ elif main_menu_choice[0] == 'New Game':
                                             ,
                                             'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
                                             ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
-                                            'such warrior, proficient4 in melee combat and wearing a set of armor.'
+                                            'such warrior, proficient in melee combat and wearing a set of armor.'
                                             ,
                                             'Mercenaries from distant Northern country called Gantra are well-known ' +
                                             'as trustworthy soldiers. One of them - with your sturdy crossbow' +
@@ -168,7 +166,8 @@ elif main_menu_choice[0] == 'New Game':
         game.player.add_item(game.current_loc.reg_entity('item_haste_potion'))
 elif main_menu_choice[0] == 'Exit':
     exit()
-main_window = ui.WindowMain(game, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, MAP_WIDTH, MAP_HEIGHT)
+main_window = ui.WindowMain(game, 0, 0, settings['screen_width'], settings['screen_height'],
+                            0, settings['map_width'], settings['map_height'])
 graphics.win_mgr.add_window(main_window)  # add main window to WinMgr
 graphics.win_mgr.active_window = main_window  # make it active
 main_loop()
