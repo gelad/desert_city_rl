@@ -130,40 +130,13 @@ elif main_menu_choice[0] == 'New Game':
                                             ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
                                             ' magic gift.'])
     game = game_logic.Game()  # start a new game
-    # TODO: need to make some templates for different starting classes (in dataset?)
     if not class_choice:  # if nothing selected (esc hit)
         quit()
-    if class_choice[0] == 'Adventurer':
-        game.player.add_item(game.current_loc.reg_entity('item_short_bow'))
-        game.player.add_item(game.current_loc.reg_entity('item_bronze_tipped_arrow'))
-        game.player.add_item(game.current_loc.reg_entity('item_dagger'))
-        game.player.add_item(game.current_loc.reg_entity('item_firebolt_scroll'))
-        game.player.add_item(game.current_loc.reg_entity('item_antidote_potion'))
-        game.player.add_item(game.current_loc.reg_entity('item_healing_potion'))
-    elif class_choice[0] == 'Warrior':
-        game.player.add_item(game.current_loc.reg_entity('item_sabre'))
-        game.player.add_item(game.current_loc.reg_entity('item_mail_armor'))
-        game.player.add_item(game.current_loc.reg_entity('item_misurka'))
-        game.player.add_item(game.current_loc.reg_entity('item_wooden_buckler'))
-        game.player.add_item(game.current_loc.reg_entity('item_javelin'))
-        game.player.add_item(game.current_loc.reg_entity('item_antidote_potion'))
-        game.player.add_item(game.current_loc.reg_entity('item_healing_potion'))
-    elif class_choice[0] == 'Gantra mercenary':
-        game.player.add_item(game.current_loc.reg_entity('item_leather_armor'))
-        game.player.add_item(game.current_loc.reg_entity('item_leather_cap'))
-        game.player.add_item(game.current_loc.reg_entity('item_hunting_crossbow'))
-        game.player.add_item(game.current_loc.reg_entity('item_bronze_bolt'))
-        game.player.add_item(game.current_loc.reg_entity('item_dagger'))
-        game.player.add_item(game.current_loc.reg_entity('item_antidote_potion'))
-        game.player.add_item(game.current_loc.reg_entity('item_healing_potion'))
-    elif class_choice[0] == 'Magic seeker':
-        game.player.add_item(game.current_loc.reg_entity('item_dagger'))
-        game.player.add_item(game.current_loc.reg_entity('item_firebolt_scroll'))
-        game.player.add_item(game.current_loc.reg_entity('item_frostbolt_scroll'))
-        game.player.add_item(game.current_loc.reg_entity('item_lightning_scroll'))
-        game.player.add_item(game.current_loc.reg_entity('item_antidote_potion'))
-        game.player.add_item(game.current_loc.reg_entity('item_healing_potion'))
-        game.player.add_item(game.current_loc.reg_entity('item_haste_potion'))
+    sg_file = open('data/starting_gear.json', 'r')  # load starting gear
+    sg_dict = jsonpickle.loads(sg_file.read())
+    for item_id in sg_dict[class_choice[0]]:
+        game.player.add_item(item_id)
+    sg_file.close()
 elif main_menu_choice[0] == 'Exit':
     exit()
 main_window = ui.WindowMain(game, 0, 0, settings['screen_width'], settings['screen_height'],

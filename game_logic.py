@@ -430,6 +430,11 @@ class Inventory(Entity):
 
     def add_item(self, item):
         """ Item adding method """
+        if isinstance(item, str):  # if item ID instead of item
+            if self.location:
+                item = self.location.reg_entity(item)
+            else:
+                item = dataset.get_entity(item)
         if isinstance(item, ItemCharges):  # if item is stackable
             if 'stackable' in item.categories:
                 for i in self.inventory:

@@ -1,0 +1,37 @@
+{
+  "Adventurer": [
+    "item_short_bow",
+    "item_bronze_tipped_arrow",
+    "item_dagger",
+    "item_firebolt_scroll",
+    "item_antidote_potion",
+    "item_healing_potion"
+  ],
+  "Warrior": [
+    "item_sabre",
+    "item_mail_armor",
+    "item_misurka",
+    "item_wooden_buckler",
+    "item_javelin",
+    "item_antidote_potion",
+    "item_healing_potion"
+  ],
+  "Gantra mercenary": [
+    "item_leather_armor",
+    "item_leather_cap",
+    "item_hunting_crossbow",
+    "item_bronze_bolt",
+    "item_dagger",
+    "item_antidote_potion",
+    "item_healing_potion"
+  ],
+  "Magic seeker": [
+    "item_dagger",
+    "item_firebolt_scroll",
+    "item_frostbolt_scroll",
+    "item_lightning_scroll",
+    "item_antidote_potion",
+    "item_healing_potion",
+    "item_haste_potion"
+  ]
+}
