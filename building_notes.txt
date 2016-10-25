@@ -1,0 +1,5 @@
+Working build for Windows made with pyinstaller.
+1. NOT one file mode.
+2. -m PyInstaller dc_rl.py   :in pycharm
+3. needfiles folder copy to build directory.
+4. data folder copy to build directory.
