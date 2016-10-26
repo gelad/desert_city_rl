@@ -274,24 +274,26 @@ class ElementScrollMenuOptions(ElementMenuOptions):
     """ Element that contains menu options, scrollable """
     def __init__(self, owner=None, x=0, y=0, options=None, keys=None, width=0, height=0, z=0,
                  color=(255, 255, 255), bgcolor=(0, 0, 0), highlight_color=(0, 100, 0), visible=True):
+        self.scrolling_mode = False  # set scrolling mode to False at first, to initialize parent class
         super(ElementScrollMenuOptions, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z,
                                                        visible=visible, options=options, keys=keys, color=color,
                                                        bgcolor=bgcolor, highlight_color=highlight_color)
         if self.height < len(self.options):  # if options number exceeds height - scroll mode needed
             self.scrolling_mode = True
-            self.scroll_pos = self.options.selected_index
+            self.scroll_pos = self.selected_index
+            self._scroll()
         else:
             self.scrolling_mode = False
 
     def _scroll(self):
         """ Method for scrolling the options list """
-        if self.options.selected_index < self.scroll_pos:
-            self.scroll_pos = self.options.selected_index
-        elif self.options.selected_index > self.scroll_pos + self.height:
-            self.scroll_pos = self.options.selected_index - self.height
+        if self.selected_index < self.scroll_pos:
+            self.scroll_pos = self.selected_index
+        elif self.selected_index > self.scroll_pos + self.height - 1:
+            self.scroll_pos = self.selected_index - self.height
         el_y = 0
         for i in range(len(self.options)):
-            if i >= self.scroll_pos and self.scroll_pos < (self.scroll_pos + self.height):
+            if self.scroll_pos <= i < (self.scroll_pos + self.height):
                 self.elements[i].visible = True
                 self.elements[i].y = el_y
                 el_y += 1
@@ -301,7 +303,8 @@ class ElementScrollMenuOptions(ElementMenuOptions):
     def select(self, opt_index):
         """ Overrides method to change selected option """
         super(ElementScrollMenuOptions, self).select(opt_index=opt_index)
-        self._scroll()
+        if self.scrolling_mode:
+            self._scroll()
 
 
 class ElementMainPanel(Element):
@@ -1122,8 +1125,8 @@ class WindowMenu(Window):
     def __init__(self, options, keys=None, x=0, y=0, width=0, height=0, z=0, visible=True,
                  prev_window=None, text_color=(255, 255, 255), highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
         # make a menu options element first - to determine height and width if auto
-        self.opts = ElementMenuOptions(x=x, y=y, options=options, keys=keys, width=width, height=height,
-                                       color=text_color, bgcolor=bg_color, highlight_color=highlight_color)
+        self.opts = ElementScrollMenuOptions(x=x, y=y, options=options, keys=keys, width=width, height=height,
+                                             color=text_color, bgcolor=bg_color, highlight_color=highlight_color)
         if width <= 0:
             width = self.opts.width
         if height <= 0:
@@ -1410,7 +1413,11 @@ def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0,
                         info_height=30, prev_window=None):
     """ A function to show an inventory menu, and return result """
     # create inventory menu
-    menu = WindowInventoryMenu(caption=caption, options=options, keys=keys, x=x_offset, y=y_offset, z=z,
+    if len(options) > win_mgr.graphics.screen_height - 10:
+        height = win_mgr.graphics.screen_height - 10
+    else:
+        height = 0
+    menu = WindowInventoryMenu(caption=caption, options=options, keys=keys, x=x_offset, y=y_offset, z=z, height=height,
                                info_width=info_width, info_height=info_height, prev_window=prev_window)
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
