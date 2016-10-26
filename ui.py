@@ -270,6 +270,40 @@ class ElementMenuOptions(Element):
         return self.console
 
 
+class ElementScrollMenuOptions(ElementMenuOptions):
+    """ Element that contains menu options, scrollable """
+    def __init__(self, owner=None, x=0, y=0, options=None, keys=None, width=0, height=0, z=0,
+                 color=(255, 255, 255), bgcolor=(0, 0, 0), highlight_color=(0, 100, 0), visible=True):
+        super(ElementScrollMenuOptions, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z,
+                                                       visible=visible, options=options, keys=keys, color=color,
+                                                       bgcolor=bgcolor, highlight_color=highlight_color)
+        if self.height < len(self.options):  # if options number exceeds height - scroll mode needed
+            self.scrolling_mode = True
+            self.scroll_pos = self.options.selected_index
+        else:
+            self.scrolling_mode = False
+
+    def _scroll(self):
+        """ Method for scrolling the options list """
+        if self.options.selected_index < self.scroll_pos:
+            self.scroll_pos = self.options.selected_index
+        elif self.options.selected_index > self.scroll_pos + self.height:
+            self.scroll_pos = self.options.selected_index - self.height
+        el_y = 0
+        for i in range(len(self.options)):
+            if i >= self.scroll_pos and self.scroll_pos < (self.scroll_pos + self.height):
+                self.elements[i].visible = True
+                self.elements[i].y = el_y
+                el_y += 1
+            else:
+                self.elements[i].visible = False
+
+    def select(self, opt_index):
+        """ Overrides method to change selected option """
+        super(ElementScrollMenuOptions, self).select(opt_index=opt_index)
+        self._scroll()
+
+
 class ElementMainPanel(Element):
     """ Main panel with player stats, etc """
 
