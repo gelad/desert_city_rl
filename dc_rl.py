@@ -136,8 +136,6 @@ elif main_menu_choice[0] == 'New Game':
     sg_dict = jsonpickle.loads(sg_file.read())
     for item_id in sg_dict[class_choice[0]]:
         game.player.add_item(item_id)
-    for i in range(40):
-        game.player.add_item('item_sabre')
     sg_file.close()
 elif main_menu_choice[0] == 'Exit':
     exit()

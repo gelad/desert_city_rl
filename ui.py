@@ -170,7 +170,6 @@ class ElementTextRect(Element):
         return console
 
 
-# TODO: make scrollable options list
 class ElementMenuOptions(Element):
     """ Element that contains menu options """
     def __init__(self, owner=None, x=0, y=0, options=None, keys=None, width=0, height=0, z=0,
@@ -290,7 +289,7 @@ class ElementScrollMenuOptions(ElementMenuOptions):
         if self.selected_index < self.scroll_pos:
             self.scroll_pos = self.selected_index
         elif self.selected_index > self.scroll_pos + self.height - 1:
-            self.scroll_pos = self.selected_index - self.height
+            self.scroll_pos = self.selected_index - self.height + 1
         el_y = 0
         for i in range(len(self.options)):
             if self.scroll_pos <= i < (self.scroll_pos + self.height):
@@ -1378,7 +1377,11 @@ class WindowManager:
 
 def show_menu(win_mgr, options, keys=None, x_offset=0, y_offset=0, z=1, prev_window=None):
     """ A function to show a simple menu, and return result """
-    menu = WindowMenu(options=options, keys=keys, z=z, prev_window=prev_window)  # create a menu
+    if len(options) > win_mgr.graphics.screen_height - 5:  # determine height
+        height = win_mgr.graphics.screen_height - 5
+    else:
+        height = 0
+    menu = WindowMenu(options=options, keys=keys, z=z, prev_window=prev_window, height=height)  # create a menu
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager
@@ -1394,8 +1397,12 @@ def show_menu(win_mgr, options, keys=None, x_offset=0, y_offset=0, z=1, prev_win
 
 def show_menu_list(win_mgr, caption, options, keys=None, x_offset=0, y_offset=0, z=1, prev_window=None):
     """ A function to show a list menu, and return result """
+    if len(options) > win_mgr.graphics.screen_height - 5:  # determine height
+        height = win_mgr.graphics.screen_height - 5
+    else:
+        height = 0
     menu = WindowListMenu(caption=caption, options=options, keys=keys, x=x_offset, y=y_offset, z=z, visible=True,
-                          prev_window=prev_window)  # create a list menu
+                          prev_window=prev_window, height=height)  # create a list menu
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager
@@ -1413,7 +1420,7 @@ def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0,
                         info_height=30, prev_window=None):
     """ A function to show an inventory menu, and return result """
     # create inventory menu
-    if len(options) > win_mgr.graphics.screen_height - 10:
+    if len(options) > win_mgr.graphics.screen_height - 10:  # determine height
         height = win_mgr.graphics.screen_height - 10
     else:
         height = 0
@@ -1435,9 +1442,13 @@ def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0,
 def show_menu_text(win_mgr, caption, options, keys, texts, x_offset=0, y_offset=0, z=1, text_width=20,
                    text_height=30, prev_window=None):
     """ A function to show a text menu, and return result """
-    # create inventory menu
+    # create text menu
+    if len(options) + text_height > win_mgr.graphics.screen_height - 10:  # determine height
+        height = win_mgr.graphics.screen_height - 10
+    else:
+        height = 0
     menu = WindowTextMenu(caption=caption, options=options, keys=keys, texts=texts, x=x_offset, y=y_offset, z=z,
-                          text_width=text_width, text_height=text_height, prev_window=prev_window)
+                          text_width=text_width, text_height=text_height, prev_window=prev_window, height=height)
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager
@@ -1455,8 +1466,12 @@ def show_menu_text_above(win_mgr, caption, options, keys, texts, x_offset=0, y_o
                          prev_window=None):
     """ A function to show a text menu (with above text), and return result """
     # create inventory menu
+    if len(options) + text_height > win_mgr.graphics.screen_height - 10:  # determine height
+        height = win_mgr.graphics.screen_height - 10
+    else:
+        height = 0
     menu = WindowTextAboveMenu(caption=caption, options=options, keys=keys, texts=texts, x=x_offset, y=y_offset, z=z,
-                               width=width, text_height=text_height, prev_window=prev_window)
+                               width=width, text_height=text_height, prev_window=prev_window, height=height)
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager
