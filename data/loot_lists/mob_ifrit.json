@@ -1,0 +1,56 @@
+[
+  {
+    "py/tuple": [
+      "None",
+      60
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_potions",
+      10
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_melee_weapons",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_armor",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_ranged_weapons",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_ammunition",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_throwing_weapons",
+      4
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_rings",
+      3
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_scrolls",
+      3
+    ]
+  }
+]

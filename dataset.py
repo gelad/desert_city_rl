@@ -509,6 +509,22 @@ def initialize():
                              message_color=[0, 150, 0])
     data_set['item_venom_sac'].add_ability(abil)
 
+    data_set['item_sparkling_dust'] = game_logic.ItemCharges(name='sparkling dust',
+                                                        data_id='item_sparkling_dust',
+                    description='Magical dust, sparkling with tiny lightnings. Useful alchemical ingredient. If thrown - can deal minor lightning damage.',
+                                                        categories={'throwing', 'stackable', 'alchemy'},
+                                                        properties={'break_chance': 1,
+                                                                    'throw_speed': 0.75,
+                                                                    'accuracy_thrown': 0.6},
+                                                        char="`", color=[255, 255, 0],
+                                                        charges=1, destroyed_after_use=True, weight=0.1)
+    react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (1, 3), 'dmg_type': 'lightning'}
+    abil = abilities.Ability(name='Zap!', owner=data_set['item_sparkling_dust'],
+                             trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[255, 255, 0])
+    data_set['item_sparkling_dust'].add_ability(abil)
+
     data_set['item_explosive_potion'] = game_logic.ItemCharges(name='explosive potion',
                                                                data_id='item_explosive_potion',
                                                                description='Unstable potion, that explodes if breaked.',
@@ -576,12 +592,14 @@ def initialize():
                                                   armor={'bashing': 0, 'slashing': 0, 'piercing': 0},
                                                   color=[255, 127, 80], hp=8, speed=80, sight_radius=18.5,
                                                   damage=(3, 7), categories={'living'},
+                                                  properties={'loot_list': 'mob_rakshasa'},
                                                   dmg_type='slashing', ai=game_logic.SimpleMeleeChaserAI(), weight=70)
 
     data_set['mob_ifrit'] = game_logic.Fighter(name='Ifrit', data_id='mob_ifrit',
                             description='A magical creature with human upper body floating over column of flame.',
                                                char='F', armor={'bashing': 100, 'slashing': 100, 'piercing': 100},
                                                resist={'cold': -50, 'fire': 1000}, categories={'living', 'magical'},
+                                               properties={'loot_list': 'mob_ifrit'},
                                                color=[255, 50, 0], hp=25, speed=100, sight_radius=18.5, damage=(3, 5),
                                                dmg_type='bashing', ai=game_logic.AbilityUserAI(), weight=100)
     data_set['mob_ifrit'].effects.append(effects.Effect('BLOCK_FIRE', 100))
@@ -616,6 +634,7 @@ def initialize():
                                                         resist={'cold': -100, 'lightning': 1000},
                                                         color=[255, 255, 0], hp=2, speed=100, sight_radius=15.5,
                                                         damage=(1, 2), dmg_type='lightning', categories={'magical'},
+                                                        properties={'loot_list': 'mob_lightning_wisp_ingredients'},
                                                         ai=game_logic.AbilityUserAI(behavior='ranged',
                                                                                     properties={'preferred_range': 6}),
                                                         weight=1)
@@ -635,6 +654,7 @@ def initialize():
                                                     armor={'bashing': 100, 'slashing': 75, 'piercing': 300},
                                                     color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5,
                                                     damage=(6, 10), categories={'golem', 'magical'},
+                                                    properties={'loot_list': 'mob_sand_golem'},
                                                     dmg_type='bashing', ai=game_logic.SimpleMeleeChaserAI(), weight=300)
     data_set['mob_sand_golem'].effects.append(effects.Effect('BLOCK_BASHING', 2))
     data_set['mob_sand_golem'].effects.append(effects.Effect('BLOCK_SLASHING', 1))
