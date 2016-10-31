@@ -492,6 +492,23 @@ def initialize():
                              message_color=[255, 255, 255])
     data_set['item_throwing_knife'].add_ability(abil)
 
+    data_set['item_venom_sac'] = game_logic.ItemCharges(name='venom sac',
+                                                        data_id='item_venom_sac',
+            description='Small sac, full of scorpion venom. Useful alchemical ingredient. If thrown - can deal minor poison damage.',
+                                                        categories={'throwing', 'stackable', 'alchemy'},
+                                                        properties={'break_chance': 1,
+                                                                    'throw_speed': 0.75,
+                                                                    'accuracy_thrown': 0.8},
+                                                        char="`", color=[0, 230, 0],
+                                                        charges=1, destroyed_after_use=True, weight=0.5)
+    cond = abilities.Condition('TARGET_IS_CATEGORY', category='living')
+    react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (1, 3), 'dmg_type': 'poison'}
+    abil = abilities.Ability(name='Splash!', owner=data_set['item_venom_sac'],
+                             trigger='projectile_hit', conditions=[cond], reactions=[react],
+                             message_color=[0, 150, 0])
+    data_set['item_venom_sac'].add_ability(abil)
+
     data_set['item_explosive_potion'] = game_logic.ItemCharges(name='explosive potion',
                                                                data_id='item_explosive_potion',
                                                                description='Unstable potion, that explodes if breaked.',
@@ -542,7 +559,8 @@ def initialize():
                                                   armor={'bashing': -50, 'slashing': 50, 'piercing': 50},
                                                   color=[5, 5, 5], hp=3, speed=100, sight_radius=14.5, damage=(1, 4),
                                                   dmg_type='piercing', ai=game_logic.SimpleMeleeChaserAI(),
-                                                  categories={'living'}, weight=15)
+                                                  categories={'living'}, weight=15,
+                                                  properties={'loot_list': ('mob_scorpion', 'mob_scorpion_ingredients')})
     cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
     cond2 = abilities.Condition('TARGET_IS_CATEGORY', category='living')
     react = {'type': 'deal_periodic_damage', 'chance': 50, 'target': 'default', 'damage': (1, 2),

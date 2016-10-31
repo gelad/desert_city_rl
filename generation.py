@@ -161,8 +161,14 @@ def gen_mob_loot(mob):
     """ Function that generates mob loot and places it in inventory - mostly a placeholder now """
     try:
         if 'loot_list' in mob.properties:
-            item = dataset.get_item_from_loot_list(mob.properties['loot_list'])
-            if item:
-                mob.add_item(item)
+            items = []
+            if isinstance(mob.properties['loot_list'], str):
+                items.append(dataset.get_item_from_loot_list(mob.properties['loot_list']))
+            else:
+                for lst in mob.properties['loot_list']:  # multiple lists allowed
+                    items.append(dataset.get_item_from_loot_list(lst))
+            for item in items:
+                if item:
+                    mob.add_item(item)
     except AttributeError:  # if no properties attribute - no loot
         pass
