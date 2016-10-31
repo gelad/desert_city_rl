@@ -534,6 +534,7 @@ def initialize():
                                                        damage=(1, 2),
                                                        dmg_type='bashing', ai=game_logic.SimpleMeleeChaserAI(),
                                                        categories={'living'},
+                                                       properties={'loot_list': 'mob_mindless_body'},
                                                        weight=60)
 
     data_set['mob_scorpion'] = game_logic.Fighter(name='Scorpion', data_id='mob_scorpion',

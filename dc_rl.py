@@ -105,6 +105,7 @@ if not main_menu_choice:
 if main_menu_choice[0] == 'Continue':
     game = loaded  # load saved game
 elif main_menu_choice[0] == 'New Game':
+    # TODO: move texts to files
     class_choice = ui.show_menu_text(win_mgr=graphics.win_mgr, caption='Choose your character background:',
                                      options=['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
                                      keys='alphabet', text_width=40, text_height=30,

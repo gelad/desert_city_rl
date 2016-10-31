@@ -78,12 +78,14 @@ def generate_loc(loc_type, settings, width, height):
                                                             ('mob_ifrit', 3 + item_count * 1)])
                         # more loot - dangerous mobs
                         mob_coords = floor_cells[random.randrange(len(floor_cells))]
-                        loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
+                        mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
+                        gen_mob_loot(mob)  # generate mob loot
                     trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for m in range(0, trap_count):
                         trap_id = game_logic.weighted_choice([('trap_corrosive_moss', 100)])
                         trap_coords = floor_cells[random.randrange(len(floor_cells))]
-                        loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
+                        mob = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
+                        gen_mob_loot(mob)  # generate mob loot
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
@@ -100,7 +102,8 @@ def generate_loc(loc_type, settings, width, height):
                                                              ('mob_scorpion', 40),
                                                              ('mob_rakshasa', 10)])
                         mob_coords = floor_cells[random.randrange(len(floor_cells))]
-                        loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
+                        mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
+                        gen_mob_loot(mob)  # generate mob loot
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 
@@ -152,3 +155,14 @@ def subgen_building(building, build_w, build_h, settings=None):
                     elif pattern[x][y] == 'floor':
                         pattern[x][y] = game_logic.weighted_choice([('sand', 70), ('floor', 30)])
     return pattern
+
+
+def gen_mob_loot(mob):
+    """ Function that generates mob loot and places it in inventory - mostly a placeholder now """
+    try:
+        if 'loot_list' in mob.properties:
+            item = dataset.get_item_from_loot_list(mob.properties['loot_list'])
+            if item:
+                mob.add_item(item)
+    except AttributeError:  # if no properties attribute - no loot
+        pass
