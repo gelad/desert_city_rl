@@ -31,7 +31,7 @@ def generate_loc(loc_type, settings, width, height):
         for plot_x in range(width // grid_size - 1):
             for plot_y in range(height // grid_size - 1):
                 # choose a building type
-                build_type = game_logic.weighted_choice([('house', 50), ('prefab_test_cross', 30), ('none', 20)])
+                build_type = game_logic.weighted_choice([('house', 50), ('prefab_small_shop', 30), ('none', 20)])
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)
@@ -91,8 +91,8 @@ def generate_loc(loc_type, settings, width, height):
                         gen_mob_loot(mob)  # generate mob loot
                 elif build_type[:7] == 'prefab_':
                     prefab_name = build_type[7:]
-                    place_prefab(name=prefab_name, loc=loc, grid_size=grid_size, plot_x=plot_x, plot_y=plot_y,
-                                 settings={'destruct': random.randint(1, 8)})
+                    place_prefab(name=prefab_name, loc=loc, plot_size=grid_size, plot_x=plot_x * grid_size,
+                                 plot_y=plot_y * grid_size, settings={'destruct': random.randint(1, 8)})
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
@@ -121,7 +121,7 @@ def load_prefab(name, settings=None):
     return prefab_xp
 
 
-def place_prefab(name, loc, grid_size, plot_x, plot_y, settings=None):
+def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
     """ Places prefab on the map, generating items, mobs, destruction etc """
     # TODO: rework and comment this, add prefab rotation settings
     if settings is None:  # if no settings - empty set
@@ -129,18 +129,19 @@ def place_prefab(name, loc, grid_size, plot_x, plot_y, settings=None):
     prefab = load_prefab(name)  # load prefab from .xp file
     build_w = prefab['width']
     build_h = prefab['height']
-    build_x = random.randrange(grid_size - build_w)
-    build_y = random.randrange(grid_size - build_h)
+    build_x = random.randrange(plot_size - build_w)
+    build_y = random.randrange(plot_size - build_h)
     if 'destruct' in settings:
         for i in range(settings['destruct']):  # run destruction as many times as desired
             dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
             for j in range(dest_cells_num):  # destroy selected number of cells
                 x = random.randrange(build_w)
                 y = random.randrange(build_h)
+                tile = prefab['layer_data'][0]['cells'][x][y]
                 char_tile = chr(prefab['layer_data'][0]['cells'][x][y]['keycode'])
-                if char_tile == '.':
+                if char_tile == chr(0):
                     prefab['layer_data'][0]['cells'][x][y]['keycode'] = \
-                        ord(game_logic.weighted_choice([(' ', 70), ('.', 30)]))
+                        ord(game_logic.weighted_choice([('.', 70), (' ', 30)]))
                 char = chr(prefab['layer_data'][1]['cells'][x][y]['keycode'])
                 if char == '#' or char == '"' or char == '_':
                     prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
@@ -151,12 +152,17 @@ def place_prefab(name, loc, grid_size, plot_x, plot_y, settings=None):
     floor_cells = []  # empty floor cells for item and mob generation
     for x in range(build_w):
         for y in range(build_h):
-            loc_cell_x = x + build_x + plot_x * grid_size
-            loc_cell_y = y + build_y + plot_y * grid_size
-            char_tile = chr(prefab['layer_data'][0]['cells'][x][y]['keycode'])
-            if char_tile == '.':
-                loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
-            char = chr(prefab['layer_data'][1]['cells'][x][y]['keycode'])
+            loc_cell_x = x + build_x + plot_x
+            loc_cell_y = y + build_y + plot_y
+            tile_cell = prefab['layer_data'][0]['cells'][x][y]
+            char_tile = chr(tile_cell['keycode'])
+            char_bgcolor = (tile_cell['back_r'], tile_cell['back_g'], tile_cell['back_b'])
+            if char_tile == chr(0):
+                if char_bgcolor == (153, 153, 0):
+                    loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
+            entity_cell = prefab['layer_data'][1]['cells'][x][y]
+            char = chr(entity_cell['keycode'])
+            char_color = (entity_cell['fore_r'], entity_cell['fore_g'], entity_cell['fore_b'])
             if char == '#':
                 loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
             if char == '+':
@@ -166,7 +172,10 @@ def place_prefab(name, loc, grid_size, plot_x, plot_y, settings=None):
             if char == '_':
                 loc.place_entity('window_large_sandstone', loc_cell_x, loc_cell_y)
             if char == '&':
-                loc.place_entity('debris_large_sandstone', loc_cell_x, loc_cell_y)
+                if char_color == (255, 250, 205):
+                    loc.place_entity('debris_large_sandstone', loc_cell_x, loc_cell_y)
+                elif char_color == (128, 0, 0):
+                    loc.place_entity('debris_large_wooden', loc_cell_x, loc_cell_y)
             # if cell is passable - add to floor list
             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                 floor_cells.append((loc_cell_x, loc_cell_y))
