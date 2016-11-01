@@ -5,10 +5,12 @@
 import game_logic
 import fov_los_pf
 import dataset
+import xp_loader
 
 import jsonpickle
 
 import random
+import gzip
 from collections import namedtuple
 
 
@@ -28,7 +30,8 @@ def generate_loc(loc_type, settings, width, height):
         Plot = namedtuple('Plot', ['cells', 'b_x', 'b_y', 'b_w', 'b_h', 'b_type'])
         for plot_x in range(width // grid_size - 1):
             for plot_y in range(height // grid_size - 1):
-                build_type = game_logic.weighted_choice([('house', 70), ('none', 30)])  # choose a building type
+                # choose a building type
+                build_type = game_logic.weighted_choice([('house', 50), ('prefab_test_cross', 30), ('none', 20)])
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)
@@ -86,6 +89,35 @@ def generate_loc(loc_type, settings, width, height):
                         trap_coords = floor_cells[random.randrange(len(floor_cells))]
                         mob = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
                         gen_mob_loot(mob)  # generate mob loot
+                elif build_type[:7] == 'prefab_':  #
+                    prefab_name = build_type[7:]
+                    prefab = load_prefab(prefab_name)
+                    build_w = prefab['width']
+                    build_h = prefab['height']
+                    build_x = random.randrange(grid_size - build_w)
+                    build_y = random.randrange(grid_size - build_h)
+                    floor_cells = []  # empty floor cells for item gen
+                    for x in range(build_w):
+                        for y in range(build_h):
+                            loc_cell_x = x + build_x + plot_x * 20
+                            loc_cell_y = y + build_y + plot_y * 20
+                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '#':
+                                loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
+                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '+':
+                                loc.place_entity('door_wooden', loc_cell_x, loc_cell_y)
+                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '"':
+                                loc.place_entity('window_small_sandstone', loc_cell_x, loc_cell_y)
+                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '_':
+                                loc.place_entity('window_large_sandstone', loc_cell_x, loc_cell_y)
+                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '&':
+                                loc.place_entity('debris_large_sandstone', loc_cell_x, loc_cell_y)
+                            # if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '&':
+                            #    loc.place_entity('debris_large_wooden', loc_cell_x, loc_cell_y)
+                            if chr(prefab['layer_data'][0]['cells'][x][y]['keycode']) == '.':
+                                loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
+                            # if cell is passable - add to floor list
+                            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
+                                floor_cells.append((loc_cell_x, loc_cell_y))
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
@@ -106,6 +138,12 @@ def generate_loc(loc_type, settings, width, height):
                         gen_mob_loot(mob)  # generate mob loot
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
+
+
+def load_prefab(name, settings=None):
+    """ Load building from prefab, created in REXPaint """
+    prefab_xp = xp_loader.load_xp_string(gzip.open('data/prefabs/' + name + '.xp').read())
+    return prefab_xp
 
 
 def subgen_building(building, build_w, build_h, settings=None):

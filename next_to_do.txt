@@ -58,11 +58,11 @@ Make simple AOE explosions. (DONE)
 Make ammo with abilities (exploding, freezing arrows, etc) (DONE)
 Add some config file (DONE).
 Make menu lists scrollable. (DONE)
+Make loot from mobs. (DONE)
 
 
 Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.
 Inform player if targeting failed.
-Make loot from mobs.
 Make door-opening mobs.
 BUG: attempted reload command after player death (player can perform actions after death?)
 Make 'give item' debug command.
