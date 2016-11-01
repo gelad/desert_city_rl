@@ -151,7 +151,9 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                 y = random.randrange(build_h)
                 tile = prefab['layer_data'][0]['cells'][x][y]
                 char_tile = chr(prefab['layer_data'][0]['cells'][x][y]['keycode'])
-                if char_tile == chr(0):
+                if ord(char_tile) == 0:  # space has 0 and 32 code in REXPaint - problems if it's 0
+                    char_tile = ' '
+                if char_tile == ' ':
                     prefab['layer_data'][0]['cells'][x][y]['keycode'] = \
                         ord(game_logic.weighted_choice([('.', 70), (' ', 30)]))
                 char = chr(prefab['layer_data'][1]['cells'][x][y]['keycode'])
@@ -169,6 +171,8 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
             loc_cell_y = y + build_y + plot_y
             tile_cell = prefab['layer_data'][0]['cells'][x][y]  # get tile info from prefab
             char_tile = chr(tile_cell['keycode'])
+            if ord(char_tile) == 0:  # space has 0 and 32 code in REXPaint - problems if it's 0
+                char_tile = ' '
             char_tile_color = (tile_cell['fore_r'], tile_cell['fore_g'], tile_cell['fore_b'])
             char_tile_bgcolor = (tile_cell['back_r'], tile_cell['back_g'], tile_cell['back_b'])
             for tile in dataset.tile_set:  # search for matching tile in dataset
@@ -183,7 +187,7 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                 if dataset.data_set[entity_ID].char == char_ent and\
                                 tuple(dataset.data_set[entity_ID].color) == char_ent_color:
                     loc.place_entity(entity_ID, loc_cell_x, loc_cell_y)
-                break
+                    break
             # if cell is passable and marked as 'i'nner - add to inner list
             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed() and prefab['layer_data'][2]['cells'][x][y][
                                                                                   'keycode'] == ord('i'):
