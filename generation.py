@@ -89,35 +89,10 @@ def generate_loc(loc_type, settings, width, height):
                         trap_coords = floor_cells[random.randrange(len(floor_cells))]
                         mob = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
                         gen_mob_loot(mob)  # generate mob loot
-                elif build_type[:7] == 'prefab_':  #
+                elif build_type[:7] == 'prefab_':
                     prefab_name = build_type[7:]
-                    prefab = load_prefab(prefab_name)
-                    build_w = prefab['width']
-                    build_h = prefab['height']
-                    build_x = random.randrange(grid_size - build_w)
-                    build_y = random.randrange(grid_size - build_h)
-                    floor_cells = []  # empty floor cells for item gen
-                    for x in range(build_w):
-                        for y in range(build_h):
-                            loc_cell_x = x + build_x + plot_x * 20
-                            loc_cell_y = y + build_y + plot_y * 20
-                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '#':
-                                loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
-                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '+':
-                                loc.place_entity('door_wooden', loc_cell_x, loc_cell_y)
-                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '"':
-                                loc.place_entity('window_small_sandstone', loc_cell_x, loc_cell_y)
-                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '_':
-                                loc.place_entity('window_large_sandstone', loc_cell_x, loc_cell_y)
-                            if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '&':
-                                loc.place_entity('debris_large_sandstone', loc_cell_x, loc_cell_y)
-                            # if chr(prefab['layer_data'][1]['cells'][x][y]['keycode']) == '&':
-                            #    loc.place_entity('debris_large_wooden', loc_cell_x, loc_cell_y)
-                            if chr(prefab['layer_data'][0]['cells'][x][y]['keycode']) == '.':
-                                loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
-                            # if cell is passable - add to floor list
-                            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
-                                floor_cells.append((loc_cell_x, loc_cell_y))
+                    place_prefab(name=prefab_name, loc=loc, grid_size=grid_size, plot_x=plot_x, plot_y=plot_y,
+                                 settings={'destruct': random.randint(1, 8)})
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
@@ -144,6 +119,82 @@ def load_prefab(name, settings=None):
     """ Load building from prefab, created in REXPaint """
     prefab_xp = xp_loader.load_xp_string(gzip.open('data/prefabs/' + name + '.xp').read())
     return prefab_xp
+
+
+def place_prefab(name, loc, grid_size, plot_x, plot_y, settings=None):
+    """ Places prefab on the map, generating items, mobs, destruction etc """
+    # TODO: rework and comment this, add prefab rotation settings
+    if settings is None:  # if no settings - empty set
+        settings = {}
+    prefab = load_prefab(name)  # load prefab from .xp file
+    build_w = prefab['width']
+    build_h = prefab['height']
+    build_x = random.randrange(grid_size - build_w)
+    build_y = random.randrange(grid_size - build_h)
+    if 'destruct' in settings:
+        for i in range(settings['destruct']):  # run destruction as many times as desired
+            dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
+            for j in range(dest_cells_num):  # destroy selected number of cells
+                x = random.randrange(build_w)
+                y = random.randrange(build_h)
+                char_tile = chr(prefab['layer_data'][0]['cells'][x][y]['keycode'])
+                if char_tile == '.':
+                    prefab['layer_data'][0]['cells'][x][y]['keycode'] = \
+                        ord(game_logic.weighted_choice([(' ', 70), ('.', 30)]))
+                char = chr(prefab['layer_data'][1]['cells'][x][y]['keycode'])
+                if char == '#' or char == '"' or char == '_':
+                    prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
+                        ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
+                elif char == '+':
+                    prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
+                        ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
+    floor_cells = []  # empty floor cells for item and mob generation
+    for x in range(build_w):
+        for y in range(build_h):
+            loc_cell_x = x + build_x + plot_x * grid_size
+            loc_cell_y = y + build_y + plot_y * grid_size
+            char_tile = chr(prefab['layer_data'][0]['cells'][x][y]['keycode'])
+            if char_tile == '.':
+                loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
+            char = chr(prefab['layer_data'][1]['cells'][x][y]['keycode'])
+            if char == '#':
+                loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
+            if char == '+':
+                loc.place_entity('door_wooden', loc_cell_x, loc_cell_y)
+            if char == '"':
+                loc.place_entity('window_small_sandstone', loc_cell_x, loc_cell_y)
+            if char == '_':
+                loc.place_entity('window_large_sandstone', loc_cell_x, loc_cell_y)
+            if char == '&':
+                loc.place_entity('debris_large_sandstone', loc_cell_x, loc_cell_y)
+            # if cell is passable - add to floor list
+            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
+                floor_cells.append((loc_cell_x, loc_cell_y))
+    # ============= PLACEHOLDER CODE - NEED LOAD ITEM AND MOB GENERATION INFO FROM PREFAB =========================
+    item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+    for i in range(0, item_count):
+        item = dataset.get_item_from_loot_list('house_default')
+        item_coords = floor_cells[random.randrange(len(floor_cells))]
+        loc.place_entity(item, item_coords[0], item_coords[1])
+    mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+    for m in range(0, mob_count):
+        mob_id = game_logic.weighted_choice([('mob_mindless_body', 55),
+                                             ('mob_scorpion', 20),
+                                             ('mob_rakshasa', 10 + item_count * 3),
+                                             ('mob_sand_golem', 7 + item_count * 3),
+                                             ('mob_lightning_wisp', 5 + item_count * 2),
+                                             ('mob_ifrit', 3 + item_count * 1)])
+        # more loot - dangerous mobs
+        mob_coords = floor_cells[random.randrange(len(floor_cells))]
+        mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
+        gen_mob_loot(mob)  # generate mob loot
+    trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+    for m in range(0, trap_count):
+        trap_id = game_logic.weighted_choice([('trap_corrosive_moss', 100)])
+        trap_coords = floor_cells[random.randrange(len(floor_cells))]
+        mob = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
+        gen_mob_loot(mob)  # generate mob loot
+    # ============================================================================================================
 
 
 def subgen_building(building, build_w, build_h, settings=None):
@@ -180,18 +231,19 @@ def subgen_building(building, build_w, build_h, settings=None):
         if direction == 4: y = -1
         pattern[x][y] = 'door'
         # destruction algorithm
-        if 'destruct' in settings:
-            for i in range(settings['destruct']):  # run destruction as many times as desired
-                dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
-                for j in range(dest_cells_num):  # destroy selected number of cells
-                    x = random.randrange(build_w)
-                    y = random.randrange(build_h)
-                    if pattern[x][y] == 'wall' or pattern[x][y] == 'small_window' or pattern[x][y] == 'large_window':
-                        pattern[x][y] = game_logic.weighted_choice([('debris_stone', 70), ('floor', 30)])
-                    elif pattern[x][y] == 'door':
-                        pattern[x][y] = game_logic.weighted_choice([('debris_wood', 70), ('floor', 30)])
-                    elif pattern[x][y] == 'floor':
-                        pattern[x][y] = game_logic.weighted_choice([('sand', 70), ('floor', 30)])
+        if settings:
+            if 'destruct' in settings:
+                for i in range(settings['destruct']):  # run destruction as many times as desired
+                    dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
+                    for j in range(dest_cells_num):  # destroy selected number of cells
+                        x = random.randrange(build_w)
+                        y = random.randrange(build_h)
+                        if pattern[x][y] == 'wall' or pattern[x][y] == 'small_window' or pattern[x][y] == 'large_window':
+                            pattern[x][y] = game_logic.weighted_choice([('debris_stone', 70), ('floor', 30)])
+                        elif pattern[x][y] == 'door':
+                            pattern[x][y] = game_logic.weighted_choice([('debris_wood', 70), ('floor', 30)])
+                        elif pattern[x][y] == 'floor':
+                            pattern[x][y] = game_logic.weighted_choice([('sand', 70), ('floor', 30)])
     return pattern
 
 
