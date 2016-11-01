@@ -61,6 +61,7 @@ Make menu lists scrollable. (DONE)
 Make loot from mobs. (DONE)
 
 
+BUG: poison stops working if move to another location.
 Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.
 Inform player if targeting failed.
 Make door-opening mobs.

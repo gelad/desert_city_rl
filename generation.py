@@ -39,7 +39,7 @@ def generate_loc(loc_type, settings, width, height):
                     build_h = random.randrange(4, grid_size // 2)
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
-                             range(plot_x, plot_x + grid_size)],
+                                    range(plot_x, plot_x + grid_size)],
                              b_x=build_x, b_y=build_y, b_w=build_w, b_h=build_h, b_type=build_type)
                     floor_cells = []  # empty floor cells for item gen
                     building = subgen_building('house', build_w, build_h,
@@ -74,11 +74,11 @@ def generate_loc(loc_type, settings, width, height):
                     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for m in range(0, mob_count):
                         mob_id = game_logic.weighted_choice([('mob_mindless_body', 55),
-                                                            ('mob_scorpion', 20),
-                                                            ('mob_rakshasa', 10 + item_count * 3),
-                                                            ('mob_sand_golem', 7 + item_count * 3),
-                                                            ('mob_lightning_wisp', 5 + item_count * 2),
-                                                            ('mob_ifrit', 3 + item_count * 1)])
+                                                             ('mob_scorpion', 20),
+                                                             ('mob_rakshasa', 10 + item_count * 3),
+                                                             ('mob_sand_golem', 7 + item_count * 3),
+                                                             ('mob_lightning_wisp', 5 + item_count * 2),
+                                                             ('mob_ifrit', 3 + item_count * 1)])
                         # more loot - dangerous mobs
                         mob_coords = floor_cells[random.randrange(len(floor_cells))]
                         mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
@@ -92,7 +92,8 @@ def generate_loc(loc_type, settings, width, height):
                 elif build_type[:7] == 'prefab_':
                     prefab_name = build_type[7:]
                     place_prefab(name=prefab_name, loc=loc, plot_size=grid_size, plot_x=plot_x * grid_size,
-                                 plot_y=plot_y * grid_size, settings={'destruct': random.randint(1, 8)})
+                                 plot_y=plot_y * grid_size, settings={'destruct': random.randint(1, 8),
+                                                                      'rotate': random.randint(0, 3)})
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
@@ -115,23 +116,34 @@ def generate_loc(loc_type, settings, width, height):
     return loc  # return generated location
 
 
-def load_prefab(name, settings=None):
-    """ Load building from prefab, created in REXPaint """
+def load_prefab(name):
+    """ Load building from prefab, created in REXPaint
+        Prefab layers for now:
+        0 - tiles
+        1 - props and such - walls, windows, doors
+        2 - 'i'nner and 'o'uter cells - for separate mob and loot spawn
+    """
     prefab_xp = xp_loader.load_xp_string(gzip.open('data/prefabs/' + name + '.xp').read())
     return prefab_xp
 
 
 def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
     """ Places prefab on the map, generating items, mobs, destruction etc """
-    # TODO: rework and comment this, add prefab rotation settings
     if settings is None:  # if no settings - empty set
         settings = {}
     prefab = load_prefab(name)  # load prefab from .xp file
-    build_w = prefab['width']
+    build_w = prefab['width']  # building dimensions - from prefab
     build_h = prefab['height']
-    build_x = random.randrange(plot_size - build_w)
+    build_x = random.randrange(plot_size - build_w)  # random building position within plot (according to its size)
     build_y = random.randrange(plot_size - build_h)
-    if 'destruct' in settings:
+    if 'rotate' in settings:  # rotate prefab if needed
+        i = 0
+        while i < settings['rotate']:
+            for l in range(len(prefab['layer_data'])):
+                cells = prefab['layer_data'][l]['cells']
+                prefab['layer_data'][l]['cells'] = list(zip(*cells[::-1]))
+            i += 1
+    if 'destruct' in settings:  # TODO: destruction part needs rework
         for i in range(settings['destruct']):  # run destruction as many times as desired
             dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
             for j in range(dest_cells_num):  # destroy selected number of cells
@@ -149,41 +161,39 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                 elif char == '+':
                     prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
                         ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
-    floor_cells = []  # empty floor cells for item and mob generation
+    # actual entities and tiles placing part
+    inner_cells = []  # empty floor cells for item and mob generation
     for x in range(build_w):
         for y in range(build_h):
-            loc_cell_x = x + build_x + plot_x
+            loc_cell_x = x + build_x + plot_x  # location cell coords - for placement
             loc_cell_y = y + build_y + plot_y
-            tile_cell = prefab['layer_data'][0]['cells'][x][y]
+            tile_cell = prefab['layer_data'][0]['cells'][x][y]  # get tile info from prefab
             char_tile = chr(tile_cell['keycode'])
-            char_bgcolor = (tile_cell['back_r'], tile_cell['back_g'], tile_cell['back_b'])
-            if char_tile == chr(0):
-                if char_bgcolor == (153, 153, 0):
-                    loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
-            entity_cell = prefab['layer_data'][1]['cells'][x][y]
-            char = chr(entity_cell['keycode'])
-            char_color = (entity_cell['fore_r'], entity_cell['fore_g'], entity_cell['fore_b'])
-            if char == '#':
-                loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
-            if char == '+':
-                loc.place_entity('door_wooden', loc_cell_x, loc_cell_y)
-            if char == '"':
-                loc.place_entity('window_small_sandstone', loc_cell_x, loc_cell_y)
-            if char == '_':
-                loc.place_entity('window_large_sandstone', loc_cell_x, loc_cell_y)
-            if char == '&':
-                if char_color == (255, 250, 205):
-                    loc.place_entity('debris_large_sandstone', loc_cell_x, loc_cell_y)
-                elif char_color == (128, 0, 0):
-                    loc.place_entity('debris_large_wooden', loc_cell_x, loc_cell_y)
-            # if cell is passable - add to floor list
-            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
-                floor_cells.append((loc_cell_x, loc_cell_y))
+            char_tile_color = (tile_cell['fore_r'], tile_cell['fore_g'], tile_cell['fore_b'])
+            char_tile_bgcolor = (tile_cell['back_r'], tile_cell['back_g'], tile_cell['back_b'])
+            for tile in dataset.tile_set:  # search for matching tile in dataset
+                if char_tile == dataset.tile_set[tile][0] and char_tile_color == tuple(dataset.tile_set[tile][1]) \
+                        and char_tile_bgcolor == tuple(dataset.tile_set[tile][2]):
+                    loc.cells[loc_cell_x][loc_cell_y].tile = tile
+                    break
+            entity_cell = prefab['layer_data'][1]['cells'][x][y]  # get entity info from prefab
+            char_ent = chr(entity_cell['keycode'])
+            char_ent_color = (entity_cell['fore_r'], entity_cell['fore_g'], entity_cell['fore_b'])
+            for entity_ID in dataset.data_set:  # search for matching entity in dataset
+                if dataset.data_set[entity_ID].char == char_ent and\
+                                tuple(dataset.data_set[entity_ID].color) == char_ent_color:
+                    loc.place_entity(entity_ID, loc_cell_x, loc_cell_y)
+                break
+            # if cell is passable and marked as 'i'nner - add to inner list
+            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed() and prefab['layer_data'][2]['cells'][x][y][
+                                                                                  'keycode'] == ord('i'):
+                inner_cells.append((loc_cell_x, loc_cell_y))
+            # TODO: add 'o'uter cells list - when prefab will have separate outer and inner tile items and mobs
     # ============= PLACEHOLDER CODE - NEED LOAD ITEM AND MOB GENERATION INFO FROM PREFAB =========================
     item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for i in range(0, item_count):
         item = dataset.get_item_from_loot_list('house_default')
-        item_coords = floor_cells[random.randrange(len(floor_cells))]
+        item_coords = inner_cells[random.randrange(len(inner_cells))]
         loc.place_entity(item, item_coords[0], item_coords[1])
     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for m in range(0, mob_count):
@@ -194,16 +204,16 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                                              ('mob_lightning_wisp', 5 + item_count * 2),
                                              ('mob_ifrit', 3 + item_count * 1)])
         # more loot - dangerous mobs
-        mob_coords = floor_cells[random.randrange(len(floor_cells))]
+        mob_coords = inner_cells[random.randrange(len(inner_cells))]
         mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
         gen_mob_loot(mob)  # generate mob loot
     trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for m in range(0, trap_count):
         trap_id = game_logic.weighted_choice([('trap_corrosive_moss', 100)])
-        trap_coords = floor_cells[random.randrange(len(floor_cells))]
+        trap_coords = inner_cells[random.randrange(len(inner_cells))]
         mob = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
         gen_mob_loot(mob)  # generate mob loot
-    # ============================================================================================================
+        # ============================================================================================================
 
 
 def subgen_building(building, build_w, build_h, settings=None):
@@ -247,7 +257,8 @@ def subgen_building(building, build_w, build_h, settings=None):
                     for j in range(dest_cells_num):  # destroy selected number of cells
                         x = random.randrange(build_w)
                         y = random.randrange(build_h)
-                        if pattern[x][y] == 'wall' or pattern[x][y] == 'small_window' or pattern[x][y] == 'large_window':
+                        if pattern[x][y] == 'wall' or pattern[x][y] == 'small_window' or pattern[x][
+                            y] == 'large_window':
                             pattern[x][y] = game_logic.weighted_choice([('debris_stone', 70), ('floor', 30)])
                         elif pattern[x][y] == 'door':
                             pattern[x][y] = game_logic.weighted_choice([('debris_wood', 70), ('floor', 30)])
