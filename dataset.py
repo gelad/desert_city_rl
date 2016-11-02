@@ -107,13 +107,13 @@ def initialize():
                                                            description='A potion that hastens user by 50%.',
                                                            categories={'consumable', 'potion'},
                                                            properties={'usable': 'self'},
-                                                           char='!', color=[255, 255, 0],
+                                                           char='!', color=[255, 215, 0],
                                                            charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
     react = {'type': 'apply_timed_effect', 'target': 'default', 'time': 1000, 'effect': effects.Effect('HASTE', 50)}
     abil = abilities.Ability(name='Haste', owner=data_set['item_haste_potion'],
                              trigger='used_on_self', conditions=[cond], reactions=[react],
-                             message_color=[255, 255, 0])
+                             message_color=[255, 215, 0])
     data_set['item_haste_potion'].add_ability(abil)
 
     data_set['item_antidote_potion'] = game_logic.ItemCharges(name='antidote potion', data_id='item_antidote_potion',
@@ -136,13 +136,13 @@ def initialize():
                                                     description='A scroll that calls a lightning strike on enemy.',
                                                                categories={'consumable', 'scroll'},
                                                                properties={'usable': 'battle_entity', 'range': 15},
-                                                               char='?', color=[255, 255, 0],
+                                                               char='?', color=[255, 215, 0],
                                                                charges=1, destroyed_after_use=True, weight=0.1)
     cond = abilities.Condition('USED')
     react = {'type': 'deal_damage', 'target': 'default', 'damage': (10, 30), 'dmg_type': 'lightning'}
     abil = abilities.Ability(name='Lightning', owner=data_set['item_lightning_scroll'],
                              trigger='used_on_target', conditions=[cond], reactions=[react],
-                             message_color=[255, 255, 0])
+                             message_color=[255, 215, 0])
     data_set['item_lightning_scroll'].add_ability(abil)
 
     data_set['item_firebolt_scroll'] = game_logic.ItemCharges(name='scroll of Firebolt',
@@ -247,7 +247,7 @@ def initialize():
                                                           data_id='item_ring_lightning_res',
                                                           description='Ring that grants protection from lightning.',
                                                           categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
-                                                          char='˚', color=[255, 255, 0],
+                                                          char='˚', color=[255, 215, 0],
                                                           weight=0.1)
     data_set['item_ring_lightning_res'].effects.append(effects.Effect('RESIST_LIGHTNING', 100))
 
@@ -516,13 +516,13 @@ def initialize():
                                                         properties={'break_chance': 1,
                                                                     'throw_speed': 0.75,
                                                                     'accuracy_thrown': 0.6},
-                                                        char="`", color=[255, 255, 0],
+                                                        char="`", color=[255, 215, 0],
                                                         charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 3), 'dmg_type': 'lightning'}
     abil = abilities.Ability(name='Zap!', owner=data_set['item_sparkling_dust'],
                              trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 255, 0])
+                             message_color=[255, 215, 0])
     data_set['item_sparkling_dust'].add_ability(abil)
 
     data_set['item_explosive_potion'] = game_logic.ItemCharges(name='explosive potion',
@@ -632,7 +632,7 @@ def initialize():
                             description='A small hostile magic cloud, that zaps enemies with lightning.', char='w',
                                                         armor={'bashing': 100, 'slashing': 100, 'piercing': 1000},
                                                         resist={'cold': -100, 'lightning': 1000},
-                                                        color=[255, 255, 0], hp=2, speed=100, sight_radius=15.5,
+                                                        color=[255, 215, 0], hp=2, speed=100, sight_radius=15.5,
                                                         damage=(1, 2), dmg_type='lightning', categories={'magical'},
                                                         properties={'loot_list': 'mob_lightning_wisp_ingredients'},
                                                         ai=game_logic.AbilityUserAI(behavior='ranged',
@@ -646,13 +646,13 @@ def initialize():
                'whole_time': 100, 'use_offset': 0.5}
     abil = abilities.Ability(name='Zap', owner=data_set['mob_lightning_wisp'], cooldown=300,
                              trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
-                             message_color=[255, 255, 0])
+                             message_color=[255, 215, 0])
     data_set['mob_lightning_wisp'].add_ability(abil)
 
     data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='S',
                                         description='Magic-formed sand, resembling a human figure about 3m high.',
                                                     armor={'bashing': 100, 'slashing': 75, 'piercing': 300},
-                                                    color=[255, 255, 0], hp=20, speed=200, sight_radius=9.5,
+                                                    color=[255, 215, 0], hp=20, speed=200, sight_radius=9.5,
                                                     damage=(6, 10), categories={'golem', 'magical'},
                                                     properties={'loot_list': 'mob_sand_golem'},
                                                     dmg_type='bashing', ai=game_logic.SimpleMeleeChaserAI(), weight=300)
