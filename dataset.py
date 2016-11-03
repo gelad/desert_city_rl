@@ -718,6 +718,7 @@ def get_mob_from_spawn_list(list_name):
         chosen_mob = []
         while i < quantity:
             chosen_mob.append(get_entity(chosen[chosen.find(')')+1:]))
+            i += 1
         if len(chosen_mob) == 0:  # if no mobs in list - return None instead of empty list
             chosen_mob = None
     else:
