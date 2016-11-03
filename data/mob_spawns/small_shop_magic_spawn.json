@@ -1,0 +1,38 @@
+[
+  {
+    "py/tuple": [
+      "qty_(3;5)mob_mindless_body",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "qty_(2;3)mob_scorpion",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "qty_(1;2)mob_rakshasa",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "qty_(1;2)mob_sand_golem",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "qty_(1;2)mob_lightning_wisp",
+      15
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_ifrit",
+      5
+    ]
+  }
+]

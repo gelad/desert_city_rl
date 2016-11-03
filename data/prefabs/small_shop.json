@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "default": {
+      "chance": 50,
+      "loot_i": "house_default",
+      "mobs_i": "ruins_default"
+    },
+    "magic": {
+      "chance": 50,
+      "loot_i": "small_shop_magic",
+      "mobs_i": "small_shop_magic_spawn"
+    }
+  },
+  "legend": {
+    "entities": {
+      "('#', (255, 250, 205))": "wall_sandstone"
+    },
+    "tiles": {
+      "(' ', (0, 0, 0), (153, 153, 0))": "FLOOR_SANDSTONE"
+    }
+  }
+}

@@ -73,16 +73,17 @@ def generate_loc(loc_type, settings, width, height):
                         loc.place_entity(item, item_coords[0], item_coords[1])
                     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for m in range(0, mob_count):
-                        mob_id = game_logic.weighted_choice([('mob_mindless_body', 55),
-                                                             ('mob_scorpion', 20),
-                                                             ('mob_rakshasa', 10 + item_count * 3),
-                                                             ('mob_sand_golem', 7 + item_count * 3),
-                                                             ('mob_lightning_wisp', 5 + item_count * 2),
-                                                             ('mob_ifrit', 3 + item_count * 1)])
-                        # more loot - dangerous mobs
-                        mob_coords = floor_cells[random.randrange(len(floor_cells))]
-                        mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
-                        gen_mob_loot(mob)  # generate mob loot
+                        mobs = dataset.get_mob_from_spawn_list('ruins_default')
+                        if mobs:
+                            if isinstance(mobs, list):  # if multiple mobs
+                                for mob in mobs:
+                                    mob_coords = floor_cells[random.randrange(len(floor_cells))]
+                                    loc.place_entity(mob, mob_coords[0], mob_coords[1])
+                                    gen_mob_loot(mob)  # generate mob loot
+                            elif isinstance(mobs, game_logic.Entity):
+                                mob_coords = floor_cells[random.randrange(len(floor_cells))]
+                                loc.place_entity(mobs, mob_coords[0], mob_coords[1])
+                                gen_mob_loot(mobs)  # generate mob loot
                     trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
                     for m in range(0, trap_count):
                         trap_id = game_logic.weighted_choice([('trap_corrosive_moss', 100)])
@@ -132,6 +133,32 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
     if settings is None:  # if no settings - empty set
         settings = {}
     prefab = load_prefab(name)  # load prefab from .xp file
+    # prefab_info = {'legend': {'tiles': {(' ', (0, 0, 0), (153, 153, 0)): 'FLOOR_SANDSTONE'},
+    #                           'entities': {('#', (255, 250, 205)): 'wall_sandstone'}},
+    #                'variants': {'default': {'chance': 50,
+    #                                         'loot_i': 'house_default',
+    #                                         'mobs_i': 'ruins_default'
+    #                                         },
+    #                             'magic': {'chance': 50,
+    #                                       'loot_i': 'small_shop_magic',
+    #                                       'mobs_i': 'small_shop_magic_spawn'
+    #                                       }
+    #                             }}
+    # fl = open('data/prefabs/small_shop.json', 'w').write(jsonpickle.dumps(prefab_info))
+    try:  # try load prefab info TODO: move info load and variant selection to separate function
+        fl = open('data/prefabs/' + name + '.json')
+        prefab_info = jsonpickle.loads(fl.read())
+        fl.close()
+        if 'variant' in settings:  # if specific variant in settings
+            prefab_variant = prefab_info['variants'][settings['variant']]
+        else:  # if not specified - based on prefab info chances
+            variants = []
+            for v in prefab_info['variants']:  # make a list with chances - to use weighted_choice
+                variants.append((v, prefab_info['variants'][v]['chance']))
+            prefab_variant = prefab_info['variants'][game_logic.weighted_choice(variants)]  # choose one
+            # TODO: make some 'default variant' file for location type - load it when no variants
+    except FileNotFoundError:
+        raise Exception('No prefab info file for prefab"' + name + '"! Need one to generate loot and mobs.')
     build_w = prefab['width']  # building dimensions - from prefab
     build_h = prefab['height']
     build_x = random.randrange(plot_size - build_w)  # random building position within plot (according to its size)
@@ -175,6 +202,7 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                 char_tile = ' '
             char_tile_color = (tile_cell['fore_r'], tile_cell['fore_g'], tile_cell['fore_b'])
             char_tile_bgcolor = (tile_cell['back_r'], tile_cell['back_g'], tile_cell['back_b'])
+            # TODO: make first look in prefab legend
             for tile in dataset.tile_set:  # search for matching tile in dataset
                 if char_tile == dataset.tile_set[tile][0] and char_tile_color == tuple(dataset.tile_set[tile][1]) \
                         and char_tile_bgcolor == tuple(dataset.tile_set[tile][2]):
@@ -183,6 +211,7 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
             entity_cell = prefab['layer_data'][1]['cells'][x][y]  # get entity info from prefab
             char_ent = chr(entity_cell['keycode'])
             char_ent_color = (entity_cell['fore_r'], entity_cell['fore_g'], entity_cell['fore_b'])
+            # TODO: make first look in prefab legend
             for entity_ID in dataset.data_set:  # search for matching entity in dataset
                 if dataset.data_set[entity_ID].char == char_ent and\
                                 tuple(dataset.data_set[entity_ID].color) == char_ent_color:
@@ -196,21 +225,29 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
     # ============= PLACEHOLDER CODE - NEED LOAD ITEM AND MOB GENERATION INFO FROM PREFAB =========================
     item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for i in range(0, item_count):
-        item = dataset.get_item_from_loot_list('house_default')
-        item_coords = inner_cells[random.randrange(len(inner_cells))]
-        loc.place_entity(item, item_coords[0], item_coords[1])
+        item = dataset.get_item_from_loot_list(prefab_variant['loot_i'])
+        if item:
+            item_coords = inner_cells[random.randrange(len(inner_cells))]
+            loc.place_entity(item, item_coords[0], item_coords[1])
     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for m in range(0, mob_count):
-        mob = dataset.get_mob_from_spawn_list('ruins_default')
-        mob_coords = inner_cells[random.randrange(len(inner_cells))]
-        loc.place_entity(mob, mob_coords[0], mob_coords[1])
-        gen_mob_loot(mob)  # generate mob loot
+        mobs = dataset.get_mob_from_spawn_list(prefab_variant['mobs_i'])
+        if mobs:
+            if isinstance(mobs, list):  # if multiple mobs
+                for mob in mobs:
+                    mob_coords = inner_cells[random.randrange(len(inner_cells))]
+                    loc.place_entity(mob, mob_coords[0], mob_coords[1])
+                    gen_mob_loot(mob)  # generate mob loot
+            elif isinstance(mobs, game_logic.Entity):
+                mob_coords = inner_cells[random.randrange(len(inner_cells))]
+                loc.place_entity(mobs, mob_coords[0], mob_coords[1])
+                gen_mob_loot(mobs)  # generate mob loot
     trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for m in range(0, trap_count):
         trap_id = game_logic.weighted_choice([('trap_corrosive_moss', 100)])
         trap_coords = inner_cells[random.randrange(len(inner_cells))]
-        mob = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
-        gen_mob_loot(mob)  # generate mob loot
+        trap = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
+        gen_mob_loot(trap)  # generate mob loot
         # ============================================================================================================
 
 
