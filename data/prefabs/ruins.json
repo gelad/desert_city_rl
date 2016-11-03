@@ -3,11 +3,17 @@
     "default": {
       "chance": 100,
       "items_i": "ruins_default_items",
+      "items_i_num_chances": [[0, 50], [1, 25], [2, 15], [3, 10]],
       "mobs_i": "ruins_default_mobs",
+      "mobs_i_num_chances": [[0, 50], [1, 25], [2, 15], [3, 10]],
       "traps_i": "ruins_default_traps",
+      "traps_i_num_chances": [[0, 50], [1, 25], [2, 15], [3, 10]],
       "items_o": "None",
+      "items_o_num_chances": [[0, 100]],
       "mobs_o": "None",
-      "traps_o": "None"
+      "mobs_o_num_chances": [[0, 100]],
+      "traps_o": "None",
+      "traps_o_num_chances": [[0, 100]]
     }
   }
 }

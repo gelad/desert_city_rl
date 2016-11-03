@@ -3,20 +3,32 @@
     "default": {
       "chance": 70,
       "items_i": "LOC_default",
+      "items_i_num_chances": "LOC_default",
       "mobs_i": "LOC_default",
+      "mobs_i_num_chances": "LOC_default",
       "traps_i": "LOC_default",
+      "traps_i_num_chances": "LOC_default",
       "items_o": "LOC_default",
+      "items_o_num_chances": "LOC_default",
       "mobs_o": "LOC_default",
-      "traps_o": "LOC_default"
+      "mobs_o_num_chances": "LOC_default",
+      "traps_o": "LOC_default",
+      "traps_o_num_chances": "LOC_default"
     },
     "magic": {
       "chance": 30,
       "items_i": "small_shop_magic_items",
+      "items_i_num_chances": [[0, 30], [1, 30], [2, 25], [3, 10], [4, 5]],
       "mobs_i": "small_shop_magic_mobs",
+      "mobs_i_num_chances": [[0, 25], [1, 40], [2, 20], [3, 10], [4, 5]],
       "traps_i": "small_shop_magic_traps",
-      "items_o": "None",
-      "mobs_o": "None",
-      "traps_o": "None"
+      "traps_i_num_chances": [[0, 30], [1, 50], [2, 15], [3, 5]],
+      "items_o": "LOC_default",
+      "items_o_num_chances": "LOC_default",
+      "mobs_o": "LOC_default",
+      "mobs_o_num_chances": "LOC_default",
+      "traps_o": "LOC_default",
+      "traps_o_num_chances": "LOC_default"
     }
   },
   "legend": {

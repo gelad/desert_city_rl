@@ -241,9 +241,12 @@ def populate_prefab(ent_type, prefab_variant, cell_groups, loc, exclude_affected
             list_name = prefab_variant[ent_type + '_' + c_group]
         except KeyError:  # if there are no spawn list for group - skip it
             break
-        entity_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+        if ent_type + '_' + c_group + '_num_chances' in prefab_variant:
+            entity_count = game_logic.weighted_choice(prefab_variant[ent_type + '_' + c_group + '_num_chances'])
+        else:
+            print('Warning! No entity number chances for prefab! Using defaults.')
+            entity_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
         for i in range(0, entity_count):
-
             if ent_type == 'items':  # if any categories of Entities need special get functions - place here
                 entities = dataset.get_item_from_loot_list(list_name)
             else:
