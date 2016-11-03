@@ -163,16 +163,84 @@ def load_prefab_info(name, settings):
     return prefab_info, prefab_variant
 
 
+def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, build_w, build_h):
+    """ Function, that fills prefab with tiles and pre-defined Entites (such as walls, windows, doors) """
+    inner_cells = []  # empty floor cells for item and mob generation
+    for x in range(build_w):
+        for y in range(build_h):
+            loc_cell_x = x + build_x  # location cell coords - for placement
+            loc_cell_y = y + build_y
+            tile_cell = prefab['layer_data'][0]['cells'][x][y]  # get tile info from prefab
+            char_tile = chr(tile_cell['keycode'])
+            if ord(char_tile) == 0:  # space has 0 and 32 code in REXPaint - problems if it's 0
+                char_tile = ' '
+            char_tile_color = (tile_cell['fore_r'], tile_cell['fore_g'], tile_cell['fore_b'])
+            char_tile_bgcolor = (tile_cell['back_r'], tile_cell['back_g'], tile_cell['back_b'])
+            found_tile = False  # tile found flag
+            if char_tile == ' ' and char_tile_color == (0, 0, 0) and char_tile_bgcolor == (0, 0, 0):
+                found_tile = True  # if empty tile - not look for it
+            if 'legend' in prefab_info and not found_tile:  # first look in prefab legend - faster
+                if 'tiles' in prefab_info['legend']:
+                    for tile in prefab_info['legend']['tiles']:
+                        if char_tile == tile['char'] and char_tile_color == tile['color'] and \
+                                        char_tile_bgcolor == tile['bgcolor']:
+                            loc.cells[loc_cell_x][loc_cell_y].tile = tile['name']
+                            found_tile = True
+                            break
+            if not found_tile:  # if not found in legend - search for matching tile in dataset
+                for tile in dataset.tile_set:
+                    if char_tile == dataset.tile_set[tile][0] and char_tile_color == tuple(dataset.tile_set[tile][1]) \
+                            and char_tile_bgcolor == tuple(dataset.tile_set[tile][2]):
+                        loc.cells[loc_cell_x][loc_cell_y].tile = tile
+                        found_tile = True
+                        break
+            if not found_tile:
+                pass  # TODO: uncomment when destruction is reworked
+                # print('Warning! Tile ' + char_tile + ' not found in prefab info and dataset, skipped.')
+            entity_cell = prefab['layer_data'][1]['cells'][x][y]  # get entity info from prefab
+            char_ent = chr(entity_cell['keycode'])
+            char_ent_color = (entity_cell['fore_r'], entity_cell['fore_g'], entity_cell['fore_b'])
+            found_ent = False  # entity found flag
+            if char_ent == ' ' and char_ent_color == (0, 0, 0):
+                found_ent = True  # if empty entity glyph of black color - not look for it
+            if 'legend' in prefab_info and not found_ent:  # first look in prefab legend - faster
+                if 'entities' in prefab_info['legend']:
+                    for entity in prefab_info['legend']['entities']:
+                        if char_ent == entity['char'] and char_ent_color == entity['color']:
+                            loc.place_entity(entity['name'], loc_cell_x, loc_cell_y)
+                            found_ent = True
+                            break
+            if not found_ent:  # if not found in legend - search for matching entity in dataset
+                for entity in dataset.data_set:
+                    if char_ent == dataset.data_set[entity].char and \
+                                    char_ent_color == tuple(dataset.data_set[entity].color):
+                        loc.place_entity(entity, loc_cell_x, loc_cell_y)
+                        found_ent = True
+                        break
+            if not found_ent:
+                pass  # TODO: uncomment when destruction is reworked
+                # print('Warning! Entity ' + char_ent + ' not found in prefab info and dataset, skipped.')
+            # make cell groups, according to prefab
+            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed() and prefab['layer_data'][2]['cells'][x][y][
+                'keycode'] == ord('i'):
+                inner_cells.append((loc_cell_x, loc_cell_y))
+                # TODO: add 'o'uter cells list - when prefab will have separate outer and inner tile items and mobs
+    return inner_cells
+
+
 def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
-    """ Places prefab on the map, generating items, mobs, destruction etc """
+    """
+        This function should be called to place prefab during generation.
+        Places prefab on the map, generating items, mobs, destruction etc.
+    """
     if settings is None:  # if no settings - empty set
         settings = {}
     prefab = load_prefab(name)  # load prefab from .xp file
     prefab_info, prefab_variant = load_prefab_info(name=name, settings=settings)  # load prefab info
     build_w = prefab['width']  # building dimensions - from prefab
     build_h = prefab['height']
-    build_x = random.randrange(plot_size - build_w)  # random building position within plot (according to its size)
-    build_y = random.randrange(plot_size - build_h)
+    build_x = random.randrange(plot_size - build_w) + plot_x  # random building position within plot (according to size)
+    build_y = random.randrange(plot_size - build_h) + plot_y
     if 'rotate' in settings:  # rotate prefab if needed
         i = 0
         while i < settings['rotate']:
@@ -200,39 +268,13 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                 elif char == '+':
                     prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
                         ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
-    # actual entities and tiles placing part
-    inner_cells = []  # empty floor cells for item and mob generation
-    for x in range(build_w):
-        for y in range(build_h):
-            loc_cell_x = x + build_x + plot_x  # location cell coords - for placement
-            loc_cell_y = y + build_y + plot_y
-            tile_cell = prefab['layer_data'][0]['cells'][x][y]  # get tile info from prefab
-            char_tile = chr(tile_cell['keycode'])
-            if ord(char_tile) == 0:  # space has 0 and 32 code in REXPaint - problems if it's 0
-                char_tile = ' '
-            char_tile_color = (tile_cell['fore_r'], tile_cell['fore_g'], tile_cell['fore_b'])
-            char_tile_bgcolor = (tile_cell['back_r'], tile_cell['back_g'], tile_cell['back_b'])
-            # TODO: make first look in prefab legend
-            for tile in dataset.tile_set:  # search for matching tile in dataset
-                if char_tile == dataset.tile_set[tile][0] and char_tile_color == tuple(dataset.tile_set[tile][1]) \
-                        and char_tile_bgcolor == tuple(dataset.tile_set[tile][2]):
-                    loc.cells[loc_cell_x][loc_cell_y].tile = tile
-                    break
-            entity_cell = prefab['layer_data'][1]['cells'][x][y]  # get entity info from prefab
-            char_ent = chr(entity_cell['keycode'])
-            char_ent_color = (entity_cell['fore_r'], entity_cell['fore_g'], entity_cell['fore_b'])
-            # TODO: make first look in prefab legend
-            for entity_ID in dataset.data_set:  # search for matching entity in dataset
-                if dataset.data_set[entity_ID].char == char_ent and\
-                                tuple(dataset.data_set[entity_ID].color) == char_ent_color:
-                    loc.place_entity(entity_ID, loc_cell_x, loc_cell_y)
-                    break
-            # if cell is passable and marked as 'i'nner - add to inner list
-            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed() and prefab['layer_data'][2]['cells'][x][y][
-                                                                                  'keycode'] == ord('i'):
-                inner_cells.append((loc_cell_x, loc_cell_y))
-            # TODO: add 'o'uter cells list - when prefab will have separate outer and inner tile items and mobs
+    # actual pre-defined entities and tiles placing
+    inner_cells = fill_prefab(loc=loc, prefab=prefab, prefab_info=prefab_info, prefab_variant=prefab_variant,
+                              build_x=build_x, build_y=build_y, build_w=build_w, build_h=build_h)
     item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+    if len(inner_cells) == 0:
+        print('Warning! No inner cells in prefab.')
+        return
     for i in range(0, item_count):
         item = dataset.get_item_from_loot_list(prefab_variant['loot_i'])
         if item:

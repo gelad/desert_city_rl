@@ -14,11 +14,38 @@
     }
   },
   "legend": {
-    "entities": {
-      "('#', (255, 250, 205))": "wall_sandstone"
-    },
-    "tiles": {
-      "(' ', (0, 0, 0), (153, 153, 0))": "FLOOR_SANDSTONE"
-    }
+    "entities": [
+      {
+        "name": "wall_sandstone",
+        "char": "#",
+        "color": {
+          "py/tuple": [
+            255,
+            250,
+            205
+          ]
+        }
+      }
+    ],
+    "tiles": [
+      {
+        "name": "FLOOR_SANDSTONE",
+        "char": " ",
+        "color": {
+          "py/tuple": [
+            0,
+            0,
+            0
+          ]
+        },
+        "bgcolor": {
+          "py/tuple": [
+            153,
+            153,
+            0
+          ]
+        }
+      }
+    ]
   }
 }
