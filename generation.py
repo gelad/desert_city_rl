@@ -201,15 +201,9 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
         loc.place_entity(item, item_coords[0], item_coords[1])
     mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for m in range(0, mob_count):
-        mob_id = game_logic.weighted_choice([('mob_mindless_body', 55),
-                                             ('mob_scorpion', 20),
-                                             ('mob_rakshasa', 10 + item_count * 3),
-                                             ('mob_sand_golem', 7 + item_count * 3),
-                                             ('mob_lightning_wisp', 5 + item_count * 2),
-                                             ('mob_ifrit', 3 + item_count * 1)])
-        # more loot - dangerous mobs
+        mob = dataset.get_mob_from_spawn_list('ruins_default')
         mob_coords = inner_cells[random.randrange(len(inner_cells))]
-        mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
+        loc.place_entity(mob, mob_coords[0], mob_coords[1])
         gen_mob_loot(mob)  # generate mob loot
     trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
     for m in range(0, trap_count):

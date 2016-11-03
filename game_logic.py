@@ -1567,6 +1567,7 @@ class Location:
             else:
                 entity.location = self  # update entity location
                 self.entities.add(entity)
+                self.reobserve_entity(entity)
             if isinstance(entity, Actor):  # check if entity is an Actor
                 self.actors.append(entity)  # add it to Actors list
             if isinstance(entity, Inventory):  # check if entity has inventory

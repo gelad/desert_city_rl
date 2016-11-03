@@ -1,0 +1,38 @@
+[
+  {
+    "py/tuple": [
+      "mob_mindless_body",
+      55
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_scorpion",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_rakshasa",
+      10
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_sand_golem",
+      7
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_lightning_wisp",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_ifrit",
+      3
+    ]
+  }
+]
