@@ -1,16 +1,22 @@
 {
   "variants": {
     "default": {
-      "chance": 50,
-      "loot_i": "LOC_default",
+      "chance": 70,
+      "items_i": "LOC_default",
       "mobs_i": "LOC_default",
-      "traps_i": "LOC_default"
+      "traps_i": "LOC_default",
+      "items_o": "LOC_default",
+      "mobs_o": "LOC_default",
+      "traps_o": "LOC_default"
     },
     "magic": {
-      "chance": 50,
-      "loot_i": "small_shop_magic_items",
+      "chance": 30,
+      "items_i": "small_shop_magic_items",
       "mobs_i": "small_shop_magic_mobs",
-      "traps_i": "small_shop_magic_traps"
+      "traps_i": "small_shop_magic_traps",
+      "items_o": "None",
+      "mobs_o": "None",
+      "traps_o": "None"
     }
   },
   "legend": {

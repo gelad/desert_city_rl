@@ -678,6 +678,8 @@ def get_item_from_loot_list(list_name):
         Function that returns item from loot list (random item, based on weights in list)
         Supports recursion - loot list can be supplied instead of item ID
     """
+    if list_name == 'None':
+        return None
     file = open('data/loot_lists/' + list_name + '.json', 'r')  # load and decode loot list
     loot_list = jsonpickle.loads(file.read())
     file.close()
@@ -702,6 +704,8 @@ def get_entity_from_spawn_list(list_name):
         Function that returns entity from spawn list (random entity, based on weights in list)
         Supports recursion - entity spawn can be supplied instead of entity ID
     """
+    if list_name == 'None':
+        return None
     file = open('data/entity_spawns/' + list_name + '.json', 'r')  # load and decode entity list
     entity_list = jsonpickle.loads(file.read())
     file.close()

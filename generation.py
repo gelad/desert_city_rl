@@ -165,7 +165,7 @@ def load_prefab_info(name, settings):
 
 def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, build_w, build_h):
     """ Function, that fills prefab with tiles and pre-defined Entites (such as walls, windows, doors) """
-    inner_cells = []  # empty floor cells for item and mob generation
+    cell_groups = {}  # empty floor cells for item and mob generation
     for x in range(build_w):
         for y in range(build_h):
             loc_cell_x = x + build_x  # location cell coords - for placement
@@ -220,12 +220,50 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
             if not found_ent:
                 pass  # TODO: uncomment when destruction is reworked
                 # print('Warning! Entity ' + char_ent + ' not found in prefab info and dataset, skipped.')
-            # make cell groups, according to prefab
-            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed() and prefab['layer_data'][2]['cells'][x][y][
-                'keycode'] == ord('i'):
-                inner_cells.append((loc_cell_x, loc_cell_y))
-                # TODO: add 'o'uter cells list - when prefab will have separate outer and inner tile items and mobs
-    return inner_cells
+            # make cell groups, according to prefab # TODO: Move cell groups creation to separate function
+            cell_group_char = chr(prefab['layer_data'][2]['cells'][x][y]['keycode'])
+            if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
+                if cell_group_char in cell_groups:  # if such cells are already in cell_groups
+                    cell_groups[cell_group_char].add((loc_cell_x, loc_cell_y))  # add cell to group
+                else:  # if not - create new group with 1 cell
+                    cell_groups.update({cell_group_char: {(loc_cell_x, loc_cell_y)}})
+    return cell_groups
+
+
+def populate_prefab(ent_type, prefab_variant, cell_groups, loc, exclude_affected_cells=False):
+    """
+        This function places mob, loot, trap entities in the prefab
+        if exclude_affected_cells is True - removes cells, where something is placed from cell_groups
+        (useful to not generating mobs one into another)
+    """
+    for c_group in cell_groups:  # iterate through cell groups
+        try:
+            list_name = prefab_variant[ent_type + '_' + c_group]
+        except KeyError:  # if there are no spawn list for group - skip it
+            break
+        entity_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
+        for i in range(0, entity_count):
+
+            if ent_type == 'items':  # if any categories of Entities need special get functions - place here
+                entities = dataset.get_item_from_loot_list(list_name)
+            else:
+                entities = dataset.get_entity_from_spawn_list(list_name)
+            if entities:
+                if isinstance(entities, list):  # if multiple entities
+                    for entity in entities:
+                        if len(cell_groups[c_group]) > 0:
+                            entity_coords = random.choice(tuple(cell_groups[c_group]))
+                            if exclude_affected_cells:  # if exclude affected flag is set - remove coords from group
+                                cell_groups[c_group].remove(entity_coords)
+                            loc.place_entity(entity, entity_coords[0], entity_coords[1])
+                            gen_entity_loot(entity)  # generate entity loot
+                elif isinstance(entities, game_logic.Entity):
+                    if len(cell_groups[c_group]) > 0:
+                        entity_coords = random.choice(tuple(cell_groups[c_group]))
+                        if exclude_affected_cells:  # if exclude affected flag is set - remove coords from group
+                            cell_groups[c_group].remove(entity_coords)
+                        loc.place_entity(entities, entity_coords[0], entity_coords[1])
+                        gen_entity_loot(entities)  # generate entity loot
 
 
 def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
@@ -269,43 +307,16 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                     prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
                         ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
     # actual pre-defined entities and tiles placing
-    inner_cells = fill_prefab(loc=loc, prefab=prefab, prefab_info=prefab_info, prefab_variant=prefab_variant,
+    cell_groups = fill_prefab(loc=loc, prefab=prefab, prefab_info=prefab_info, prefab_variant=prefab_variant,
                               build_x=build_x, build_y=build_y, build_w=build_w, build_h=build_h)
-    item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
-    if len(inner_cells) == 0:
-        print('Warning! No inner cells in prefab.')
+    if len(cell_groups) == 0:
+        print('Warning! Empty cell groups in prefab.')
         return
-    for i in range(0, item_count):
-        item = dataset.get_item_from_loot_list(prefab_variant['loot_i'])
-        if item:
-            item_coords = inner_cells[random.randrange(len(inner_cells))]
-            loc.place_entity(item, item_coords[0], item_coords[1])
-    mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
-    for m in range(0, mob_count):
-        mobs = dataset.get_entity_from_spawn_list(prefab_variant['mobs_i'])
-        if mobs:
-            if isinstance(mobs, list):  # if multiple mobs
-                for mob in mobs:
-                    mob_coords = inner_cells[random.randrange(len(inner_cells))]
-                    loc.place_entity(mob, mob_coords[0], mob_coords[1])
-                    gen_entity_loot(mob)  # generate mob loot
-            elif isinstance(mobs, game_logic.Entity):
-                mob_coords = inner_cells[random.randrange(len(inner_cells))]
-                loc.place_entity(mobs, mob_coords[0], mob_coords[1])
-                gen_entity_loot(mobs)  # generate mob loot
-    trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
-    for m in range(0, trap_count):
-        traps = dataset.get_entity_from_spawn_list(prefab_variant['traps_i'])
-        if traps:
-            if isinstance(traps, list):  # if multiple traps
-                for trap in traps:
-                    trap_coords = inner_cells[random.randrange(len(inner_cells))]
-                    loc.place_entity(trap, trap_coords[0], trap_coords[1])
-                    gen_entity_loot(trap)  # generate trap loot
-            elif isinstance(traps, game_logic.Entity):
-                trap_coords = inner_cells[random.randrange(len(inner_cells))]
-                loc.place_entity(traps, trap_coords[0], trap_coords[1])
-                gen_entity_loot(traps)  # generate trap loot
+    populate_prefab(ent_type='items', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc)  # add items
+    populate_prefab(ent_type='mobs', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc,
+                    exclude_affected_cells=True)  # add mobs
+    populate_prefab(ent_type='traps', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc,
+                    exclude_affected_cells=True)  # add traps
 
 
 def subgen_building(building, build_w, build_h, settings=None):
