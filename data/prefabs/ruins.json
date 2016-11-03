@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "default": {
+      "chance": 100,
+      "loot_i": "ruins_default_items",
+      "mobs_i": "ruins_default_mobs",
+      "traps_i": "ruins_default_traps"
+    }
+  }
+}

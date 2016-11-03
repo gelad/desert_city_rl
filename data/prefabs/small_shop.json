@@ -2,13 +2,15 @@
   "variants": {
     "default": {
       "chance": 50,
-      "loot_i": "house_default",
-      "mobs_i": "ruins_default"
+      "loot_i": "LOC_default",
+      "mobs_i": "LOC_default",
+      "traps_i": "LOC_default"
     },
     "magic": {
       "chance": 50,
-      "loot_i": "small_shop_magic",
-      "mobs_i": "small_shop_magic_spawn"
+      "loot_i": "small_shop_magic_items",
+      "mobs_i": "small_shop_magic_mobs",
+      "traps_i": "small_shop_magic_traps"
     }
   },
   "legend": {

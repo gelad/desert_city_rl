@@ -697,30 +697,30 @@ def get_item_from_loot_list(list_name):
     return chosen_item
 
 
-def get_mob_from_spawn_list(list_name):
+def get_entity_from_spawn_list(list_name):
     """
-        Function that returns mob from spawn list (random mob, based on weights in list)
-        Supports recursion - mob spawn can be supplied instead of mob ID
+        Function that returns entity from spawn list (random entity, based on weights in list)
+        Supports recursion - entity spawn can be supplied instead of entity ID
     """
-    file = open('data/mob_spawns/' + list_name + '.json', 'r')  # load and decode mob list
-    mob_list = jsonpickle.loads(file.read())
+    file = open('data/entity_spawns/' + list_name + '.json', 'r')  # load and decode entity list
+    entity_list = jsonpickle.loads(file.read())
     file.close()
-    chosen = game_logic.weighted_choice(mob_list)
-    if chosen == 'None':  # None string can be supplied to return no mob
-        chosen_mob = None
+    chosen = game_logic.weighted_choice(entity_list)
+    if chosen == 'None':  # None string can be supplied to return no entity
+        chosen_entity = None
     elif chosen[0:5] == 'list_':  # if chosen is another list - choose from it
-        chosen_mob = get_mob_from_spawn_list(chosen[5:])  # <--- recursion here!
-    elif chosen[0:4] == 'qty_':  # if mob quantity specified - return list of mobs
+        chosen_entity = get_entity_from_spawn_list(chosen[5:])  # <--- recursion here!
+    elif chosen[0:4] == 'qty_':  # if entity quantity specified - return list of entities
         min_qty = int(chosen[chosen.find('(')+1:chosen.find(';')])
         max_qty = int(chosen[chosen.find(';')+1:chosen.find(')')])
         quantity = random.randint(min_qty, max_qty)
         i = 0
-        chosen_mob = []
+        chosen_entity = []
         while i < quantity:
-            chosen_mob.append(get_entity(chosen[chosen.find(')')+1:]))
+            chosen_entity.append(get_entity(chosen[chosen.find(')')+1:]))
             i += 1
-        if len(chosen_mob) == 0:  # if no mobs in list - return None instead of empty list
-            chosen_mob = None
+        if len(chosen_entity) == 0:  # if no entities in list - return None instead of empty list
+            chosen_entity = None
     else:
-        chosen_mob = get_entity(chosen)
-    return chosen_mob  # can be single Entity or list
+        chosen_entity = get_entity(chosen)
+    return chosen_entity  # can be single Entity or list
