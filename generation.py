@@ -31,8 +31,8 @@ def generate_loc(loc_type, settings, width, height):
         for plot_x in range(width // grid_size - 1):
             for plot_y in range(height // grid_size - 1):
                 # choose a building type
-                build_type = game_logic.weighted_choice([('house', 50), ('prefab_small_shop', 20),
-                                                         ('prefab_small_market', 10), ('none', 20)])
+                build_type = game_logic.weighted_choice([('house', 5), ('prefab_small_shop', 5),
+                                                         ('prefab_small_market', 20), ('none', 70)])
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)
@@ -211,9 +211,9 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                             if entity['name'][:7] == 'PREFAB_':
                                 pr_str = entity['name'][7:]
                                 pr_set = dict(settings)  # make settings copy
-                                if pr_str.find('MV'):  # if 'match variant' keyword
+                                if pr_str.find('MV') >= 0:  # if 'match variant' keyword
                                     pr_set['variant'] = prefab_variant['name']
-                                if pr_str.find('RR'):  # if 'random rotation' keyword
+                                if pr_str.find('RR') >= 0:  # if 'random rotation' keyword
                                     pr_set['rotate'] = random.randint(0, 3)
                                 pr_name = pr_str[pr_str.find('NAME:') + 5:]
                                 place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x, plot_y=loc_cell_y,
