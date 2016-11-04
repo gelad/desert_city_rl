@@ -73,6 +73,28 @@ def initialize():
     data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
     data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_PIERCING', 20))
 
+    data_set['furn_wooden_counter'] = game_logic.Prop(name='Wooden counter',
+                                                      data_id='furn_wooden_counter',
+                                                      occupies_tile=False, blocks_los=False, blocks_shots=0.25,
+                                                      armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                      pass_cost=2,
+                                                    description='Wooden counter. Provides small cover from projectiles.',
+                                                      char='ʭ', color=[128, 0, 0], hp=50, weight=50)
+    data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_BASHING', 10))
+    data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
+    data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
+    data_set['furn_wooden_table'] = game_logic.Prop(name='Wooden table',
+                                                    data_id='furn_wooden_table',
+                                                    occupies_tile=False, blocks_los=False, blocks_shots=0.25,
+                                                    armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                    pass_cost=2,
+                                                    description='Wooden table. Provides small cover from projectiles.',
+                                                    char='■', color=[128, 0, 0], hp=50, weight=50)
+    data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_BASHING', 10))
+    data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
+    data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
     data_set['trap_corrosive_moss'] = game_logic.Prop(name='Corrosive moss', data_id='trap_corrosive_moss',
                                                       occupies_tile=False, blocks_los=False, blocks_shots=0,
                                                       armor={'bashing': 300, 'slashing': 50, 'piercing': 300},
@@ -351,13 +373,13 @@ def initialize():
                                              description='A sharp sabre with pointy tip.',
                                              categories={'weapon', 'sword'},
                                              properties={'slashing': (4, 6), 'attack_speed_mod': 1},
-                                             char='/', color=[200, 200, 255], weight=2)
+                                             char='ϯ', color=[200, 200, 255], weight=2)
 
     data_set['item_longsword'] = game_logic.Item(name='longsword', data_id='item_longsword',
                                                  description='A double-edged straight sword.',
                                                  categories={'weapon', 'sword'},
                                                  properties={'slashing': (5, 9), 'attack_speed_mod': 1.2},
-                                                 char='/', color=[150, 150, 255], weight=4)
+                                                 char='ϯ', color=[150, 150, 255], weight=4)
 
     data_set['item_dagger'] = game_logic.Item(name='dagger', data_id='item_dagger',
                                               description='A dagger about 20cm long.',

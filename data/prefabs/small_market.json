@@ -109,15 +109,19 @@
         "name": [
           [
             "PREFAB_RR_NAME:market_lot",
-            25
+            20
           ],
           [
             "PREFAB_RR_NAME:market_lot2",
-            25
+            20
+          ],
+          [
+            "PREFAB_RR_NAME:market_lot3",
+            20
           ],
           [
             "None",
-            50
+            60
           ]
         ],
         "char": "0",

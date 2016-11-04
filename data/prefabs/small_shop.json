@@ -45,6 +45,28 @@
             205
           ]
         }
+      },
+      {
+        "name": "furn_wooden_counter",
+        "char": "c",
+        "color": {
+          "py/tuple": [
+            128,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "furn_wooden_table",
+        "char": "t",
+        "color": {
+          "py/tuple": [
+            128,
+            0,
+            0
+          ]
+        }
       }
     ],
     "tiles": [
