@@ -108,15 +108,15 @@
       {
         "name": [
           [
-            "PREFAB_RR_NAME:market_lot",
+            "PREFAB_RR_PO(-2;-2)_NAME:market_lot",
             20
           ],
           [
-            "PREFAB_RR_NAME:market_lot2",
+            "PREFAB_RR_PO(-2;-2)_NAME:market_lot2",
             20
           ],
           [
-            "PREFAB_RR_NAME:market_lot3",
+            "PREFAB_RR_PO(-2;-2)_NAME:market_lot3",
             20
           ],
           [

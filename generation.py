@@ -330,13 +330,22 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                                     if roll > chance:
                                         found_ent = True
                                         break
+                                offset_x = 0
+                                offset_y = 0
+                                po = pr_str.find('PO')
+                                if po >= 0:  # if 'position offset' keyword
+                                    offset_x = int(pr_str[pr_str.find('(', po) + 1:pr_str.find(';', po)])
+                                    offset_y = int(pr_str[pr_str.find(';', po) + 1:pr_str.find(')', po)])
                                 if pr_str.find('MV') >= 0:  # if 'match variant' keyword
                                     pr_set['variant'] = prefab_variant['name']
                                 if pr_str.find('RR') >= 0:  # if 'random rotation' keyword
                                     pr_set['rotate'] = random.randint(0, 3)
+                                if pr_str.find('DE') < 0:  # if no 'destruct' keyword
+                                    if 'destruct' in pr_set:
+                                        del pr_set['destruct']
                                 pr_name = pr_str[pr_str.find('NAME:') + 5:]
-                                place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x, plot_y=loc_cell_y,
-                                             settings=pr_set)
+                                place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x + offset_x,
+                                             plot_y=loc_cell_y + offset_y, settings=pr_set)
                             else:
                                 loc.place_entity(entity_id, loc_cell_x, loc_cell_y)
                             found_ent = True
