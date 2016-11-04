@@ -31,8 +31,8 @@ def generate_loc(loc_type, settings, width, height):
         for plot_x in range(width // grid_size - 1):
             for plot_y in range(height // grid_size - 1):
                 # choose a building type
-                build_type = game_logic.weighted_choice([('house', 5), ('prefab_small_shop', 5),
-                                                         ('prefab_small_market', 20), ('none', 70)])
+                build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
+                                                         ('prefab_small_market', 5), ('none', 45)])
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)
@@ -207,10 +207,25 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
             if 'legend' in prefab_info and not found_ent:  # first look in prefab legend - faster
                 if 'entities' in prefab_info['legend']:
                     for entity in prefab_info['legend']['entities']:
+                        # if list of entities with chances - WORKS WITH PREFABS ONLY
+                        if isinstance(entity['name'], list):
+                            # choices = [tuple(t) for t in entity['name']]
+                            entity_id = game_logic.weighted_choice(entity['name'])  # choose one
+                        else:
+                            entity_id = entity['name']
+                        if entity_id == 'None':  # if None entity - skip
+                            break
                         if char_ent == entity['char'] and char_ent_color == entity['color']:
-                            if entity['name'][:7] == 'PREFAB_':
-                                pr_str = entity['name'][7:]
+                            if entity_id[:7] == 'PREFAB_':
+                                pr_str = entity_id[7:]
                                 pr_set = dict(settings)  # make settings copy
+                                ch = pr_str.find('CH')
+                                if ch >= 0:  # if 'chance' keyword
+                                    chance = int(pr_str[pr_str.find('(', ch) + 1:pr_str.find(';', ch)])
+                                    total = int(pr_str[pr_str.find(';', ch) + 1:pr_str.find(')', ch)])
+                                    roll = random.randint(0, total)
+                                    if roll > chance:
+                                        break
                                 if pr_str.find('MV') >= 0:  # if 'match variant' keyword
                                     pr_set['variant'] = prefab_variant['name']
                                 if pr_str.find('RR') >= 0:  # if 'random rotation' keyword
@@ -219,7 +234,7 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                                 place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x, plot_y=loc_cell_y,
                                              settings=pr_set)
                             else:
-                                loc.place_entity(entity['name'], loc_cell_x, loc_cell_y)
+                                loc.place_entity(entity_id, loc_cell_x, loc_cell_y)
                             found_ent = True
                             break
             if not found_ent:  # if not found in legend - search for matching entity in dataset

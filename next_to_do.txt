@@ -59,8 +59,12 @@ Make ammo with abilities (exploding, freezing arrows, etc) (DONE)
 Add some config file (DONE).
 Make menu lists scrollable. (DONE)
 Make loot from mobs. (DONE)
+Make building prefabs. (DONE)
+Make prefabs recursive (one can contain another). (DONE)
 
 
+Rework building destruction at generation time.
+Rework loc generation with prefabs.
 BUG: poison stops working if move to another location.
 Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.
 Inform player if targeting failed.

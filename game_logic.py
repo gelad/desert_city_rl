@@ -1732,6 +1732,7 @@ class Game:
 def weighted_choice(choices):
     """ Weighted choice function """
     total = sum(w for c, w in choices)
+    random.seed()
     r = random.uniform(0, total)
     upto = 0
     for c, w in choices:
