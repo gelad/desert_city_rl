@@ -45,8 +45,7 @@ def generate_loc(loc_type, settings, width, height):
                                     range(plot_x, plot_x + grid_size)],
                              b_x=build_x, b_y=build_y, b_w=build_w, b_h=build_h, b_type=build_type)
                     floor_cells = []  # empty floor cells for item gen
-                    building = subgen_building('house', build_w, build_h,
-                                               {'destruct': random.randint(1, 8)})
+                    building = subgen_building(building='house', build_w=build_w, build_h=build_h)
                     for x in range(build_w):
                         for y in range(build_h):
                             loc_cell_x = x + build_x + plot_x * 20
@@ -69,6 +68,9 @@ def generate_loc(loc_type, settings, width, height):
                             # if cell is passable - add to floor list
                             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                                 floor_cells.append((loc_cell_x, loc_cell_y))
+                    destruct(loc=loc, start_x=build_x + plot_x * 20, start_y=build_y + plot_y * 20, width=build_w,
+                             height=build_h, settings={'passes': random.randint(1, 10),
+                                                       'destroy_tiles': 'SAND'})  # destroy building
                     populate_prefab(ent_type='items', prefab_variant=loc_default_variant,
                                     cell_groups={'i': floor_cells}, loc=loc)  # add items
                     populate_prefab(ent_type='mobs', prefab_variant=loc_default_variant,
@@ -79,7 +81,7 @@ def generate_loc(loc_type, settings, width, height):
                     prefab_name = build_type[7:]
                     place_prefab(name=prefab_name, loc=loc, plot_size=grid_size, plot_x=plot_x * grid_size,
                                  plot_y=plot_y * grid_size, settings={'loc_type': loc_type,
-                                                                      'destruct': {'passes': random.randint(1, 12),
+                                                                      'destruct': {'passes': random.randint(1, 10),
                                                                                    'destroy_tiles': 'SAND'},
                                                                       'rotate': random.randint(0, 3)})
                 elif build_type == 'none':  # generate no building
@@ -135,21 +137,6 @@ def subgen_building(building, build_w, build_h, settings=None):
         if direction == 3: y = 0
         if direction == 4: y = -1
         pattern[x][y] = 'door'
-        # destruction algorithm
-        if settings:
-            if 'destruct' in settings:
-                for i in range(settings['destruct']):  # run destruction as many times as desired
-                    dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
-                    for j in range(dest_cells_num):  # destroy selected number of cells
-                        x = random.randrange(build_w)
-                        y = random.randrange(build_h)
-                        if pattern[x][y] == 'wall' or pattern[x][y] == 'small_window' or pattern[x][
-                            y] == 'large_window':
-                            pattern[x][y] = game_logic.weighted_choice([('debris_stone', 70), ('floor', 30)])
-                        elif pattern[x][y] == 'door':
-                            pattern[x][y] = game_logic.weighted_choice([('debris_wood', 70), ('floor', 30)])
-                        elif pattern[x][y] == 'floor':
-                            pattern[x][y] = game_logic.weighted_choice([('sand', 70), ('floor', 30)])
     return pattern
 
 
