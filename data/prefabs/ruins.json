@@ -1,6 +1,7 @@
 {
   "variants": {
     "default": {
+      "name": "default",
       "chance": 100,
       "items_i": "ruins_default_items",
       "items_i_num_chances": [[0, 50], [1, 25], [2, 15], [3, 10]],

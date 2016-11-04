@@ -45,6 +45,17 @@
             205
           ]
         }
+      },
+      {
+        "name": "PREFAB_RR_NAME:market_lot",
+        "char": "0",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
       }
     ],
     "tiles": [

@@ -31,7 +31,8 @@ def generate_loc(loc_type, settings, width, height):
         for plot_x in range(width // grid_size - 1):
             for plot_y in range(height // grid_size - 1):
                 # choose a building type
-                build_type = game_logic.weighted_choice([('house', 50), ('prefab_small_shop', 30), ('none', 20)])
+                build_type = game_logic.weighted_choice([('house', 50), ('prefab_small_shop', 20),
+                                                         ('prefab_small_market', 10), ('none', 20)])
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)
@@ -163,7 +164,7 @@ def load_prefab_info(name, settings):
     return prefab_info, prefab_variant
 
 
-def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, build_w, build_h):
+def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, build_w, build_h, settings=None):
     """ Function, that fills prefab with tiles and pre-defined Entites (such as walls, windows, doors) """
     cell_groups = {}  # empty floor cells for item and mob generation
     for x in range(build_w):
@@ -207,7 +208,18 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                 if 'entities' in prefab_info['legend']:
                     for entity in prefab_info['legend']['entities']:
                         if char_ent == entity['char'] and char_ent_color == entity['color']:
-                            loc.place_entity(entity['name'], loc_cell_x, loc_cell_y)
+                            if entity['name'][:7] == 'PREFAB_':
+                                pr_str = entity['name'][7:]
+                                pr_set = dict(settings)  # make settings copy
+                                if pr_str.find('MV'):  # if 'match variant' keyword
+                                    pr_set['variant'] = prefab_variant['name']
+                                if pr_str.find('RR'):  # if 'random rotation' keyword
+                                    pr_set['rotate'] = random.randint(0, 3)
+                                pr_name = pr_str[pr_str.find('NAME:') + 5:]
+                                place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x, plot_y=loc_cell_y,
+                                             settings=pr_set)
+                            else:
+                                loc.place_entity(entity['name'], loc_cell_x, loc_cell_y)
                             found_ent = True
                             break
             if not found_ent:  # if not found in legend - search for matching entity in dataset
@@ -269,19 +281,31 @@ def populate_prefab(ent_type, prefab_variant, cell_groups, loc, exclude_affected
                         gen_entity_loot(entities)  # generate entity loot
 
 
-def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
+def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
     """
         This function should be called to place prefab during generation.
         Places prefab on the map, generating items, mobs, destruction etc.
     """
+    # TODO: ?? make prefab recursion - allow one contain another
     if settings is None:  # if no settings - empty set
         settings = {}
     prefab = load_prefab(name)  # load prefab from .xp file
     prefab_info, prefab_variant = load_prefab_info(name=name, settings=settings)  # load prefab info
     build_w = prefab['width']  # building dimensions - from prefab
     build_h = prefab['height']
-    build_x = random.randrange(plot_size - build_w) + plot_x  # random building position within plot (according to size)
-    build_y = random.randrange(plot_size - build_h) + plot_y
+    if build_w != build_h:
+        raise Exception('Not square prefab - currently not allowed.')
+    if plot_size == 0:  # if plot size not specified - make it match prefab width
+        plot_size = build_w
+    if plot_size > build_w:
+        # random building position within plot (according to size)
+        build_x = random.randrange(plot_size - build_w) + plot_x
+        build_y = random.randrange(plot_size - build_h) + plot_y
+    elif plot_size == build_w:
+        build_x = plot_x  # building takes whole plot
+        build_y = plot_y
+    else:
+        raise Exception('Building larger than plot!')
     if 'rotate' in settings:  # rotate prefab if needed
         i = 0
         while i < settings['rotate']:
@@ -311,7 +335,7 @@ def place_prefab(name, loc, plot_size, plot_x, plot_y, settings=None):
                         ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
     # actual pre-defined entities and tiles placing
     cell_groups = fill_prefab(loc=loc, prefab=prefab, prefab_info=prefab_info, prefab_variant=prefab_variant,
-                              build_x=build_x, build_y=build_y, build_w=build_w, build_h=build_h)
+                              build_x=build_x, build_y=build_y, build_w=build_w, build_h=build_h, settings=settings)
     if len(cell_groups) == 0:
         print('Warning! Empty cell groups in prefab.')
         return
