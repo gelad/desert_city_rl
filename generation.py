@@ -95,7 +95,8 @@ def generate_loc(loc_type, settings, width, height):
                     prefab_name = build_type[7:]
                     place_prefab(name=prefab_name, loc=loc, plot_size=grid_size, plot_x=plot_x * grid_size,
                                  plot_y=plot_y * grid_size, settings={'loc_type': loc_type,
-                                                                      'destruct': random.randint(1, 8),
+                                                                      'destruct': {'passes': random.randint(1, 12),
+                                                                                   'destroy_tiles': 'SAND'},
                                                                       'rotate': random.randint(0, 3)})
                 elif build_type == 'none':  # generate no building
                     plots[plot_x][plot_y] = \
@@ -119,6 +120,108 @@ def generate_loc(loc_type, settings, width, height):
     return loc  # return generated location
 
 
+def subgen_building(building, build_w, build_h, settings=None):
+    """ Subgeneration function - generates a building """
+    pattern = [['ground' for y in range(build_h)] for x in range(build_w)]  # fill cells with 'ground'
+    if building == 'house':  # generate a simple house
+        pattern = [['floor' for y in range(build_h)] for x in range(build_w)]  # fill cells with 'floor'
+        for x in range(0, build_w):  # draw horizontal walls
+            pattern[x][0] = 'wall'
+            pattern[x][-1] = 'wall'
+        for y in range(0, build_h):  # draw vertical walls
+            pattern[0][y] = 'wall'
+            pattern[-1][y] = 'wall'
+        for i in range(random.randrange(10)):  # make some walls inside
+            x = random.randrange(build_w)
+            y = random.randrange(build_h)
+            if pattern[x][y] == 'floor':
+                pattern[x][y] = 'wall'
+        for n in range(1, 8):  # make windows
+            x = random.randrange(1, build_w - 1)
+            y = random.randrange(1, build_h - 1)
+            direction = random.randint(1, 4)
+            if direction == 1: x = 0
+            if direction == 2: x = -1
+            if direction == 3: y = 0
+            if direction == 4: y = -1
+            pattern[x][y] = game_logic.weighted_choice([('small_window', 50), ('large_window', 50)])
+        x = random.randrange(1, build_w - 1)  # make a door
+        y = random.randrange(1, build_h - 1)
+        direction = random.randint(1, 4)
+        if direction == 1: x = 0
+        if direction == 2: x = -1
+        if direction == 3: y = 0
+        if direction == 4: y = -1
+        pattern[x][y] = 'door'
+        # destruction algorithm
+        if settings:
+            if 'destruct' in settings:
+                for i in range(settings['destruct']):  # run destruction as many times as desired
+                    dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
+                    for j in range(dest_cells_num):  # destroy selected number of cells
+                        x = random.randrange(build_w)
+                        y = random.randrange(build_h)
+                        if pattern[x][y] == 'wall' or pattern[x][y] == 'small_window' or pattern[x][
+                            y] == 'large_window':
+                            pattern[x][y] = game_logic.weighted_choice([('debris_stone', 70), ('floor', 30)])
+                        elif pattern[x][y] == 'door':
+                            pattern[x][y] = game_logic.weighted_choice([('debris_wood', 70), ('floor', 30)])
+                        elif pattern[x][y] == 'floor':
+                            pattern[x][y] = game_logic.weighted_choice([('sand', 70), ('floor', 30)])
+    return pattern
+
+
+def gen_entity_loot(entity):
+    """ Function that generates entity loot and places it in inventory - mostly a placeholder now """
+    try:
+        if 'loot_list' in entity.properties:
+            items = []
+            if isinstance(entity.properties['loot_list'], str):
+                items.append(dataset.get_item_from_loot_list(entity.properties['loot_list']))
+            else:
+                for lst in entity.properties['loot_list']:  # multiple lists allowed
+                    items.append(dataset.get_item_from_loot_list(lst))
+            for item in items:
+                if item:
+                    entity.add_item(item)
+    except AttributeError:  # if no properties attribute - no loot
+        pass
+
+
+def destruct(loc, start_x, start_y, width, height, settings=None):
+    """
+        Imitates destruction of buildings. Very simple for now.
+        Wreak havoc and destruction upon the map ;)
+    """
+    if settings is None:  # if no settings - default 1 pass
+        settings = {'passes': 1, 'destroy_tiles': 'SAND'}
+    if 'destructible_types' in settings:
+        d_types = settings['destructible_types']
+    else:
+        d_types = {game_logic.Prop, game_logic.Door}
+    for i in range(0, settings['passes']):  # run destruction as many times as desired
+        dest_cells_num = int(width * height / 10)  # one iteration affects up to 10% of the building
+        for j in range(dest_cells_num):  # destroy selected number of cells
+            x = random.randrange(width) + start_x  # random coords of affected cell
+            y = random.randrange(height) + start_y
+            if loc.is_in_boundaries(x, y):  # check for x, y in bounds
+                destroyed = False
+                for ent in loc.cells[x][y].entities:
+                    for typ in d_types:
+                        if isinstance(ent, typ):
+                            try:
+                                ent.death()
+                            except AttributeError:  # if no death method
+                                loc.remove_entity(ent)
+                            destroyed = True
+                            break
+                        if destroyed:
+                            break  # one entity destroyed at a time
+                if 'destroy_tiles' in settings and not destroyed:
+                    loc.cells[x][y].tile = settings['destroy_tiles']  # set tile to specified destroyed tile
+
+
+# =================================== PREFAB SECTION =======================================================
 def load_prefab(name):
     """ Load building from prefab, created in REXPaint
         Prefab layers for now:
@@ -196,8 +299,7 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                         found_tile = True
                         break
             if not found_tile:
-                pass  # TODO: uncomment when destruction is reworked
-                # print('Warning! Tile ' + char_tile + ' not found in prefab info and dataset, skipped.')
+                print('Warning! Tile ' + char_tile + ' not found in prefab info and dataset, skipped.')
             entity_cell = prefab['layer_data'][1]['cells'][x][y]  # get entity info from prefab
             char_ent = chr(entity_cell['keycode'])
             char_ent_color = (entity_cell['fore_r'], entity_cell['fore_g'], entity_cell['fore_b'])
@@ -214,6 +316,7 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                         else:
                             entity_id = entity['name']
                         if entity_id == 'None':  # if None entity - skip
+                            found_ent = True
                             break
                         if char_ent == entity['char'] and char_ent_color == entity['color']:
                             if entity_id[:7] == 'PREFAB_':
@@ -225,6 +328,7 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                                     total = int(pr_str[pr_str.find(';', ch) + 1:pr_str.find(')', ch)])
                                     roll = random.randint(0, total)
                                     if roll > chance:
+                                        found_ent = True
                                         break
                                 if pr_str.find('MV') >= 0:  # if 'match variant' keyword
                                     pr_set['variant'] = prefab_variant['name']
@@ -245,8 +349,8 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                         found_ent = True
                         break
             if not found_ent:
-                pass  # TODO: uncomment when destruction is reworked
-                # print('Warning! Entity ' + char_ent + ' not found in prefab info and dataset, skipped.')
+                print('Warning! Entity ' + char_ent + ' of color' + str(char_ent_color) +
+                      ' not found in prefab with variant "' + prefab_variant['name'] + '" info and dataset, skipped.')
             # make cell groups, according to prefab # TODO: Move cell groups creation to separate function
             cell_group_char = chr(prefab['layer_data'][2]['cells'][x][y]['keycode'])
             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
@@ -301,7 +405,6 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
         This function should be called to place prefab during generation.
         Places prefab on the map, generating items, mobs, destruction etc.
     """
-    # TODO: ?? make prefab recursion - allow one contain another
     if settings is None:  # if no settings - empty set
         settings = {}
     prefab = load_prefab(name)  # load prefab from .xp file
@@ -328,29 +431,12 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
                 cells = prefab['layer_data'][l]['cells']
                 prefab['layer_data'][l]['cells'] = list(zip(*cells[::-1]))
             i += 1
-    if 'destruct' in settings:  # TODO: destruction part needs rework
-        for i in range(settings['destruct']):  # run destruction as many times as desired
-            dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
-            for j in range(dest_cells_num):  # destroy selected number of cells
-                x = random.randrange(build_w)
-                y = random.randrange(build_h)
-                tile = prefab['layer_data'][0]['cells'][x][y]
-                char_tile = chr(prefab['layer_data'][0]['cells'][x][y]['keycode'])
-                if ord(char_tile) == 0:  # space has 0 and 32 code in REXPaint - problems if it's 0
-                    char_tile = ' '
-                if char_tile == ' ':
-                    prefab['layer_data'][0]['cells'][x][y]['keycode'] = \
-                        ord(game_logic.weighted_choice([('.', 70), (' ', 30)]))
-                char = chr(prefab['layer_data'][1]['cells'][x][y]['keycode'])
-                if char == '#' or char == '"' or char == '_':
-                    prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
-                        ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
-                elif char == '+':
-                    prefab['layer_data'][1]['cells'][x][y]['keycode'] = \
-                        ord(game_logic.weighted_choice([('&', 70), (' ', 30)]))
     # actual pre-defined entities and tiles placing
     cell_groups = fill_prefab(loc=loc, prefab=prefab, prefab_info=prefab_info, prefab_variant=prefab_variant,
                               build_x=build_x, build_y=build_y, build_w=build_w, build_h=build_h, settings=settings)
+    if 'destruct' in settings:  # prefab destruction according to settings
+        destruct(loc=loc, start_x=build_x, start_y=build_y, width=build_w, height=build_h,
+                 settings=settings['destruct'])
     if len(cell_groups) == 0:
         print('Warning! Empty cell groups in prefab.')
         return
@@ -360,70 +446,5 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
     populate_prefab(ent_type='traps', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc,
                     exclude_affected_cells=True)  # add traps
 
+# =================================================================================================================
 
-def subgen_building(building, build_w, build_h, settings=None):
-    """ Subgeneration function - generates a building """
-    pattern = [['ground' for y in range(build_h)] for x in range(build_w)]  # fill cells with 'ground'
-    if building == 'house':  # generate a simple house
-        pattern = [['floor' for y in range(build_h)] for x in range(build_w)]  # fill cells with 'floor'
-        for x in range(0, build_w):  # draw horizontal walls
-            pattern[x][0] = 'wall'
-            pattern[x][-1] = 'wall'
-        for y in range(0, build_h):  # draw vertical walls
-            pattern[0][y] = 'wall'
-            pattern[-1][y] = 'wall'
-        for i in range(random.randrange(10)):  # make some walls inside
-            x = random.randrange(build_w)
-            y = random.randrange(build_h)
-            if pattern[x][y] == 'floor':
-                pattern[x][y] = 'wall'
-        for n in range(1, 8):  # make windows
-            x = random.randrange(1, build_w - 1)
-            y = random.randrange(1, build_h - 1)
-            direction = random.randint(1, 4)
-            if direction == 1: x = 0
-            if direction == 2: x = -1
-            if direction == 3: y = 0
-            if direction == 4: y = -1
-            pattern[x][y] = game_logic.weighted_choice([('small_window', 50), ('large_window', 50)])
-        x = random.randrange(1, build_w - 1)  # make a door
-        y = random.randrange(1, build_h - 1)
-        direction = random.randint(1, 4)
-        if direction == 1: x = 0
-        if direction == 2: x = -1
-        if direction == 3: y = 0
-        if direction == 4: y = -1
-        pattern[x][y] = 'door'
-        # destruction algorithm
-        if settings:
-            if 'destruct' in settings:
-                for i in range(settings['destruct']):  # run destruction as many times as desired
-                    dest_cells_num = int(build_w * build_h / 10)  # one iteration affects up to 10% of the building
-                    for j in range(dest_cells_num):  # destroy selected number of cells
-                        x = random.randrange(build_w)
-                        y = random.randrange(build_h)
-                        if pattern[x][y] == 'wall' or pattern[x][y] == 'small_window' or pattern[x][
-                            y] == 'large_window':
-                            pattern[x][y] = game_logic.weighted_choice([('debris_stone', 70), ('floor', 30)])
-                        elif pattern[x][y] == 'door':
-                            pattern[x][y] = game_logic.weighted_choice([('debris_wood', 70), ('floor', 30)])
-                        elif pattern[x][y] == 'floor':
-                            pattern[x][y] = game_logic.weighted_choice([('sand', 70), ('floor', 30)])
-    return pattern
-
-
-def gen_entity_loot(entity):
-    """ Function that generates entity loot and places it in inventory - mostly a placeholder now """
-    try:
-        if 'loot_list' in entity.properties:
-            items = []
-            if isinstance(entity.properties['loot_list'], str):
-                items.append(dataset.get_item_from_loot_list(entity.properties['loot_list']))
-            else:
-                for lst in entity.properties['loot_list']:  # multiple lists allowed
-                    items.append(dataset.get_item_from_loot_list(lst))
-            for item in items:
-                if item:
-                    entity.add_item(item)
-    except AttributeError:  # if no properties attribute - no loot
-        pass
