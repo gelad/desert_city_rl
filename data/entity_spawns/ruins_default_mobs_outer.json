@@ -1,0 +1,26 @@
+[
+  {
+    "py/tuple": [
+      "mob_mindless_body",
+      60
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_scorpion",
+      30
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_rakshasa",
+      9
+    ]
+  },
+  {
+    "py/tuple": [
+      "mob_ifrit",
+      1
+    ]
+  }
+]

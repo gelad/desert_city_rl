@@ -17,6 +17,8 @@ from collections import namedtuple
 def generate_loc(loc_type, settings, width, height):
     """ Location generation function """
     loc = game_logic.Location(width, height)
+    # load loc prefab info
+    loc_prefab_info, loc_default_variant = load_prefab_info(name=loc_type, settings={'variant': 'default'})
     if loc_type == 'clear':  # simply make a location full of sand tiles
         loc.cells.clear()
         loc.cells = [[game_logic.Cell('SAND') for y in range(loc.height)] for x in range(loc.width)]
@@ -67,30 +69,12 @@ def generate_loc(loc_type, settings, width, height):
                             # if cell is passable - add to floor list
                             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                                 floor_cells.append((loc_cell_x, loc_cell_y))
-                    item_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
-                    for i in range(0, item_count):
-                        item = dataset.get_item_from_loot_list('ruins_default_items')
-                        item_coords = floor_cells[random.randrange(len(floor_cells))]
-                        loc.place_entity(item, item_coords[0], item_coords[1])
-                    mob_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
-                    for m in range(0, mob_count):
-                        mobs = dataset.get_entity_from_spawn_list('ruins_default_mobs')
-                        if mobs:
-                            if isinstance(mobs, list):  # if multiple mobs
-                                for mob in mobs:
-                                    mob_coords = floor_cells[random.randrange(len(floor_cells))]
-                                    loc.place_entity(mob, mob_coords[0], mob_coords[1])
-                                    gen_entity_loot(mob)  # generate mob loot
-                            elif isinstance(mobs, game_logic.Entity):
-                                mob_coords = floor_cells[random.randrange(len(floor_cells))]
-                                loc.place_entity(mobs, mob_coords[0], mob_coords[1])
-                                gen_entity_loot(mobs)  # generate mob loot
-                    trap_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
-                    for m in range(0, trap_count):
-                        trap_id = game_logic.weighted_choice([('trap_corrosive_moss', 100)])
-                        trap_coords = floor_cells[random.randrange(len(floor_cells))]
-                        mob = loc.place_entity(trap_id, trap_coords[0], trap_coords[1])
-                        gen_entity_loot(mob)  # generate mob loot
+                    populate_prefab(ent_type='items', prefab_variant=loc_default_variant,
+                                    cell_groups={'i': floor_cells}, loc=loc)  # add items
+                    populate_prefab(ent_type='mobs', prefab_variant=loc_default_variant,
+                                    cell_groups={'i': floor_cells}, loc=loc, exclude_affected_cells=True)  # add mobs
+                    populate_prefab(ent_type='traps', prefab_variant=loc_default_variant,
+                                    cell_groups={'i': floor_cells}, loc=loc, exclude_affected_cells=True)  # add traps
                 elif build_type[:7] == 'prefab_':
                     prefab_name = build_type[7:]
                     place_prefab(name=prefab_name, loc=loc, plot_size=grid_size, plot_x=plot_x * grid_size,
@@ -103,19 +87,17 @@ def generate_loc(loc_type, settings, width, height):
                         Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
                                     range(plot_x, plot_x + grid_size)],
                              b_x=0, b_y=0, b_w=grid_size, b_h=grid_size, b_type=build_type)
-                    floor_cells = []
+                    outer_cells = []
                     for x in range(grid_size // 2):
                         for y in range(grid_size // 2):
-                            floor_cells.append((x + plot_x * 20, y + plot_y * 20))
-                    # place some mobs even there are no building
-                    mob_count = game_logic.weighted_choice([(0, 70), (1, 20), (2, 7), (3, 3)])
-                    for m in range(0, mob_count):
-                        mob_id = game_logic.weighted_choice([('mob_mindless_body', 50),
-                                                             ('mob_scorpion', 40),
-                                                             ('mob_rakshasa', 10)])
-                        mob_coords = floor_cells[random.randrange(len(floor_cells))]
-                        mob = loc.place_entity(mob_id, mob_coords[0], mob_coords[1])
-                        gen_entity_loot(mob)  # generate mob loot
+                            outer_cells.append((x + plot_x * 20, y + plot_y * 20))
+                    # place some mobs and loot even there are no building
+                    populate_prefab(ent_type='items', prefab_variant=loc_default_variant,
+                                    cell_groups={'o': outer_cells}, loc=loc)  # add items
+                    populate_prefab(ent_type='mobs', prefab_variant=loc_default_variant,
+                                    cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add mobs
+                    populate_prefab(ent_type='traps', prefab_variant=loc_default_variant,
+                                    cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add traps
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 

@@ -671,7 +671,7 @@ def initialize():
                              message_color=[255, 215, 0])
     data_set['mob_lightning_wisp'].add_ability(abil)
 
-    data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='S',
+    data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='G',
                                         description='Magic-formed sand, resembling a human figure about 3m high.',
                                                     armor={'bashing': 100, 'slashing': 75, 'piercing': 300},
                                                     color=[255, 215, 0], hp=20, speed=200, sight_radius=9.5,
