@@ -437,6 +437,15 @@ class Inventory(Entity):
                 item = dataset.get_entity(item)
         if isinstance(item, ItemCharges):  # if item is stackable
             if 'stackable' in item.categories:
+                if isinstance(self, Equipment):  # first try add to equipment
+                    for i in self.equipment.values():
+                        if i:
+                            if i.name == item.name:  # add a charge number to existing stack
+                                i.charges += item.charges
+                                if item.position:  # if it's placed somewhere in location
+                                    item.location.cells[item.position[0]][item.position[1]].entities.remove(item)
+                                    item.position = None
+                                return
                 for i in self.inventory:
                     if i.name == item.name:  # add a charge number to existing stack
                         i.charges += item.charges
