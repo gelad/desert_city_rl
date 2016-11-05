@@ -64,6 +64,7 @@ Make prefabs recursive (one can contain another). (DONE)
 Rework building destruction at generation time. (DONE)
 
 
+Make some fences, paths and roads on map.
 Rework loc generation with prefabs.
 BUG: poison stops working if move to another location.
 Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.

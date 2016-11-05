@@ -27,11 +27,11 @@ def generate_loc(loc_type, settings, width, height):
         loc.cells = [[game_logic.Cell('SAND') for y in range(loc.height)] for x in range(loc.width)]
         random.seed()
         grid_size = 20  # divide location to plots 20x20 each, making a grid 20 times smaller than map
-        plots = [[None for y in range(height // grid_size - 1)] for x in range(width // grid_size - 1)]
+        plots = [[None for y in range(height // grid_size)] for x in range(width // grid_size)]
         # plot is a named tuple ([list of loc.cells in plot], building_x, building_y, building_width, building_height)
         Plot = namedtuple('Plot', ['cells', 'b_x', 'b_y', 'b_w', 'b_h', 'b_type'])
-        for plot_x in range(width // grid_size - 1):
-            for plot_y in range(height // grid_size - 1):
+        for plot_x in range(width // grid_size):
+            for plot_y in range(height // grid_size):
                 # choose a building type
                 build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
                                                          ('prefab_small_market', 5), ('none', 45)])
@@ -51,6 +51,8 @@ def generate_loc(loc_type, settings, width, height):
                             loc_cell_x = x + build_x + plot_x * 20
                             loc_cell_y = y + build_y + plot_y * 20
                             loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
+                            if building[x][y] == 'sand':
+                                loc.cells[loc_cell_x][loc_cell_y].tile = 'SAND'
                             if building[x][y] == 'wall':
                                 loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
                             if building[x][y] == 'door':
@@ -59,12 +61,13 @@ def generate_loc(loc_type, settings, width, height):
                                 loc.place_entity('window_small_sandstone', loc_cell_x, loc_cell_y)
                             if building[x][y] == 'large_window':
                                 loc.place_entity('window_large_sandstone', loc_cell_x, loc_cell_y)
+                            if building[x][y] == 'furniture':
+                                loc.place_entity(dataset.get_entity_from_spawn_list('house_furniture'),
+                                                 loc_cell_x, loc_cell_y)
                             if building[x][y] == 'debris_stone':
                                 loc.place_entity('debris_large_sandstone', loc_cell_x, loc_cell_y)
                             if building[x][y] == 'debris_wooden':
                                 loc.place_entity('debris_large_wooden', loc_cell_x, loc_cell_y)
-                            if building[x][y] == 'sand':
-                                loc.cells[loc_cell_x][loc_cell_y].tile = 'SAND'
                             # if cell is passable - add to floor list
                             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                                 floor_cells.append((loc_cell_x, loc_cell_y))
@@ -120,6 +123,11 @@ def subgen_building(building, build_w, build_h, settings=None):
             y = random.randrange(build_h)
             if pattern[x][y] == 'floor':
                 pattern[x][y] = 'wall'
+        for i in range(0, random.randrange(3)):  # make some furniture
+            x = random.randrange(build_w)
+            y = random.randrange(build_h)
+            if pattern[x][y] == 'floor':
+                pattern[x][y] = 'furniture'
         for n in range(1, 8):  # make windows
             x = random.randrange(1, build_w - 1)
             y = random.randrange(1, build_h - 1)
