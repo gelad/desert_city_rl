@@ -317,23 +317,30 @@ class ElementMainPanel(Element):
                                          line=str(player.hp) + '/' + str(player.maxhp) + ' HP')  # player hp bar
         self.add_element(self.player_hp)
         # player position (for debug)
-        self.player_pos = ElementTextLine(owner=self, x=0, y=2, z=0,
-                                          line='X:' + str(player.position[0]) + ' Y:' + str(player.position[1]))
-        self.add_element(self.player_pos)
+        # self.player_pos = ElementTextLine(owner=self, x=0, y=2, z=0,
+        #                                  line='X:' + str(player.position[0]) + ' Y:' + str(player.position[1]))
+        # self.add_element(self.player_pos)
         # player equipment in hands
-        self.player_hands = ElementTextLine(owner=self, x=0, y=3, z=0,
-                                            line=(', '.join([str(player.equipment['RIGHT_HAND']),
-                                                             str(player.equipment['LEFT_HAND'])])))
-        self.add_element(self.player_hands)
+        self.player_right_hand = ElementTextLine(owner=self, x=0, y=3, z=0)
+        self.add_element(self.player_right_hand)
+        self.player_left_hand = ElementTextLine(owner=self, x=0, y=4, z=0)
+        self.add_element(self.player_left_hand)
 
     def draw(self):
         """ Drawing method """
         # update player stats in lines
         self.player_hp.set_line(str(self.player.hp) + '/' + str(self.player.maxhp) + ' HP')
-        self.player_pos.set_line('X:' + str(self.player.position[0]) + ' Y:' + str(self.player.position[1]))
+        hp_percent = self.player.hp / self.player.maxhp
+        if hp_percent < 0:
+            hp_percent = 0
+        if hp_percent > 1:
+            hp_percent = 1
+        self.player_hp.color = (int(255 * (1 - hp_percent)), int(255 * hp_percent), 0)  # hp becomes red when hurt
+        # self.player_pos.set_line('X:' + str(self.player.position[0]) + ' Y:' + str(self.player.position[1]))
         right = self.player.equipment['RIGHT_HAND']
+        self.player_right_hand.set_line('Right: ' + str(right))
         left = self.player.equipment['LEFT_HAND']
-        self.player_hands.set_line(', '.join([str(right), str(left)]))
+        self.player_left_hand.set_line('Left:  ' + str(left))
         console = tdl.Console(self.width, self.height)
         for element in self.elements:  # blit every element to console
             console.blit(element.draw(), element.x, element.y)
@@ -596,6 +603,8 @@ class WindowMain(Window):
         self.map_border = ElementBorder(owner=self, x=0, y=0, width=map_width, height=map_height, pattern='double_line',
                                         borders='tblr')  # border around map
         self.add_element(self.map_border)
+        self.caption = ElementTextLine(owner=self, x=0, y=0, visible=False)  # caption that shows various statuses
+        self.add_element(self.caption)
         self.map = ElementMap(owner=self, game=game, player=game.player, x=1, y=1, width=map_width - 2,
                               height=map_height - 2)  # a map element
         self.add_element(self.map)
@@ -624,6 +633,25 @@ class WindowMain(Window):
             if element.visible:
                 self.console.blit(element.draw(), element.x, element.y)
         return self.console
+
+    def set_caption(self, line, color=None, bgcolor=None):
+        """ Sets caption to given line. Adjusts position according to length. """
+        if not color:
+            color = (255, 255, 255)
+        if not bgcolor:
+            bgcolor = (0, 0, 0)
+        center = self.map.width // 2
+        x = center - len(line) // 2
+        if x < 0:
+            x = 0
+        self.caption.x = x
+        self.caption.set_line(line)
+        self.caption.color = color
+        self.caption.bgcolor = bgcolor
+        if len(line) > 0:
+            self.caption.visible = True
+        else:
+            self.caption.visible = False
 
     # ========================== COMMAND METHODS (special cases, to prevent code duplication) ====================
     def command_default_direction(self, player, loc, dx, dy):
@@ -896,6 +924,7 @@ class WindowMain(Window):
         self.game.state = 'targeting'
         self.log.visible = False
         self.cell_info.visible = True
+        self.set_caption('| SELECT TARGET: ' + str(thing) + ' |')
 
     def command_target_confirmed(self, player):
         """ Command method when target is chosen - execute command """
@@ -915,6 +944,7 @@ class WindowMain(Window):
         self.log.visible = True
         self.cell_info.visible = False
         self.game.state = 'playing'
+        self.set_caption('')
 
     def handle_input(self):
         """ Method that translates player input commands to game logic actions and runs them """
@@ -987,6 +1017,7 @@ class WindowMain(Window):
                         game.state = 'looking'
                         self.log.visible = False
                         self.cell_info.visible = True
+                        self.set_caption('| LOOKING |')
                     # show/hide debug log command
                     elif command == 'debug_log':
                         if game.show_debug_log:
@@ -1067,6 +1098,7 @@ class WindowMain(Window):
                         self.map.cam_offset = (0, 0)  # set camera offset to normal
                         self.cell_info.visible = False
                         self.log.visible = True
+                        self.set_caption('')
                         game.state = 'playing'  # resume normal game flow
                     # moving camera commands
                     elif command == 'move_n':
