@@ -1,0 +1,32 @@
+[
+  {
+    "py/tuple": [
+      "None",
+      75
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_melee_weapons",
+      15
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_ammunition",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_throwing_weapons",
+      3
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_rings",
+      1
+    ]
+  }
+]

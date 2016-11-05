@@ -95,6 +95,17 @@ def initialize():
     data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
     data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
 
+    data_set['furn_rusty_anvil'] = game_logic.Prop(name='Rusty anvil',
+                                                   data_id='furn_rusty_anvil',
+                                                   occupies_tile=False, blocks_los=False, blocks_shots=0,
+                                                   armor={'bashing': 500, 'slashing': 500, 'piercing': 500},
+                                                   pass_cost=2,
+                                                   description='An anvil, dirty and covered in rust.',
+                                                   char='▼', color=[225, 200, 200], hp=250, weight=150)
+    data_set['furn_rusty_anvil'].effects.append(effects.Effect('BLOCK_BASHING', 50))
+    data_set['furn_rusty_anvil'].effects.append(effects.Effect('BLOCK_SLASHING', 50))
+    data_set['furn_rusty_anvil'].effects.append(effects.Effect('BLOCK_PIERCING', 50))
+
     data_set['trap_corrosive_moss'] = game_logic.Prop(name='Corrosive moss', data_id='trap_corrosive_moss',
                                                       occupies_tile=False, blocks_los=False, blocks_shots=0,
                                                       armor={'bashing': 300, 'slashing': 50, 'piercing': 300},
@@ -681,6 +692,17 @@ def initialize():
     data_set['mob_sand_golem'].effects.append(effects.Effect('BLOCK_BASHING', 2))
     data_set['mob_sand_golem'].effects.append(effects.Effect('BLOCK_SLASHING', 1))
     data_set['mob_sand_golem'].effects.append(effects.Effect('BLOCK_PIERCING', 10))
+
+    data_set['mob_iron_golem'] = game_logic.Fighter(name='Iron golem', data_id='mob_iron_golem', char='G',
+                description='Fighting mechanism made of iron, brought to life with magic. Armed with enormous blade.',
+                                                    armor={'bashing': 50, 'slashing': 200, 'piercing': 300, 'acid': -50},
+                                                    color=[200, 200, 255], hp=20, speed=150, sight_radius=9.5,
+                                                    damage=(6, 12), categories={'golem', 'magical', 'iron'},
+                                                    properties={'loot_list': 'mob_iron_golem'},
+                                                    dmg_type='slashing', ai=game_logic.SimpleMeleeChaserAI(), weight=300)
+    data_set['mob_iron_golem'].effects.append(effects.Effect('BLOCK_BASHING', 2))
+    data_set['mob_iron_golem'].effects.append(effects.Effect('BLOCK_SLASHING', 5))
+    data_set['mob_iron_golem'].effects.append(effects.Effect('BLOCK_PIERCING', 10))
 
     events.Observer.clear()  # remove events made during init of Entities - A HACK
 

@@ -2,13 +2,19 @@
   {
     "py/tuple": [
       "furn_wooden_counter",
-      50
+      49
     ]
   },
   {
     "py/tuple": [
       "furn_wooden_table",
-      50
+      49
+    ]
+  },
+  {
+    "py/tuple": [
+      "furn_rusty_anvil",
+      2
     ]
   }
 ]
