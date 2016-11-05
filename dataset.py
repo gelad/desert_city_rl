@@ -106,6 +106,16 @@ def initialize():
     data_set['furn_rusty_anvil'].effects.append(effects.Effect('BLOCK_SLASHING', 50))
     data_set['furn_rusty_anvil'].effects.append(effects.Effect('BLOCK_PIERCING', 50))
 
+    data_set['furn_iron_grate'] = game_logic.Prop(name='Iron grate',
+                                                  data_id='furn_iron_grate',
+                                                  occupies_tile=True, blocks_los=False, blocks_shots=0.25,
+                                                  armor={'bashing': 100, 'slashing': 200, 'piercing': 300},
+                                                  description='A grate made of iron, too tight for man to pass through.',
+                                                  char='‡', color=[200, 200, 225], hp=50, weight=100)
+    data_set['furn_iron_grate'].effects.append(effects.Effect('BLOCK_BASHING', 10))
+    data_set['furn_iron_grate'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
+    data_set['furn_iron_grate'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
     data_set['trap_corrosive_moss'] = game_logic.Prop(name='Corrosive moss', data_id='trap_corrosive_moss',
                                                       occupies_tile=False, blocks_los=False, blocks_shots=0,
                                                       armor={'bashing': 300, 'slashing': 50, 'piercing': 300},
