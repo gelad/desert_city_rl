@@ -1,0 +1,35 @@
+{
+  "variants": {
+    "default": {
+      "name": "default",
+      "chance": 100,
+      "items_i": "dead_adventurer",
+      "items_i_num_chances": [[0, 50], [1, 30], [2, 15], [3, 5]],
+      "mobs_i": "LOC_default",
+      "mobs_i_num_chances": [[0, 50], [1, 30], [2, 15], [3, 5]],
+      "traps_i": "LOC_default",
+      "traps_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "items_o": "LOC_default",
+      "items_o_num_chances": "LOC_default",
+      "mobs_o": "LOC_default",
+      "mobs_o_num_chances": "LOC_default",
+      "traps_o": "LOC_default",
+      "traps_o_num_chances": "LOC_default"
+    }
+  },
+  "legend": {
+    "entities": [
+      {
+        "name": [["item_adventurer_corpse", 75], ["item_skeleton", 25]],
+        "char": "%",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      }
+    ]
+  }
+}

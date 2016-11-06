@@ -95,6 +95,17 @@ def initialize():
     data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
     data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
 
+    data_set['furn_stone_table'] = game_logic.Prop(name='Stone table',
+                                                   data_id='furn_stone_table',
+                                                   occupies_tile=False, blocks_los=False, blocks_shots=0.25,
+                                                   armor={'bashing': 200, 'slashing': 200, 'piercing': 300},
+                                                   pass_cost=2,
+                                                   description='Stone table. Provides small cover from projectiles.',
+                                                   char='■', color=[150, 150, 150], hp=100, weight=150)
+    data_set['furn_stone_table'].effects.append(effects.Effect('BLOCK_BASHING', 20))
+    data_set['furn_stone_table'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
+    data_set['furn_stone_table'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
     data_set['furn_rusty_anvil'] = game_logic.Prop(name='Rusty anvil',
                                                    data_id='furn_rusty_anvil',
                                                    occupies_tile=False, blocks_los=False, blocks_shots=0,
@@ -115,6 +126,16 @@ def initialize():
     data_set['furn_iron_grate'].effects.append(effects.Effect('BLOCK_BASHING', 10))
     data_set['furn_iron_grate'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
     data_set['furn_iron_grate'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
+    data_set['furn_furnace'] = game_logic.Prop(name='Furnace',
+                                               data_id='furn_furnace',
+                                               occupies_tile=True, blocks_los=True,
+                                               armor={'bashing': 200, 'slashing': 200, 'piercing': 300},
+                                               description='Device for heating, made with heavy stone blocks.',
+                                               char='◘', color=[150, 150, 150], hp=200, weight=500)
+    data_set['furn_furnace'].effects.append(effects.Effect('BLOCK_BASHING', 20))
+    data_set['furn_furnace'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
+    data_set['furn_furnace'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
 
     data_set['trap_corrosive_moss'] = game_logic.Prop(name='Corrosive moss', data_id='trap_corrosive_moss',
                                                       occupies_tile=False, blocks_los=False, blocks_shots=0,
@@ -145,6 +166,16 @@ def initialize():
     data_set['item_boulder'] = game_logic.Item(name='item_boulder', data_id='item_boulder',
                                                description='A stone boulder.', categories={'rubbish'},
                                                char='*', color=[200, 200, 200], weight=10)
+
+    data_set['item_adventurer_corpse'] = game_logic.Item(name="adventurer's corpse", data_id='item_adventurer_corpse',
+                                                         description='A dead body of adventurer, not so lucky as you.',
+                                                         categories={'corpse'},
+                                                         char='%', color=[200, 0, 0], weight=70)
+
+    data_set['item_skeleton'] = game_logic.Item(name="human skeleton", data_id='item_skeleton',
+                                                description='Human skeleton.',
+                                                categories={'corpse'},
+                                                char='%', color=[255, 255, 255], weight=10)
 
     data_set['item_haste_potion'] = game_logic.ItemCharges(name='haste potion', data_id='item_haste_potion',
                                                            description='A potion that hastens user by 50%.',
@@ -453,7 +484,7 @@ def initialize():
                                                                          'attack_speed_mod': 1.1,
                                                                          'accuracy_ranged': 0.9,
                                                                          'shot_speed': 3},
-                                                             char=')', color=[128, 0, 0], weight=1.5)
+                                                             char='ϡ', color=[128, 0, 0], weight=1.5)
     data_set['item_short_bow'].effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 1))
 
     data_set['item_bronze_bolt'] = game_logic.ItemCharges(name='bronze bolt', data_id='item_bronze_bolt',

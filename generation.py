@@ -247,6 +247,7 @@ def load_prefab_info(name, settings):
 def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, build_w, build_h, settings=None):
     """ Function, that fills prefab with tiles and pre-defined Entites (such as walls, windows, doors) """
     cell_groups = {}  # empty floor cells for item and mob generation
+    prefabs = []  # list of sub-prefabs, if any. Placed after all other entities
     for x in range(build_w):
         for y in range(build_h):
             loc_cell_x = x + build_x  # location cell coords - for placement
@@ -296,34 +297,9 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                             found_ent = True
                             break
                         if char_ent == entity['char'] and char_ent_color == entity['color']:
-                            if entity_id[:7] == 'PREFAB_':
-                                pr_str = entity_id[7:]
-                                pr_set = dict(settings)  # make settings copy
-                                ch = pr_str.find('CH')
-                                if ch >= 0:  # if 'chance' keyword
-                                    chance = int(pr_str[pr_str.find('(', ch) + 1:pr_str.find(';', ch)])
-                                    total = int(pr_str[pr_str.find(';', ch) + 1:pr_str.find(')', ch)])
-                                    roll = random.randint(0, total)
-                                    if roll > chance:
-                                        found_ent = True
-                                        break
-                                offset_x = 0
-                                offset_y = 0
-                                po = pr_str.find('PO')
-                                if po >= 0:  # if 'position offset' keyword
-                                    offset_x = int(pr_str[pr_str.find('(', po) + 1:pr_str.find(';', po)])
-                                    offset_y = int(pr_str[pr_str.find(';', po) + 1:pr_str.find(')', po)])
-                                if pr_str.find('MV') >= 0:  # if 'match variant' keyword
-                                    pr_set['variant'] = prefab_variant['name']
-                                if pr_str.find('RR') >= 0:  # if 'random rotation' keyword
-                                    pr_set['rotate'] = random.randint(0, 3)
-                                if pr_str.find('DE') < 0:  # if no 'destruct' keyword
-                                    if 'destruct' in pr_set:
-                                        del pr_set['destruct']
-                                pr_name = pr_str[pr_str.find('NAME:') + 5:]
-                                place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x + offset_x,
-                                             plot_y=loc_cell_y + offset_y, settings=pr_set)
-                            else:
+                            if entity_id[:7] == 'PREFAB_':  # if sub-prefab
+                                prefabs.append((entity_id[7:], loc_cell_x, loc_cell_y))  # add sub-prefab to list
+                            else:  # if entity ID
                                 loc.place_entity(entity_id, loc_cell_x, loc_cell_y)
                             found_ent = True
                             break
@@ -337,13 +313,44 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
             if not found_ent:
                 print('Warning! Entity ' + char_ent + ' of color' + str(char_ent_color) +
                       ' not found in prefab with variant "' + prefab_variant['name'] + '" info and dataset, skipped.')
-            # make cell groups, according to prefab # TODO: Move cell groups creation to separate function
+    for sub_prefab in prefabs:  # sub-prefab placement
+        pr_str, loc_cell_x, loc_cell_y = sub_prefab  # string and placement coords
+        pr_set = dict(settings)  # make settings copy
+        ch = pr_str.find('CH')
+        if ch >= 0:  # if 'chance' keyword
+            chance = int(pr_str[pr_str.find('(', ch) + 1:pr_str.find(';', ch)])
+            total = int(pr_str[pr_str.find(';', ch) + 1:pr_str.find(')', ch)])
+            roll = random.randint(0, total)
+            if roll > chance:
+                break
+        offset_x = 0
+        offset_y = 0
+        po = pr_str.find('PO')
+        if po >= 0:  # if 'position offset' keyword
+            offset_x = int(pr_str[pr_str.find('(', po) + 1:pr_str.find(';', po)])
+            offset_y = int(pr_str[pr_str.find(';', po) + 1:pr_str.find(')', po)])
+        if pr_str.find('MV') >= 0:  # if 'match variant' keyword
+            pr_set['variant'] = prefab_variant['name']
+        if pr_str.find('RR') >= 0:  # if 'random rotation' keyword
+            pr_set['rotate'] = random.randint(0, 3)
+        if pr_str.find('DE') < 0:  # if no 'destruct' keyword
+            if 'destruct' in pr_set:
+                del pr_set['destruct']
+        pr_name = pr_str[pr_str.find('NAME:') + 5:]
+        place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x + offset_x, plot_y=loc_cell_y + offset_y, settings=pr_set)
+    # make cell groups, according to prefab # TODO: Move cell groups creation to separate function
+    for x in range(build_w):
+        for y in range(build_h):
+            loc_cell_x = x + build_x  # location cell coords - for blocked check
+            loc_cell_y = y + build_y
             cell_group_char = chr(prefab['layer_data'][2]['cells'][x][y]['keycode'])
             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                 if cell_group_char in cell_groups:  # if such cells are already in cell_groups
                     cell_groups[cell_group_char].add((loc_cell_x, loc_cell_y))  # add cell to group
                 else:  # if not - create new group with 1 cell
                     cell_groups.update({cell_group_char: {(loc_cell_x, loc_cell_y)}})
+    if len(cell_groups) == 0:
+        pass
     return cell_groups
 
 
@@ -424,7 +431,7 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
         destruct(loc=loc, start_x=build_x, start_y=build_y, width=build_w, height=build_h,
                  settings=settings['destruct'])
     if len(cell_groups) == 0:
-        print('Warning! Empty cell groups in prefab.')
+        print('Warning! Empty cell groups in prefab "' + name + '"')
         return
     populate_prefab(ent_type='items', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc)  # add items
     populate_prefab(ent_type='mobs', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc,

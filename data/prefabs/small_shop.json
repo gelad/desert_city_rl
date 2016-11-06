@@ -74,13 +74,24 @@
         }
       },
       {
-        "name": "furn_wooden_table",
+        "name": [["furn_wooden_table", 60], ["furn_stone_table", 40]],
         "char": "t",
         "color": {
           "py/tuple": [
             128,
             0,
             0
+          ]
+        }
+      },
+      {
+        "name": [["PREFAB_PO(-1;-1)_NAME:dead_adventurer", 100], ["None", 1]],
+        "char": "%",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
           ]
         }
       }
