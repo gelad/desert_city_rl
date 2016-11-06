@@ -163,6 +163,18 @@ def initialize():
     data_set['door_wooden'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
     data_set['door_wooden'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
 
+    data_set['item_ancient_scroll'] = game_logic.Item(name='Ancient scroll', data_id='item_ancient_scroll',
+                                                      description='Ancient scroll, with some writing in it.',
+                                                      categories={'relic'},
+                                                      properties={'value': 5},
+                                                      char='?', color=[255, 20, 147], weight=0.1)
+
+    #data_set['item_ancient_scroll'] = game_logic.Item(name='Ancient scroll', data_id='item_ancient_scroll',
+    #                                                  description='Ancient scroll, with some writing in it.',
+    #                                                  categories={'relic'},
+    #                                                  properties={'value': 5},
+    #                                                  char='?', color=[255, 20, 147], weight=0.1)
+
     data_set['item_boulder'] = game_logic.Item(name='item_boulder', data_id='item_boulder',
                                                description='A stone boulder.', categories={'rubbish'},
                                                char='*', color=[200, 200, 200], weight=10)
