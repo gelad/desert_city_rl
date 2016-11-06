@@ -85,7 +85,7 @@
         }
       },
       {
-        "name": [["PREFAB_PO(-1;-1)_NAME:dead_adventurer", 100], ["None", 1]],
+        "name": [["PREFAB_PO(-1;-1)_NAME:dead_adventurer", 2], ["None", 98]],
         "char": "%",
         "color": {
           "py/tuple": [
