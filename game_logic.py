@@ -84,7 +84,7 @@ class Entity:
         self.description = description  # entity's description
         self.location = location  # Location object, where entity is placed
         self.position = position  # (x, y) tuple, represents position in the location
-        self.weight = weight  # weight of an entity, to calculate various things
+        self._weight = weight  # weight of an entity, to calculate various things
         self.occupies_tile = occupies_tile  # entity occupy tile? (no other occupying entity can be placed there)
         self.blocks_los = blocks_los  # is it blocking line of sight? walls do, monsters (usually) don't
         self.blocks_shots = blocks_shots  # is it blocking shots? if yes, percent of shots blocked
@@ -92,6 +92,11 @@ class Entity:
         self.char = char  # char that represents entity in graphics ('@')
         self.color = color  # entity char color
         self.effects = []  # entity effects
+
+    @property
+    def weight(self):
+        """ Weight property - overridden in some classes """
+        return self._weight
 
     def __str__(self):
         """ Method returns string representation of an entity - it's name """
@@ -428,6 +433,14 @@ class Inventory(Entity):
     def __init__(self):
         self.inventory = []  # a list of Item objects
 
+    @property
+    def inv_weight(self):
+        """ Property that returns total weight of items in inventory """
+        w = 0
+        for item in self.inventory:
+            w += item.weight
+        return w
+
     def add_item(self, item):
         """ Item adding method """
         if isinstance(item, str):  # if item ID instead of item
@@ -513,6 +526,15 @@ class Equipment(Entity):
             self.equipment = dict.fromkeys(['RIGHT_HAND', 'LEFT_HAND', 'RIGHT_RING', 'LEFT_RING', 'ARMS', 'SHOULDERS',
                                             'BODY', 'HEAD', 'FACE', 'LEFT_EAR', 'RIGHT_EAR', 'NECK', 'WAIST', 'LEGS',
                                             'FEET'])
+
+    @property
+    def eq_weight(self):
+        """ Property that returns total weight of equipped items """
+        w = 0
+        for item in self.equipment.values():
+            if item:
+                w += item.weight
+        return w
 
     def equip_item(self, item, slot):
         """ Method for equipping items """
@@ -1010,6 +1032,14 @@ class ItemCharges(Item):
         self.destroyed_after_use = destroyed_after_use  # if True, item is destroyed when charges are depleted
         self.charges = charges  # number of uses
 
+    @property
+    def weight(self):
+        """ Overridden method that returns weight according to charges number """
+        if 'weight_per_charge' in self.categories:
+            return self._weight * self.charges
+        else:
+            return self._weight
+
     def __str__(self):
         """ Method returns string representation of ItemCharges - it's name with charges """
         return self.name + '[' + str(self.charges) + ']'
@@ -1107,6 +1137,14 @@ class ItemRangedWeapon(Item):
             self.ammo = []
         self.ammo_max = ammo_max  # maximum ammo ammount
 
+    @property
+    def weight(self):
+        """ Overridden method that returns weight according to ammo loaded """
+        ammo_weight = 0
+        for ammo in self.ammo:
+            ammo_weight += ammo.weight
+        return self._weight + ammo_weight
+
     def __str__(self):
         """ Method returns string representation of ItemRangedWeapon - it's name with number of ammo loaded """
         return self.name + '[' + str(len(self.ammo)) + ']'
@@ -1158,6 +1196,28 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
             self.properties = properties  # monster properties - stats, etc
         else:
             self.properties = {}
+
+    @property
+    def weight(self):
+        """ Property that returns total weight of Fighter - with inventory and equipment """
+        return self._weight + self.eq_weight + self.inv_weight
+
+    @property
+    def carried_weight(self):
+        """ Property that returns total carried weight - equipment + inventory """
+        return self.eq_weight + self.inv_weight
+
+    @property
+    def speed(self):
+        """ Fighter speed (with burden applied) """
+        sp = super(Fighter, self).speed
+        burden_mod = 1
+        if 'max_carry_weight' in self.properties:
+            if self.carried_weight > self.properties['max_carry_weight']:
+                burden_mod = self.carried_weight / self.properties['max_carry_weight']
+                if burden_mod > 3:  # not too high, 3 times longer actions is enough
+                    burden_mod = 3
+        return int(sp * burden_mod)
 
     def attack_melee_basic(self, target):
         """ Attack in melee with basic attack method (mostly for monsters)"""
@@ -1706,7 +1766,7 @@ class Game:
         self.add_location(self.current_loc)
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1,
-                             categories={'living'}, properties={}, weight=70)
+                             categories={'living'}, properties={'max_carry_weight': 30}, weight=70)
         self.current_loc.place_entity(self.player, 0, 0)
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         # self.current_loc.place_entity('mob_ifrit', 20, 20)
