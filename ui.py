@@ -347,6 +347,84 @@ class ElementMainPanel(Element):
         return console
 
 
+class ElementBuffBar(Element):
+    """ A panel with buffs/debuffs shown """
+
+    def __init__(self, player, owner=None, x=0, y=0, width=0, height=0, z=0, visible=True):
+        super(ElementBuffBar, self).__init__(owner=owner, x=x, y=y, width=width, height=height, z=z, visible=visible)
+        self.player = player  # Player object, to obtain player-related info
+        for i in range(6):  # add six lines to display buff names
+            self.add_element(ElementTextLine(owner=self, x=0, y=0, z=0, line=''))
+
+    def draw(self):
+        """ Drawing method """
+        console = tdl.Console(self.width, self.height)
+        for element in self.elements:  # blit every element to console
+            if element.visible:
+                console.blit(element.draw(), element.x, element.y)
+        return console
+
+    def update_buffs(self):
+        """ Updates buff bar info """
+        filled_lines = 0
+        width = 0
+        next_x = 0
+        # TODO: ugly placeholder code - rework
+        if self.player.carried_weight / self.player.properties['max_carry_weight'] >= 1.5:
+            self.elements[filled_lines].set_line('BURDENED!')
+            self.elements[filled_lines].color = (255, 0, 0)
+            self.elements[filled_lines].x = next_x
+            next_x += self.elements[filled_lines].width + 1
+            width += self.elements[filled_lines].width + 1
+            self.elements[filled_lines].visible = True
+            filled_lines += 1
+        elif self.player.carried_weight / self.player.properties['max_carry_weight'] >= 1:
+            self.elements[filled_lines].set_line('BURDENED')
+            self.elements[filled_lines].color = (255, 200, 0)
+            self.elements[filled_lines].x = next_x
+            next_x += self.elements[filled_lines].width + 1
+            width += self.elements[filled_lines].width + 1
+            self.elements[filled_lines].visible = True
+            filled_lines += 1
+        for effect in self.player.effects:
+            if filled_lines < 6:
+                if effect.eff == 'POISONED':
+                    self.elements[filled_lines].set_line(effect.eff)
+                    self.elements[filled_lines].color = (0, 150, 0)
+                    self.elements[filled_lines].x = next_x
+                    next_x += self.elements[filled_lines].width + 1
+                    width += self.elements[filled_lines].width + 1
+                    self.elements[filled_lines].visible = True
+                    filled_lines += 1
+                elif effect.eff == 'HASTE':
+                    self.elements[filled_lines].set_line(effect.eff)
+                    self.elements[filled_lines].color = (255, 255, 0)
+                    self.elements[filled_lines].x = next_x
+                    next_x += self.elements[filled_lines].width + 1
+                    width += self.elements[filled_lines].width + 1
+                    self.elements[filled_lines].visible = True
+                    filled_lines += 1
+                elif effect.eff == 'SLOWED':
+                    self.elements[filled_lines].set_line(effect.eff)
+                    self.elements[filled_lines].color = (0, 0, 200)
+                    self.elements[filled_lines].x = next_x
+                    next_x += self.elements[filled_lines].width + 1
+                    width += self.elements[filled_lines].width + 1
+                    self.elements[filled_lines].visible = True
+                    filled_lines += 1
+        for i in range(filled_lines, 6):
+            self.elements[i].set_line('')
+            self.elements[i].visible = False
+        if filled_lines > 0:
+            self.visible = True
+        else:
+            self.visible = False
+        if width < self.owner.map.width:
+            self.width = width
+        else:
+            self.width = self.owner.map.width - 1
+
+
 class ElementItemInfo(Element):
     """ Item info for inventory """
 
@@ -611,6 +689,9 @@ class WindowMain(Window):
         self.panel = ElementMainPanel(owner=self, player=game.player, x=map_width, y=0, width=width - map_width,
                                       height=height // 2)  # panel element
         self.add_element(self.panel)
+        self.buff_bar = ElementBuffBar(player=game.player, owner=self, x=self.map.x + 1, y=map_height - 1, height=1,
+                                       visible=False)
+        self.add_element(self.buff_bar)  # buff bar element
         self.log = ElementLog(owner=self, game=game, x=map_width, y=height // 2, width=width - map_width,
                               height=height // 2 - 1)  # log element
         self.add_element(self.log)
@@ -629,6 +710,7 @@ class WindowMain(Window):
     def draw(self):
         """ Window drawing method """
         self.console.clear()
+        self.buff_bar.update_buffs()  # TODO: ?? rework this - do not update buff info every frame
         for element in self.elements:  # blit every element to console
             if element.visible:
                 self.console.blit(element.draw(), element.x, element.y)
@@ -734,8 +816,8 @@ class WindowMain(Window):
                 if len(items) == 1:
                     player.perform(actions.act_pick_up_item, player, items[0])
                 else:
-                    item = show_menu_inventory(win_mgr=self.win_mgr, options=items, caption='Pick up item:',
-                                               keys='alphabet', prev_window=self)
+                    item = show_menu_inventory(win_mgr=self.win_mgr, options=items, player=player,
+                                               caption='Pick up item:', keys='alphabet', prev_window=self)
                     if item:
                         player.perform(actions.act_pick_up_item, player, item[0])
             return False
@@ -778,7 +860,7 @@ class WindowMain(Window):
     def command_inventory(self, player):
         """ Command method to show inventory menu """
         # show inventory menu
-        item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, caption='Inventory:',
+        item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, player=player, caption='Inventory:',
                                    keys='alphabet', prev_window=self)
         if item:
             add_options = []
@@ -814,8 +896,8 @@ class WindowMain(Window):
                         if len(ammos) == 1:
                             player.perform(actions.act_reload, player, item, ammos[0])
                         else:
-                            ammo = show_menu_inventory(win_mgr=self.win_mgr, options=ammos, keys='alphabet',
-                                                       caption='Select ammunition:', prev_window=self)
+                            ammo = show_menu_inventory(win_mgr=self.win_mgr, options=ammos, player=player,
+                                                       keys='alphabet', caption='Select ammunition:', prev_window=self)
                             if ammo:
                                 player.perform(actions.act_reload, player, item, ammo[0])
                     else:
@@ -836,7 +918,7 @@ class WindowMain(Window):
                             player.perform(actions.act_reload, player, item, ammos[0])
                         else:
                             ammo = show_menu_inventory(win_mgr=self.win_mgr, options=ammos, keys='alphabet',
-                                                       caption='Select ammunition:', prev_window=self)
+                                                       player=player, caption='Select ammunition:', prev_window=self)
                             if ammo:
                                 player.perform(actions.act_reload, player, item, ammo[0])
                     else:
@@ -1071,8 +1153,8 @@ class WindowMain(Window):
                     # drop item command
                     elif command == 'drop':
                         # show inventory menu
-                        item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, caption='Drop item:',
-                                                   keys='alphabet', prev_window=self)
+                        item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, player=player,
+                                                   caption='Drop item:', keys='alphabet', prev_window=self)
                         if item:
                             player.perform(actions.act_drop_item, player, item[0])
                     # pick up from ground command
@@ -1215,7 +1297,7 @@ class WindowMenu(Window):
 
 class WindowInventoryMenu(WindowMenu):
     """ Class for simple inventory menu (list of selectable items) """
-    def __init__(self, caption, options, keys, x=0, y=0, width=0, height=0, info_width=20, info_height=30,
+    def __init__(self, caption, options, keys, player=None, x=0, y=0, width=0, height=0, info_width=20, info_height=30,
                  z=0, visible=True, prev_window=None,
                  text_color=(255, 255, 255), highlight_color=(0, 100, 0), bg_color=(0, 0, 0)):
         # width and height of base menu is adjusted - border, item description and caption must fit
@@ -1223,6 +1305,7 @@ class WindowInventoryMenu(WindowMenu):
                                                   width=width - 2, height=height - 3,
                                                   visible=visible, text_color=text_color, bg_color=bg_color,
                                                   highlight_color=highlight_color, prev_window=prev_window)
+        self.player = player
         self.width += 2 + info_width  # make window of desired width and height (parent init call made it smaller)
         self.height += 3
         if self.height < info_height + 2:
@@ -1230,9 +1313,11 @@ class WindowInventoryMenu(WindowMenu):
         self.opts.x = 1  # set position of menu options
         self.opts.y = 2
         self.info = ElementItemInfo(owner=self, x=self.opts.width+self.opts.x, y=1,
-                                    width=info_width, height=info_height)
+                                    width=info_width, height=info_height - 1)
         self.add_element(self.info)  # an item information element
         self.info.item = self.opts.selected
+        self.weight = ElementTextLine(owner=self, x=self.opts.width + self.opts.x, y=info_height, line='')
+        self.add_element(self.weight)  # add carried weight info
         self.add_element(ElementBorder(owner=self, x=0, y=0, width=self.width, height=self.height, z=-1,
                                        pattern='double_line', borders='tblr', color=self.text_color,
                                        bgcolor=self.bg_color))  # add border
@@ -1246,6 +1331,16 @@ class WindowInventoryMenu(WindowMenu):
     def draw(self):
         """ Overrides parent method to change item description before draw """
         self.info.item = self.opts.selected
+        if self.player:  # show weight info
+            self.weight.visible = True
+            self.weight.set_line('Weight: ' + str(round(self.player.carried_weight, 2)) + '/' +
+                                 str(round(self.player.properties['max_carry_weight'], 2)) + ' kg.')
+            if self.player.carried_weight <= self.player.properties['max_carry_weight']:
+                self.weight.color = (255, 255, 255)
+            else:
+                self.weight.color = (255, 0, 0)
+        else:
+            self.weight.visible = False
         return super(WindowInventoryMenu, self).draw()
 
 
@@ -1448,7 +1543,7 @@ def show_menu_list(win_mgr, caption, options, keys=None, x_offset=0, y_offset=0,
         return menu.opts.selected, menu.opts.selected_index
 
 
-def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0, z=1, info_width=20,
+def show_menu_inventory(win_mgr, caption, options, keys, player=None, x_offset=0, y_offset=0, z=1, info_width=20,
                         info_height=30, prev_window=None):
     """ A function to show an inventory menu, and return result """
     # create inventory menu
@@ -1456,8 +1551,8 @@ def show_menu_inventory(win_mgr, caption, options, keys, x_offset=0, y_offset=0,
         height = win_mgr.graphics.screen_height - 10
     else:
         height = 0
-    menu = WindowInventoryMenu(caption=caption, options=options, keys=keys, x=x_offset, y=y_offset, z=z, height=height,
-                               info_width=info_width, info_height=info_height, prev_window=prev_window)
+    menu = WindowInventoryMenu(caption=caption, options=options, keys=keys, player=player, x=x_offset, y=y_offset, z=z,
+                               height=height, info_width=info_width, info_height=info_height, prev_window=prev_window)
     menu.x = win_mgr.graphics.screen_width // 2 - menu.width // 2 + x_offset  # place it at center of screen
     menu.y = win_mgr.graphics.screen_height // 2 - menu.height // 2 + y_offset
     win_mgr.add_window(menu)  # add menu to window manager
