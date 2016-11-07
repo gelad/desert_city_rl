@@ -163,17 +163,49 @@ def initialize():
     data_set['door_wooden'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
     data_set['door_wooden'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
 
-    data_set['item_ancient_scroll'] = game_logic.Item(name='Ancient scroll', data_id='item_ancient_scroll',
-                                                      description='Ancient scroll, with some writing in it.',
-                                                      categories={'relic'},
-                                                      properties={'value': 5},
-                                                      char='?', color=[255, 20, 147], weight=0.1)
+    data_set['item_ancient_coin'] = game_logic.ItemCharges(name='ancient coin',
+                                                           data_id='item_ancient_coin',
+                                                           description='An ancient coin.',
+                                                           categories={'relic', 'stackable'},
+                                                           properties={'value': 1},
+                                                           char='$', color=[255, 20, 147],
+                                                           charges=1, destroyed_after_use=True, weight=0.01)
 
-    #data_set['item_ancient_scroll'] = game_logic.Item(name='Ancient scroll', data_id='item_ancient_scroll',
-    #                                                  description='Ancient scroll, with some writing in it.',
-    #                                                  categories={'relic'},
-    #                                                  properties={'value': 5},
-    #                                                  char='?', color=[255, 20, 147], weight=0.1)
+    data_set['item_ancient_scroll'] = game_logic.ItemCharges(name='ancient scroll',
+                                                             data_id='item_ancient_scroll',
+                                                             description='Ancient scroll, with some writing in it.',
+                                                             categories={'relic', 'scroll', 'stackable'},
+                                                             properties={'value': 5},
+                                                             char='?', color=[255, 20, 147],
+                                                             charges=1, destroyed_after_use=True, weight=0.1)
+
+    data_set['item_ancient_clay_tablet'] = game_logic.ItemCharges(name='clay tablet',
+                                                                  data_id='item_ancient_clay_tablet',
+                                description='Clay tablet, with some writing or picture in it.',
+                                                                  categories={'relic', 'stackable'},
+                                                                  properties={'value': 15},
+                                                                  char='æ', color=[255, 20, 147],
+                                                                  charges=1, destroyed_after_use=True, weight=1)
+
+    data_set['item_ancient_pottery'] = game_logic.ItemCharges(name='ancient pottery',
+                                                              data_id='item_ancient_pottery',
+                                                description='Ancient jar, or pot, with some pictures or engravings.',
+                                                              categories={'relic', 'stackable'},
+                                                              properties={'value': 15},
+                                                              char='§', color=[255, 20, 147],
+                                                              charges=1, destroyed_after_use=True, weight=1)
+
+    data_set['item_ancient_ring'] = game_logic.Item(name='ancient ring', data_id='item_ancient_scroll',
+                                                    description='Ancient scroll, with some writing in it.',
+                                                    categories={'relic', 'ring'},
+                                                    properties={'value': 25}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                    char='˚', color=[255, 20, 147], weight=0.1)
+
+    data_set['item_ancient_necklace'] = game_logic.Item(name='ancient necklace', data_id='item_ancient_necklace',
+                                                        description='Ancient necklace.',
+                                                        categories={'relic', 'ring'},
+                                                        properties={'value': 30}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                        char='ˠ', color=[255, 20, 147], weight=0.1)
 
     data_set['item_boulder'] = game_logic.Item(name='item_boulder', data_id='item_boulder',
                                                description='A stone boulder.', categories={'rubbish'},

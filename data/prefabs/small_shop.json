@@ -9,12 +9,16 @@
       "mobs_i_num_chances": "LOC_default",
       "traps_i": "LOC_default",
       "traps_i_num_chances": "LOC_default",
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
       "items_o": "LOC_default",
       "items_o_num_chances": "LOC_default",
       "mobs_o": "LOC_default",
       "mobs_o_num_chances": "LOC_default",
       "traps_o": "LOC_default",
-      "traps_o_num_chances": "LOC_default"
+      "traps_o_num_chances": "LOC_default",
+      "relics_o": "LOC_default",
+      "relics_o_num_chances": "LOC_default"
     },
     "magic": {
       "name": "magic",
@@ -25,12 +29,16 @@
       "mobs_i_num_chances": [[0, 25], [1, 40], [2, 20], [3, 10], [4, 5]],
       "traps_i": "small_shop_magic_traps",
       "traps_i_num_chances": [[0, 30], [1, 50], [2, 15], [3, 5]],
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
       "items_o": "LOC_default",
       "items_o_num_chances": "LOC_default",
       "mobs_o": "LOC_default",
       "mobs_o_num_chances": "LOC_default",
       "traps_o": "LOC_default",
-      "traps_o_num_chances": "LOC_default"
+      "traps_o_num_chances": "LOC_default",
+      "relics_o": "LOC_default",
+      "relics_o_num_chances": "LOC_default"
     },
     "arms": {
       "name": "arms",
@@ -41,12 +49,16 @@
       "mobs_i_num_chances": [[0, 25], [1, 40], [2, 20], [3, 10], [4, 5]],
       "traps_i": "small_shop_arms_traps",
       "traps_i_num_chances": [[0, 30], [1, 50], [2, 15], [3, 5]],
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
       "items_o": "LOC_default",
       "items_o_num_chances": "LOC_default",
       "mobs_o": "LOC_default",
       "mobs_o_num_chances": "LOC_default",
       "traps_o": "LOC_default",
-      "traps_o_num_chances": "LOC_default"
+      "traps_o_num_chances": "LOC_default",
+      "relics_o": "LOC_default",
+      "relics_o_num_chances": "LOC_default"
     }
   },
   "legend": {

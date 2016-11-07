@@ -76,6 +76,8 @@ def generate_loc(loc_type, settings, width, height):
                                                        'destroy_tiles': 'SAND'})  # destroy building
                     populate_prefab(ent_type='items', prefab_variant=loc_default_variant,
                                     cell_groups={'i': floor_cells}, loc=loc)  # add items
+                    populate_prefab(ent_type='relics', prefab_variant=loc_default_variant,
+                                    cell_groups={'i': floor_cells}, loc=loc)  # add relics
                     populate_prefab(ent_type='mobs', prefab_variant=loc_default_variant,
                                     cell_groups={'i': floor_cells}, loc=loc, exclude_affected_cells=True)  # add mobs
                     populate_prefab(ent_type='traps', prefab_variant=loc_default_variant,
@@ -99,6 +101,8 @@ def generate_loc(loc_type, settings, width, height):
                     # place some mobs and loot even there are no building
                     populate_prefab(ent_type='items', prefab_variant=loc_default_variant,
                                     cell_groups={'o': outer_cells}, loc=loc)  # add items
+                    populate_prefab(ent_type='relics', prefab_variant=loc_default_variant,
+                                    cell_groups={'o': outer_cells}, loc=loc)  # add relics
                     populate_prefab(ent_type='mobs', prefab_variant=loc_default_variant,
                                     cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add mobs
                     populate_prefab(ent_type='traps', prefab_variant=loc_default_variant,
@@ -371,7 +375,7 @@ def populate_prefab(ent_type, prefab_variant, cell_groups, loc, exclude_affected
             print('Warning! No entity number chances for prefab! Using defaults.')
             entity_count = game_logic.weighted_choice([(0, 50), (1, 25), (2, 15), (3, 10)])
         for i in range(0, entity_count):
-            if ent_type == 'items':  # if any categories of Entities need special get functions - place here
+            if ent_type == 'items' or ent_type == 'relics':  # if any categories of Entities need special get functions - place here
                 entities = dataset.get_item_from_loot_list(list_name)
             else:
                 entities = dataset.get_entity_from_spawn_list(list_name)
@@ -434,6 +438,7 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
         print('Warning! Empty cell groups in prefab "' + name + '"')
         return
     populate_prefab(ent_type='items', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc)  # add items
+    populate_prefab(ent_type='relics', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc)  # add relics
     populate_prefab(ent_type='mobs', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc,
                     exclude_affected_cells=True)  # add mobs
     populate_prefab(ent_type='traps', prefab_variant=prefab_variant, cell_groups=cell_groups, loc=loc,

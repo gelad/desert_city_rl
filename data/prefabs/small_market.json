@@ -9,12 +9,16 @@
       "mobs_i_num_chances": "LOC_default",
       "traps_i": "LOC_default",
       "traps_i_num_chances": "LOC_default",
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
       "items_o": "LOC_default",
       "items_o_num_chances": "LOC_default",
       "mobs_o": "LOC_default",
       "mobs_o_num_chances": "LOC_default",
       "traps_o": "LOC_default",
-      "traps_o_num_chances": "LOC_default"
+      "traps_o_num_chances": "LOC_default",
+      "relics_o": "LOC_default",
+      "relics_o_num_chances": "LOC_default"
     },
     "magic": {
       "name": "magic",

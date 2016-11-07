@@ -1,0 +1,38 @@
+[
+  {
+    "py/tuple": [
+      "qty_(1;20)item_ancient_coin",
+      30
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_ancient_scroll",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_ancient_clay_tablet",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_ancient_pottery",
+      20
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_ancient_ring",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_ancient_necklace",
+      5
+    ]
+  }
+]

@@ -9,12 +9,16 @@
       "mobs_i_num_chances": [[0, 50], [1, 25], [2, 15], [3, 10]],
       "traps_i": "ruins_default_traps",
       "traps_i_num_chances": [[0, 50], [1, 25], [2, 15], [3, 10]],
+      "relics_i": "ruins_default_relics",
+      "relics_i_num_chances": [[0, 80], [1, 15], [2, 5]],
       "items_o": "None",
       "items_o_num_chances": [[0, 100]],
       "mobs_o": "ruins_default_mobs_outer",
       "mobs_o_num_chances": [[0, 85], [1, 10], [2, 4], [3, 1]],
       "traps_o": "None",
-      "traps_o_num_chances": [[0, 100]]
+      "traps_o_num_chances": [[0, 100]],
+      "relics_o": "None",
+      "relics_o_num_chances": [[0, 100]]
     }
   }
 }

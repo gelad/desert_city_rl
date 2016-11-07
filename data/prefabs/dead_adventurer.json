@@ -9,6 +9,8 @@
       "mobs_i_num_chances": [[0, 50], [1, 30], [2, 15], [3, 5]],
       "traps_i": "LOC_default",
       "traps_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": [[0, 50], [1, 35], [2, 10],[3, 5]],
       "items_o": "LOC_default",
       "items_o_num_chances": "LOC_default",
       "mobs_o": "LOC_default",
