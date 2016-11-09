@@ -19,6 +19,7 @@
       "traps_o_num_chances": "LOC_default",
       "relics_o": "LOC_default",
       "relics_o_num_chances": "LOC_default"
+    }
   },
   "legend": {
     "entities": [
