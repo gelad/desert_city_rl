@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "default": {
+      "name": "default",
+      "chance": 100,
+      "items_i": "LOC_default",
+      "items_i_num_chances": "LOC_default",
+      "mobs_i": "LOC_default",
+      "mobs_i_num_chances": "LOC_default",
+      "traps_i": "LOC_default",
+      "traps_i_num_chances": "LOC_default",
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
+      "items_o": "LOC_default",
+      "items_o_num_chances": "LOC_default",
+      "mobs_o": "LOC_default",
+      "mobs_o_num_chances": "LOC_default",
+      "traps_o": "LOC_default",
+      "traps_o_num_chances": "LOC_default",
+      "relics_o": "LOC_default",
+      "relics_o_num_chances": "LOC_default"
+  },
+  "legend": {
+    "entities": [
+      {
+        "name": "wall_sandstone",
+        "char": "#",
+        "color": {
+          "py/tuple": [
+            255,
+            250,
+            205
+          ]
+        }
+      },
+      {
+        "name": "furn_wooden_counter",
+        "char": "c",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      {
+        "name": "furn_rusty_anvil",
+        "char": "a",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      {
+        "name": "furn_furnace",
+        "char": "f",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      {
+        "name": "furn_iron_grate",
+        "char": "g",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      {
+        "name": [["furn_stone_table", 80], ["furn_wooden_table", 20]],
+        "char": "t",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      {
+        "name": [["PREFAB_PO(-1;-1)_NAME:dead_adventurer", 2], ["None", 98]],
+        "char": "%",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      }
+    ],
+    "tiles": [
+      {
+        "name": "FLOOR_SANDSTONE",
+        "char": " ",
+        "color": {
+          "py/tuple": [
+            0,
+            0,
+            0
+          ]
+        },
+        "bgcolor": {
+          "py/tuple": [
+            153,
+            153,
+            0
+          ]
+        }
+      }
+    ]
+  }
+}
