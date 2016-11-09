@@ -1,0 +1,38 @@
+[
+  {
+    "py/tuple": [
+      "list_melee_weapons",
+      50
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_iron_armor",
+      15
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_hunting_crossbow",
+      5
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_ammunition",
+      15
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_throwing_weapons",
+      12
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_rings",
+      3
+    ]
+  }
+]
