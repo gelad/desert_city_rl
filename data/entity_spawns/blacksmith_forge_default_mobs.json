@@ -2,7 +2,7 @@
   {
     "py/tuple": [
       "qty_(2;4)mob_mindless_body",
-      25
+      20
     ]
   },
   {
@@ -20,13 +20,19 @@
   {
     "py/tuple": [
       "qty_(1;2)mob_sand_golem",
-      25
+      15
     ]
   },
   {
     "py/tuple": [
       "qty_(1;2)mob_iron_golem",
       25
+    ]
+  },
+  {
+    "py/tuple": [
+      "qty_(1;2)mob_flame_wisp",
+      15
     ]
   },
   {

@@ -652,6 +652,23 @@ def initialize():
                              message_color=[255, 215, 0])
     data_set['item_sparkling_dust'].add_ability(abil)
 
+    data_set['item_hot_ash'] = game_logic.ItemCharges(name='hot ash',
+                                                      data_id='item_hot_ash',
+        description='Magical ash, radiating heat. Useful alchemical ingredient. If thrown - can deal minor fire damage.',
+                                                      categories={'throwing', 'stackable', 'weight_per_charge',
+                                                                  'alchemy'},
+                                                      properties={'break_chance': 1,
+                                                                  'throw_speed': 0.75,
+                                                                  'accuracy_thrown': 0.6},
+                                                      char="`", color=[160, 0, 0],
+                                                      charges=1, destroyed_after_use=True, weight=0.1)
+    react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (1, 3), 'dmg_type': 'fire'}
+    abil = abilities.Ability(name='Ignite', owner=data_set['item_hot_ash'],
+                             trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[255, 215, 0])
+    data_set['item_hot_ash'].add_ability(abil)
+
     data_set['item_explosive_potion'] = game_logic.ItemCharges(name='explosive potion',
                                                                data_id='item_explosive_potion',
                                                                description='Unstable potion, that explodes if breaked.',
@@ -753,7 +770,7 @@ def initialize():
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
     abil = abilities.Ability(name='Firebolt', owner=data_set['mob_ifrit'], cooldown=1000,
-                             trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
+                             trigger='ability_used', conditions=[], reactions=[react], ai_info=ai_info,
                              message_color=[255, 50, 0])
     data_set['mob_ifrit'].add_ability(abil)
 
@@ -777,6 +794,37 @@ def initialize():
                              trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
                              message_color=[255, 215, 0])
     data_set['mob_lightning_wisp'].add_ability(abil)
+
+    data_set['mob_flame_wisp'] = game_logic.Fighter(name='Flame wisp', data_id='mob_flame_wisp',
+                                        description='Hostile ball of flame, burning with hatred to all living beings.',
+                                                    char='w',
+                                                    armor={'bashing': 100, 'slashing': 100, 'piercing': 1000},
+                                                    resist={'cold': -200, 'fire': 1000},
+                                                    color=[255, 0, 0], hp=2, speed=100, sight_radius=15.5,
+                                                    damage=(1, 2), dmg_type='fire', categories={'magical'},
+                                                    properties={'loot_list': 'mob_flame_wisp_ingredients'},
+                                                    ai=game_logic.AbilityUserAI(behavior='ranged',
+                                                                                properties={'preferred_range': 8}),
+                                                    weight=1)
+    data_set['mob_flame_wisp'].effects.append(effects.Effect('BLOCK_PIERCING', 100))
+    data_set['mob_flame_wisp'].effects.append(effects.Effect('BLOCK_FIRE', 100))
+    cond = abilities.Condition('TARGET_IN_RANGE')
+    # === projectile
+    proj = game_logic.UnguidedProjectile(launcher=None, speed=30, power=15, target=None, name='firebolt',
+                                         description='An arrow of pure flame.', char='*', color=[255, 0, 0])
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (2, 5), 'dmg_type': 'fire'}
+    abil = abilities.Ability(name='Ignite', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[255, 0, 0])
+    proj.add_ability(abil)
+    # === end of projectile
+    react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile', 'projectile': proj}
+    ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
+               'whole_time': 100, 'use_offset': 0.5}
+    abil = abilities.Ability(name='Firebolt', owner=data_set['mob_flame_wisp'], cooldown=300,
+                             trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
+                             message_color=[255, 0, 0])
+    data_set['mob_flame_wisp'].add_ability(abil)
 
     data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='G',
                                         description='Magic-formed sand, resembling a human figure about 3m high.',
