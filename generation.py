@@ -34,7 +34,8 @@ def generate_loc(loc_type, settings, width, height):
             for plot_y in range(height // grid_size):
                 # choose a building type
                 build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
-                                                         ('prefab_small_market', 5), ('prefab_blacksmith_forge', 40), ('none', 5)])
+                                                         ('prefab_small_market', 5), ('prefab_blacksmith_forge', 5),
+                                                         ('none', 40)])
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)

@@ -2,7 +2,13 @@
   {
     "py/tuple": [
       "list_melee_weapons",
-      40
+      30
+    ]
+  },
+  {
+    "py/tuple": [
+      "list_rare_melee_weapons",
+      10
     ]
   },
   {

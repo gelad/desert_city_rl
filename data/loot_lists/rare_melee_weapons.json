@@ -1,37 +1,37 @@
 [
   {
     "py/tuple": [
-      "item_sabre",
+      "item_zweihander",
       20
     ]
   },
   {
     "py/tuple": [
-      "item_dagger",
+      "item_khopesh",
+      15
+    ]
+  },
+  {
+    "py/tuple": [
+      "item_tabar",
       20
     ]
   },
   {
     "py/tuple": [
-      "item_longsword",
+      "item_panabas",
       15
     ]
   },
   {
     "py/tuple": [
-      "item_bronze_maul",
+      "item_jambiyah",
       15
     ]
   },
   {
     "py/tuple": [
-      "item_mace",
-      15
-    ]
-  },
-  {
-    "py/tuple": [
-      "item_assegai",
+      "item_kris",
       15
     ]
   }

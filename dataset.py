@@ -472,17 +472,53 @@ def initialize():
                                              properties={'slashing': (4, 6), 'attack_speed_mod': 1},
                                              char='ϯ', color=[200, 200, 255], weight=2)
 
+    data_set['item_khopesh'] = game_logic.Item(name='khopesh', data_id='item_khopesh',
+                                               description='An ancient bronze sickle-sword.',
+                                               categories={'weapon', 'sword'},
+                                               properties={'slashing': (4, 7), 'attack_speed_mod': 1.05},
+                                               char='ϯ', color=[80, 50, 20], weight=2.5)
+
     data_set['item_longsword'] = game_logic.Item(name='longsword', data_id='item_longsword',
                                                  description='A double-edged straight sword.',
                                                  categories={'weapon', 'sword'},
                                                  properties={'slashing': (5, 9), 'attack_speed_mod': 1.2},
                                                  char='ϯ', color=[150, 150, 255], weight=4)
 
+    data_set['item_zweihander'] = game_logic.Item(name='zweihander', data_id='item_zweihander',
+                        description='A long and heavy two-handed sword. Slow to swing, but extremely heavy-hitting.',
+                                                  categories={'weapon', 'sword'},
+                                                  properties={'slashing': (6, 14), 'attack_speed_mod': 1.8},
+                                                  char='ϯ', color=[150, 150, 175], weight=8)
+
+    data_set['item_tabar'] = game_logic.Item(name='tabar', data_id='item_tabar',
+                                             description='Fighting axe, with metal handle suitable for parrying.',
+                                             categories={'weapon', 'axe'},
+                                             properties={'slashing': (3, 7), 'attack_speed_mod': 1},
+                                             char='г', color=[150, 150, 255], weight=3)
+
+    data_set['item_panabas'] = game_logic.Item(name='panabas', data_id='item_panabas',
+                                               description='Long sword-like two-handed axe.',
+                                               categories={'weapon', 'axe'},
+                                               properties={'slashing': (4, 12), 'attack_speed_mod': 1.5},
+                                               char='Г', color=[150, 150, 255], weight=6)
+
     data_set['item_dagger'] = game_logic.Item(name='dagger', data_id='item_dagger',
                                               description='A dagger about 20cm long.',
                                               categories={'weapon', 'dagger'},
                                               properties={'piercing': (1, 4), 'attack_speed_mod': 0.75},
                                               char=',', color=[200, 200, 255], weight=0.5)
+
+    data_set['item_jambiyah'] = game_logic.Item(name='jambiyah', data_id='item_jambiyah',
+                                                description='A knife with broad blade, suited for slashing.',
+                                                categories={'weapon', 'dagger'},
+                                                properties={'slashing': (1, 4), 'attack_speed_mod': 0.75},
+                                                char=',', color=[150, 150, 255], weight=0.5)
+
+    data_set['item_kris'] = game_logic.Item(name='kris', data_id='item_kris',
+                                            description='A dagger with flame-like blade.',
+                                            categories={'weapon', 'dagger'},
+                                            properties={'piercing': (2, 5), 'attack_speed_mod': 0.85},
+                                            char=',', color=[80, 50, 2], weight=0.7)
 
     data_set['item_assegai'] = game_logic.Item(name='assegai', data_id='item_assegai',
                                                description='Short spear, used for melee combat.',
