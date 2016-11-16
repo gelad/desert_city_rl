@@ -20,6 +20,7 @@ class Condition:
 
     def evaluate(self, **kwargs):
         """ Method to evaluate condition, returning True or False """
+        # TODO: make ability check for ability_fired trigger (to avoid infinite loops)
         if self.kwargs:  # if any arguments given on condition creation - add them
             kwargs.update(self.kwargs)
         if self.condition == 'TARGET_IS_CATEGORY':  # TARGET_IS_CATEGORY condition
@@ -132,6 +133,7 @@ class Ability(events.Observer):
                     self.ability_on_cd = False  # finish cooldown
         if data['type'] == self.trigger and not self.ability_on_cd:  # if trigger is valid
             if self.conditions_met(data):  # if conditions are passed - react
+                # TODO: make reaction chain - subsequent reaction have info on previous ones results
                 for reaction in self.reactions:
                     if 'chance' in reaction:  # if reaction occurs with some random chance (percent)
                         if random.randint(1, 100) > reaction['chance']:  # take a chance
@@ -159,8 +161,9 @@ class Ability(events.Observer):
 
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """
+        reaction_result = None
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
-            self.react_deal_damage(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_deal_damage(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'deal_damage_aoe':  # dealing damage in AOE reaction
             self.react_deal_damage_aoe(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'kill_entity':  # removing entity reaction
@@ -180,12 +183,17 @@ class Ability(events.Observer):
         if self.cooldown > 0:  # if ability has cooldown
             self.ability_on_cd = True  # start cooldown
             self.ticks_to_cd = self.cooldown
-        events.Event(self.owner, {'type': 'ability_fired', 'ability': self})  # fire an ability event
-        events.Event('location', {'type': 'ability_fired', 'ability': self})
+        # fire an ability event
+        ability_event_data = {'type': 'ability_fired', 'ability': self}
+        if reaction_result:
+            ability_event_data.update(reaction_result)
+        events.Event(self.owner, ability_event_data)
+        events.Event('location', ability_event_data)
 
     # ===========================================REACTIONS=================================================
     def react_deal_damage(self, reaction, event_data):
         """ Reaction, that deals damage """
+        reaction_result = {'damage': 0, 'target': None}  # reaction result dict
         if 'strike_type' in reaction:  # determine strike type
             strike_type = reaction['strike_type']
         else:
@@ -204,10 +212,13 @@ class Ability(events.Observer):
             damage_dealt = attacker.land_strike(strike=strike, target=target)  # land strike
             game_logic.Game.add_message(self.name + ': ' + target.name + ' takes ' + str(damage_dealt) +
                                         ' ' + reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
+            reaction_result['damage'] = damage_dealt
+            reaction_result['target'] = target
         else:  # tried to deal damage to not BattleEntity
             game_logic.Game.add_message(
                 self.name + ': attempted to deal damage to not BE.',
                 'DEBUG', self.message_color)
+        return reaction_result
 
     def react_deal_damage_aoe(self, reaction, event_data):
         """ Reaction, that deals damage in AOE """
