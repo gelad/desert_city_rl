@@ -1769,7 +1769,7 @@ class Game:
                              categories={'living'}, properties={'max_carry_weight': 30}, weight=70)
         self.current_loc.place_entity(self.player, 0, 0)
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
-        # self.current_loc.place_entity('mob_ifrit', 20, 20)
+        # self.current_loc.place_entity('mob_frost_wisp', 20, 20)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
         self.current_loc.actors.insert(0, self.player)
         self.is_waiting_input = True

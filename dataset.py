@@ -862,6 +862,43 @@ def initialize():
                              message_color=[255, 0, 0])
     data_set['mob_flame_wisp'].add_ability(abil)
 
+    data_set['mob_frost_wisp'] = game_logic.Fighter(name='Frost wisp', data_id='mob_frost_wisp',
+                                description='Hostile ball of cold energy, burning with hatred to all living beings.',
+                                                    char='w',
+                                                    armor={'bashing': 100, 'slashing': 100, 'piercing': 1000},
+                                                    resist={'cold': 1000, 'fire': -200},
+                                                    color=[100, 100, 255], hp=2, speed=100, sight_radius=15.5,
+                                                    damage=(1, 2), dmg_type='cold', categories={'magical'},
+                                                    properties={'loot_list': 'mob_frost_wisp_ingredients'},
+                                                    ai=game_logic.AbilityUserAI(behavior='ranged',
+                                                                                properties={'preferred_range': 8}),
+                                                    weight=1, corpse='no corpse')
+    data_set['mob_frost_wisp'].effects.append(effects.Effect('BLOCK_PIERCING', 100))
+    data_set['mob_frost_wisp'].effects.append(effects.Effect('BLOCK_COLD', 100))
+    cond = abilities.Condition('TARGET_IN_RANGE')
+    # === projectile
+    proj = game_logic.UnguidedProjectile(launcher=None, speed=30, power=15, target=None, name='frostbolt',
+                                         description='An arrow of pure frost.', char='*', color=[0, 0, 255])
+    react1 = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (1, 3), 'dmg_type': 'cold'}
+    abil1 = abilities.Ability(name='Freeze', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react1],
+                             message_color=[0, 0, 255])
+    # cond_chill = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
+    # react2 = {'type': 'apply_timed_effect', 'target': 'projectile_hit_entity', 'time': 500,
+    #           'effect': effects.Effect('SLOWED', 150)}
+    # abil2 = abilities.Ability(name='Chill', owner=proj, trigger='projectile_hit', conditions=[cond_chill],
+    #                           reactions=[react2], message_color=[100, 100, 255])
+    proj.add_ability(abil1)
+    # proj.add_ability(abil2)  # TODO: make some way to check if previous reaction succeed - dealt damage, etc
+    # === end of projectile
+    react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile', 'projectile': proj}
+    ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
+               'whole_time': 100, 'use_offset': 0.5}
+    abil = abilities.Ability(name='Frostbolt', owner=data_set['mob_frost_wisp'], cooldown=300,
+                             trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
+                             message_color=[255, 0, 0])
+    data_set['mob_frost_wisp'].add_ability(abil)
+
     data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='G',
                                         description='Magic-formed sand, resembling a human figure about 3m high.',
                                                     armor={'bashing': 100, 'slashing': 75, 'piercing': 300},
