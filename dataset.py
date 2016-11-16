@@ -819,7 +819,7 @@ def initialize():
                                                         properties={'loot_list': 'mob_lightning_wisp_ingredients'},
                                                         ai=game_logic.AbilityUserAI(behavior='ranged',
                                                                                     properties={'preferred_range': 6}),
-                                                        weight=1)
+                                                        weight=1, corpse='no corpse')
     data_set['mob_lightning_wisp'].effects.append(effects.Effect('BLOCK_PIERCING', 100))
     data_set['mob_lightning_wisp'].effects.append(effects.Effect('BLOCK_LIGHTNING', 100))
     cond = abilities.Condition('TARGET_IN_RANGE')
@@ -841,7 +841,7 @@ def initialize():
                                                     properties={'loot_list': 'mob_flame_wisp_ingredients'},
                                                     ai=game_logic.AbilityUserAI(behavior='ranged',
                                                                                 properties={'preferred_range': 8}),
-                                                    weight=1)
+                                                    weight=1, corpse='no corpse')
     data_set['mob_flame_wisp'].effects.append(effects.Effect('BLOCK_PIERCING', 100))
     data_set['mob_flame_wisp'].effects.append(effects.Effect('BLOCK_FIRE', 100))
     cond = abilities.Condition('TARGET_IN_RANGE')
