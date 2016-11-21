@@ -705,6 +705,23 @@ def initialize():
                              message_color=[255, 215, 0])
     data_set['item_hot_ash'].add_ability(abil)
 
+    data_set['item_magic_snow'] = game_logic.ItemCharges(name='magic snow',
+                                                      data_id='item_magic_snow',
+                description="Magical snow, that doesn't melt. Useful alchemical ingredient. If thrown - can deal minor frost damage.",
+                                                      categories={'throwing', 'stackable', 'weight_per_charge',
+                                                                  'alchemy'},
+                                                      properties={'break_chance': 1,
+                                                                  'throw_speed': 0.75,
+                                                                  'accuracy_thrown': 0.6},
+                                                      char="`", color=[0, 0, 255],
+                                                      charges=1, destroyed_after_use=True, weight=0.1)
+    react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (1, 3), 'dmg_type': 'cold'}
+    abil = abilities.Ability(name='Ignite', owner=data_set['item_magic_snow'],
+                             trigger='projectile_hit', conditions=[], reactions=[react],
+                             message_color=[100, 100, 205])
+    data_set['item_magic_snow'].add_ability(abil)
+
     data_set['item_explosive_potion'] = game_logic.ItemCharges(name='explosive potion',
                                                                data_id='item_explosive_potion',
                                                                description='Unstable potion, that explodes if breaked.',

@@ -215,7 +215,7 @@ class BattleEntity(Entity):
         else:
             damage = strike.damage
             dmg_type = strike.dmg_type
-            if strike.strike_type is 'melee' or strike.strike_type is 'projectile':
+            if strike.strike_type == 'melee' or strike.strike_type == 'projectile':
                 if isinstance(self, Equipment):  # shield blocking if BE has equipment
                     if 'ignore_shield' not in strike.mods:
                         shield = None

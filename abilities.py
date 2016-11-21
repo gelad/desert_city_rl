@@ -20,7 +20,6 @@ class Condition:
 
     def evaluate(self, **kwargs):
         """ Method to evaluate condition, returning True or False """
-        # TODO: make ability check for ability_fired trigger (to avoid infinite loops)
         if self.kwargs:  # if any arguments given on condition creation - add them
             kwargs.update(self.kwargs)
         if self.condition == 'TARGET_IS_CATEGORY':  # TARGET_IS_CATEGORY condition

@@ -32,7 +32,13 @@
   {
     "py/tuple": [
       "qty_(1;2)mob_flame_wisp",
-      15
+      10
+    ]
+  },
+  {
+    "py/tuple": [
+      "qty_(1;2)mob_frost_wisp",
+      5
     ]
   },
   {
