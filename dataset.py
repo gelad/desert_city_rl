@@ -883,13 +883,16 @@ def initialize():
              'damage': (1, 3), 'dmg_type': 'cold'}
     abil1 = abilities.Ability(name='Freeze', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react1],
                              message_color=[0, 0, 255])
-    cond_chill = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
-    react2 = {'type': 'apply_timed_effect', 'target': 'default', 'time': 500,
+    cond_chill1 = abilities.Condition('ABILITY_NAME_IS', name='Freeze')
+    cond_chill2 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
+
+    react2 = {'type': 'apply_timed_effect', 'target': 'projectile_hit_entity', 'time': 500,
               'effect': effects.Effect('SLOWED', 150)}
-    abil2 = abilities.Ability(name='Chill', owner=proj, trigger='ability_fired', conditions=[cond_chill],
+    abil2 = abilities.Ability(name='Chill', owner=proj, trigger='ability_fired',
+                              conditions=[cond_chill1, ' and ', cond_chill2],
                               reactions=[react2], message_color=[100, 100, 255])
     proj.add_ability(abil1)
-    proj.add_ability(abil2)  # TODO: make some way to check if previous reaction succeed - dealt damage, etc
+    proj.add_ability(abil2)
     # === end of projectile
     react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile', 'projectile': proj}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',

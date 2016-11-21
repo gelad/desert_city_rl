@@ -40,7 +40,10 @@ class Condition:
         elif self.condition == 'DEALT_DAMAGE':  # DEALT_DAMAGE condition
             sign = self.kwargs['sign']
             number = self.kwargs['number']
-            return eval(str(kwargs['damage']) + sign + str(number))  # check damage condition
+            if 'damage' in kwargs:
+                return eval(str(kwargs['damage']) + sign + str(number))  # check damage condition
+            else:  # if no 'damage' arg - False
+                return False
         elif self.condition == 'EQUIPPED' and kwargs['owner']:  # EQUIPPED condition
             if kwargs['owner_item'] in kwargs['owner'].equipment.values():  # check if item equipped
                 return True
@@ -71,6 +74,11 @@ class Condition:
                 return False
         elif self.condition == 'MOVER_IS_A_BE':  # MOVER IS A BE condition
             if isinstance(kwargs['entity'], game_logic.BattleEntity):  # if target is a BE
+                return True
+            else:
+                return False
+        elif self.condition == 'ABILITY_NAME_IS':  # ABILITY NAME IS condition
+            if kwargs['ability'].name == kwargs['name']:
                 return True
             else:
                 return False
@@ -165,6 +173,7 @@ class Ability(events.Observer):
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             reaction_result = self.react_deal_damage(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'deal_damage_aoe':  # dealing damage in AOE reaction
+            # TODO: add reaction results for all reactions
             self.react_deal_damage_aoe(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'kill_entity':  # removing entity reaction
             self.react_kill_entity(reaction=reaction, event_data=event_data)
@@ -189,6 +198,7 @@ class Ability(events.Observer):
             ability_event_data.update(reaction_result)
         events.Event(self.owner, ability_event_data)
         events.Event('location', ability_event_data)
+        return reaction_result
 
     # ===========================================REACTIONS=================================================
     def react_deal_damage(self, reaction, event_data):
