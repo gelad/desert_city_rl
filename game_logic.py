@@ -238,6 +238,8 @@ class BattleEntity(Entity):
             # at 100 armor - 50% reduction
             if protection[0] == -100:  # to prevent division by zero
                 reduce = protection[0]
+            elif protection[0] < 0:  # if vulnerability instead of reduction
+                reduce = -1 * protection[0] / (100 + protection[0])
             else:
                 reduce = protection[0] / (100 + protection[0])
             resulting_damage = ceil(damage * (1 - reduce) - protection[1])

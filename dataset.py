@@ -916,7 +916,7 @@ def initialize():
                'whole_time': 100, 'use_offset': 0.5}
     abil = abilities.Ability(name='Frostbolt', owner=data_set['mob_frost_wisp'], cooldown=300,
                              trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
-                             message_color=[255, 0, 0])
+                             message_color=[100, 100, 255])
     data_set['mob_frost_wisp'].add_ability(abil)
 
     data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='G',
