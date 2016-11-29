@@ -168,24 +168,22 @@ class Ability(events.Observer):
 
     def react(self, reaction, event_data):
         """ Method that converts reaction dicts to game actions """
-        reaction_result = None
         if reaction['type'] == 'deal_damage':  # dealing damage reaction
             reaction_result = self.react_deal_damage(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'deal_damage_aoe':  # dealing damage in AOE reaction
-            # TODO: add reaction results for all reactions
-            self.react_deal_damage_aoe(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_deal_damage_aoe(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'kill_entity':  # removing entity reaction
-            self.react_kill_entity(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_kill_entity(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'launch_projectile':  # launch projectile reaction
-            self.react_launch_projectile(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_launch_projectile(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'heal':  # healing reaction
-            self.react_heal(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_heal(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'apply_timed_effect':  # applying timed effect reaction
-            self.react_apply_timed_effect(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_apply_timed_effect(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'remove_effect':  # remove effect reaction
-            self.react_remove_effect(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_remove_effect(reaction=reaction, event_data=event_data)
         elif reaction['type'] == 'deal_periodic_damage':  # deal periodic damage
-            self.react_deal_periodic_damage(reaction=reaction, event_data=event_data)
+            reaction_result = self.react_deal_periodic_damage(reaction=reaction, event_data=event_data)
         else:
             raise Exception('Unknown reaction - ' + reaction['type'])
         if self.cooldown > 0:  # if ability has cooldown
@@ -202,7 +200,7 @@ class Ability(events.Observer):
     # ===========================================REACTIONS=================================================
     def react_deal_damage(self, reaction, event_data):
         """ Reaction, that deals damage """
-        reaction_result = {'damage': 0, 'target': None}  # reaction result dict
+        reaction_result = {'success': False, 'damage': 0, 'target': None}  # reaction result dict
         if 'strike_type' in reaction:  # determine strike type
             strike_type = reaction['strike_type']
         else:
@@ -223,6 +221,8 @@ class Ability(events.Observer):
                                         ' ' + reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
             reaction_result['damage'] = damage_dealt
             reaction_result['target'] = target
+            if damage_dealt > 0:
+                reaction_result['success'] = True
         else:  # tried to deal damage to not BattleEntity
             game_logic.Game.add_message(
                 self.name + ': attempted to deal damage to not BE.',
@@ -232,6 +232,7 @@ class Ability(events.Observer):
     def react_deal_damage_aoe(self, reaction, event_data):
         """ Reaction, that deals damage in AOE """
         # if reaction is AOE - apply reaction to all cells in specified area
+        reaction_result = {'success': False}  # result dict TODO: make more complicate result - list of targets
         if reaction['aoe'] == 'circle':
             radius = reaction['radius']
             include_center = reaction['include_center']
@@ -252,7 +253,10 @@ class Ability(events.Observer):
                             if not check_conditions(conditions=conds, data=event_data):
                                 conds_met = False
                         if conds_met:
-                            self.react_deal_damage(reaction, event_data)
+                            res = self.react_deal_damage(reaction, event_data)
+                            if res['success']:  # if at least one target damaged - set success to true
+                                reaction_result['success'] = True
+        return reaction_result
 
     def react_launch_projectile(self, reaction, event_data):
         """ Reaction, that launches projectile """
@@ -264,22 +268,31 @@ class Ability(events.Observer):
         launcher = self.owner  # default
         launcher.location.action_mgr.register_action(0, actions.act_launch_projectile, reaction['projectile'],
                                                      launcher, target, self.message_color)
+        return {'success': True}  # PLACEHOLDER launch is always successiful now
 
     def react_heal(self, reaction, event_data):
         """ Reaction, that heals """
+        reaction_result = {'success': False}  # result dict
         # if there will be different reaction targets - specify here
         target = self.owner  # default
-        self.owner.heal(reaction['heal'], target)
+        healed_hp = self.owner.heal(reaction['heal'], target)
+        if healed_hp > 0:  # success if some hp healed
+            reaction_result['success'] = True
+        return reaction_result
 
     def react_kill_entity(self, reaction, event_data):
         """ Reaction, that kills reaction target from location """
+        reaction_result = {'success': False}  # result dict
         # if there will be different reaction targets - specify here
         target = self.owner  # default
         if reaction['target'] == 'thrown':
             target = self.owner.thrown  # set target to thrown item
         if reaction['target'] == 'ammo':
             target = self.owner.ammo  # set target to ammo item
-        target.location.dead.append(target)
+        if target:
+            target.location.dead.append(target)
+            reaction_result['success'] = True
+        return reaction_result
 
     def react_apply_timed_effect(self, reaction, event_data):
         """ Reaction, that applies a timed effect """
@@ -293,15 +306,22 @@ class Ability(events.Observer):
             game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
                                         reaction['effect'].description + ' for ' + str(reaction['time']) +
                                         ' ticks.', 'PLAYER', self.message_color)
+        return {'success': True}  # PLACEHOLDER effect applying is always successiful now
     
     def react_remove_effect(self, reaction, event_data):
         """ Reaction, that removes effects """
+        reaction_result = {'success': False, 'removed_effects_count': 0}  # result dict
         # if there will be different reaction targets - specify here
         target = self.owner  # default
         if reaction['effects_number'] == 'all':  # if all effects has to be removed
+            r = 0  # number of removed effects
             for effect in target.effects[:]:  # remove all such effects
                 if effect.eff == reaction['effect'].eff:
                     target.effects.remove(effect)
+                    r += 1
+            if r > 0:  # if at least one effect removed - reaction successiful
+                reaction_result['success'] = True
+                reaction_result['removed_effects_count'] = r
             if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
                 game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
                                             reaction['effect'].eff.upper() + ' effects.', 'PLAYER', self.message_color)
@@ -309,11 +329,13 @@ class Ability(events.Observer):
             # choose needed effects
             needed_effects = [e for e in target.effects if e.eff == reaction['effect'].eff]
             if len(needed_effects) > 0:  # if there are
+                r = 0  # number of removed effects
                 # if effects to be removed number less than present effects
                 if len(needed_effects) < reaction['effects_number']:
                     # remove random effects
                     for effect in random.sample(needed_effects, reaction['effects_number']):
                         target.effects.remove(effect)
+                        r += 1
                     if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
                         game_logic.Game.add_message(self.name.capitalize() + ': removed ' +
                                                     str(len(needed_effects)) + ' ' +
@@ -323,10 +345,15 @@ class Ability(events.Observer):
                     for effect in target.effects[:]:  # remove all such effects
                         if effect.eff == reaction['effect'].eff:
                             target.effects.remove(effect)
+                            r += 1
                     if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
                         game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
                                                     reaction['effect'].eff.upper() + ' effects.',
                                                     'PLAYER', self.message_color)
+                if r > 0:  # if at least one effect removed - reaction successiful
+                    reaction_result['success'] = True
+                    reaction_result['removed_effects_count'] = r
+        return reaction_result
 
     def react_deal_periodic_damage(self, reaction, event_data):
         """ Reaction, that applies periodic damage """
@@ -344,6 +371,7 @@ class Ability(events.Observer):
         if isinstance(attacker, game_logic.Player):  # if player applies - inform him of effect
             game_logic.Game.add_message(target.name.capitalize() + ' is ' + reaction['effect'].eff.lower() + '.',
                                         'PLAYER', self.message_color)
+        return {'success': True}  # PLACEHOLDER applying periodic damage is always successiful now
 
 # ============================== UTILITY FUNCTIONS ===========================================
 
