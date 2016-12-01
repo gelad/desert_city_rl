@@ -1369,7 +1369,11 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
 
     def get_throw_range(self, item):
         """ PLACEHOLDER method, until some role system will be implemented (must be based on strength) """
-        return round(12 - item.weight * 2)  # some MAGIC number
+        if isinstance(item, ItemCharges):  # throwing one item from a stack (for now)
+            w = item._weight  # so obtain single item weight
+        else:
+            w = item.weight
+        return round(12 - w * 2)  # some MAGIC number
 
     def reload(self, weapon, ammo):
         """ Reload a ranged weapon """
