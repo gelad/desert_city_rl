@@ -101,6 +101,9 @@ def main_menu():
 
 def main_loop():
     """ Main game loop function """
+    global current_game
+    game = current_game
+    to_menu = False  # 'return to main menu on game end' flag
     draw_screen = True  # draw screen at first run
     last_frame_time = time.time()
     while not game.state == 'exit':
@@ -120,11 +123,14 @@ def main_loop():
                     # show window with death recap, that returns to main menu
                     # TODO: make player death function, and move this out of here
                     chosen = ui.show_menu_text_above(win_mgr=graphics.win_mgr, caption='You died!',
-                                                     options=['Return to main menu.'], keys=None,
-                                                     texts='Horrors of Desert City got you.',
+                                                     options=['Return to main menu', 'Exit'], keys=None,
+                                                     texts='Horrors of the Desert City got you.',
                                                      prev_window=graphics.win_mgr.active_window,
-                                                     width=35,
+                                                     width=40,
                                                      text_height=2)
+                    if chosen[0] == 'Return to main menu':
+                        to_menu = True
+                    break
                 for actor in game.current_loc.actors:  # iterate through actors
                     if actor.state == 'ready' and actor.ai:  # pick those who have ai and ready to act
                         actor.ai.act()  # make them act
@@ -153,6 +159,7 @@ def main_loop():
         if sleep_time > 0:
             time.sleep(sleep_time)
         last_frame_time = current_time
+    return to_menu
 
 # HERE PROGRAM RUN STARTS
 dataset.initialize()
@@ -160,13 +167,22 @@ settings_file = open('data/settings.json')  # open settings file
 settings = jsonpickle.loads(settings_file.read())  # load settings
 settings_file.close()
 graphics = render.Graphics(screen_width=settings['screen_width'], screen_height=settings['screen_height'])
-game = main_menu()
-main_loop()
-if game.player.state == 'dead':
-    try:
-        os.remove('savegame')
-    except FileNotFoundError:
-        pass
-else:
-    save_game(game)
+back_to_menu = True
+current_game = None
+while back_to_menu:
+    graphics.win_mgr.active_window = None  # TODO: maybe make a method for clearing graphics?
+    graphics.win_mgr.windows.clear()
+    graphics.console.clear()
+    if current_game:
+        del current_game
+    current_game = main_menu()
+    back_to_menu = main_loop()
+    if current_game.player.state == 'dead':
+        try:
+            os.remove('savegame')
+        except FileNotFoundError:
+            pass
+    else:
+        save_game(current_game)
+
 
