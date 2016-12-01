@@ -325,6 +325,8 @@ class ElementMainPanel(Element):
         self.add_element(self.player_right_hand)
         self.player_left_hand = ElementTextLine(owner=self, x=0, y=4, z=0)
         self.add_element(self.player_left_hand)
+        self.money = ElementTextLine(owner=self, x=0, y=6, z=0)
+        self.add_element(self.money)
 
     def draw(self):
         """ Drawing method """
@@ -341,6 +343,8 @@ class ElementMainPanel(Element):
         self.player_right_hand.set_line('Right: ' + str(right))
         left = self.player.equipment['LEFT_HAND']
         self.player_left_hand.set_line('Left:  ' + str(left))
+        money = self.player.properties['money']
+        self.money.set_line('Money: ' + str(money) + ' coins.')
         console = tdl.Console(self.width, self.height)
         for element in self.elements:  # blit every element to console
             console.blit(element.draw(), element.x, element.y)
@@ -769,7 +773,37 @@ class WindowMain(Window):
 
     def command_leave_loc(self):
         """ PLACEHOLDER method for moving to another loc """
+        # TODO: make window between raids - with merchant to buy equipment,
+        # maybe some rest options and next raid target selection
         old_loc = self.game.current_loc
+        # show after level score - sold treasures for now
+        treasures = {}
+        for item in self.game.player.inventory:
+            if 'relic' in item.categories:  # if there'll be other types of treasure - add here
+                if isinstance(item, game_logic.ItemCharges):
+                    count = item.charges
+                else:
+                    count = 1
+                if item.name in treasures:
+                    treasures[item.name][0] += count
+                else:
+                    treasures[item.name] = [count, item.properties['value']]
+                self.game.player.discard_item(item)
+                del item
+        if len(treasures) > 0:
+            text = 'You escaped the City alive, and obtained some treasures:\n\n'
+            total = 0
+            for tr in treasures.keys():
+                text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
+                        + str(treasures[tr][0] * treasures[tr][1]) + '\n'
+                total += treasures[tr][0] * treasures[tr][1]
+            text += '\nTotal treasures value: ' + str(total) + ' coins.'
+            self.game.player.properties['money'] += total
+        else:
+            text = 'You escaped the City alive, but with nothing of value in your pockets.\n\n'
+        show_menu_text_above(win_mgr=self.win_mgr, caption='Successiful raid into ruins of Neth-Nikakh.',
+                             options=['Ok.'], keys=None, texts=text, prev_window=self, width=self.width // 3 * 2,
+                             text_height=25)
         self.game.current_loc = generation.generate_loc('ruins', None, 200, 200)
         self.game.add_location(self.game.current_loc)
         self.game.player.location.remove_entity(self.game.player)

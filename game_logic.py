@@ -1772,7 +1772,7 @@ class Game:
         self.add_location(self.current_loc)
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1,
-                             categories={'living'}, properties={'max_carry_weight': 30}, weight=70)
+                             categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
         self.current_loc.place_entity(self.player, 0, 0)
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         # self.current_loc.place_entity('mob_frost_wisp', 20, 20)
