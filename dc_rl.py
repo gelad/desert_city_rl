@@ -99,6 +99,22 @@ def main_menu():
     return game
 
 
+def player_death():
+    """ Function that is called if player is dead """
+    # show window with death recap, that returns to main menu
+    chosen = ui.show_menu_text_above(win_mgr=graphics.win_mgr, caption='You died!',
+                                     options=['Return to main menu', 'Exit'], keys=None,
+                                     texts='Horrors of the Desert City got you.',
+                                     prev_window=graphics.win_mgr.active_window,
+                                     width=40,
+                                     text_height=2)
+    if chosen[0] == 'Return to main menu':
+        to_menu = True
+    else:
+        to_menu = False
+    return to_menu
+
+
 def main_loop():
     """ Main game loop function """
     global current_game
@@ -120,16 +136,7 @@ def main_loop():
                     game.state = 'dead'  # set game state to dead
                     game.is_waiting_input = True  # set waiting for input flag True
                     draw_screen = True  # set flag to draw screen
-                    # show window with death recap, that returns to main menu
-                    # TODO: make player death function, and move this out of here
-                    chosen = ui.show_menu_text_above(win_mgr=graphics.win_mgr, caption='You died!',
-                                                     options=['Return to main menu', 'Exit'], keys=None,
-                                                     texts='Horrors of the Desert City got you.',
-                                                     prev_window=graphics.win_mgr.active_window,
-                                                     width=40,
-                                                     text_height=2)
-                    if chosen[0] == 'Return to main menu':
-                        to_menu = True
+                    to_menu = player_death()
                     break
                 for actor in game.current_loc.actors:  # iterate through actors
                     if actor.state == 'ready' and actor.ai:  # pick those who have ai and ready to act
