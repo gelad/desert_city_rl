@@ -27,11 +27,14 @@ def generate_loc(loc_type, settings, width, height):
         loc.cells = [[game_logic.Cell('SAND') for y in range(loc.height)] for x in range(loc.width)]
         random.seed()
         grid_size = 20  # divide location to plots 20x20 each, making a grid 20 times smaller than map
-        plots = [[None for y in range(height // grid_size)] for x in range(width // grid_size)]
+        plan_width = width // grid_size
+        plan_height = height // grid_size
+        plots = [[None for y in range(plan_height)] for x in range(plan_width)]
+        # TODO: remove Plot and related stuff - change to location plan
         # plot is a named tuple ([list of loc.cells in plot], building_x, building_y, building_width, building_height)
         Plot = namedtuple('Plot', ['cells', 'b_x', 'b_y', 'b_w', 'b_h', 'b_type'])
-        for plot_x in range(width // grid_size):
-            for plot_y in range(height // grid_size):
+        for plot_x in range(plan_width):
+            for plot_y in range(plan_height):
                 # choose a building type
                 build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
                                                          ('prefab_small_market', 5), ('prefab_blacksmith_forge', 5),
@@ -110,6 +113,29 @@ def generate_loc(loc_type, settings, width, height):
                                     cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add traps
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
+
+
+def generate_loc_plan(loc_type, settings):
+    """ Generate location plan - what buildings (or else) to place in plots """
+    plan_width = settings['plan_width']
+    plan_height = settings['plan_height']
+    grid_size = settings['grid_size']
+    # create an empty plan
+    plan = [[{'structure': None} for y in range(plan_height)] for x in range(plan_width)]
+    if loc_type == 'clear':
+        pass
+    elif loc_type == 'ruins':
+        # TODO: add "big features" - roads, squares, multi-plot buildings, etc
+        for x in range(plan_width):
+            for y in range(plan_height):
+                # choose a building type
+                if plan[x][y]['structure'] is None:
+                    build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
+                                                             ('prefab_small_market', 5), ('prefab_blacksmith_forge', 5),
+                                                             ('none', 40)])
+                    plan[x][y]['structure'] = 'building'
+                    plan[x][y]['build_type'] = build_type
+    return plan
 
 
 def subgen_building(building, build_w, build_h, settings=None):
