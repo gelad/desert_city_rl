@@ -11,7 +11,6 @@ import jsonpickle
 
 import random
 import gzip
-from collections import namedtuple
 
 
 def generate_loc(loc_type, settings, width, height):
@@ -29,25 +28,28 @@ def generate_loc(loc_type, settings, width, height):
         grid_size = 20  # divide location to plots 20x20 each, making a grid 20 times smaller than map
         plan_width = width // grid_size
         plan_height = height // grid_size
-        plots = [[None for y in range(plan_height)] for x in range(plan_width)]
-        # TODO: remove Plot and related stuff - change to location plan
-        # plot is a named tuple ([list of loc.cells in plot], building_x, building_y, building_width, building_height)
-        Plot = namedtuple('Plot', ['cells', 'b_x', 'b_y', 'b_w', 'b_h', 'b_type'])
+        if settings:
+            plan_settings = dict(settings)
+        else:
+            plan_settings = dict()
+        plan_settings['plan_width'] = plan_width
+        plan_settings['plan_height'] = plan_height
+        plan_settings['grid_size'] = grid_size
+        plan = generate_loc_plan(loc_type, plan_settings)
         for plot_x in range(plan_width):
             for plot_y in range(plan_height):
-                # choose a building type
-                build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
-                                                         ('prefab_small_market', 5), ('prefab_blacksmith_forge', 5),
-                                                         ('none', 40)])
+                # get a building type from plan
+                if plan[plot_x][plot_y]['structure'] == 'building':
+                    build_type = plan[plot_x][plot_y]['build_type']
+                else:
+                    build_type = 'none'
                 if build_type == 'house':  # generate a house
                     build_x = random.randrange(grid_size // 2)
                     build_y = random.randrange(grid_size // 2)
                     build_w = random.randrange(4, grid_size // 2)
                     build_h = random.randrange(4, grid_size // 2)
-                    plots[plot_x][plot_y] = \
-                        Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
-                                    range(plot_x, plot_x + grid_size)],
-                             b_x=build_x, b_y=build_y, b_w=build_w, b_h=build_h, b_type=build_type)
+                    plan[plot_x][plot_y]['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
+                                                     in range(plot_x, plot_x + grid_size)]
                     floor_cells = []  # empty floor cells for item gen
                     building = subgen_building(building='house', build_w=build_w, build_h=build_h)
                     for x in range(build_w):
@@ -94,10 +96,8 @@ def generate_loc(loc_type, settings, width, height):
                                                                                    'destroy_tiles': 'SAND'},
                                                                       'rotate': random.randint(0, 3)})
                 elif build_type == 'none':  # generate no building
-                    plots[plot_x][plot_y] = \
-                        Plot(cells=[[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x in
-                                    range(plot_x, plot_x + grid_size)],
-                             b_x=0, b_y=0, b_w=grid_size, b_h=grid_size, b_type=build_type)
+                    plan[plot_x][plot_y]['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
+                                                     in range(plot_x, plot_x + grid_size)]
                     outer_cells = []
                     for x in range(grid_size // 2):
                         for y in range(grid_size // 2):
@@ -132,9 +132,10 @@ def generate_loc_plan(loc_type, settings):
                 if plan[x][y]['structure'] is None:
                     build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
                                                              ('prefab_small_market', 5), ('prefab_blacksmith_forge', 5),
-                                                             ('none', 40)])
-                    plan[x][y]['structure'] = 'building'
-                    plan[x][y]['build_type'] = build_type
+                                                             (None, 40)])
+                    if build_type is not None:
+                        plan[x][y]['structure'] = 'building'
+                        plan[x][y]['build_type'] = build_type
     return plan
 
 
