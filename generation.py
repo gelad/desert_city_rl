@@ -38,9 +38,30 @@ def generate_loc(loc_type, settings, width, height):
         plan = generate_loc_plan(loc_type, plan_settings)
         for plot_x in range(plan_width):
             for plot_y in range(plan_height):
+                plot = plan[plot_x][plot_y]
+                # check for structures other from buildings
+                if plot['structure'] == 'road':  # if there are road
+                    if plot['road_direction'] == 'vertical':
+                        start_x = 0
+                        end_x = grid_size
+                        start_y = plot['road_on_plot_start']
+                        end_y = plot['road_on_plot_start'] + plot['road_thickness']
+                    else:
+                        start_x = plot['road_on_plot_start']
+                        end_x = plot['road_on_plot_start'] + plot['road_thickness']
+                        start_y = 0
+                        end_y = grid_size
+                    for x in range(end_x - start_x):
+                        for y in range(end_y - start_y):
+                            loc_cell_x = x + start_x + plot_x * grid_size
+                            loc_cell_y = y + start_y + plot_y * grid_size
+                            loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
+                    destruct(loc=loc, start_x=start_x + plot_x * grid_size, start_y=start_y + plot_y * grid_size,
+                             width=end_x - start_x, height=end_y - start_y, settings={'passes': random.randint(1, 10),
+                                                                                      'destroy_tiles': 'SAND'})
                 # get a building type from plan
-                if plan[plot_x][plot_y]['structure'] == 'building':
-                    build_type = plan[plot_x][plot_y]['build_type']
+                if 'build_type' in plot:
+                    build_type = plot['build_type']
                 else:
                     build_type = 'none'
                 if build_type == 'house':  # generate a house
@@ -48,14 +69,15 @@ def generate_loc(loc_type, settings, width, height):
                     build_y = random.randrange(grid_size // 2)
                     build_w = random.randrange(4, grid_size // 2)
                     build_h = random.randrange(4, grid_size // 2)
-                    plan[plot_x][plot_y]['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
+                    # TODO: think if 'cells' are needed in plan or not
+                    plot['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
                                                      in range(plot_x, plot_x + grid_size)]
                     floor_cells = []  # empty floor cells for item gen
                     building = subgen_building(building='house', build_w=build_w, build_h=build_h)
                     for x in range(build_w):
                         for y in range(build_h):
-                            loc_cell_x = x + build_x + plot_x * 20
-                            loc_cell_y = y + build_y + plot_y * 20
+                            loc_cell_x = x + build_x + plot_x * grid_size
+                            loc_cell_y = y + build_y + plot_y * grid_size
                             loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
                             if building[x][y] == 'sand':
                                 loc.cells[loc_cell_x][loc_cell_y].tile = 'SAND'
@@ -77,9 +99,9 @@ def generate_loc(loc_type, settings, width, height):
                             # if cell is passable - add to floor list
                             if loc.cells[loc_cell_x][loc_cell_y].is_movement_allowed():
                                 floor_cells.append((loc_cell_x, loc_cell_y))
-                    destruct(loc=loc, start_x=build_x + plot_x * 20, start_y=build_y + plot_y * 20, width=build_w,
-                             height=build_h, settings={'passes': random.randint(1, 10),
-                                                       'destroy_tiles': 'SAND'})  # destroy building
+                    destruct(loc=loc, start_x=build_x + plot_x * grid_size, start_y=build_y + plot_y * grid_size,
+                             width=build_w, height=build_h, settings={'passes': random.randint(1, 10),
+                                                                      'destroy_tiles': 'SAND'})  # destroy building
                     populate_prefab(ent_type='items', prefab_variant=loc_default_variant,
                                     cell_groups={'i': floor_cells}, loc=loc)  # add items
                     populate_prefab(ent_type='relics', prefab_variant=loc_default_variant,
@@ -96,12 +118,12 @@ def generate_loc(loc_type, settings, width, height):
                                                                                    'destroy_tiles': 'SAND'},
                                                                       'rotate': random.randint(0, 3)})
                 elif build_type == 'none':  # generate no building
-                    plan[plot_x][plot_y]['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
+                    plot['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
                                                      in range(plot_x, plot_x + grid_size)]
                     outer_cells = []
                     for x in range(grid_size // 2):
                         for y in range(grid_size // 2):
-                            outer_cells.append((x + plot_x * 20, y + plot_y * 20))
+                            outer_cells.append((x + plot_x * grid_size, y + plot_y * grid_size))
                     # place some mobs and loot even there are no building
                     populate_prefab(ent_type='items', prefab_variant=loc_default_variant,
                                     cell_groups={'o': outer_cells}, loc=loc)  # add items
@@ -126,6 +148,26 @@ def generate_loc_plan(loc_type, settings):
         pass
     elif loc_type == 'ruins':
         # TODO: add "big features" - roads, squares, multi-plot buildings, etc
+        # simple road generation
+        road_direction = game_logic.weighted_choice([('horizontal', 50), ('vertical', 50)])
+        road_x = random.randrange(plan_width - 1)  # road coords on plan grid
+        road_y = random.randrange(plan_height - 1)
+        road_thickness = random.randrange(2, grid_size - 1)
+        road_on_plot_start = random.randrange(grid_size - 1)  # road coord in specific plot
+        if road_direction == 'vertical':
+            road_length = random.randrange((plan_height - 1) - road_x)
+            for x in range(road_x, road_x + road_length):
+                plan[x][road_y]['structure'] = 'road'
+                plan[x][road_y]['road_direction'] = road_direction
+                plan[x][road_y]['road_thickness'] = road_thickness
+                plan[x][road_y]['road_on_plot_start'] = road_on_plot_start
+        else:
+            road_length = random.randrange((plan_width - 1) - road_y)
+            for y in range(road_y, road_y + road_length):
+                plan[road_x][y]['structure'] = 'road'
+                plan[road_x][y]['road_direction'] = road_direction
+                plan[road_x][y]['road_thickness'] = road_thickness
+                plan[road_x][y]['road_on_plot_start'] = road_on_plot_start
         for x in range(plan_width):
             for y in range(plan_height):
                 # choose a building type

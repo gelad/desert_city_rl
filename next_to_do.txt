@@ -63,7 +63,7 @@ Make building prefabs. (DONE)
 Make prefabs recursive (one can contain another). (DONE)
 Rework building destruction at generation time. (DONE)
 
-
+Add road tile.
 Add prefab_info store variant-specific layer numbers, to place additional entities for variant. ?? 9 layers max
 Make some fences, paths and roads on map.
 Rework loc generation with prefabs.
