@@ -55,7 +55,7 @@ def generate_loc(loc_type, settings, width, height):
                         for y in range(end_y - start_y):
                             loc_cell_x = x + start_x + plot_x * grid_size
                             loc_cell_y = y + start_y + plot_y * grid_size
-                            loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
+                            loc.cells[loc_cell_x][loc_cell_y].tile = 'ROAD_STONE'
                     destruct(loc=loc, start_x=start_x + plot_x * grid_size, start_y=start_y + plot_y * grid_size,
                              width=end_x - start_x, height=end_y - start_y, settings={'passes': random.randint(1, 10),
                                                                                       'destroy_tiles': 'SAND'})
