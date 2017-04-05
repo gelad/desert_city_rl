@@ -147,27 +147,29 @@ def generate_loc_plan(loc_type, settings):
     if loc_type == 'clear':
         pass
     elif loc_type == 'ruins':
-        # TODO: add "big features" - roads, squares, multi-plot buildings, etc
+        # TODO: add more "big features" - squares, multi-plot buildings, etc
+        roads = random.randrange(0, 3)  # 0 to 3 roads on ruins location
         # simple road generation
-        road_direction = game_logic.weighted_choice([('horizontal', 50), ('vertical', 50)])
-        road_x = random.randrange(plan_width - 1)  # road coords on plan grid
-        road_y = random.randrange(plan_height - 1)
-        road_thickness = random.randrange(2, grid_size - 1)
-        road_on_plot_start = random.randrange(grid_size - 1)  # road coord in specific plot
-        if road_direction == 'vertical':
-            road_length = random.randrange((plan_height - 1) - road_x)
-            for x in range(road_x, road_x + road_length):
-                plan[x][road_y]['structure'] = 'road'
-                plan[x][road_y]['road_direction'] = road_direction
-                plan[x][road_y]['road_thickness'] = road_thickness
-                plan[x][road_y]['road_on_plot_start'] = road_on_plot_start
-        else:
-            road_length = random.randrange((plan_width - 1) - road_y)
-            for y in range(road_y, road_y + road_length):
-                plan[road_x][y]['structure'] = 'road'
-                plan[road_x][y]['road_direction'] = road_direction
-                plan[road_x][y]['road_thickness'] = road_thickness
-                plan[road_x][y]['road_on_plot_start'] = road_on_plot_start
+        for n in range(roads):
+            road_direction = game_logic.weighted_choice([('horizontal', 50), ('vertical', 50)])
+            road_x = random.randrange(plan_width - 1)  # road coords on plan grid
+            road_y = random.randrange(plan_height - 1)
+            road_thickness = random.randrange(2, grid_size - 1)
+            road_on_plot_start = random.randrange(grid_size - 1)  # road coord in specific plot
+            if road_direction == 'vertical':
+                road_length = random.randrange((plan_height - 1) - road_x)
+                for x in range(road_x, road_x + road_length):
+                    plan[x][road_y]['structure'] = 'road'
+                    plan[x][road_y]['road_direction'] = road_direction
+                    plan[x][road_y]['road_thickness'] = road_thickness
+                    plan[x][road_y]['road_on_plot_start'] = road_on_plot_start
+            else:
+                road_length = random.randrange((plan_width - 1) - road_y)
+                for y in range(road_y, road_y + road_length):
+                    plan[road_x][y]['structure'] = 'road'
+                    plan[road_x][y]['road_direction'] = road_direction
+                    plan[road_x][y]['road_thickness'] = road_thickness
+                    plan[road_x][y]['road_on_plot_start'] = road_on_plot_start
         for x in range(plan_width):
             for y in range(plan_height):
                 # choose a building type
@@ -178,6 +180,7 @@ def generate_loc_plan(loc_type, settings):
                     if build_type is not None:
                         plan[x][y]['structure'] = 'building'
                         plan[x][y]['build_type'] = build_type
+                # TODO: make road-specific buildings like carts, wagons, small shops etc
     return plan
 
 
