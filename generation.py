@@ -12,12 +12,14 @@ import jsonpickle
 import random
 import gzip
 
+from functools import lru_cache
+
 
 def generate_loc(loc_type, settings, width, height):
     """ Location generation function """
     loc = game_logic.Location(width, height)
     # load loc prefab info
-    loc_prefab_info = load_prefab_info(name=loc_type)
+    loc_prefab_info = get_prefab_info(name=loc_type)
     loc_default_variant = get_random_prefab_variant(prefab_info=loc_prefab_info, settings={'variant': 'default'})
     if loc_type == 'clear':  # simply make a location full of sand tiles
         loc.cells.clear()
@@ -303,20 +305,27 @@ def destruct(loc, start_x, start_y, width, height, settings=None):
 
 
 # =================================== PREFAB SECTION =======================================================
-def load_prefab(name):
+@lru_cache()
+def get_prefab(name):
     """ Load building from prefab, created in REXPaint
         Prefab layers for now:
         0 - tiles
         1 - props and such - walls, windows, doors
         2 - 'i'nner and 'o'uter cells - for separate mob and loot spawn
+        results cached!
     """
-    prefab_xp = xp_loader.load_xp_string(gzip.open('data/prefabs/' + name + '.xp').read())
+    try:  # try load prefab info
+        prefab_xp = xp_loader.load_xp_string(gzip.open('data/prefabs/' + name + '.xp').read())
+    except FileNotFoundError:
+        raise Exception('No file for prefab"' + name)
     return prefab_xp
 
 
-def load_prefab_info(name):
+@lru_cache()
+def get_prefab_info(name):
     """
         Load prefab information: legend, mob/loot lists from JSON
+        results cached!
     """
     try:  # try load prefab info
         fl = open('data/prefabs/' + name + '.json')
@@ -511,8 +520,8 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
     """
     if settings is None:  # if no settings - empty set
         settings = {}
-    prefab = load_prefab(name)  # load prefab from .xp file
-    prefab_info = load_prefab_info(name=name)
+    prefab = get_prefab(name)  # load prefab from .xp file
+    prefab_info = get_prefab_info(name=name)
     prefab_variant = get_random_prefab_variant(prefab_info=prefab_info, settings=settings)
     build_w = prefab['width']  # building dimensions - from prefab
     build_h = prefab['height']
