@@ -119,7 +119,7 @@ def generate_loc(loc_type, settings, width, height):
                                                                       'rotate': random.randint(0, 3)})
                 elif build_type == 'none':  # generate no building
                     plot['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
-                                                     in range(plot_x, plot_x + grid_size)]
+                                                      in range(plot_x, plot_x + grid_size)]
                     outer_cells = []
                     for x in range(grid_size // 2):
                         for y in range(grid_size // 2):
@@ -133,6 +133,23 @@ def generate_loc(loc_type, settings, width, height):
                                     cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add mobs
                     populate_prefab(ent_type='traps', prefab_variant=loc_default_variant,
                                     cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add traps
+        # small map features placement (in any empty spaces for now)
+        # TODO: small features number range to settings
+        small_feats_num = random.randrange(50)
+        for i in range(small_feats_num):
+            # determine feature type
+            feat_type = game_logic.weighted_choice([('wall_fragment', 80), ('prefab_market_lot', 10),
+                                                    ('prefab_dead_adventurer', 10)])
+            if feat_type[:7] == 'prefab_':
+                pass  # PLACEHOLDER for now, need prefab placement (get prefab size w/o placing it)
+            elif feat_type == "wall_fragment":  # TODO: remake wall fragment generation
+                place = loc.find_place({'shape': 'rect', 'size_x': 4, 'size_y': 4, 'place': 'random', 'tries': 100})
+                if place:
+                    xp, yp = place
+                    for x in range(xp, xp + 4):
+                        for y in range(yp, yp + 4):
+                            if random.randrange(100) > 50:
+                                loc.place_entity('wall_sandstone', x, y)
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 

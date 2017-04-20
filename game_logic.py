@@ -1743,6 +1743,30 @@ class Location:
         else:
             self.path_map[x][y] = 0
 
+    def find_place(self, settings):
+        """ Method that finds a place for something, specified in settings """
+        if settings['shape'] == 'rect':  # rectangular shape
+            size_x = settings['size_x']
+            size_y = settings['size_y']
+            if settings['place'] == 'random':
+                for i in range(settings['tries']):
+                    match = True  # place matches conditions or not
+                    x = random.randrange(self.width - size_x)
+                    y = random.randrange(self.height - size_y)
+                    # make a set of cells in shape
+                    shape_cells = set()
+                    for xs in range(x, x + size_x):
+                        for ys in range(y, y + size_y):
+                            shape_cells.add(self.cells[xs][ys])
+                    # check cells for conditions, specified in settings
+                    for cell in shape_cells:
+                        if 'passable' in settings and cell.blocks_move:
+                            match = False
+                            break
+                    if match:
+                        return x, y
+        return None  # TODO: throw some exception
+
 
 class Game:
     """
