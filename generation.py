@@ -137,33 +137,74 @@ def generate_loc(loc_type, settings, width, height):
                     populate_prefab(ent_type='traps', prefab_variant=loc_default_variant,
                                     cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add traps
         # small map features placement (in any empty spaces for now)
-        # TODO: small features number range to settings
-        small_feats_num = random.randrange(20, 100)
-        generate_small_features(loc, small_feats_num)
+        # long walls - TEST
+        generate_small_features(loc=loc, settings={'loc_type': loc_type, 'small_feats_num': random.randrange(2, 20),
+                                                   'feature_types': [('long_wall', 100)], 'placing': {'passable'}})
+        # other features
+        generate_small_features(loc=loc, settings={'loc_type': loc_type, 'small_feats_num': random.randrange(30, 150),
+                                                   'feature_types': [('building_fragment', 80),
+                                                                     ('prefab_market_lot', 6),
+                                                                     ('prefab_market_lot2', 6),
+                                                                     ('prefab_market_lot3', 6),
+                                                                     ('prefab_dead_adventurer', 2)],
+                                                   'destruct': {'passes': (1, 5),
+                                                                'destroy_tiles': 'SAND'},
+                                                   'placing': {'passable'}})
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 
 
-def generate_small_features(loc, small_feats_num):
+def generate_small_features(loc, settings=None):
     """ Generate small features on loc """
+    small_feats_num = settings['small_feats_num']
     for i in range(small_feats_num):
         # determine feature type
-        feat_type = game_logic.weighted_choice([('wall_fragment', 80), ('prefab_market_lot', 10),
-                                                ('prefab_dead_adventurer', 10)])
-        if feat_type[:7] == 'prefab_':
-            pass  # PLACEHOLDER for now, need prefab placement (get prefab size w/o placing it)
-        elif feat_type == "wall_fragment":  # TODO: remake wall fragment generation
+        feat_type = game_logic.weighted_choice(settings['feature_types'])
+        if feat_type[:7] == 'prefab_':  # if small feature is a prefab
+            prefab_name = feat_type[7:]
+            prefab = get_prefab(prefab_name)
+            place = loc.find_place({'shape': 'rect', 'size_x': prefab['width'], 'size_y': prefab['height'],
+                                    'place': 'random', 'tries': 100, 'placing': settings['placing']})
+            if place:
+                xp, yp = place
+                prefab_settings = {'rotate': random.randint(0, 3)}
+                prefab_settings.update(settings)
+                place_prefab(name=prefab_name, loc=loc, plot_size=prefab['width'], plot_x=xp,
+                             plot_y=yp, settings=prefab_settings)
+        elif feat_type == "building_fragment":
             sx = random.randrange(1, 5)
             sy = random.randrange(1, 5)
-            place = loc.find_place({'shape': 'rect', 'size_x': sx, 'size_y': sy, 'place': 'random', 'tries': 100})
+            place = loc.find_place({'shape': 'rect', 'size_x': sx, 'size_y': sy, 'place': 'random', 'tries': 100,
+                                   'placing': settings['placing']})
             if place:
                 xp, yp = place
                 for x in range(xp, xp + sx):
                     for y in range(yp, yp + sy):
-                        if random.randrange(100) > 70:
-                            loc.place_entity('wall_sandstone', x, y)
-                        elif random.randrange(100) > 50:
-                            loc.place_entity('debris_large_sandstone', x, y)
+                        if not loc.cells[x][y].is_there_a(game_logic.Prop):
+                            if random.randrange(100) > 70:
+                                loc.place_entity('wall_sandstone', x, y)
+                            elif random.randrange(100) > 50:
+                                loc.place_entity('debris_large_sandstone', x, y)
+        # TODO: make more complex ruins and walls
+        elif feat_type == "long_wall":
+            direction = game_logic.weighted_choice([('horizontal', 50), ('vertical', 50)])
+            if direction == 'vertical':
+                sx = random.randrange(1, 2)
+                sy = random.randrange(5, 100)
+            elif direction == 'horizontal':
+                sx = random.randrange(5, 100)
+                sy = random.randrange(1, 2)
+            place = loc.find_place({'shape': 'rect', 'size_x': sx, 'size_y': sy, 'place': 'random', 'tries': 100,
+                                   'placing': settings['placing']})
+            if place:
+                xp, yp = place
+                for x in range(xp, xp + sx):
+                    for y in range(yp, yp + sy):
+                        if not loc.cells[x][y].is_there_a(game_logic.Prop):
+                            if random.randrange(100) > 10:
+                                loc.place_entity('wall_sandstone', x, y)
+                            elif random.randrange(100) > 10:
+                                loc.place_entity('debris_large_sandstone', x, y)
 
 
 def generate_loc_plan(loc_type, settings):
@@ -282,7 +323,11 @@ def destruct(loc, start_x, start_y, width, height, settings=None):
         d_types = settings['destructible_types']
     else:
         d_types = {game_logic.Prop, game_logic.Door}
-    for i in range(0, settings['passes']):  # run destruction as many times as desired
+    if isinstance(settings['passes'], tuple):
+        passes = random.randrange(settings['passes'][0], settings['passes'][1])
+    else:
+        passes = settings['passes']
+    for i in range(0, passes):  # run destruction as many times as desired
         dest_cells_num = int(width * height / 10)  # one iteration affects up to 10% of the building
         for j in range(dest_cells_num):  # destroy selected number of cells
             x = random.randrange(width) + start_x  # random coords of affected cell

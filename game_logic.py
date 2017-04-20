@@ -1760,9 +1760,10 @@ class Location:
                             shape_cells.add(self.cells[xs][ys])
                     # check cells for conditions, specified in settings
                     for cell in shape_cells:
-                        if 'passable' in settings and cell.blocks_move:
-                            match = False
-                            break
+                        if 'placing' in settings:
+                            if 'passable' in settings['placing'] and cell.blocks_move:
+                                match = False
+                                break
                     if match:
                         return x, y
         return None  # TODO: throw some exception
