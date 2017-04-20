@@ -17,7 +17,8 @@ def generate_loc(loc_type, settings, width, height):
     """ Location generation function """
     loc = game_logic.Location(width, height)
     # load loc prefab info
-    loc_prefab_info, loc_default_variant = load_prefab_info(name=loc_type, settings={'variant': 'default'})
+    loc_prefab_info = load_prefab_info(name=loc_type)
+    loc_default_variant = get_random_prefab_variant(prefab_info=loc_prefab_info, settings={'variant': 'default'})
     if loc_type == 'clear':  # simply make a location full of sand tiles
         loc.cells.clear()
         loc.cells = [[game_logic.Cell('SAND') for y in range(loc.height)] for x in range(loc.width)]
@@ -135,23 +136,32 @@ def generate_loc(loc_type, settings, width, height):
                                     cell_groups={'o': outer_cells}, loc=loc, exclude_affected_cells=True)  # add traps
         # small map features placement (in any empty spaces for now)
         # TODO: small features number range to settings
-        small_feats_num = random.randrange(50)
-        for i in range(small_feats_num):
-            # determine feature type
-            feat_type = game_logic.weighted_choice([('wall_fragment', 80), ('prefab_market_lot', 10),
-                                                    ('prefab_dead_adventurer', 10)])
-            if feat_type[:7] == 'prefab_':
-                pass  # PLACEHOLDER for now, need prefab placement (get prefab size w/o placing it)
-            elif feat_type == "wall_fragment":  # TODO: remake wall fragment generation
-                place = loc.find_place({'shape': 'rect', 'size_x': 4, 'size_y': 4, 'place': 'random', 'tries': 100})
-                if place:
-                    xp, yp = place
-                    for x in range(xp, xp + 4):
-                        for y in range(yp, yp + 4):
-                            if random.randrange(100) > 50:
-                                loc.place_entity('wall_sandstone', x, y)
+        small_feats_num = random.randrange(20, 100)
+        generate_small_features(loc, small_feats_num)
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
+
+
+def generate_small_features(loc, small_feats_num):
+    """ Generate small features on loc """
+    for i in range(small_feats_num):
+        # determine feature type
+        feat_type = game_logic.weighted_choice([('wall_fragment', 80), ('prefab_market_lot', 10),
+                                                ('prefab_dead_adventurer', 10)])
+        if feat_type[:7] == 'prefab_':
+            pass  # PLACEHOLDER for now, need prefab placement (get prefab size w/o placing it)
+        elif feat_type == "wall_fragment":  # TODO: remake wall fragment generation
+            sx = random.randrange(1, 5)
+            sy = random.randrange(1, 5)
+            place = loc.find_place({'shape': 'rect', 'size_x': sx, 'size_y': sy, 'place': 'random', 'tries': 100})
+            if place:
+                xp, yp = place
+                for x in range(xp, xp + sx):
+                    for y in range(yp, yp + sy):
+                        if random.randrange(100) > 70:
+                            loc.place_entity('wall_sandstone', x, y)
+                        elif random.randrange(100) > 50:
+                            loc.place_entity('debris_large_sandstone', x, y)
 
 
 def generate_loc_plan(loc_type, settings):
@@ -304,7 +314,7 @@ def load_prefab(name):
     return prefab_xp
 
 
-def load_prefab_info(name, settings):
+def load_prefab_info(name):
     """
         Load prefab information: legend, mob/loot lists from JSON
     """
@@ -312,30 +322,37 @@ def load_prefab_info(name, settings):
         fl = open('data/prefabs/' + name + '.json')
         prefab_info = jsonpickle.loads(fl.read())
         fl.close()
-        if 'variant' in settings:  # if specific variant in settings
-            prefab_variant = prefab_info['variants'][settings['variant']]
-        else:  # if not specified - based on prefab info chances
-            variants = []
-            for v in prefab_info['variants']:  # make a list with chances - to use weighted_choice
-                variants.append((v, prefab_info['variants'][v]['chance']))
-            prefab_variant = prefab_info['variants'][game_logic.weighted_choice(variants)]  # choose one
-        if 'loc_type' in settings:
-            try:  # try load location info if exists
-                fl = open('data/prefabs/' + settings['loc_type'] + '.json')
-                loc_info = jsonpickle.loads(fl.read())
-                fl.close()
-                for v in prefab_variant:
-                    if isinstance(prefab_variant[v], str):
-                        if prefab_variant[v][:4] == 'LOC_':
-                            try:
-                                prefab_variant[v] = loc_info['variants'][prefab_variant[v][4:]][v]
-                            except KeyError:
-                                raise Exception('No location default for :' + v)
-            except FileNotFoundError:
-                print('Warning! No default prefab_info for location: ' + settings['loc_type'])
     except FileNotFoundError:
         raise Exception('No prefab info file for prefab"' + name + '"! Need one to generate loot and mobs.')
-    return prefab_info, prefab_variant
+    return prefab_info
+
+
+def get_random_prefab_variant(prefab_info, settings=None):
+    """ Choose one of prefab variants (one specified or random if not) """
+    if settings is None:  # if no settings - empty set
+        settings = {}
+    if 'variant' in settings:  # if specific variant in settings
+        prefab_variant = prefab_info['variants'][settings['variant']]
+    else:  # if not specified - based on prefab info chances
+        variants = []
+        for v in prefab_info['variants']:  # make a list with chances - to use weighted_choice
+            variants.append((v, prefab_info['variants'][v]['chance']))
+        prefab_variant = prefab_info['variants'][game_logic.weighted_choice(variants)]  # choose one
+    if 'loc_type' in settings:
+        try:  # try load location info if exists
+            fl = open('data/prefabs/' + settings['loc_type'] + '.json')
+            loc_info = jsonpickle.loads(fl.read())
+            fl.close()
+            for v in prefab_variant:
+                if isinstance(prefab_variant[v], str):
+                    if prefab_variant[v][:4] == 'LOC_':
+                        try:
+                            prefab_variant[v] = loc_info['variants'][prefab_variant[v][4:]][v]
+                        except KeyError:
+                            raise Exception('No location default for :' + v)
+        except FileNotFoundError:
+            print('Warning! No default prefab_info for location: ' + settings['loc_type'])
+    return prefab_variant
 
 
 def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, build_w, build_h, settings=None):
@@ -495,7 +512,8 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
     if settings is None:  # if no settings - empty set
         settings = {}
     prefab = load_prefab(name)  # load prefab from .xp file
-    prefab_info, prefab_variant = load_prefab_info(name=name, settings=settings)  # load prefab info
+    prefab_info = load_prefab_info(name=name)
+    prefab_variant = get_random_prefab_variant(prefab_info=prefab_info, settings=settings)
     build_w = prefab['width']  # building dimensions - from prefab
     build_h = prefab['height']
     if build_w != build_h:
