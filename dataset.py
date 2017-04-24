@@ -73,12 +73,34 @@ def initialize():
     data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
     data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_PIERCING', 20))
 
+    data_set['furn_wooden_board'] = game_logic.Prop(name='Wooden board',
+                                                    data_id='furn_wooden_board',
+                                                    occupies_tile=False, blocks_los=False, blocks_shots=0.25,
+                                                    armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                    pass_cost=2,
+                                            description='Wooden wagon board. Provides small cover from projectiles.',
+                                                    char='▧', color=[128, 0, 0], hp=100, weight=100)
+    data_set['furn_wooden_board'].effects.append(effects.Effect('BLOCK_BASHING', 10))
+    data_set['furn_wooden_board'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
+    data_set['furn_wooden_board'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
+    data_set['furn_wooden_wheel'] = game_logic.Prop(name='Wooden wheel',
+                                                    data_id='furn_wooden_wheel',
+                                                    occupies_tile=False, blocks_los=False, blocks_shots=0.15,
+                                                    armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                    pass_cost=2,
+                                            description='Wooden wagon wheel. Provides small cover from projectiles.',
+                                                    char='o', color=[128, 0, 0], hp=100, weight=70)
+    data_set['furn_wooden_wheel'].effects.append(effects.Effect('BLOCK_BASHING', 10))
+    data_set['furn_wooden_wheel'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
+    data_set['furn_wooden_wheel'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+
     data_set['furn_wooden_counter'] = game_logic.Prop(name='Wooden counter',
                                                       data_id='furn_wooden_counter',
                                                       occupies_tile=False, blocks_los=False, blocks_shots=0.25,
                                                       armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
                                                       pass_cost=2,
-                                                    description='Wooden counter. Provides small cover from projectiles.',
+                                            description='Wooden counter. Provides small cover from projectiles.',
                                                       char='ʭ', color=[128, 0, 0], hp=50, weight=50)
     data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_BASHING', 10))
     data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
@@ -221,6 +243,11 @@ def initialize():
                                                 description='Human skeleton.',
                                                 categories={'corpse'},
                                                 char='%', color=[255, 255, 255], weight=10)
+
+    data_set['item_horse_skeleton'] = game_logic.Item(name="horse skeleton", data_id='item_horse_skeleton',
+                                                      description='Horse skeleton.',
+                                                      categories={'corpse'},
+                                                      char='%', color=[255, 255, 255], weight=80)
 
     data_set['item_haste_potion'] = game_logic.ItemCharges(name='haste potion', data_id='item_haste_potion',
                                                            description='A potion that hastens user by 50%.',

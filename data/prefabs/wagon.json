@@ -1,0 +1,115 @@
+{
+  "variants": {
+    "default": {
+      "name": "default",
+      "chance": 70,
+      "items_i": "LOC_default",
+      "items_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "mobs_i": "LOC_default",
+      "mobs_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "traps_i": "LOC_default",
+      "traps_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
+      "items_o": "LOC_default",
+      "items_o_num_chances": "LOC_default",
+      "mobs_o": "LOC_default",
+      "mobs_o_num_chances": "LOC_default",
+      "traps_o": "LOC_default",
+      "traps_o_num_chances": "LOC_default"
+    },
+    "magic": {
+      "name": "magic",
+      "chance": 10,
+      "items_i": "small_shop_magic_items",
+      "items_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "mobs_i": "small_shop_magic_mobs",
+      "mobs_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "traps_i": "small_shop_magic_traps",
+      "traps_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
+      "items_o": "LOC_default",
+      "items_o_num_chances": "LOC_default",
+      "mobs_o": "LOC_default",
+      "mobs_o_num_chances": "LOC_default",
+      "traps_o": "LOC_default",
+      "traps_o_num_chances": "LOC_default"
+    },
+    "arms": {
+      "name": "arms",
+      "chance": 20,
+      "items_i": "small_shop_arms_items",
+      "items_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "mobs_i": "small_shop_arms_mobs",
+      "mobs_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "traps_i": "small_shop_arms_traps",
+      "traps_i_num_chances": [[0, 90], [1, 5], [2, 3], [3, 1]],
+      "relics_i": "LOC_default",
+      "relics_i_num_chances": "LOC_default",
+      "items_o": "LOC_default",
+      "items_o_num_chances": "LOC_default",
+      "mobs_o": "LOC_default",
+      "mobs_o_num_chances": "LOC_default",
+      "traps_o": "LOC_default",
+      "traps_o_num_chances": "LOC_default"
+    }
+  },
+  "legend": {
+    "entities": [
+      {
+        "name": "furn_wooden_board",
+        "char": "b",
+        "color": {
+          "py/tuple": [
+            128,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "furn_wooden_wheel",
+        "char": "o",
+        "color": {
+          "py/tuple": [
+            128,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "item_skeleton_horse",
+        "char": "s",
+        "color": {
+          "py/tuple": [
+            255,
+            255,
+            255
+          ]
+        }
+      }
+    ],
+    "tiles": [
+      {
+        "name": "FLOOR_SANDSTONE",
+        "char": " ",
+        "color": {
+          "py/tuple": [
+            0,
+            0,
+            0
+          ]
+        },
+        "bgcolor": {
+          "py/tuple": [
+            153,
+            153,
+            0
+          ]
+        }
+      }
+    ]
+  }
+}
