@@ -292,7 +292,50 @@ def subgen_building(building, build_w, build_h, settings=None):
         if direction == 3: y = 0
         if direction == 4: y = -1
         pattern[x][y] = 'door'
+    elif building == 'multiroom_house':  # generate a house with multiple rooms
+        rooms = []
+        room_needed = random.randrange(2, 5)  # TODO: replace magic numbers with gen parameters
+        x1 = random.randrange(0, build_w)  # make first room
+        y1 = random.randrange(0, build_h)
+        x2 = random.randrange(x1, build_w)
+        y2 = random.randrange(y1, build_h)
+        first_room = {'x1': random.randrange(0, build_w), 'y1': random.randrange(0, build_h),
+                      'x2': random.randrange(0, build_w), 'y2': random.randrange(0, build_h)}
+        rooms.append(first_room)
+        for x in range(x1, x2):  # draw horizontal walls
+            pattern[x][y1] = 'wall'
+            pattern[x][y2] = 'wall'
+        for y in range(y1, y2):  # draw vertical walls
+            pattern[x1][y] = 'wall'
+            pattern[x2][y] = 'wall'
+        for x in range(x1 + 1, x2 - 1):  # fill inner space with floor
+            for y in range(y1 + 1, y2 -1):
+                pattern[x][y] = 'floor'
+        tries = 0
+        while len(rooms) < room_needed and tries < 100:  # generate more rooms
+            pass  # CONTINUE CODE HERE
+
     return pattern
+
+
+def subgen_multiroom_get_candidates(build_w, build_h, pattern):
+    """ This function scans a building pattern for specific wall tiles, for creating additional rooms """
+    candidates = []
+    for x in range(1, build_w - 1):  # iterate through pattern (border tiles are ignored)
+        for y in range(1, build_h - 1):
+            # candidate = True
+            if pattern[x][y] != 'wall':  # candidate must be a wall
+                continue
+            # candidate must have 2 adjacent walls on the same axis - |
+            if not ((pattern[x - 1][y] == 'wall' and pattern[x + 1][y] == 'wall') or (
+                    pattern[x][y - 1] == 'wall' and pattern[x][y - 1] == 'wall')):
+                continue
+            # candidate must have adjacent ground tile
+            if not ((pattern[x - 1][y] == 'ground' or pattern[x + 1][y] == 'ground' or pattern[x][y - 1] == 'ground' or
+                    pattern[x][y + 1] == 'ground')):
+                continue
+            candidates.append((x, y))
+    return candidates
 
 
 def gen_entity_loot(entity):
