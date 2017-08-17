@@ -67,13 +67,13 @@ def generate_loc(loc_type, settings, width, height):
                     build_type = plot['build_type']
                 else:
                     build_type = 'none'
-                if build_type == 'house' or 'multiroom_house':  # generate a house
+                if build_type == 'house' or build_type == 'multiroom_house':  # generate a house
                     if build_type == 'house':
                         build_x = random.randrange(grid_size // 2)
                         build_y = random.randrange(grid_size // 2)
                         build_w = random.randrange(4, grid_size // 2)
                         build_h = random.randrange(4, grid_size // 2)
-                    if build_type == 'multiroom_house':
+                    elif build_type == 'multiroom_house':
                         build_x = random.randrange(grid_size // 4)
                         build_y = random.randrange(grid_size // 4)
                         build_w = random.randrange(10, grid_size - build_x)
