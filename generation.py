@@ -67,16 +67,22 @@ def generate_loc(loc_type, settings, width, height):
                     build_type = plot['build_type']
                 else:
                     build_type = 'none'
-                if build_type == 'house':  # generate a house
-                    build_x = random.randrange(grid_size // 2)
-                    build_y = random.randrange(grid_size // 2)
-                    build_w = random.randrange(4, grid_size // 2)
-                    build_h = random.randrange(4, grid_size // 2)
+                if build_type == 'house' or 'multiroom_house':  # generate a house
+                    if build_type == 'house':
+                        build_x = random.randrange(grid_size // 2)
+                        build_y = random.randrange(grid_size // 2)
+                        build_w = random.randrange(4, grid_size // 2)
+                        build_h = random.randrange(4, grid_size // 2)
+                    if build_type == 'multiroom_house':
+                        build_x = random.randrange(grid_size // 4)
+                        build_y = random.randrange(grid_size // 4)
+                        build_w = random.randrange(10, grid_size - build_x)
+                        build_h = random.randrange(10, grid_size - build_y)
                     # TODO: think if 'cells' are needed in plan or not
                     plot['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
                                                      in range(plot_x, plot_x + grid_size)]
                     floor_cells = []  # empty floor cells for item gen
-                    building = subgen_building(building='house', build_w=build_w, build_h=build_h)
+                    building = subgen_building(building=build_type, build_w=build_w, build_h=build_h)
                     for x in range(build_w):
                         for y in range(build_h):
                             loc_cell_x = x + build_x + plot_x * grid_size
@@ -244,9 +250,9 @@ def generate_loc_plan(loc_type, settings):
             for y in range(plan_height):
                 # choose a building type
                 if plan[x][y]['structure'] is None:
-                    build_type = game_logic.weighted_choice([('house', 40), ('prefab_small_shop', 10),
-                                                             ('prefab_small_market', 5), ('prefab_blacksmith_forge', 5),
-                                                             (None, 40)])
+                    build_type = game_logic.weighted_choice([('house', 20), ('multiroom_house', 20),
+                                                             ('prefab_small_shop', 10), ('prefab_small_market', 5),
+                                                             ('prefab_blacksmith_forge', 5), (None, 40)])
                     if build_type is not None:
                         plan[x][y]['structure'] = 'building'
                         plan[x][y]['build_type'] = build_type
@@ -299,22 +305,20 @@ def subgen_building(building, build_w, build_h, settings=None):
         y1 = random.randrange(0, build_h)
         x2 = random.randrange(x1, build_w)
         y2 = random.randrange(y1, build_h)
-        first_room = {'x1': random.randrange(0, build_w), 'y1': random.randrange(0, build_h),
-                      'x2': random.randrange(0, build_w), 'y2': random.randrange(0, build_h)}
+        first_room = {'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2}
         rooms.append(first_room)
-        for x in range(x1, x2):  # draw horizontal walls
-            pattern[x][y1] = 'wall'
-            pattern[x][y2] = 'wall'
-        for y in range(y1, y2):  # draw vertical walls
-            pattern[x1][y] = 'wall'
-            pattern[x2][y] = 'wall'
-        for x in range(x1 + 1, x2 - 1):  # fill inner space with floor
-            for y in range(y1 + 1, y2 -1):
-                pattern[x][y] = 'floor'
+        subgen_multiroom_place_room(x1=x1, y1=y1, x2=x2, y2=y2, pattern=pattern)
         tries = 0
         while len(rooms) < room_needed and tries < 100:  # generate more rooms
-            pass  # CONTINUE CODE HERE
-
+            tries += 1
+            candidates = subgen_multiroom_get_candidates(build_w=build_w, build_h=build_h, pattern=pattern)
+            if len(candidates) > 0: # check if there are suitable walls
+                candidate = candidates[random.randrange(0, len(candidates) - 1)]
+                room = subgen_multiroom_fit_room(build_w=build_w, build_h=build_h, pattern=pattern, candidate=candidate)
+                if room:  # if room is succesifully placed
+                    rooms.append(room)
+            else:
+                break
     return pattern
 
 
@@ -336,6 +340,59 @@ def subgen_multiroom_get_candidates(build_w, build_h, pattern):
                 continue
             candidates.append((x, y))
     return candidates
+
+
+def subgen_multiroom_place_room(x1, y1, x2, y2, pattern):
+    """ This sub places room on a pattern - actually fills cells with 'walls', 'floor', etc """
+    for x in range(x1, x2):  # draw horizontal walls
+        pattern[x][y1] = 'wall'
+        pattern[x][y2] = 'wall'
+    for y in range(y1, y2):  # draw vertical walls
+        pattern[x1][y] = 'wall'
+        pattern[x2][y] = 'wall'
+    for x in range(x1 + 1, x2 - 1):  # fill inner space with floor
+        for y in range(y1 + 1, y2 - 1):
+            pattern[x][y] = 'floor'
+
+
+def subgen_multiroom_fit_room(build_w, build_h, pattern, candidate):
+    """ This function tries to fit a room, returns True/False """
+    placed = False
+    c_x, c_y = candidate
+    # define new room placing side, according to wall 'candidate' coords (SOME COORD MAGIC)
+    if pattern[c_x - 1][c_y] == 'ground':  # left
+        x1 = random.randrange(0, c_x - 1)
+        y1 = random.randrange(0, c_y)
+        x2 = c_x
+        y2 = random.randrange(c_y, build_h)
+    elif pattern[c_x + 1][c_y] == 'ground':  # right
+        x1 = c_x
+        y1 = random.randrange(0, c_y)
+        x2 = random.randrange(c_x + 1, build_w)
+        y2 = random.randrange(c_y, build_h)
+    elif pattern[c_x][c_y - 1] == 'ground':  # up
+        x1 = random.randrange(0, c_x)
+        y1 = random.randrange(0, c_y - 1)
+        x2 = random.randrange(c_x, build_w)
+        y2 = c_y
+    elif pattern[c_x][c_y + 1] == 'ground':  # down
+        x1 = random.randrange(0, c_x)
+        y1 = c_y
+        x2 = random.randrange(c_x, build_w)
+        y2 = random.randrange(c_y + 1, build_h)
+    else:  # that's impossible O_o
+        raise RuntimeError('Wall candidate is invalid!')
+    intersect = False
+    for x in range(x1, x2):  # check new room for intersections with others
+        for y in range(y1, y2):
+            if pattern[x][y] == 'floor':
+                intersect = True
+                break
+    if not intersect:  # if no intersection - place the room
+        subgen_multiroom_place_room(x1=x1, y1=y1, x2=x2, y2=y2, pattern=pattern)
+        pattern[c_x][c_y] = 'door'  # TODO: move door making to room placement code
+        placed = {'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2}
+    return placed
 
 
 def gen_entity_loot(entity):
