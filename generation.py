@@ -88,7 +88,7 @@ def generate_loc(loc_type, settings, width, height):
                             loc_cell_x = x + build_x + plot_x * grid_size
                             loc_cell_y = y + build_y + plot_y * grid_size
                             loc.cells[loc_cell_x][loc_cell_y].tile = 'FLOOR_SANDSTONE'
-                            if building[x][y] == 'sand':
+                            if building[x][y] == 'ground':
                                 loc.cells[loc_cell_x][loc_cell_y].tile = 'SAND'
                             if building[x][y] == 'wall':
                                 loc.place_entity('wall_sandstone', loc_cell_x, loc_cell_y)
@@ -313,7 +313,7 @@ def subgen_building(building, build_w, build_h, settings=None):
             tries += 1
             candidates = subgen_multiroom_get_candidates(build_w=build_w, build_h=build_h, pattern=pattern)
             if len(candidates) > 0: # check if there are suitable walls
-                candidate = candidates[random.randrange(0, len(candidates) - 1)]
+                candidate = candidates[random.randrange(0, len(candidates))]
                 room = subgen_multiroom_fit_room(build_w=build_w, build_h=build_h, pattern=pattern, candidate=candidate)
                 if room:  # if room is succesifully placed
                     rooms.append(room)
@@ -361,25 +361,25 @@ def subgen_multiroom_fit_room(build_w, build_h, pattern, candidate):
     c_x, c_y = candidate
     # define new room placing side, according to wall 'candidate' coords (SOME COORD MAGIC)
     if pattern[c_x - 1][c_y] == 'ground':  # left
-        x1 = random.randrange(0, c_x - 1)
+        x1 = random.randrange(0, c_x)
         y1 = random.randrange(0, c_y)
         x2 = c_x
         y2 = random.randrange(c_y, build_h)
     elif pattern[c_x + 1][c_y] == 'ground':  # right
         x1 = c_x
         y1 = random.randrange(0, c_y)
-        x2 = random.randrange(c_x + 1, build_w)
+        x2 = random.randrange(c_x, build_w)
         y2 = random.randrange(c_y, build_h)
     elif pattern[c_x][c_y - 1] == 'ground':  # up
         x1 = random.randrange(0, c_x)
-        y1 = random.randrange(0, c_y - 1)
+        y1 = random.randrange(0, c_y)
         x2 = random.randrange(c_x, build_w)
         y2 = c_y
     elif pattern[c_x][c_y + 1] == 'ground':  # down
         x1 = random.randrange(0, c_x)
         y1 = c_y
         x2 = random.randrange(c_x, build_w)
-        y2 = random.randrange(c_y + 1, build_h)
+        y2 = random.randrange(c_y, build_h)
     else:  # that's impossible O_o
         raise RuntimeError('Wall candidate is invalid!')
     intersect = False
