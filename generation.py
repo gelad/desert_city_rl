@@ -68,6 +68,7 @@ def generate_loc(loc_type, settings, width, height):
                 else:
                     build_type = 'none'
                 if build_type == 'house' or build_type == 'multiroom_house':  # generate a house
+                    building_settings = None
                     if build_type == 'house':
                         build_x = random.randrange(grid_size // 2)
                         build_y = random.randrange(grid_size // 2)
@@ -76,13 +77,17 @@ def generate_loc(loc_type, settings, width, height):
                     elif build_type == 'multiroom_house':
                         build_x = random.randrange(grid_size // 4)
                         build_y = random.randrange(grid_size // 4)
-                        build_w = random.randrange(10, grid_size - build_x)
-                        build_h = random.randrange(10, grid_size - build_y)
+                        build_w = random.randrange(grid_size // 2, grid_size - build_x)
+                        build_h = random.randrange(grid_size // 2, grid_size - build_y)
+                        room_min = 2
+                        room_max = 5
+                        building_settings = {'room_min': room_min, 'room_max': room_max}
                     # TODO: think if 'cells' are needed in plan or not
                     plot['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
                                                      in range(plot_x, plot_x + grid_size)]
                     floor_cells = []  # empty floor cells for item gen
-                    building = subgen_building(building=build_type, build_w=build_w, build_h=build_h)
+                    building = subgen_building(building=build_type, build_w=build_w, build_h=build_h,
+                                               settings=building_settings)
                     for x in range(build_w):
                         for y in range(build_h):
                             loc_cell_x = x + build_x + plot_x * grid_size
@@ -300,7 +305,10 @@ def subgen_building(building, build_w, build_h, settings=None):
         pattern[x][y] = 'door'
     elif building == 'multiroom_house':  # generate a house with multiple rooms
         rooms = []
-        room_needed = random.randrange(2, 5)  # TODO: replace magic numbers with gen parameters
+        if 'room_min' in settings and 'room_max' in settings:
+            room_needed = random.randrange(settings['room_min'], settings['room_max'])
+        else:
+            raise RuntimeError('No minimal and maximal number of rooms specified.')
         x1 = random.randrange(0, build_w)  # make first room
         y1 = random.randrange(0, build_h)
         x2 = random.randrange(x1, build_w)
