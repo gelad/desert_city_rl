@@ -42,7 +42,8 @@ def get_input(game):
                     player_input.append('wait1step')
                 elif event.key == 'CHAR':
                     if event.keychar == 'c':  # closing doors
-                        key = tdl.event.keyWait()
+                        tdl.event.wait()  # wait first for KeyUP
+                        key = tdl.event.key_wait()
                         if key.keychar == 'UP' or key.keychar == 'KP8':
                             player_input.append('close_n')
                         elif key.keychar == 'DOWN' or key.keychar == 'KP2':
@@ -60,7 +61,8 @@ def get_input(game):
                         elif key.keychar == 'KP3':
                             player_input.append('close_se')
                     if event.keychar == 's':  # smashin' things
-                        key = tdl.event.keyWait()
+                        tdl.event.wait()  # wait first for KeyUP
+                        key = tdl.event.key_wait()
                         if key.keychar == 'UP' or key.keychar == 'KP8':
                             player_input.append('smash_n')
                         elif key.keychar == 'DOWN' or key.keychar == 'KP2':
@@ -107,6 +109,6 @@ def get_input(game):
 
 
 def get_raw_input():
-    """ Function returns list of player input (not keypresses, but desired actions) """
+    """ Function returns raw player input """
     if INPUT_ENGINE == 'TDL':
         return tdl.event.get()  # get input from TDL
