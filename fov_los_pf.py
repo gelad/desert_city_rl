@@ -61,11 +61,9 @@ def get_path(loc, x1, y1, x2, y2):
     """ Function that returns path, using A* algorithm """
     if loc.get_move_cost((x1, y1), (x2, y2)) == 0:  # if cell is impassable - return empty path without using A*
         return []
-    ast = tdl.map.AStar(width=loc.width, height=loc.height, callback=loc.get_move_cost_old)
     finder = astar.pathfinder(neighbors=grid_neighbors_diagonal(loc.width, loc.height),
                               cost=loc.get_move_cost)
     length, path = finder((x1, y1), (x2, y2))
-    apath = ast.get_path(x1, y1, x2, y2)
     del path[0]  # remove first element - it's the start
     return path
 
