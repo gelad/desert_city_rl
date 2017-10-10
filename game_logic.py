@@ -1720,7 +1720,15 @@ class Location:
             return self.cells[x][y].is_transparent()  # return if cell is transparent
         return False  # if out of bounds, edge of the map certainly block los ;)
 
-    def get_move_cost(self, dest_x, dest_y):
+    def get_move_cost(self, start, end):
+        """ Method that returns movement cost (for A*) """
+        dest_x, dest_y = end
+        if self.cells[dest_x][dest_y].is_there_a(Player):  # if there a player - mark it as passable
+            return self.cells[dest_x][dest_y].get_move_cost()
+        else:
+            return self.path_map[dest_x][dest_y]
+
+    def get_move_cost_old(self, dest_x, dest_y):
         """ Method that returns movement cost (for A*) """
         if self.cells[dest_x][dest_y].is_there_a(Player):  # if there a player - mark it as passable
             return self.cells[dest_x][dest_y].get_move_cost()
@@ -1734,14 +1742,14 @@ class Location:
                 if self.cells[x][y].is_movement_allowed():
                     self.path_map[x][y] = self.cells[x][y].get_move_cost()
                 else:
-                    self.path_map[x][y] = 0
+                    self.path_map[x][y] = self.width * self.height  # set cost too high
 
     def path_map_update(self, x, y):
         """ Method that updates single cell of path map """
         if self.cells[x][y].is_movement_allowed():
             self.path_map[x][y] = self.cells[x][y].get_move_cost()
         else:
-            self.path_map[x][y] = 0
+            self.path_map[x][y] = self.width * self.height  # set cost too high
 
     def find_place(self, settings):
         """ Method that finds a place for something, specified in settings """
