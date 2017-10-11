@@ -2,9 +2,8 @@
     This file contains FOV (Field Of View) and LOS (Line Of Sight) related things.
 """
 import tdl
-from pypaths import astar
-
 import math
+import pathfinding
 
 
 def get_fov(x, y, loc, radius):
@@ -61,33 +60,8 @@ def get_path(loc, x1, y1, x2, y2):
     """ Function that returns path, using A* algorithm """
     if loc.get_move_cost((x1, y1), (x2, y2)) == 0:  # if cell is impassable - return empty path without using A*
         return []
-    finder = astar.pathfinder(neighbors=grid_neighbors_diagonal(loc.width, loc.height),
-                              cost=loc.get_move_cost)
+    finder = pathfinding.pathfinder(neighbors=pathfinding.grid_neighbors_diagonal(loc.width, loc.height),
+                                    cost=loc.get_move_cost)
     length, path = finder((x1, y1), (x2, y2))
     del path[0]  # remove first element - it's the start
     return path
-
-
-def grid_neighbors_diagonal(height, width):
-    """
-    Calculate neighbors for a simple grid where
-    a movement can be made up, down, left, right or diagonal.
-
-    """
-
-    def func(coord):
-        neighbor_list = [(coord[0], coord[1] + 1),
-                         (coord[0], coord[1] - 1),
-                         (coord[0] + 1, coord[1]),
-                         (coord[0] - 1, coord[1]),
-                         (coord[0] - 1, coord[1] + 1),
-                         (coord[0] + 1, coord[1] - 1),
-                         (coord[0] - 1, coord[1] - 1),
-                         (coord[0] + 1, coord[1] + 1)]
-
-        return [c for c in neighbor_list
-                if c != coord
-                and c[0] >= 0 and c[0] < width
-                and c[1] >= 0 and c[1] < height]
-
-    return func
