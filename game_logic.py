@@ -334,6 +334,7 @@ class Actor(Entity):
     def __init__(self, speed, state='ready', ai=None):
         self.base_speed = speed  # overall speed factor of actions
         self.state = state  # actor state - ready, acting or withdrawal (for now)
+        self.not_moved = 0  # number of turns that Entity not moved
         self.actions = []  # list of actions
         self.ai = ai  # ai component
 
@@ -370,6 +371,7 @@ class Actor(Entity):
                     events.Event(self.location, {'type': 'entity_moved', 'entity': self})  # fire an event
                     msg = self.name + 'moved to ' + str(new_x) + ':' + str(new_y)
                     Game.add_message(msg, 'DEBUG', [255, 255, 255])
+                    self.not_moved = 0
                     return True
         else:
             raise Exception('Attempted to move entity not positioned in any location. ', self.name)
@@ -609,10 +611,11 @@ class SimpleMeleeChaserAI(AI):
                 pl_x = data['entity'].position[0]
                 pl_y = data['entity'].position[1]
                 if hypot(pl_x - self.owner.position[0], pl_y - self.owner.position[1]) <= self.owner.sight_radius:
-                    self.state = 'alert'  # if player new position is within FOV - switch to 'alert' state
+                    self.state = 'alert'  # if player new position is within sight radius - switch to 'alert' state
 
     def act(self):
         """ Method called when monster is ready to act """
+        moved = False  # flag if Actor moves this turn - for A* pathfinding optimisation
         if self.state == 'alert':
             x = self.owner.position[0]
             y = self.owner.position[1]
@@ -631,6 +634,7 @@ class SimpleMeleeChaserAI(AI):
                         if len(path) > 0:  # if there are path
                             step_cell = path[0]  # move closer
                             self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                            moved = True
                             break  # action is performed - stop iterating through FOV
             if self.seen and self.owner.state == 'ready':  # check if still ready to act, and player was seen
                 if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
@@ -638,6 +642,7 @@ class SimpleMeleeChaserAI(AI):
                     if len(path) > 0:  # if there are path
                         step_cell = path[0]  # move closer to last known player position
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                        moved = True
                 else:  # if in last seen player position, and no player in FOV - stop searching, go idle
                     self.seen = False
                     self.seen_x = -1
@@ -645,6 +650,8 @@ class SimpleMeleeChaserAI(AI):
                     self.state = 'idle'
         if self.owner.state == 'ready':  # if no action is performed - wait
             self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
+        if not moved:
+            self.owner.not_moved += 1
 
 
 class AbilityUserAI(AI):
@@ -682,6 +689,7 @@ class AbilityUserAI(AI):
         x = self.owner.position[0]
         y = self.owner.position[1]
         acted = False  # acted flag
+        moved = False  # flag if Actor moves this turn - for A* pathfinding optimisation
         for point in self.owner.fov_set:  # check for player in FOV
             player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
             if player:  # if there is one
@@ -722,6 +730,7 @@ class AbilityUserAI(AI):
                         step_cell = path[0]  # move closer
                         acted = True
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                        moved = True
                         break  # action is performed - stop iterating through FOV
         if self.seen and not acted:  # check if still ready to act, and player was seen
             if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
@@ -730,11 +739,14 @@ class AbilityUserAI(AI):
                     step_cell = path[0]  # move closer to last known player position
                     acted = True
                     self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                    moved = True
             else:  # if in last seen player position, and no player in FOV - stop searching, go idle
                 self.seen = False
                 self.seen_x = -1
                 self.seen_y = -1
                 self.state = 'idle'
+        if not moved:
+            self.owner.not_moved += 1
 
     def ranged(self):
         """ Method what to do in alert state if ranged behavior """
@@ -742,6 +754,7 @@ class AbilityUserAI(AI):
         y = self.owner.position[1]
         pref_range = self.properties['preferred_range']
         acted = False  # acted flag
+        moved = False  # flag if Actor moves this turn - for A* pathfinding optimisation
         for point in self.owner.fov_set:  # check for player in FOV
             player = self.owner.location.cells[point[0]][point[1]].is_there_a(Player)
             if player:  # if there is one
@@ -779,6 +792,7 @@ class AbilityUserAI(AI):
                         step_cell = path[0]  # move closer
                         acted = True
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                        moved = True
                         break  # action is performed - stop iterating through FOV
                 if not acted and range_to_player <= 1.42:
                     # if in melee range - attack
@@ -797,11 +811,14 @@ class AbilityUserAI(AI):
                     step_cell = path[0]  # move closer to last known player position
                     acted = True
                     self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
+                    moved = True
             else:  # if in last seen player position, and no player in FOV - stop searching, go idle
                 self.seen = False
                 self.seen_x = -1
                 self.seen_y = -1
                 self.state = 'idle'
+        if not moved:
+            self.owner.not_moved += 1
 
 
 class UnguidedProjectileAI(AI):
@@ -1725,13 +1742,9 @@ class Location:
         dest_x, dest_y = end
         if self.cells[dest_x][dest_y].is_there_a(Player):  # if there a player - mark it as passable
             return self.cells[dest_x][dest_y].get_move_cost()
-        else:
-            return self.path_map[dest_x][dest_y]
-
-    def get_move_cost_old(self, dest_x, dest_y):
-        """ Method that returns movement cost (for A*) """
-        if self.cells[dest_x][dest_y].is_there_a(Player):  # if there a player - mark it as passable
-            return self.cells[dest_x][dest_y].get_move_cost()
+        actor = self.cells[dest_x][dest_y].is_there_a(Actor)
+        if actor:  # if there is an actor - add 'not moved' turns count to prevent monster jams in narrow places
+            return self.cells[dest_x][dest_y].get_move_cost() + actor.not_moved * actor.speed
         else:
             return self.path_map[dest_x][dest_y]
 
