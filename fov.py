@@ -75,24 +75,16 @@ def fieldOfView(startX, startY, mapWidth, mapHeight, radius, \
         maxExtentY = radius
 
     # Northeast quadrant
-    __checkQuadrant(visited, startX, startY, 1, 1, \
-      maxExtentX, maxExtentY, \
-      funcVisitTile, funcTileBlocked, radius)
+    __checkQuadrant(visited, startX, startY, 1, 1, maxExtentX, maxExtentY, funcVisitTile, funcTileBlocked, radius)
 
     # Southeast quadrant
-    __checkQuadrant(visited, startX, startY, 1, -1, \
-      maxExtentX, minExtentY, \
-      funcVisitTile, funcTileBlocked, radius)
+    __checkQuadrant(visited, startX, startY, 1, -1, maxExtentX, minExtentY, funcVisitTile, funcTileBlocked, radius)
 
     # Southwest quadrant
-    __checkQuadrant(visited, startX, startY, -1, -1, \
-      minExtentX, minExtentY, \
-      funcVisitTile, funcTileBlocked, radius)
+    __checkQuadrant(visited, startX, startY, -1, -1, minExtentX, minExtentY, funcVisitTile, funcTileBlocked, radius)
 
     # Northwest quadrant
-    __checkQuadrant(visited, startX, startY, -1, 1, \
-      minExtentX, maxExtentY, \
-      funcVisitTile, funcTileBlocked, radius)
+    __checkQuadrant(visited, startX, startY, -1, 1, minExtentX, maxExtentY, funcVisitTile, funcTileBlocked, radius)
 
 #-------------------------------------------------------------
 
@@ -150,8 +142,10 @@ def __checkQuadrant(visited, startX, startY, dx, dy, \
   extentX, extentY, funcVisitTile, funcTileBlocked, radius):
     activeViews = []
 
-    shallowLine = __Line(0, 1, extentX, 0)
-    steepLine = __Line(1, 0, 0, extentY)
+    perm = 5 / 10  # Permissiveness magic number
+
+    shallowLine = __Line(1 - perm, 1 * perm, extentX, 0)
+    steepLine = __Line(1 * perm, 1 - perm, 0, extentY)
 
     activeViews.append( __View(shallowLine, steepLine) )
     viewIndex = 0
@@ -236,26 +230,20 @@ def __visitCoord(visited, startX, startY, x, y, dx, dy, viewIndex, activeViews, 
         # has no effect on the view.
         return
 
-    if activeViews[viewIndex].shallowLine.pAbove( \
-       bottomRight[0], bottomRight[1]) \
-      and activeViews[viewIndex].steepLine.pBelow( \
-       topLeft[0], topLeft[1]):
+    if activeViews[viewIndex].shallowLine.pAbove(bottomRight[0], bottomRight[1]) \
+      and activeViews[viewIndex].steepLine.pBelow(topLeft[0], topLeft[1]):
         # The current coordinate is intersected by both lines in the
         # current view.  The view is completely blocked.
         del activeViews[viewIndex]
-    elif activeViews[viewIndex].shallowLine.pAbove( \
-      bottomRight[0], bottomRight[1]):
+    elif activeViews[viewIndex].shallowLine.pAbove(bottomRight[0], bottomRight[1]):
         # The current coordinate is intersected by the shallow line of
         # the current view.  The shallow line needs to be raised.
-        __addShallowBump(topLeft[0], topLeft[1], \
-          activeViews, viewIndex)
+        __addShallowBump(topLeft[0], topLeft[1], activeViews, viewIndex)
         __checkView(activeViews, viewIndex)
-    elif activeViews[viewIndex].steepLine.pBelow( \
-      topLeft[0], topLeft[1]):
+    elif activeViews[viewIndex].steepLine.pBelow(topLeft[0], topLeft[1]):
         # The current coordinate is intersected by the steep line of
         # the current view.  The steep line needs to be lowered.
-        __addSteepBump(bottomRight[0], bottomRight[1], activeViews, \
-          viewIndex)
+        __addSteepBump(bottomRight[0], bottomRight[1], activeViews, viewIndex)
         __checkView(activeViews, viewIndex)
     else:
         # The current coordinate is completely between the two lines
