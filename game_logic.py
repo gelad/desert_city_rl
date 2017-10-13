@@ -310,15 +310,23 @@ class Seer(Entity):
 
     def __init__(self, sight_radius):
         self.sight_radius = sight_radius  # sight radius in tiles
-        self.fov_set = ()  # field of view - set of (x, y) points
+        self.fov_set = set()  # field of view - set of (x, y) points
 
     def compute_fov(self):
         """ Method that calculates FOV """
-        self.fov_set = fov_los_pf.get_fov(self.position[0], self.position[1], self.location, self.sight_radius)
+        if self.fov_set:
+            self.fov_set.clear()
+        else:
+            self.fov_set = set()
+        fov_los_pf.get_fov(self.position[0], self.position[1], self.location, self.sight_radius, self.fov_visit_cell)
         if isinstance(self, Player):
             for point in self.fov_set:
                 if self.location.is_in_boundaries(point[0], point[1]):
                     self.location.cells[point[0]][point[1]].explored = True
+
+    def fov_visit_cell(self, x, y):
+        """ Method for FOV "visit" """
+        self.fov_set.add((x, y))
 
     def is_in_fov(self, x, y):
         """ Method that determines is a cell in Seer's FOV """
@@ -1734,7 +1742,7 @@ class Location:
     def is_cell_transparent(self, x, y):
         """ Method that determines, is cell at x, y is transparent """
         if self.is_in_boundaries(x, y):  # check if cell coords are in boundaries
-            return self.cells[x][y].is_transparent()  # return if cell is transparent
+            return not self.cells[x][y].is_transparent()  # return if cell is transparent
         return False  # if out of bounds, edge of the map certainly block los ;)
 
     def get_move_cost(self, start, end):
@@ -1817,7 +1825,7 @@ class Game:
         self.current_loc = generation.generate_loc('ruins', None, 200, 200)
         self.add_location(self.current_loc)
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
-                             color=[255, 255, 255], hp=20, speed=100, sight_radius=23.5, damage=1,
+                             color=[255, 255, 255], hp=20, speed=100, sight_radius=23, damage=1,
                              categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
         self.current_loc.place_entity(self.player, 0, 0)
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
