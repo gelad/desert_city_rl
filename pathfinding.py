@@ -25,6 +25,7 @@ the cost exceeded the specified maximum
 """
 
 import math
+from heapq import *
 
 
 def manhattan_distance(start, end):
@@ -156,15 +157,18 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
         translated almost directly into python.
         http://en.wikipedia.org/wiki/A*_search_algorithm
         """
-        open_set = {start}
+        # max_cost=50
+        oheap = []
         closed_set = set()
         came_from = {}
 
         g_score = {start: 0}
         f_score = {start: cost(start, end)}
 
-        while len(open_set) != 0:
-            current = min(open_set, key=lambda c: f_score[c])
+        heappush(oheap, (f_score[start], start))
+
+        while oheap:
+            current = heappop(oheap)[1]
 
             if max_cost is not None and g_score[current] > max_cost:
                 break
@@ -172,7 +176,6 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
             if current == end:
                 return g_score[current], reconstruct_path(came_from, end)
 
-            open_set.discard(current)
             closed_set.add(current)
             for neighbor in neighbors(current):
                 tentative_score = g_score[current] + cost(current, neighbor)
@@ -180,13 +183,11 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
                 if neighbor in closed_set and (neighbor in g_score and tentative_score >= g_score[neighbor]):
                     continue
 
-                if neighbor not in open_set or (neighbor in g_score and tentative_score < g_score[neighbor]):
+                if neighbor not in [i[1]for i in oheap] or (neighbor in g_score and tentative_score < g_score[neighbor]):
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_score
                     f_score[neighbor] = tentative_score + distance(neighbor, end)
-
-                    if neighbor not in open_set:
-                        open_set.add(neighbor)
+                    heappush(oheap, (f_score[neighbor], neighbor))
 
         return None, []
 
@@ -195,10 +196,12 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
 
 def get_path(loc, x1, y1, x2, y2):
     """ Function that returns path, using A* algorithm """
-    if loc.get_move_cost((x1, y1), (x2, y2)) == 0:  # if cell is impassable - return empty path without using A*
+    if loc.get_move_cost((x1, y1), (x2, y2)) >= loc.width * loc.height:
+        # if cell is impassable - return empty path without using A*
         return []
     finder = pathfinder(neighbors=grid_neighbors_diagonal(loc.width, loc.height),
                         cost=loc.get_move_cost)
     length, path = finder((x1, y1), (x2, y2))
-    del path[0]  # remove first element - it's the start
+    if len(path) > 0:
+        del path[0]  # remove first element - it's the start
     return path
