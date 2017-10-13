@@ -13,7 +13,7 @@ particular graph implementation:
 
 >>> finder = pathfinder( distance=absolute_distance,        \\
 ...                      cost=fixed_cost(2),                \\
-...                      neighbors=grid_neighbors(10,10) );
+...                      neighbors=grid_neighbors(10,10) )
 >>> finder( (0,0), (2,2) )
 (8, [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)])
 
@@ -191,3 +191,14 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
         return None, []
 
     return func
+
+
+def get_path(loc, x1, y1, x2, y2):
+    """ Function that returns path, using A* algorithm """
+    if loc.get_move_cost((x1, y1), (x2, y2)) == 0:  # if cell is impassable - return empty path without using A*
+        return []
+    finder = pathfinder(neighbors=grid_neighbors_diagonal(loc.width, loc.height),
+                        cost=loc.get_move_cost)
+    length, path = finder((x1, y1), (x2, y2))
+    del path[0]  # remove first element - it's the start
+    return path

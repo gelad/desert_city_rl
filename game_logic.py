@@ -2,7 +2,10 @@
     This file contains game logic objects.
 """
 import actions
-import fov_los_pf
+import raycasting
+import fov
+import los
+import pathfinding
 import effects
 import events
 import abilities
@@ -314,18 +317,19 @@ class Seer(Entity):
 
     def compute_fov(self):
         """ Method that calculates FOV """
-        if self.fov_set:
+        if self.fov_set:  # clear FOV
             self.fov_set.clear()
         else:
             self.fov_set = set()
-        fov_los_pf.get_fov(self.position[0], self.position[1], self.location, self.sight_radius, self.fov_visit_cell)
+        fov.fieldOfView(self.position[0], self.position[1], self.location.width, self.location.height,
+                        self.sight_radius, self.fov_visit_cell, self.location.cell_blocks_sight)
         if isinstance(self, Player):
             for point in self.fov_set:
                 if self.location.is_in_boundaries(point[0], point[1]):
                     self.location.cells[point[0]][point[1]].explored = True
 
     def fov_visit_cell(self, x, y):
-        """ Method for FOV "visit" """
+        """ Method for FOV "visit" - adds visible cell coords to FOV set """
         self.fov_set.add((x, y))
 
     def is_in_fov(self, x, y):
@@ -638,7 +642,7 @@ class SimpleMeleeChaserAI(AI):
                         self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
                         break  # action is performed - stop iterating through FOV
                     else:  # if not - obtain path
-                        path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
+                        path = pathfinding.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
                         if len(path) > 0:  # if there are path
                             step_cell = path[0]  # move closer
                             self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
@@ -646,7 +650,7 @@ class SimpleMeleeChaserAI(AI):
                             break  # action is performed - stop iterating through FOV
             if self.seen and self.owner.state == 'ready':  # check if still ready to act, and player was seen
                 if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
-                    path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
+                    path = pathfinding.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
                     if len(path) > 0:  # if there are path
                         step_cell = path[0]  # move closer to last known player position
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
@@ -733,7 +737,7 @@ class AbilityUserAI(AI):
                     acted = True
                     break  # action is performed - stop iterating through FOV
                 else:  # if not - obtain path
-                    path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
+                    path = pathfinding.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
                     if len(path) > 0:  # if there are path
                         step_cell = path[0]  # move closer
                         acted = True
@@ -742,7 +746,7 @@ class AbilityUserAI(AI):
                         break  # action is performed - stop iterating through FOV
         if self.seen and not acted:  # check if still ready to act, and player was seen
             if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
-                path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
+                path = pathfinding.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
                 if len(path) > 0:  # if there are path
                     step_cell = path[0]  # move closer to last known player position
                     acted = True
@@ -795,7 +799,7 @@ class AbilityUserAI(AI):
                             acted = True
                             break  # one action at a time
                 if not acted and range_to_player > pref_range:  # if farther than in preferred range - move closer
-                    path = fov_los_pf.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
+                    path = pathfinding.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
                     if len(path) > 0:  # if there are path
                         step_cell = path[0]  # move closer
                         acted = True
@@ -814,7 +818,7 @@ class AbilityUserAI(AI):
                     break  # action is performed - stop iterating through FOV
         if self.seen and not acted:  # check if still ready to act, and player was seen
             if not ((x == self.seen_x) and (y == self.seen_y)):  # if not in last player seen position
-                path = fov_los_pf.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
+                path = pathfinding.get_path(self.owner.location, x, y, self.seen_x, self.seen_y)  # get a path there
                 if len(path) > 0:  # if there are path
                     step_cell = path[0]  # move closer to last known player position
                     acted = True
@@ -846,7 +850,7 @@ class UnguidedProjectileAI(AI):
 
     def enroute(self):
         """ Method to calculate route """
-        self.route = fov_los_pf.ray(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1],
+        self.route = raycasting.ray(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1],
                                     self.owner.location.width, self.owner.location.height, self.power)
         self.next = iter(self.route)
         self._fly_next()  # fly to next cell (or stop if out of power or route end)
@@ -987,8 +991,7 @@ class UnguidedThrownAI(UnguidedProjectileAI):
 
     def enroute(self):
         """ Method to calculate route (overridden: line to target instead of trajectory that crosses it) """
-        self.route = fov_los_pf.line(self.owner.position[0], self.owner.position[1], self.target[0],
-                                     self.target[1])
+        self.route = los.get_line(self.owner.position[0], self.owner.position[1], self.target[0], self.target[1])
         self.route.pop(0)  # pop first item from path, it's thrower position
         self.next = iter(self.route)
         self._fly_next()  # fly to next cell (or stop if out of power or route end)
@@ -1739,8 +1742,8 @@ class Location:
                 self.remove_entity(victim)
             self.dead.remove(victim)
 
-    def is_cell_transparent(self, x, y):
-        """ Method that determines, is cell at x, y is transparent """
+    def cell_blocks_sight(self, x, y):
+        """ Method that determines, is cell at x, y is blocking sight """
         if self.is_in_boundaries(x, y):  # check if cell coords are in boundaries
             return not self.cells[x][y].is_transparent()  # return if cell is transparent
         return False  # if out of bounds, edge of the map certainly block los ;)

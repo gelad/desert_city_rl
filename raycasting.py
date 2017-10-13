@@ -1,21 +1,7 @@
 """
-    This file contains FOV (Field Of View) and LOS (Line Of Sight) related things.
+    This file contains raycasting functions.
 """
-import tdl
 import math
-import pathfinding
-import los
-import fov
-
-
-def get_fov(x, y, loc, radius, visit_func):
-    """ Function that calculates FOV. Now just a wrapper around tdl function """
-    fov.fieldOfView(x, y, loc.width, loc.height, radius, visit_func, loc.is_cell_transparent)
-
-
-def line(x1, y1, x2, y2):
-    """ Function that returns points in line. """
-    return los.get_line((x1, y1), (x2, y2))
 
 
 def ray(x1, y1, x2, y2, width, height, power):
@@ -50,14 +36,3 @@ def ray_angle(x1, y1, angle, width, height, power):
             break
         ray.append((round(x), round(y)))
     return ray
-
-
-def get_path(loc, x1, y1, x2, y2):
-    """ Function that returns path, using A* algorithm """
-    if loc.get_move_cost((x1, y1), (x2, y2)) == 0:  # if cell is impassable - return empty path without using A*
-        return []
-    finder = pathfinding.pathfinder(neighbors=pathfinding.grid_neighbors_diagonal(loc.width, loc.height),
-                                    cost=loc.get_move_cost)
-    length, path = finder((x1, y1), (x2, y2))
-    del path[0]  # remove first element - it's the start
-    return path

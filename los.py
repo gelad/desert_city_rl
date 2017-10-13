@@ -1,4 +1,4 @@
-def get_line(start, end):
+def get_line(x1, y1, x2, y2):
     """Bresenham's Line Algorithm
     Produces a list of tuples from start and end
 
@@ -11,8 +11,6 @@ def get_line(start, end):
     [(3, 4), (2, 3), (1, 2), (1, 1), (0, 0)]
     """
     # Setup initial conditions
-    x1, y1 = start
-    x2, y2 = end
     dx = x2 - x1
     dy = y2 - y1
 

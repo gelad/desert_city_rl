@@ -3,7 +3,6 @@
 """
 
 import game_logic
-import fov_los_pf
 import dataset
 import xp_loader
 
