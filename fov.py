@@ -15,6 +15,7 @@
 """
 
 import copy
+import math
 
 def fieldOfView(startX, startY, mapWidth, mapHeight, radius, \
   funcVisitTile, funcTileBlocked):
@@ -76,22 +77,22 @@ def fieldOfView(startX, startY, mapWidth, mapHeight, radius, \
     # Northeast quadrant
     __checkQuadrant(visited, startX, startY, 1, 1, \
       maxExtentX, maxExtentY, \
-      funcVisitTile, funcTileBlocked)
+      funcVisitTile, funcTileBlocked, radius)
 
     # Southeast quadrant
     __checkQuadrant(visited, startX, startY, 1, -1, \
       maxExtentX, minExtentY, \
-      funcVisitTile, funcTileBlocked)
+      funcVisitTile, funcTileBlocked, radius)
 
     # Southwest quadrant
     __checkQuadrant(visited, startX, startY, -1, -1, \
       minExtentX, minExtentY, \
-      funcVisitTile, funcTileBlocked)
+      funcVisitTile, funcTileBlocked, radius)
 
     # Northwest quadrant
     __checkQuadrant(visited, startX, startY, -1, 1, \
       minExtentX, maxExtentY, \
-      funcVisitTile, funcTileBlocked)
+      funcVisitTile, funcTileBlocked, radius)
 
 #-------------------------------------------------------------
 
@@ -142,8 +143,11 @@ class __View:
         self.shallowBump = None
         self.steepBump = None
 
+def __distance(x1, y1, x2, y2):
+    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
+
 def __checkQuadrant(visited, startX, startY, dx, dy, \
-  extentX, extentY, funcVisitTile, funcTileBlocked):
+  extentX, extentY, funcVisitTile, funcTileBlocked, radius):
     activeViews = []
 
     shallowLine = __Line(0, 1, extentX, 0)
@@ -180,14 +184,14 @@ def __checkQuadrant(visited, startX, startY, dx, dy, \
             y = j
             __visitCoord(visited, startX, startY, x, y, dx, dy, \
               viewIndex, activeViews, \
-              funcVisitTile, funcTileBlocked)
+              funcVisitTile, funcTileBlocked, radius)
 
             j += 1
 
         i += 1
 
-def __visitCoord(visited, startX, startY, x, y, dx, dy, viewIndex, \
-  activeViews, funcVisitTile, funcTileBlocked):
+
+def __visitCoord(visited, startX, startY, x, y, dx, dy, viewIndex, activeViews, funcVisitTile, funcTileBlocked, radius):
     # The top left and bottom right corners of the current coordinate.
     topLeft = (x, y + 1)
     bottomRight = (x + 1, y)
@@ -214,6 +218,9 @@ def __visitCoord(visited, startX, startY, x, y, dx, dy, viewIndex, \
     # The real quadrant coordinates
     realX = x * dx
     realY = y * dy
+
+    if radius and __distance(startX, startY, startX + realX, startY + realY) > radius:
+        return
 
     if (startX + realX, startY + realY) not in visited:
         visited.add((startX + realX, startY + realY))
