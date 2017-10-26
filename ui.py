@@ -1,7 +1,7 @@
 """
     This file contains user interface. For now uses tdl (maybe need to move all render work to render?)
 """
-import tdl
+from clubsandwich.director import DirectorLoop
 
 import textwrap
 import math
@@ -12,6 +12,13 @@ import player_input
 import dataset
 import generation
 
+class GameLoop(DirectorLoop):
+    """ GameLoop class """
+    def terminal_init(self):
+        super().terminal_init()
+
+    def get_initial_scene(self):
+        return MainMenuScene()
 
 class Element:
     """ Base class for UI element """

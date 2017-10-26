@@ -1,7 +1,7 @@
-import render
-import ui
+import game_view
 import game_logic
 import dataset
+import save_load
 
 import pickle
 import os
@@ -12,32 +12,6 @@ import zlib
 import jsonpickle
 
 
-# =========================== global functions, save/load, loop, etc =================================
-def save_game(game):
-    """ Game saving function """
-    gc.collect()  # run garbage collect - remove weakref object without references and so on
-    # save game object instance, and observers
-    uncompressed = pickle.dumps(game)
-    compressed = zlib.compress(uncompressed)
-    open('savegame', 'wb').write(compressed)
-
-
-def load_game():
-    """ Game loading function """
-    try:
-        # load game object instance, and observers
-        compressed = open('savegame', 'rb').read()
-        uncompressed = zlib.decompress(compressed)
-        loaded_game = pickle.loads(uncompressed)
-        loaded_game.locations_reobserve()
-        if loaded_game.state == 'exit':
-            print('Saved game state was exit, changed to playing')  # debug output
-            loaded_game.state = 'playing'
-        return loaded_game
-    except FileNotFoundError:
-        return False
-
-
 def main_menu():
     main_menu_options = []
     loaded = load_game()  # try to load game
@@ -45,7 +19,7 @@ def main_menu():
         main_menu_options.append('Continue')
     main_menu_options.append('New Game')
     main_menu_options.append('Exit')
-    main_menu_choice = ui.show_menu_list(win_mgr=graphics.win_mgr, caption='Welcome to ancient city of Neth-Nikakh!',
+    main_menu_choice = ui.show_menu_list(win_mgr=game_view.win_mgr, caption='Welcome to ancient city of Neth-Nikakh!',
                                          options=main_menu_options)
     if not main_menu_choice:
         exit()
@@ -53,7 +27,7 @@ def main_menu():
         game = loaded  # load saved game
     elif main_menu_choice[0] == 'New Game':
         # TODO: move texts to files
-        class_choice = ui.show_menu_text(win_mgr=graphics.win_mgr, caption='Choose your character background:',
+        class_choice = ui.show_menu_text(win_mgr=game_view.win_mgr, caption='Choose your character background:',
                                          options=['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
                                          keys='alphabet', text_width=40, text_height=30,
                                          texts=[
@@ -90,18 +64,18 @@ def main_menu():
         exit()
     main_window = ui.WindowMain(game, 0, 0, settings['screen_width'], settings['screen_height'],
                                 0, settings['map_width'], settings['map_height'])
-    graphics.win_mgr.add_window(main_window)  # add main window to WinMgr
-    graphics.win_mgr.active_window = main_window  # make it active
+    game_view.win_mgr.add_window(main_window)  # add main window to WinMgr
+    game_view.win_mgr.active_window = main_window  # make it active
     return game
 
 
 def player_death():
     """ Function that is called if player is dead """
     # show window with death recap, that returns to main menu
-    chosen = ui.show_menu_text_above(win_mgr=graphics.win_mgr, caption='You died!',
+    chosen = ui.show_menu_text_above(win_mgr=game_view.win_mgr, caption='You died!',
                                      options=['Return to main menu', 'Exit'], keys=None,
                                      texts='Horrors of the Desert City got you.',
-                                     prev_window=graphics.win_mgr.active_window,
+                                     prev_window=game_view.win_mgr.active_window,
                                      width=40,
                                      text_height=2)
     if chosen[0] == 'Return to main menu':
@@ -121,7 +95,7 @@ def main_loop():
     while not game.state == 'exit':
         if game.state == 'playing':  # check if state is 'playing'
             if game.is_waiting_input:  # check if game is waiting for player input
-                if graphics.win_mgr.active_window.handle_input():  # let active window handle input
+                if game_view.win_mgr.active_window.handle_input():  # let active window handle input
                     draw_screen = True  # if any input - set flag to draw screen
                 if not game.player.state == 'ready':  # if after command execution player is performing an action
                     game.is_waiting_input = False  # set waiting for input flag to False
@@ -142,18 +116,18 @@ def main_loop():
                     draw_screen = True  # set flag to draw screen
         elif game.state == 'looking' or game.state == 'targeting':  # check if state is 'looking' or 'targeting'
             if game.is_waiting_input:
-                if graphics.win_mgr.active_window.handle_input():  # let active window handle input
+                if game_view.win_mgr.active_window.handle_input():  # let active window handle input
                     draw_screen = True  # if any input - set flag to draw screen
             else:
                 pass
         elif game.state == 'dead':
             if game.is_waiting_input:
-                if graphics.win_mgr.active_window.handle_input():  # let active window handle input
+                if game_view.win_mgr.active_window.handle_input():  # let active window handle input
                     draw_screen = True  # if any input - set flag to draw screen
             else:
                 pass
         if draw_screen:
-            graphics.render_all()  # call a screen rendering function
+            game_view.render_all()  # call a screen rendering function
         draw_screen = False
         # dealing with high CPU load
         current_time = time.time()
@@ -169,13 +143,15 @@ dataset.initialize()
 settings_file = open('data/settings.json')  # open settings file
 settings = jsonpickle.loads(settings_file.read())  # load settings
 settings_file.close()
-graphics = render.Graphics(screen_width=settings['screen_width'], screen_height=settings['screen_height'])
-back_to_menu = True
+loop = game_view.GameLoop()
+loop.run()
+
+back_to_menu = False
 current_game = None
 while back_to_menu:
-    graphics.win_mgr.active_window = None  # TODO: maybe make a method for clearing graphics?
-    graphics.win_mgr.windows.clear()
-    graphics.console.clear()
+    game_view.win_mgr.active_window = None  # TODO: maybe make a method for clearing graphics?
+    game_view.win_mgr.windows.clear()
+    game_view.console.clear()
     if current_game:
         del current_game
     current_game = main_menu()
