@@ -1,17 +1,13 @@
 import render
 import ui
 import game_logic
-import events
 import dataset
-
-import xp_loader
 
 import pickle
 import os
 import time
 import gc
 import zlib
-import gzip
 
 import jsonpickle
 
