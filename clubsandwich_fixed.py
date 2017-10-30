@@ -63,6 +63,7 @@ class ButtonViewFixed(View):
   :param str text: Button title
   :param func callback: Function to call when button is activated. Takes no
                         arguments.
+  :param func callback_selected: Function to call when button is selected
   :param str align_horz: Horizontal alignment. See :py:class:`LabelView`.
   :param str align_vert: Vertical alignment. See :py:class:`LabelView`.
 
@@ -74,13 +75,16 @@ class ButtonViewFixed(View):
   * The label is drawn black-on-white instead of white-on-black
   * Pressing the Enter key calls *callback*
   FIX: bearlib tags in [] now don't affect text alignment (LabelViewFixed is used)
+  ADDED: callback_selected
+  ADDED: callback returns link to button
   """
   def __init__(
-      self, text, callback, align_horz='center', align_vert='center',
+      self, text, callback, callback_selected=None, align_horz='center', align_vert='center',
       *args, **kwargs):
     self.label_view = LabelViewFixed(text, align_horz=align_horz, align_vert=align_vert)
     super().__init__(subviews=[self.label_view], *args, **kwargs)
     self.callback = callback
+    self.callback_selected = callback_selected
 
   def set_needs_layout(self, val):
     super().set_needs_layout(val)
@@ -89,6 +93,9 @@ class ButtonViewFixed(View):
   def did_become_first_responder(self):
       self.label_view.color_fg = '#000000'
       self.label_view.color_bg = '#ffffff'
+      if self.callback_selected:
+          self.callback_selected()
+
 
   def did_resign_first_responder(self):
       self.label_view.color_fg = '#ffffff'

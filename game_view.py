@@ -13,6 +13,8 @@ from clubsandwich.ui import (
     IntStepperView,
     RectView
 )
+from bearlibterminal import terminal
+
 from clubsandwich_fixed import ButtonViewFixed, LabelViewFixed
 
 import game_logic
@@ -108,15 +110,17 @@ class MainMenuScene(UIScene):
 class CharacterSelectScene(UIScene):
     """ Scene displays character background variants with descriptions """
     def __init__(self, *args, **kwargs):
-        options = character_backgrounds
+        self.options = character_backgrounds
         self.bg_texts = character_bg_descriptions
+        self.selected = 0
         views = []
         views.append(RectView(style='double', layout_options=LayoutOptions(left=0, top=0)))
         top_offset = 0
-        for option in options:
+        for option in self.options:
             top_offset += 1
             views.append(ButtonViewFixed(text=option,
-                                         callback=self.option_selected(),
+                                         callback=self.option_activated,
+                                         callback_selected=self.option_selected,
                                          layout_options=LayoutOptions(
                                              left=2,
                                              top=top_offset,
@@ -124,10 +128,36 @@ class CharacterSelectScene(UIScene):
                                              height=1,
                                              bottom=None,
                                              right=None)))
+        self.description_view = LabelViewFixed(text=self.bg_texts[self.selected],
+                                               align_horz='left',
+                                               align_vert='top',
+                                               layout_options=LayoutOptions(
+                                                    left=0.5,
+                                                    top=2,
+                                                    width=0.45,
+                                                    height='intrinsic',
+                                                    bottom=None,
+                                                    right=None
+                                                ))
+        views.append(self.description_view)
         super().__init__(views, *args, **kwargs)
 
     def become_active(self):
         self.ctx.clear()
 
+    def terminal_read(self, val):
+        super().terminal_read(val)
+        if val == terminal.TK_TAB:
+            if self.selected < len(self.options) - 1:
+                self.selected += 1
+            else:
+                self.selected = 0
+
     def option_selected(self):
+        """ Method to call when option is selected (highlighted) """
+        self.description_view.text = self.bg_texts[self.selected]
+        self.description_view.needs_layout = True
+
+    def option_activated(self):
+        """ Method to call when option is activated (ENTER key pressed) """
         pass
