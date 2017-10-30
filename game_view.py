@@ -147,14 +147,30 @@ class CharacterSelectScene(UIScene):
 
     def terminal_read(self, val):
         super().terminal_read(val)
-        if val == terminal.TK_TAB:  # cycle descriptions with selected options
-            if self.selected < len(self.options) - 1:
-                self.selected += 1
-            else:
-                self.selected = 0
+        # cycle descriptions with selected options
+        if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
+            # allow traverse with arrows and numpad
+            if val == terminal.TK_TAB:
+                if self.selected < len(self.options) - 1:
+                    self.selected += 1
+                else:
+                    self.selected = 0
+            elif val in (terminal.TK_KP_8, terminal.TK_UP):
+                self.view.find_prev_responder()
+                if self.selected > 0:
+                    self.selected -= 1
+                else:
+                    self.selected = len(self.options) - 1
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+                self.view.find_next_responder()
+                if self.selected < len(self.options) - 1:
+                    self.selected += 1
+                else:
+                    self.selected = 0
             self.ctx.clear()
             self.description_view.text = self.bg_texts[self.selected]
             self.description_view.needs_layout = True
+
 
     def option_selected(self):
         """ Method to call when option is selected (highlighted) """
