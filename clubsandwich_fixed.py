@@ -5,6 +5,8 @@ from clubsandwich.ui import View
 from clubsandwich.geom import Size, Point
 from bearlibterminal import terminal
 
+from math import floor
+
 class LabelViewFixed(View):
   """
   Draws the given string inside its bounds. Multi-line strings work fine.
@@ -18,6 +20,7 @@ class LabelViewFixed(View):
   See :py:class:`View` for the rest of the init arguments.
   
   FIX: bearlib tags in [] now don't affect text alignment
+  CHANGE: added word wrap if string exceeds terminal boundary
   """
   def __init__(
       self, text, color_fg='#ffffff', color_bg='#000000',
@@ -51,8 +54,12 @@ class LabelViewFixed(View):
       y = self.bounds.height / 2 - self.intrinsic_size.height / 2
     elif self.align_vert == 'bottom':
       y = self.bounds.height - self.intrinsic_size.height
-
-    ctx.print(Point(x, y).floored, self.text)
+    #  TODO: make wordwrap parameter?
+    if self.intrinsic_size.width > self.bounds.width:  # if width exceeds bounds - wrap words
+        w = self.bounds.width
+    else:
+        w = 0
+    ctx.print(Point(x, y).floored, self.text, w)
 
   def debug_string(self):
     return super().debug_string() + ' ' + repr(self.text)

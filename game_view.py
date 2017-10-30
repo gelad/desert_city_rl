@@ -133,7 +133,7 @@ class CharacterSelectScene(UIScene):
                                                align_vert='top',
                                                layout_options=LayoutOptions(
                                                     left=0.5,
-                                                    top=2,
+                                                    top=1,
                                                     width=0.45,
                                                     height='intrinsic',
                                                     bottom=None,
@@ -147,16 +147,18 @@ class CharacterSelectScene(UIScene):
 
     def terminal_read(self, val):
         super().terminal_read(val)
-        if val == terminal.TK_TAB:
+        if val == terminal.TK_TAB:  # cycle descriptions with selected options
             if self.selected < len(self.options) - 1:
                 self.selected += 1
             else:
                 self.selected = 0
+            self.ctx.clear()
+            self.description_view.text = self.bg_texts[self.selected]
+            self.description_view.needs_layout = True
 
     def option_selected(self):
         """ Method to call when option is selected (highlighted) """
-        self.description_view.text = self.bg_texts[self.selected]
-        self.description_view.needs_layout = True
+        pass
 
     def option_activated(self):
         """ Method to call when option is activated (ENTER key pressed) """
