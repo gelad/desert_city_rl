@@ -274,9 +274,9 @@ class MapView(View):
         player_x = self.game.player.position[0]
         player_y = self.game.player.position[1]
         # player on-screen coords
-        player_scr_x = self.bounds.width // 2 - self.cam_offset[0]
+        player_scr_x = self.bounds.width // 4 - self.cam_offset[0]
         player_scr_y = self.bounds.height // 2 - self.cam_offset[1]
-        for x in range(0, self.bounds.width):  # iterate through every x, y in map_console
+        for x in range(0, self.bounds.width // 2):  # iterate through every x, y in map_console
             for y in range(0, self.bounds.height):
                 rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
                 rel_y = y - player_scr_y + player_y
@@ -288,13 +288,16 @@ class MapView(View):
                                             self.game.player.is_in_fov(rel_x, rel_y))
                     ctx.color(terminal.color_from_argb(255, cg[1][0], cg[1][1], cg[1][2]))
                     ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
-                    ctx.print(Point(x, y), cg[0])
+                    ctx.print(Point(x * 2 + 1, y), ' ')
+                    ctx.print(Point(x * 2, y), '[font=map]' + cg[0])
                 else:
                     ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                    ctx.print(Point(x, y), ' ')   # if out of bounds then draw blank space
+                    ctx.print(Point(x * 2 + 1, y), ' ')
+                    ctx.print(Point(x, y), '[font=map] ')   # if out of bounds then draw blank space
                 if not self.cam_offset == (0, 0):
                     # if camera is not centered on player - draw there a red 'X'
                     ctx.color(terminal.color_from_argb(255, 255, 0, 0))
                     ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                    ctx.print(Point(self.bounds.width // 2, self.bounds.height // 2), 'X')
+                    ctx.print(Point(self.bounds.width + 1, self.bounds.height // 2), ' ')
+                    ctx.print(Point(self.bounds.width, self.bounds.height // 2), '[font=map]X')
 
