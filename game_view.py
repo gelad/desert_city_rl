@@ -1,7 +1,7 @@
 """
     This file contains graphics and user interface.
 """
-
+import jsonpickle
 from clubsandwich.director import DirectorLoop
 from clubsandwich.ui import (
     WindowView,
@@ -11,8 +11,10 @@ from clubsandwich.ui import (
     CyclingButtonView,
     SingleLineTextInputView,
     IntStepperView,
-    RectView
+    RectView,
+    View
 )
+from clubsandwich.geom import Size, Point
 from bearlibterminal import terminal
 
 from clubsandwich_fixed import ButtonViewFixed, LabelViewFixed
@@ -69,16 +71,16 @@ class MainMenuScene(UIScene):
     """ Scene with main menu options """
     def __init__(self, *args, **kwargs):
         views = []
-        loaded = save_load.load_game()  # try to load game
+        self.game = save_load.load_game()  # try to load game
         views.append(LabelViewFixed(
                 LOGO[1:].rstrip(),
                 layout_options=LayoutOptions.row_top(0.5)))
         views.append(LabelViewFixed(
                 "Choose one of the options below:",
                 layout_options=LayoutOptions.centered('intrinsic', 'intrinsic')))
-        if loaded:  # is game succesfully loaded - show Continue button
+        if self.game:  # is game succesfully loaded - show Continue button
             views.append(ButtonViewFixed(
-                text="Continue", callback=self.continue_game(loaded),
+                text="Continue", callback=self.continue_game,
                 layout_options=LayoutOptions.row_bottom(4).with_updates(
                     left=0.2, width=0.2, right=None)))
         else:  # if no savegame - show option greyed-out
@@ -103,8 +105,8 @@ class MainMenuScene(UIScene):
     def new_game(self):
         self.director.push_scene(CharacterSelectScene())
 
-    def continue_game(self, game):
-        pass
+    def continue_game(self):
+        self.director.push_scent(MainGameScene(self.game))
 
 
 class CharacterSelectScene(UIScene):
@@ -120,7 +122,6 @@ class CharacterSelectScene(UIScene):
             top_offset += 1
             views.append(ButtonViewFixed(text=option,
                                          callback=self.option_activated,
-                                         callback_selected=self.option_selected,
                                          layout_options=LayoutOptions(
                                              left=2,
                                              top=top_offset,
@@ -171,11 +172,129 @@ class CharacterSelectScene(UIScene):
             self.description_view.text = self.bg_texts[self.selected]
             self.description_view.needs_layout = True
 
-
-    def option_selected(self):
-        """ Method to call when option is selected (highlighted) """
-        pass
-
     def option_activated(self):
-        """ Method to call when option is activated (ENTER key pressed) """
-        pass
+        """ Method to call when option is activated (ENTER key pressed) - New Game start """
+        # TODO: make LOADING scene appear
+        self.director.push_scene(LoadingScene())
+        self.director.active_scene.terminal_update()
+        game = game_logic.Game()  # start a new game
+        sg_file = open('data/starting_gear.json', 'r')  # load starting gear
+        sg_dict = jsonpickle.loads(sg_file.read())
+        for item_id in sg_dict[self.options[self.selected]]:
+            game.player.add_item(item_id)
+        sg_file.close()
+        self.director.push_scene(MainGameScene(game))
+
+
+class LoadingScene(UIScene):
+    """ Loading scene - currently a placeholder """
+    def __init__(self, *args, **kwargs):
+        views = [LabelViewFixed(
+                LOGO[1:].rstrip(),
+                layout_options=LayoutOptions.row_top(0.5))]
+        super().__init__(views, *args, **kwargs)
+
+    def become_active(self):
+        self.ctx.clear()
+
+
+class MainGameScene(UIScene):
+    """ Main game scene """
+    def __init__(self, game, *args, **kwargs):
+        self.game = game
+        views = [MapView(game=game,
+                         layout_options=LayoutOptions(
+                             left=1,
+                             width=0.75,
+                             top=1,
+                             height=None,
+                             bottom=1,
+                             right=None
+                            ))]
+        super().__init__(views, *args, **kwargs)
+
+    def become_active(self):
+        self.ctx.clear()
+
+
+class MapView(View):
+    """ View with game map """
+    def __init__(self, game, *args, **kwargs):
+        self.game = game  # game object reference for obtaining map info
+        self.cam_offset = (0, 0)
+        super().__init__(*args, **kwargs)
+
+    @property
+    def intrinsic_size(self):
+        return Size(self.bounds.width, self.bounds.height)
+
+    @staticmethod
+    def cell_graphics(x, y, cell, loc, visible):
+        """ Method that returns graphic representation of tile. """
+        char = ' '
+        color = [255, 255, 255]
+        bgcolor = [0, 0, 0]
+        if visible:  # check if cell is visible
+            tile = dataset.get_tile(cell.tile)
+            char = tile[0]
+            color = tile[1]
+            bgcolor = tile[2]
+            brk = False
+            for ent in cell.entities:  # iterate through list of entities,if there are any, display them instead of tile
+                char = ent.char
+                color = ent.color
+                if not color:
+                    color = [255, 255, 255]
+                if ent.occupies_tile:  # check if there is entity, occupying tile - display it on top
+                    color = ent.color
+                    brk = True
+                if len(cell.entities) > 1:  # if there are multiple items, replace bgcolor
+                    bgcolor = cell.entities[0].color
+                    if color == bgcolor:
+                        bgcolor = [c - 50 for c in bgcolor]
+                        i = 0
+                        for c in bgcolor:
+                            if c < 0:
+                                bgcolor[i] = 0
+                            i += 1
+                if brk:
+                    break
+            # update visited cells map (for displaying grey out of vision explored tiles)
+            loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
+            return [char, color, bgcolor]
+        elif cell.explored:  # check if it was previously explored
+            prev_seen_cg = loc.out_of_sight_map[(x, y)]  # take cell graphic from out_of_sight map of Location
+            prev_seen_cg[1] = [100, 100, 100]  # make it greyish
+            prev_seen_cg[2] = [50, 50, 50]
+            return prev_seen_cg
+        return [char, color, bgcolor]
+
+    def draw(self, ctx):
+        # player on-map coords
+        player_x = self.game.player.position[0]
+        player_y = self.game.player.position[1]
+        # player on-screen coords
+        player_scr_x = self.bounds.width // 2 - self.cam_offset[0]
+        player_scr_y = self.bounds.height // 2 - self.cam_offset[1]
+        for x in range(0, self.bounds.width):  # iterate through every x, y in map_console
+            for y in range(0, self.bounds.height):
+                rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
+                rel_y = y - player_scr_y + player_y
+                # checks if location coordinates are valid (in boundaries)
+                if self.game.current_loc.is_in_boundaries(rel_x, rel_y):
+                    # obtain cell graphics
+                    cg = self.cell_graphics(rel_x, rel_y, self.game.current_loc.cells[rel_x][rel_y],
+                                            self.game.current_loc,
+                                            self.game.player.is_in_fov(rel_x, rel_y))
+                    ctx.color(terminal.color_from_argb(255, cg[1][0], cg[1][1], cg[1][2]))
+                    ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
+                    ctx.print(Point(x, y), cg[0])
+                else:
+                    ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
+                    ctx.print(Point(x, y), ' ')   # if out of bounds then draw blank space
+                if not self.cam_offset == (0, 0):
+                    # if camera is not centered on player - draw there a red 'X'
+                    ctx.color(terminal.color_from_argb(255, 255, 0, 0))
+                    ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
+                    ctx.print(Point(self.bounds.width // 2, self.bounds.height // 2), 'X')
+

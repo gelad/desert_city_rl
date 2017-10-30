@@ -7,6 +7,7 @@ from bearlibterminal import terminal
 
 from math import floor
 
+
 class LabelViewFixed(View):
   """
   Draws the given string inside its bounds. Multi-line strings work fine.
