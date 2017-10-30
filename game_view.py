@@ -11,6 +11,7 @@ from clubsandwich.ui import (
     CyclingButtonView,
     SingleLineTextInputView,
     IntStepperView,
+    RectView
 )
 from clubsandwich_fixed import ButtonViewFixed, LabelViewFixed
 
@@ -27,7 +28,7 @@ LOGO = """
             =================================================
                      \ =======================/
 """
-texts=[
+character_bg_descriptions=[
                                              'Many adventurers are lured to the City - in search of treasures, power,' +
                                              ' glory or something else. You are among the others - jack of all trades,' +
                                              ' master of nothing.'
@@ -49,7 +50,7 @@ texts=[
                                              'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
                                              ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
                                              ' magic gift.']
-options = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
+character_backgrounds = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
 #  /temporary shit
 
 
@@ -63,6 +64,7 @@ class GameLoop(DirectorLoop):
 
 
 class MainMenuScene(UIScene):
+    """ Scene with main menu options """
     def __init__(self, *args, **kwargs):
         views = []
         loaded = save_load.load_game()  # try to load game
@@ -97,9 +99,35 @@ class MainMenuScene(UIScene):
         self.ctx.clear()
 
     def new_game(self):
-        pass
-        #  self.director.push_scene(CharacterCreationScene())
+        self.director.push_scene(CharacterSelectScene())
 
     def continue_game(self, game):
         pass
-        # self.director.push_scene(SettingsScene())
+
+
+class CharacterSelectScene(UIScene):
+    """ Scene displays character background variants with descriptions """
+    def __init__(self, *args, **kwargs):
+        options = character_backgrounds
+        self.bg_texts = character_bg_descriptions
+        views = []
+        views.append(RectView(style='double', layout_options=LayoutOptions(left=0, top=0)))
+        top_offset = 0
+        for option in options:
+            top_offset += 1
+            views.append(ButtonViewFixed(text=option,
+                                         callback=self.option_selected(),
+                                         layout_options=LayoutOptions(
+                                             left=2,
+                                             top=top_offset,
+                                             width='intrinsic',
+                                             height=1,
+                                             bottom=None,
+                                             right=None)))
+        super().__init__(views, *args, **kwargs)
+
+    def become_active(self):
+        self.ctx.clear()
+
+    def option_selected(self):
+        pass
