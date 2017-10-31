@@ -282,7 +282,6 @@ class MainGameScene(UIScene):
             elif player_input in (terminal.TK_ESCAPE, terminal.TK_CLOSE):
                 save_load.save_game(game)
                 self.director.quit()
-            self.ctx.clear()
             return True
         return False
 
@@ -291,7 +290,9 @@ class MapView(View):
     """ View with game map """
     def __init__(self, game, *args, **kwargs):
         self.game = game  # game object reference for obtaining map info
-        self.cam_offset = (0, 0)
+        self.cam_offset = (0, 0)  # camera offset (if looking or targeting)
+        self.last_game_time = game.time_system.current_time()  # last game time (to know when redraw needed)
+        self.tick = 0  # frame count (to know when redraw needed)
         super().__init__(*args, **kwargs)
 
     @property
@@ -341,46 +342,50 @@ class MapView(View):
         return [char, color, bgcolor]
 
     def draw(self, ctx):
-        # TODO: refactor this function (color handling, coords to Point() objects etc)
+        # TODO: further refactoring needed (to speed up this)
         # X coordinate divided by 2 because map font is square - 1 map char = 2 text chars
         # player on-map coords
-        ctx.clear()
-        player_x = self.game.player.position[0]
-        player_y = self.game.player.position[1]
-        # player on-screen coords
-        player_scr_x = self.bounds.width // 4 - self.cam_offset[0]
-        player_scr_y = self.bounds.height // 2 - self.cam_offset[1]
-        for x in range(0, self.bounds.width // 2):  # iterate through every x, y
-            for y in range(0, self.bounds.height):
-                rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
-                rel_y = y - player_scr_y + player_y
-                # checks if location coordinates are valid (in boundaries)
-                if self.game.current_loc.is_in_boundaries(rel_x, rel_y):
-                    # obtain cell graphics
-                    cg = self.cell_graphics(rel_x, rel_y, self.game.current_loc.cells[rel_x][rel_y],
-                                            self.game.current_loc,
-                                            self.game.player.is_in_fov(rel_x, rel_y))
-                    ctx.color(terminal.color_from_argb(255, cg[1][0], cg[1][1], cg[1][2]))
-                    ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
-                    terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
-                    terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map]' + cg[0])
-                    # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
-                    # ctx.print(Point(x * 2, y), '[font=map]' + cg[0])
-                else:
-                    ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                    terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
-                    terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map] ')
-                    # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
-                    # ctx.print(Point(x, y), '[font=map] ')   # if out of bounds then draw blank space
-                if not self.cam_offset == (0, 0):
-                    # if camera is not centered on player - draw there a red 'X'
-                    ctx.color(terminal.color_from_argb(255, 255, 0, 0))
-                    ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                    # draw blank space with bkcolor (big chars bug?)
-                    terminal.printf(self.layout_options.left + self.bounds.width // 2 + 1,
-                                    self.layout_options.top + self.bounds.height // 2, ' ')
-                    terminal.printf(self.layout_options.left + self.bounds.width // 2,
-                                    self.layout_options.top + self.bounds.height // 2, '[font=map]X')
-                    # ctx.print(Point(self.bounds.width // 2 + 1, self.bounds.height // 2), ' ')
-                    # ctx.print(Point(self.bounds.width // 2, self.bounds.height // 2), '[font=map]X')
+        self.tick += 1
+        # redraw only if game time changed or every 10 frames
+        if self.last_game_time != self.game.time_system.current_time() or self.tick > 10:
+            player_x = self.game.player.position[0]
+            player_y = self.game.player.position[1]
+            # player on-screen coords
+            player_scr_x = self.bounds.width // 4 - self.cam_offset[0]
+            player_scr_y = self.bounds.height // 2 - self.cam_offset[1]
+            for x in range(0, self.bounds.width // 2):  # iterate through every x, y
+                for y in range(0, self.bounds.height):
+                    rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
+                    rel_y = y - player_scr_y + player_y
+                    # checks if location coordinates are valid (in boundaries)
+                    if self.game.current_loc.is_in_boundaries(rel_x, rel_y):
+                        # obtain cell graphics
+                        cg = self.cell_graphics(rel_x, rel_y, self.game.current_loc.cells[rel_x][rel_y],
+                                                self.game.current_loc,
+                                                self.game.player.is_in_fov(rel_x, rel_y))
+                        ctx.color(terminal.color_from_argb(255, cg[1][0], cg[1][1], cg[1][2]))
+                        ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
+                        terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
+                        terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map]' + cg[0])
+                        # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
+                        # ctx.print(Point(x * 2, y), '[font=map]' + cg[0])
+                    else:
+                        ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
+                        terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
+                        terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map] ')
+                        # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
+                        # ctx.print(Point(x, y), '[font=map] ')   # if out of bounds then draw blank space
+                    if not self.cam_offset == (0, 0):
+                        # if camera is not centered on player - draw there a red 'X'
+                        ctx.color(terminal.color_from_argb(255, 255, 0, 0))
+                        ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
+                        # draw blank space with bkcolor (big chars bug?)
+                        terminal.printf(self.layout_options.left + self.bounds.width // 2 + 1,
+                                        self.layout_options.top + self.bounds.height // 2, ' ')
+                        terminal.printf(self.layout_options.left + self.bounds.width // 2,
+                                        self.layout_options.top + self.bounds.height // 2, '[font=map]X')
+                        # ctx.print(Point(self.bounds.width // 2 + 1, self.bounds.height // 2), ' ')
+                        # ctx.print(Point(self.bounds.width // 2, self.bounds.height // 2), '[font=map]X')
+            self.last_game_time = self.game.time_system.current_time()
+            self.tick = 0
 
