@@ -288,7 +288,15 @@ class MainGameScene(UIScene):
         """ Update values in bars and tabs before drawing """
         player = self.game.player
         if is_active:
+            self.health_bar.clear = True
             self.health_bar.text = str(player.hp) + '/' + str(player.maxhp) + ' HP'
+            # hp becomes red when hurt
+            hp_percent = player.hp / player.maxhp
+            if hp_percent < 0:
+                hp_percent = 0
+            if hp_percent > 1:
+                hp_percent = 1
+            self.health_bar.color_fg = terminal.color_from_argb(255, int(255 * (1 - hp_percent)), int(255 * hp_percent), 0)
         super().terminal_update(is_active=is_active)
 
     def terminal_read(self, val):
@@ -315,7 +323,7 @@ class MainGameScene(UIScene):
                 advance = commands.command_default_direction(game, -1, 1)
             elif player_input == terminal.TK_KP_3:
                 advance = commands.command_default_direction(game, 1, 1)
-            elif player_input in (terminal.TK_ESCAPE):
+            elif player_input == terminal.TK_ESCAPE:
                 self.director.quit()
             handled = True
             # threading is used to make UI responsible to input while game logic updates.
