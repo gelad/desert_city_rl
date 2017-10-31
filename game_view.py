@@ -234,23 +234,24 @@ class MainGameScene(UIScene):
         """ This method handles player input in main scene """
         # allow menu selection with left/right arrows
         super().terminal_read(val)
+        player_input = val
         game = self.game
         if game.is_waiting_input:
-            if val in (terminal.TK_KP_4, terminal.TK_LEFT):
+            if player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
                 commands.command_default_direction(game, -1, 0)
-            elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
+            elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
                 commands.command_default_direction(game, 1, 0)
-            elif val in (terminal.TK_KP_8, terminal.TK_UP):
+            elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
                 commands.command_default_direction(game, 0, -1)
-            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+            elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
                 commands.command_default_direction(game, 0, 1)
-            elif val == terminal.TK_KP_7:
+            elif player_input == terminal.TK_KP_7:
                 commands.command_default_direction(game, -1, -1)
-            elif val == terminal.TK_KP_9:
+            elif player_input == terminal.TK_KP_9:
                 commands.command_default_direction(game, 1, -1)
-            elif val == terminal.TK_KP_1:
+            elif player_input == terminal.TK_KP_1:
                 commands.command_default_direction(game, -1, 1)
-            elif val == terminal.TK_KP_3:
+            elif player_input == terminal.TK_KP_3:
                 commands.command_default_direction(game, 1, 1)
             self.ctx.clear()
             return True

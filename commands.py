@@ -1,6 +1,7 @@
 """ This module contains "commands" - functions that make "game-logic" actions in accord with player input """
 import actions
 import game_logic
+import threading
 
 
 def command_default_direction(game, dx, dy):
@@ -34,4 +35,4 @@ def command_default_direction(game, dx, dy):
         #     return
         # if leave[1] == 1:  # if yes - leave location
         #     self.command_leave_loc()
-    game_logic.main_loop(game)
+    threading._start_new_thread(game_logic.main_loop, (game, ))
