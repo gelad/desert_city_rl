@@ -1,8 +1,6 @@
 import game_view
 import dataset
 
-import os
-
 import jsonpickle
 
 
@@ -28,23 +26,4 @@ settings = jsonpickle.loads(settings_file.read())  # load settings
 settings_file.close()
 loop = game_view.GameLoop()
 loop.run()
-
-back_to_menu = False
-current_game = None
-while back_to_menu:
-    game_view.win_mgr.active_window = None  # TODO: maybe make a method for clearing graphics?
-    game_view.win_mgr.windows.clear()
-    game_view.console.clear()
-    if current_game:
-        del current_game
-    current_game = main_menu()
-    back_to_menu = main_loop()
-    if current_game.player.state == 'dead':
-        try:
-            os.remove('savegame')
-        except FileNotFoundError:
-            pass
-    else:
-        save_game(current_game)
-
 

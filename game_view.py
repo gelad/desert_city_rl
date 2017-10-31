@@ -21,6 +21,8 @@ from clubsandwich_fixed import ButtonViewFixed, LabelViewFixed
 
 import time
 import sys
+import threading
+import os
 
 import game_logic
 import save_load
@@ -66,10 +68,23 @@ class GameLoop(DirectorLoop):
     """ GameLoop class """
     def __init__(self):
         self.last_frame_time = time.time()
+        self.game = None  # reference to Game object - to save it if closed
         super().__init__()
 
     def terminal_init(self):
         super().terminal_init()
+
+    def quit(self):
+        """ Added game saving on quit """
+        if self.game:  # if game in progress - save it
+            if self.game.player.state != 'dead':
+                save_load.save_game(self.game)
+            else:  # delete save if player dead
+                try:
+                    os.remove('savegame')
+                except FileNotFoundError:
+                    pass
+        super().quit()
 
     def get_initial_scene(self):
         return MainMenuScene()
@@ -145,6 +160,7 @@ class MainMenuScene(UIScene):
 
     def continue_game(self):
         self.director.push_scene(MainGameScene(self.game))
+        self.director.game = self.game
 
 
 class CharacterSelectScene(UIScene):
@@ -223,6 +239,7 @@ class CharacterSelectScene(UIScene):
             game.player.add_item(item_id)
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
+        self.director.game = game
 
 
 class LoadingScene(UIScene):
@@ -241,49 +258,73 @@ class MainGameScene(UIScene):
     """ Main game scene """
     def __init__(self, game, *args, **kwargs):
         self.game = game
-        views = [RectView(style='double', layout_options=LayoutOptions(left=0, top=0)),
-                 MapView(game=game,
+        self.health_bar = LabelViewFixed(text='Health bar', layout_options=LayoutOptions(left=0.62,
+                                                                                         top=1,
+                                                                                         width='intrinsic',
+                                                                                         height='intrinsic',
+                                                                                         bottom=None,
+                                                                                         right=None))
+        views = [MapView(game=game,
                          layout_options=LayoutOptions(
                              left=1,
-                             width=0.75,
+                             width=0.60,
                              top=1,
                              height=None,
                              bottom=1,
                              right=None
-                            ))]
+                            )),
+                 RectView(style='double', layout_options=LayoutOptions(left=0, top=0)),
+                 RectView(style='double', layout_options=LayoutOptions().column_left(1).with_updates(
+                     left=0.61,
+                     right=None)),
+                 self.health_bar
+                 ]
         super().__init__(views, *args, **kwargs)
 
     def become_active(self):
         self.ctx.clear()
 
+    def terminal_update(self, is_active=False):
+        """ Update values in bars and tabs before drawing """
+        player = self.game.player
+        if is_active:
+            self.health_bar.text = str(player.hp) + '/' + str(player.maxhp) + ' HP'
+        super().terminal_update(is_active=is_active)
+
     def terminal_read(self, val):
         """ This method handles player input in main scene """
-        # allow menu selection with left/right arrows
-        super().terminal_read(val)
         player_input = val
         game = self.game
+        handled = False  # input handled flag
+        advance = False  # flag if game_logic time advance needed
         if game.is_waiting_input:
+            # movement commands
             if player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
-                commands.command_default_direction(game, -1, 0)
+                advance = commands.command_default_direction(game, -1, 0)
             elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
-                commands.command_default_direction(game, 1, 0)
+                advance = commands.command_default_direction(game, 1, 0)
             elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
-                commands.command_default_direction(game, 0, -1)
+                advance = commands.command_default_direction(game, 0, -1)
             elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
-                commands.command_default_direction(game, 0, 1)
+                advance = commands.command_default_direction(game, 0, 1)
             elif player_input == terminal.TK_KP_7:
-                commands.command_default_direction(game, -1, -1)
+                advance = commands.command_default_direction(game, -1, -1)
             elif player_input == terminal.TK_KP_9:
-                commands.command_default_direction(game, 1, -1)
+                advance = commands.command_default_direction(game, 1, -1)
             elif player_input == terminal.TK_KP_1:
-                commands.command_default_direction(game, -1, 1)
+                advance = commands.command_default_direction(game, -1, 1)
             elif player_input == terminal.TK_KP_3:
-                commands.command_default_direction(game, 1, 1)
-            elif player_input in (terminal.TK_ESCAPE, terminal.TK_CLOSE):
-                save_load.save_game(game)
+                advance = commands.command_default_direction(game, 1, 1)
+            elif player_input in (terminal.TK_ESCAPE):
                 self.director.quit()
-            return True
-        return False
+            handled = True
+            # threading is used to make UI responsible to input while game logic updates.
+            # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
+            # TODO: rewrite with proper threading
+            if advance:
+                threading._start_new_thread(game.main_loop, ())
+        super().terminal_read(val)
+        return handled
 
 
 class MapView(View):
