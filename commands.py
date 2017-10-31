@@ -3,10 +3,13 @@ import actions
 import game_logic
 
 
-def command_default_direction(player, loc, dx, dy):
+def command_default_direction(game, dx, dy):
     """ Command for player pressed direction key - move/open/attack/use default action for each type
         of object in desired cell
     """
+    game.is_waiting_input = False
+    player = game.player
+    loc = game.current_loc
     player_x = player.position[0]
     player_y = player.position[1]
     new_x = player_x + dx
@@ -31,3 +34,4 @@ def command_default_direction(player, loc, dx, dy):
         #     return
         # if leave[1] == 1:  # if yes - leave location
         #     self.command_leave_loc()
+    game_logic.main_loop(game)

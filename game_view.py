@@ -234,14 +234,21 @@ class MainGameScene(UIScene):
         game = self.game
         if game.is_waiting_input:
             if val in (terminal.TK_KP_4, terminal.TK_LEFT):
-                commands.command_default_direction(game.player, game.current_loc, -1, 0)
+                commands.command_default_direction(game, -1, 0)
             elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
-                commands.command_default_direction(game.player, game.current_loc, 1, 0)
+                commands.command_default_direction(game, 1, 0)
             elif val in (terminal.TK_KP_8, terminal.TK_UP):
-                commands.command_default_direction(game.player, game.current_loc, 0, -1)
+                commands.command_default_direction(game, 0, -1)
             elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
-                commands.command_default_direction(game.player, game.current_loc, 0, 1)
-            game_logic.main_loop(game)
+                commands.command_default_direction(game, 0, 1)
+            elif val == terminal.TK_KP_7:
+                commands.command_default_direction(game, -1, -1)
+            elif val == terminal.TK_KP_9:
+                commands.command_default_direction(game, 1, -1)
+            elif val == terminal.TK_KP_1:
+                commands.command_default_direction(game, -1, 1)
+            elif val == terminal.TK_KP_3:
+                commands.command_default_direction(game, 1, 1)
             self.ctx.clear()
 
 
@@ -291,10 +298,11 @@ class MapView(View):
             loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
             return [char, color, bgcolor]
         elif cell.explored:  # check if it was previously explored
-            prev_seen_cg = loc.out_of_sight_map[(x, y)]  # take cell graphic from out_of_sight map of Location
-            prev_seen_cg[1] = [100, 100, 100]  # make it greyish
-            prev_seen_cg[2] = [50, 50, 50]
-            return prev_seen_cg
+            if (x, y) in loc.out_of_sight_map:  # TODO: HACK, there must not be explored tiles not in out_of_sight
+                prev_seen_cg = loc.out_of_sight_map[(x, y)]  # take cell graphic from out_of_sight map of Location
+                prev_seen_cg[1] = [100, 100, 100]  # make it greyish
+                prev_seen_cg[2] = [50, 50, 50]
+                return prev_seen_cg
         return [char, color, bgcolor]
 
     def draw(self, ctx):

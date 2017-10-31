@@ -1923,7 +1923,7 @@ def circle_points(r, include_center):
 def main_loop(game):
     """ Main game loop function (time advancement, performing actions etc) """
     # TODO: move this to Game object method
-    while not game.state == 'exit':
+    while not game.player.state == 'ready':
         if game.state == 'playing':  # check if state is 'playing'
             if game.is_waiting_input:  # check if game is waiting for player input
                 if not game.player.state == 'ready':  # if after command execution player is performing an action
@@ -1938,5 +1938,4 @@ def main_loop(game):
                 for actor in game.current_loc.actors:  # iterate through actors
                     if actor.state == 'ready' and actor.ai:  # pick those who have ai and ready to act
                         actor.ai.act()  # make them act
-                if game.player.state == 'ready':  # check if player is 'ready'
-                    game.is_waiting_input = True  # set waiting for input flag True
+    game.is_waiting_input = True  # set waiting for input flag True
