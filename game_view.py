@@ -105,8 +105,10 @@ class MainMenuScene(UIScene):
         super().terminal_read(val)
         if val in (terminal.TK_KP_4, terminal.TK_LEFT):
             self.view.find_prev_responder()
+            return True
         elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
             self.view.find_next_responder()
+            return True
         self.ctx.clear()
 
     def become_active(self):
@@ -181,6 +183,7 @@ class CharacterSelectScene(UIScene):
             self.ctx.clear()
             self.description_view.text = self.bg_texts[self.selected]
             self.description_view.needs_layout = True
+            return True
 
     def option_activated(self):
         """ Method to call when option is activated (ENTER key pressed) - New Game start """
@@ -250,6 +253,8 @@ class MainGameScene(UIScene):
             elif val == terminal.TK_KP_3:
                 commands.command_default_direction(game, 1, 1)
             self.ctx.clear()
+            return True
+        return False
 
 
 class MapView(View):
