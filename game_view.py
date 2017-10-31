@@ -24,6 +24,7 @@ import save_load
 import actions
 import dataset
 import generation
+import commands
 
 #  temporary shit
 LOGO = """
@@ -99,6 +100,15 @@ class MainMenuScene(UIScene):
                     left=0.6, width=0.2, right=None)))
         super().__init__(views, *args, **kwargs)
 
+    def terminal_read(self, val):
+        # allow menu selection with left/right arrows
+        super().terminal_read(val)
+        if val in (terminal.TK_KP_4, terminal.TK_LEFT):
+            self.view.find_prev_responder()
+        elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
+            self.view.find_next_responder()
+        self.ctx.clear()
+
     def become_active(self):
         self.ctx.clear()
 
@@ -106,7 +116,7 @@ class MainMenuScene(UIScene):
         self.director.push_scene(CharacterSelectScene())
 
     def continue_game(self):
-        self.director.push_scent(MainGameScene(self.game))
+        self.director.push_scene(MainGameScene(self.game))
 
 
 class CharacterSelectScene(UIScene):
@@ -202,7 +212,8 @@ class MainGameScene(UIScene):
     """ Main game scene """
     def __init__(self, game, *args, **kwargs):
         self.game = game
-        views = [MapView(game=game,
+        views = [RectView(style='double', layout_options=LayoutOptions(left=0, top=0)),
+                 MapView(game=game,
                          layout_options=LayoutOptions(
                              left=1,
                              width=0.75,
@@ -215,6 +226,23 @@ class MainGameScene(UIScene):
 
     def become_active(self):
         self.ctx.clear()
+
+    def terminal_read(self, val):
+        """ This method handles player input in main scene """
+        # allow menu selection with left/right arrows
+        super().terminal_read(val)
+        game = self.game
+        if game.is_waiting_input:
+            if val in (terminal.TK_KP_4, terminal.TK_LEFT):
+                commands.command_default_direction(game.player, game.current_loc, -1, 0)
+            elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
+                commands.command_default_direction(game.player, game.current_loc, 1, 0)
+            elif val in (terminal.TK_KP_8, terminal.TK_UP):
+                commands.command_default_direction(game.player, game.current_loc, 0, -1)
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+                commands.command_default_direction(game.player, game.current_loc, 0, 1)
+            game_logic.main_loop(game)
+            self.ctx.clear()
 
 
 class MapView(View):
@@ -270,6 +298,7 @@ class MapView(View):
         return [char, color, bgcolor]
 
     def draw(self, ctx):
+        # TODO: refactor this function (color handling, coords to Point() objects etc)
         # X coordinate divided by 2 because map font is square - 1 map char = 2 text chars
         # player on-map coords
         player_x = self.game.player.position[0]

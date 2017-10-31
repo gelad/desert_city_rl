@@ -1918,3 +1918,25 @@ def circle_points(r, include_center):
     if include_center:
         points.add((0, 0))
     return points
+
+
+def main_loop(game):
+    """ Main game loop function (time advancement, performing actions etc) """
+    # TODO: move this to Game object method
+    while not game.state == 'exit':
+        if game.state == 'playing':  # check if state is 'playing'
+            if game.is_waiting_input:  # check if game is waiting for player input
+                if not game.player.state == 'ready':  # if after command execution player is performing an action
+                    game.is_waiting_input = False  # set waiting for input flag to False
+            else:  # if not waiting for input
+                game.time_system.pass_time()  # pass game time, fire events
+                game.current_loc.reap()  # if there are dead after tick - call their death() methods
+                if game.player.state == 'dead':  # check if player is dead
+                    game.state = 'dead'  # set game state to dead
+                    game.is_waiting_input = True  # set waiting for input flag True
+                    break
+                for actor in game.current_loc.actors:  # iterate through actors
+                    if actor.state == 'ready' and actor.ai:  # pick those who have ai and ready to act
+                        actor.ai.act()  # make them act
+                if game.player.state == 'ready':  # check if player is 'ready'
+                    game.is_waiting_input = True  # set waiting for input flag True

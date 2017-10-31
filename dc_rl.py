@@ -12,63 +12,6 @@ import zlib
 import jsonpickle
 
 
-def main_menu():
-    main_menu_options = []
-    loaded = load_game()  # try to load game
-    if loaded:
-        main_menu_options.append('Continue')
-    main_menu_options.append('New Game')
-    main_menu_options.append('Exit')
-    main_menu_choice = ui.show_menu_list(win_mgr=game_view.win_mgr, caption='Welcome to ancient city of Neth-Nikakh!',
-                                         options=main_menu_options)
-    if not main_menu_choice:
-        exit()
-    if main_menu_choice[0] == 'Continue':
-        game = loaded  # load saved game
-    elif main_menu_choice[0] == 'New Game':
-        # TODO: move texts to files
-        class_choice = ui.show_menu_text(win_mgr=game_view.win_mgr, caption='Choose your character background:',
-                                         options=['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker'],
-                                         keys='alphabet', text_width=40, text_height=30,
-                                         texts=[
-                                             'Many adventurers are lured to the City - in search of treasures, power,' +
-                                             ' glory or something else. You are among the others - jack of all trades,' +
-                                             ' master of nothing.'
-                                             ,
-                                             'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
-                                             ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
-                                             'such warrior, proficient in melee combat and wearing a set of armor.'
-                                             ,
-                                             'Mercenaries from distant Northern country called Gantra are well-known ' +
-                                             'as trustworthy soldiers. One of them - with your sturdy crossbow' +
-                                             ' and shooting skills - you headed south, to obtain treasures of mysterious'
-                                             + ' City.'
-                                             ,
-                                             'A talent to use magic is rare among the people of Vaerthol. ' +
-                                             'You lack one, but unlike others, you desperately crave ' +
-                                             'for magic. One man told you a rumor, that in the sands lies a magic city' +
-                                             ' of Neth-Nikakh, where among the other wonders, ordinary people can' +
-                                             ' become powerful ' +
-                                             'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
-                                             ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
-                                             ' magic gift.'])
-        game = game_logic.Game()  # start a new game
-        if not class_choice:  # if nothing selected (esc hit)
-            quit()
-        sg_file = open('data/starting_gear.json', 'r')  # load starting gear
-        sg_dict = jsonpickle.loads(sg_file.read())
-        for item_id in sg_dict[class_choice[0]]:
-            game.player.add_item(item_id)
-        sg_file.close()
-    elif main_menu_choice[0] == 'Exit':
-        exit()
-    main_window = ui.WindowMain(game, 0, 0, settings['screen_width'], settings['screen_height'],
-                                0, settings['map_width'], settings['map_height'])
-    game_view.win_mgr.add_window(main_window)  # add main window to WinMgr
-    game_view.win_mgr.active_window = main_window  # make it active
-    return game
-
-
 def player_death():
     """ Function that is called if player is dead """
     # show window with death recap, that returns to main menu
