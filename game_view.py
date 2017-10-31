@@ -19,6 +19,9 @@ from bearlibterminal import terminal
 
 from clubsandwich_fixed import ButtonViewFixed, LabelViewFixed
 
+import time
+import sys
+
 import game_logic
 import save_load
 import actions
@@ -61,11 +64,34 @@ character_backgrounds = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic see
 
 class GameLoop(DirectorLoop):
     """ GameLoop class """
+    def __init__(self):
+        self.last_frame_time = time.time()
+        super().__init__()
+
     def terminal_init(self):
         super().terminal_init()
 
     def get_initial_scene(self):
         return MainMenuScene()
+
+    def loop_until_terminal_exits(self):
+        """ Loop changed, added sleep(), to prevent unnecessary high CPU load """
+        try:
+            has_run_one_loop = False
+            current_time = time.time()
+            while self.run_loop_iteration():
+                sleep_time = 1. / self.fps - (current_time - self.last_frame_time)
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+                self.last_frame_time = current_time
+                has_run_one_loop = True
+            if not has_run_one_loop:
+                print(
+                    "Exited after only one loop iteration. Did you forget to" +
+                    " return True from terminal_update()?",
+                    file=sys.stderr)
+        except KeyboardInterrupt:
+            pass
 
 
 class MainMenuScene(UIScene):
@@ -253,6 +279,9 @@ class MainGameScene(UIScene):
                 commands.command_default_direction(game, -1, 1)
             elif player_input == terminal.TK_KP_3:
                 commands.command_default_direction(game, 1, 1)
+            elif player_input in (terminal.TK_ESCAPE, terminal.TK_CLOSE):
+                save_load.save_game(game)
+                self.director.quit()
             self.ctx.clear()
             return True
         return False
@@ -315,6 +344,7 @@ class MapView(View):
         # TODO: refactor this function (color handling, coords to Point() objects etc)
         # X coordinate divided by 2 because map font is square - 1 map char = 2 text chars
         # player on-map coords
+        ctx.clear()
         player_x = self.game.player.position[0]
         player_y = self.game.player.position[1]
         # player on-screen coords
@@ -332,17 +362,25 @@ class MapView(View):
                                             self.game.player.is_in_fov(rel_x, rel_y))
                     ctx.color(terminal.color_from_argb(255, cg[1][0], cg[1][1], cg[1][2]))
                     ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
-                    ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
-                    ctx.print(Point(x * 2, y), '[font=map]' + cg[0])
+                    terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
+                    terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map]' + cg[0])
+                    # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
+                    # ctx.print(Point(x * 2, y), '[font=map]' + cg[0])
                 else:
                     ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                    ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
-                    ctx.print(Point(x, y), '[font=map] ')   # if out of bounds then draw blank space
+                    terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
+                    terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map] ')
+                    # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
+                    # ctx.print(Point(x, y), '[font=map] ')   # if out of bounds then draw blank space
                 if not self.cam_offset == (0, 0):
                     # if camera is not centered on player - draw there a red 'X'
                     ctx.color(terminal.color_from_argb(255, 255, 0, 0))
                     ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
                     # draw blank space with bkcolor (big chars bug?)
-                    ctx.print(Point(self.bounds.width + 1, self.bounds.height // 2), ' ')
-                    ctx.print(Point(self.bounds.width, self.bounds.height // 2), '[font=map]X')
+                    terminal.printf(self.layout_options.left + self.bounds.width // 2 + 1,
+                                    self.layout_options.top + self.bounds.height // 2, ' ')
+                    terminal.printf(self.layout_options.left + self.bounds.width // 2,
+                                    self.layout_options.top + self.bounds.height // 2, '[font=map]X')
+                    # ctx.print(Point(self.bounds.width // 2 + 1, self.bounds.height // 2), ' ')
+                    # ctx.print(Point(self.bounds.width // 2, self.bounds.height // 2), '[font=map]X')
 
