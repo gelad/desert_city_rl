@@ -23,6 +23,7 @@ import time
 import sys
 import threading
 import os
+import textwrap
 
 import game_logic
 import save_load
@@ -298,7 +299,13 @@ class MainGameScene(UIScene):
                  self.health_bar,
                  self.player_right_hand,
                  self.player_left_hand,
-                 self.money
+                 self.money,
+                 LogView(game=game, layout_options=LayoutOptions(
+                     left=0.62,
+                     top=8,
+                     right=1,
+                     bottom=1
+                 ))
                  ]
         super().__init__(views, *args, **kwargs)
 
@@ -468,3 +475,32 @@ class MapView(View):
             self.last_game_time = self.game.time_system.current_time()
             self.tick = 0
 
+
+class LogView(View):
+    """ View with game log """
+    def __init__(self, game, *args, **kwargs):
+        self.game = game  # game object reference for obtaining map info
+        self.clear = True  # clear before each draw
+        super().__init__(*args, **kwargs)
+
+    @property
+    def intrinsic_size(self):
+        return Size(self.bounds.width, self.bounds.height)
+
+    def draw(self, ctx):
+        # get log messages, intended to be shown to player
+        if self.game.show_debug_log:
+            msgs = [m for m in game_logic.Game.log if m[1] == 'DEBUG']
+        else:
+            msgs = [m for m in game_logic.Game.log if m[1] == 'PLAYER']
+        msgs = msgs[-self.bounds.height:]  # make a slice for last ones log_height ammount
+        log_lines = []
+        for msg in msgs:  # iterate through messages
+            for line in textwrap.wrap(msg[0], self.bounds.width):  # wrap them in lines of log_width
+                log_lines.append((line, msg[2]))  # store them in list
+        log_lines = log_lines[-(self.bounds.height - 1):]  # slice list to log_height elements
+        y = 0
+        for line in log_lines:
+            y += 1
+            ctx.color(terminal.color_from_argb(255, line[1][0], line[1][1], line[1][2]))
+            ctx.print(Point(0, y), line[0])  # draw each line
