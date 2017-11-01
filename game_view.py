@@ -245,42 +245,41 @@ class CharacterSelectScene(UIScene):
 
 class DescribedListSelectionScene(UIScene):
     """ Scene displays a list with selectable options and their descriptions to the left """
-    def __init__(self, options, descriptions, callback, caption='', *args, **kwargs):
+    def __init__(self, options, descriptions, caption='', layout_options=None, *args, **kwargs):
         self.options = options
         self.descriptions = descriptions
-        self.callback = callback
         self.selected = 0
-        views = []
-        views.append(WindowView(caption=caption, style='double', layout_options=LayoutOptions(left=0, top=0)))
+        self.clear = True
         top_offset = 0
+        subviews = []
         for option in self.options:
             top_offset += 1
-            views.append(ButtonViewFixed(text=option,
-                                         callback=self.option_activated,
-                                         layout_options=LayoutOptions(
-                                             left=2,
-                                             top=top_offset,
-                                             width='intrinsic',
-                                             height=1,
-                                             bottom=None,
-                                             right=None)))
+            subviews.append(ButtonViewFixed(text=str(option),
+                                            callback=self.option_activated,
+                                            layout_options=LayoutOptions(
+                                            left=1,
+                                            top=top_offset,
+                                            width='intrinsic',
+                                            height=1,
+                                            bottom=None,
+                                            right=None)))
         self.description_view = LabelViewFixed(text=self.descriptions[self.selected],
                                                align_horz='left',
                                                align_vert='top',
                                                layout_options=LayoutOptions(
                                                     left=0.5,
-                                                    top=1,
+                                                    top=0,
                                                     width=0.45,
                                                     height='intrinsic',
                                                     bottom=None,
                                                     right=None
                                                 ))
-        views.append(self.description_view)
+        subviews.append(self.description_view)
+        views = [WindowView(title=caption,
+                            style='double',
+                            layout_options=layout_options or LayoutOptions(left=0, top=0),
+                            subviews=subviews)]
         super().__init__(views, *args, **kwargs)
-
-    def become_active(self):
-        pass
-        #  self.ctx.clear()
 
     def terminal_read(self, val):
         super().terminal_read(val)
@@ -304,15 +303,30 @@ class DescribedListSelectionScene(UIScene):
                     self.selected += 1
                 else:
                     self.selected = 0
-            self.ctx.clear()
             self.description_view.text = self.descriptions[self.selected]
             self.description_view.needs_layout = True
+            return True
+        elif val == terminal.TK_ESCAPE:
+            self.director.pop_scene(self)
             return True
 
     def option_activated(self):
         """ Method to call when option is activated (ENTER key pressed) """
-        self.callback(self.options[self.selected])
         self.director.pop_scene(self)
+
+
+class DropItemSelectionScene(DescribedListSelectionScene):
+    """ Scene displays a list of items to drop one """
+    def __init__(self, items, game, *args, **kwargs):
+        descriptions = [i.description for i in items]
+        self.game = game
+        super().__init__(options=items, descriptions=descriptions, *args, **kwargs)
+
+    def option_activated(self):
+        """ Method to drop item when option is activated (ENTER key pressed) """
+        self.game.player.perform(actions.act_drop_item, self.game.player, self.options[self.selected])
+        self.game.main_loop()
+        super().option_activated()
 
 
 class LoadingScene(UIScene):
@@ -436,14 +450,15 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_ESCAPE:
                 self.director.quit()
             elif player_input == terminal.TK_D:
-                pass
-                # TODO: CODE HERE
-                # show inventory menu
-                #item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, player=player,
-                #                           caption='Drop item:', keys='alphabet', prev_window=self)
-                #self.director.push_scene(DescribedListSelectionScene(options=player.inventory, des))
-                #if item:
-                #    player.perform(actions.act_drop_item, player, item[0])
+                # show drop item menu
+                self.director.push_scene(DropItemSelectionScene(items=player.inventory,
+                                                                game=game,
+                                                                caption='Drop item:',
+                                                                layout_options=LayoutOptions(
+                                                                    top=0.1, bottom=0.1,
+                                                                    left=0.2, right=0.2
+                                                                )
+                                                                ))
             handled = True
             # threading is used to make UI responsible to input while game logic updates.
             # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
