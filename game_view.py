@@ -258,12 +258,30 @@ class MainGameScene(UIScene):
     """ Main game scene """
     def __init__(self, game, *args, **kwargs):
         self.game = game
-        self.health_bar = LabelViewFixed(text='Health bar', layout_options=LayoutOptions(left=0.62,
-                                                                                         top=1,
-                                                                                         width='intrinsic',
-                                                                                         height='intrinsic',
-                                                                                         bottom=None,
-                                                                                         right=None))
+        self.health_bar = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
+                                                                               top=1,
+                                                                               width='intrinsic',
+                                                                               height='intrinsic',
+                                                                               bottom=None,
+                                                                               right=None))
+        self.player_right_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
+                                                                                      top=3,
+                                                                                      width='intrinsic',
+                                                                                      height='intrinsic',
+                                                                                      bottom=None,
+                                                                                      right=None))
+        self.player_left_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
+                                                                                     top=4,
+                                                                                     width='intrinsic',
+                                                                                     height='intrinsic',
+                                                                                     bottom=None,
+                                                                                     right=None))
+        self.money = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
+                                                                          top=6,
+                                                                          width='intrinsic',
+                                                                          height='intrinsic',
+                                                                          bottom=None,
+                                                                          right=None))
         views = [MapView(game=game,
                          layout_options=LayoutOptions(
                              left=1,
@@ -277,7 +295,10 @@ class MainGameScene(UIScene):
                  RectView(style='double', layout_options=LayoutOptions().column_left(1).with_updates(
                      left=0.61,
                      right=None)),
-                 self.health_bar
+                 self.health_bar,
+                 self.player_right_hand,
+                 self.player_left_hand,
+                 self.money
                  ]
         super().__init__(views, *args, **kwargs)
 
@@ -296,7 +317,16 @@ class MainGameScene(UIScene):
                 hp_percent = 0
             if hp_percent > 1:
                 hp_percent = 1
-            self.health_bar.color_fg = terminal.color_from_argb(255, int(255 * (1 - hp_percent)), int(255 * hp_percent), 0)
+            self.health_bar.color_fg = terminal.color_from_argb(255,
+                                                                int(255 * (1 - hp_percent)),
+                                                                int(255 * hp_percent),
+                                                                0)
+            right = player.equipment['RIGHT_HAND']
+            self.player_right_hand.text = 'Right: ' + str(right)
+            left = player.equipment['LEFT_HAND']
+            self.player_left_hand.text = 'Left:  ' + str(left)
+            money = player.properties['money']
+            self.money.text = 'Money: ' + str(money) + ' coins.'
         super().terminal_update(is_active=is_active)
 
     def terminal_read(self, val):
