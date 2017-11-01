@@ -243,6 +243,78 @@ class CharacterSelectScene(UIScene):
         self.director.game = game
 
 
+class DescribedListSelectionScene(UIScene):
+    """ Scene displays a list with selectable options and their descriptions to the left """
+    def __init__(self, options, descriptions, callback, caption='', *args, **kwargs):
+        self.options = options
+        self.descriptions = descriptions
+        self.callback = callback
+        self.selected = 0
+        views = []
+        views.append(WindowView(caption=caption, style='double', layout_options=LayoutOptions(left=0, top=0)))
+        top_offset = 0
+        for option in self.options:
+            top_offset += 1
+            views.append(ButtonViewFixed(text=option,
+                                         callback=self.option_activated,
+                                         layout_options=LayoutOptions(
+                                             left=2,
+                                             top=top_offset,
+                                             width='intrinsic',
+                                             height=1,
+                                             bottom=None,
+                                             right=None)))
+        self.description_view = LabelViewFixed(text=self.descriptions[self.selected],
+                                               align_horz='left',
+                                               align_vert='top',
+                                               layout_options=LayoutOptions(
+                                                    left=0.5,
+                                                    top=1,
+                                                    width=0.45,
+                                                    height='intrinsic',
+                                                    bottom=None,
+                                                    right=None
+                                                ))
+        views.append(self.description_view)
+        super().__init__(views, *args, **kwargs)
+
+    def become_active(self):
+        pass
+        #  self.ctx.clear()
+
+    def terminal_read(self, val):
+        super().terminal_read(val)
+        # cycle descriptions with selected options
+        if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
+            # allow traverse with arrows and numpad
+            if val == terminal.TK_TAB:
+                if self.selected < len(self.options) - 1:
+                    self.selected += 1
+                else:
+                    self.selected = 0
+            elif val in (terminal.TK_KP_8, terminal.TK_UP):
+                self.view.find_prev_responder()
+                if self.selected > 0:
+                    self.selected -= 1
+                else:
+                    self.selected = len(self.options) - 1
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+                self.view.find_next_responder()
+                if self.selected < len(self.options) - 1:
+                    self.selected += 1
+                else:
+                    self.selected = 0
+            self.ctx.clear()
+            self.description_view.text = self.descriptions[self.selected]
+            self.description_view.needs_layout = True
+            return True
+
+    def option_activated(self):
+        """ Method to call when option is activated (ENTER key pressed) """
+        self.callback(self.options[self.selected])
+        self.director.pop_scene(self)
+
+
 class LoadingScene(UIScene):
     """ Loading scene - currently a placeholder """
     def __init__(self, *args, **kwargs):
@@ -340,6 +412,7 @@ class MainGameScene(UIScene):
         """ This method handles player input in main scene """
         player_input = val
         game = self.game
+        player = game.player
         handled = False  # input handled flag
         advance = False  # flag if game_logic time advance needed
         if game.is_waiting_input:
@@ -362,6 +435,15 @@ class MainGameScene(UIScene):
                 advance = commands.command_default_direction(game, 1, 1)
             elif player_input == terminal.TK_ESCAPE:
                 self.director.quit()
+            elif player_input == terminal.TK_D:
+                pass
+                # TODO: CODE HERE
+                # show inventory menu
+                #item = show_menu_inventory(win_mgr=self.win_mgr, options=player.inventory, player=player,
+                #                           caption='Drop item:', keys='alphabet', prev_window=self)
+                #self.director.push_scene(DescribedListSelectionScene(options=player.inventory, des))
+                #if item:
+                #    player.perform(actions.act_drop_item, player, item[0])
             handled = True
             # threading is used to make UI responsible to input while game logic updates.
             # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
@@ -488,6 +570,7 @@ class LogView(View):
         return Size(self.bounds.width, self.bounds.height)
 
     def draw(self, ctx):
+        # TODO: draw log only if it changes
         # get log messages, intended to be shown to player
         if self.game.show_debug_log:
             msgs = [m for m in game_logic.Game.log if m[1] == 'DEBUG']
