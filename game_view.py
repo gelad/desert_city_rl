@@ -240,6 +240,9 @@ class CharacterSelectScene(UIScene):
         sg_dict = jsonpickle.loads(sg_file.read())
         for item_id in sg_dict[self.options[self.selected]]:
             game.player.add_item(item_id)
+        for x in range(25):
+            game.player.add_item('item_haste_potion')
+            game.player.add_item('item_firebolt_scroll')
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
         self.director.game = game
