@@ -15,6 +15,7 @@ import generation
 import random
 import pickle
 import copy
+import threading
 from math import hypot
 from math import ceil
 
@@ -1823,7 +1824,14 @@ class Game:
         if game_type == 'new':  # constructor option for new game start
             self.new_game()
 
-    def main_loop(self):
+    def start_update_thread(self):
+        """ This method starts game update thread (containing main loop) """
+        # threading is used to make UI responsible to input while game logic updates.
+        # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
+        # TODO: rewrite with proper threading
+        threading._start_new_thread(self._main_loop, ())
+
+    def _main_loop(self):
         """ Main game loop function (time advancement, performing actions etc) """
         while not self.player.state == 'ready':
             if self.state == 'playing':  # check if state is 'playing'

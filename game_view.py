@@ -325,7 +325,7 @@ class DropItemSelectionScene(DescribedListSelectionScene):
     def option_activated(self):
         """ Method to drop item when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_drop_item, self.game.player, self.options[self.selected])
-        self.game.main_loop()
+        self.game.start_update_thread()
         super().option_activated()
 
 
@@ -460,11 +460,8 @@ class MainGameScene(UIScene):
                                                                 )
                                                                 ))
             handled = True
-            # threading is used to make UI responsible to input while game logic updates.
-            # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
-            # TODO: rewrite with proper threading
             if advance:
-                threading._start_new_thread(game.main_loop, ())
+                game.start_update_thread()
         super().terminal_read(val)
         return handled
 
