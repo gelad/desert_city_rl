@@ -419,14 +419,14 @@ def initialize():
                                                   categories={'armor'},
                                                   properties={'armor_bashing': 60, 'armor_slashing': 120,
                                                               'armor_piercing': 60},
-                                                  char=']', color=[50, 50, 200], equip_slots={'BODY'}, weight=5)
+                                                  char=']]', color=[50, 50, 200], equip_slots={'BODY'}, weight=5)
 
     data_set['item_iron_pauldrons'] = game_logic.Item(name='iron pauldrons', data_id='item_iron_pauldrons',
                                                       description='A pair of iron pauldrons.',
                                                       categories={'armor'},
                                                       properties={'armor_bashing': 100, 'armor_slashing': 120,
                                                                   'armor_piercing': 100},
-                                                      char=']', color=[50, 50, 200], equip_slots={'SHOULDERS'},
+                                                      char=']]', color=[50, 50, 200], equip_slots={'SHOULDERS'},
                                                       weight=2)
 
     data_set['item_iron_boots'] = game_logic.Item(name='iron boots', data_id='item_iron_boots',
@@ -434,21 +434,21 @@ def initialize():
                                                   categories={'armor'},
                                                   properties={'armor_bashing': 100, 'armor_slashing': 120,
                                                               'armor_piercing': 100},
-                                                  char=']', color=[50, 50, 200], equip_slots={'FEET'}, weight=2.5)
+                                                  char=']]', color=[50, 50, 200], equip_slots={'FEET'}, weight=2.5)
 
     data_set['item_iron_armguards'] = game_logic.Item(name='iron armguards', data_id='item_iron_armguards',
                                                       description='A pair of iron armguards.',
                                                       categories={'armor'},
                                                       properties={'armor_bashing': 100, 'armor_slashing': 120,
                                                                   'armor_piercing': 100},
-                                                      char=']', color=[50, 50, 200], equip_slots={'ARMS'}, weight=2)
+                                                      char=']]', color=[50, 50, 200], equip_slots={'ARMS'}, weight=2)
 
     data_set['item_mail_leggings'] = game_logic.Item(name='mail leggings', data_id='item_mail_leggings',
                                                      description='A pair of mail leggings.',
                                                      categories={'armor'},
                                                      properties={'armor_bashing': 60, 'armor_slashing': 120,
                                                                  'armor_piercing': 60},
-                                                     char=']', color=[50, 50, 200], equip_slots={'LEGS'}, weight=4)
+                                                     char=']]', color=[50, 50, 200], equip_slots={'LEGS'}, weight=4)
     # set of leather armor =========================================================
     data_set['item_leather_cap'] = game_logic.Item(name='leather cap', data_id='item_leather_cap',
                                                    description='A leather cap offers light protection.',
@@ -462,14 +462,14 @@ def initialize():
                                                      categories={'armor'},
                                                      properties={'armor_bashing': 50, 'armor_slashing': 50,
                                                                  'armor_piercing': 40},
-                                                     char=']', color=[160, 82, 45], equip_slots={'BODY'}, weight=3)
+                                                     char=']]', color=[160, 82, 45], equip_slots={'BODY'}, weight=3)
 
     data_set['item_leather_pauldrons'] = game_logic.Item(name='leather pauldrons', data_id='item_leather_pauldrons',
                                                          description='A pair of leather pauldrons.',
                                                          categories={'armor'},
                                                          properties={'armor_bashing': 50, 'armor_slashing': 50,
                                                                      'armor_piercing': 40},
-                                                         char=']', color=[160, 82, 45], equip_slots={'SHOULDERS'},
+                                                         char=']]', color=[160, 82, 45], equip_slots={'SHOULDERS'},
                                                          weight=1.5)
 
     data_set['item_leather_boots'] = game_logic.Item(name='leather boots', data_id='item_leather_boots',
@@ -477,21 +477,21 @@ def initialize():
                                                      categories={'armor'},
                                                      properties={'armor_bashing': 50, 'armor_slashing': 50,
                                                                  'armor_piercing': 40},
-                                                     char=']', color=[160, 82, 45], equip_slots={'FEET'}, weight=2.5)
+                                                     char=']]', color=[160, 82, 45], equip_slots={'FEET'}, weight=2.5)
 
     data_set['item_leather_armguards'] = game_logic.Item(name='leather armguards', data_id='item_leather_armguards',
                                                          description='A pair of leather armguards.',
                                                          categories={'armor'},
                                                          properties={'armor_bashing': 50, 'armor_slashing': 50,
                                                                      'armor_piercing': 40},
-                                                         char=']', color=[160, 82, 45], equip_slots={'ARMS'}, weight=1)
+                                                         char=']]', color=[160, 82, 45], equip_slots={'ARMS'}, weight=1)
 
     data_set['item_leather_leggings'] = game_logic.Item(name='leather leggings', data_id='item_leather_leggings',
                                                         description='A pair of leather leggings.',
                                                         categories={'armor'},
                                                         properties={'armor_bashing': 50, 'armor_slashing': 50,
                                                                     'armor_piercing': 40},
-                                                        char=']', color=[160, 82, 45], equip_slots={'LEGS'}, weight=2)
+                                                        char=']]', color=[160, 82, 45], equip_slots={'LEGS'}, weight=2)
     # WEAPONS
     data_set['item_sabre'] = game_logic.Item(name='sabre', data_id='item_sabre',
                                              description='A sharp sabre with pointy tip.',

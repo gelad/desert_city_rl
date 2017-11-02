@@ -1072,7 +1072,7 @@ class ItemCharges(Item):
 
     def __str__(self):
         """ Method returns string representation of ItemCharges - it's name with charges """
-        return self.name + '[' + str(self.charges) + ']'
+        return self.name + '[[' + str(self.charges) + ']]'
 
     def use(self, user, target):
         """ Overrides the use() method, to manage charges and item destruction """
@@ -1177,7 +1177,7 @@ class ItemRangedWeapon(Item):
 
     def __str__(self):
         """ Method returns string representation of ItemRangedWeapon - it's name with number of ammo loaded """
-        return self.name + '[' + str(len(self.ammo)) + ']'
+        return self.name + '[[' + str(len(self.ammo)) + ']]'
 
     def shoot(self, target):
         """ Method that shoots the weapon """
