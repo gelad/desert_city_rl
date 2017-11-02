@@ -248,28 +248,35 @@ class CharacterSelectScene(UIScene):
 class DescribedListSelectionScene(UIScene):
     """ Scene displays a list with selectable options and their descriptions to the left """
     # TODO: refactor and comment this shit..
-    def __init__(self, options, descriptions, caption='', layout_options=None, *args, **kwargs):
+    def __init__(self, options, descriptions, caption='', layout_options=None, alphabet=True, *args, **kwargs):
         self.options = options
         self.descriptions = descriptions
+        self.alphabet = alphabet
         self.selected = 0
         self.clear = True
         top_offset = 0
         subviews = []
         self.buttons = []
+        letter_index = ord('a')  # start menu item indexing from 'a'
         for option in self.options:
-            button = ButtonViewFixed(text=str(option),
+            if alphabet:
+                button_text = chr(letter_index) + ') ' + str(option)
+            else:
+                button_text = str(option)
+            button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
                                      layout_options=LayoutOptions(
-                                     left=1,
-                                     top=top_offset,
-                                     width='intrinsic',
-                                     height=1,
-                                     bottom=None,
-                                     right=None))
+                                        left=1,
+                                        top=top_offset,
+                                        width='intrinsic',
+                                        height=1,
+                                        bottom=None,
+                                        right=None))
             button.is_hidden = True
             subviews.append(button)
             self.buttons.append(button)
             top_offset += 1
+            letter_index += 1
         self.description_view = LabelViewFixed(text=self.descriptions[self.selected],
                                                align_horz='left',
                                                align_vert='top',
@@ -326,6 +333,9 @@ class DescribedListSelectionScene(UIScene):
             self.description_view.text = self.descriptions[self.selected]
             self.description_view.needs_layout = True
             return True
+        elif val in range(terminal.TK_A, len(self.options) + 4) and self.alphabet:  # select by key
+            self.selected = val - 4  # because TK_A = 4
+            self.option_activated()
         elif val == terminal.TK_ESCAPE:
             self.director.pop_scene(self)
             return True
