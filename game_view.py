@@ -240,9 +240,9 @@ class CharacterSelectScene(UIScene):
         sg_dict = jsonpickle.loads(sg_file.read())
         for item_id in sg_dict[self.options[self.selected]]:
             game.player.add_item(item_id)
-        for x in range(25):
-            game.player.add_item('item_haste_potion')
-            game.player.add_item('item_firebolt_scroll')
+        #for x in range(25):
+        #    game.player.add_item('item_haste_potion')
+        #    game.player.add_item('item_firebolt_scroll')
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
         self.director.game = game
@@ -250,6 +250,7 @@ class CharacterSelectScene(UIScene):
 
 class DescribedListSelectionScene(UIScene):
     """ Scene displays a list with selectable options and their descriptions to the left """
+    # TODO: refactor and comment this shit..
     def __init__(self, options, descriptions, caption='', layout_options=None, *args, **kwargs):
         self.options = options
         self.descriptions = descriptions
@@ -259,7 +260,6 @@ class DescribedListSelectionScene(UIScene):
         subviews = []
         self.buttons = []
         for option in self.options:
-            top_offset += 1
             button = ButtonViewFixed(text=str(option),
                                      callback=self.option_activated,
                                      layout_options=LayoutOptions(
@@ -269,8 +269,10 @@ class DescribedListSelectionScene(UIScene):
                                      height=1,
                                      bottom=None,
                                      right=None))
+            button.is_hidden = True
             subviews.append(button)
             self.buttons.append(button)
+            top_offset += 1
         self.description_view = LabelViewFixed(text=self.descriptions[self.selected],
                                                align_horz='left',
                                                align_vert='top',
@@ -296,6 +298,9 @@ class DescribedListSelectionScene(UIScene):
         """ Cannot determine view bounds in __init__, doing scroll check here """
         super().terminal_update(is_active=is_active)
         self._scrolling_mode_check()
+        if not self.scrolling_mode:
+            for button in self.buttons:
+                button.is_hidden = False
 
     def terminal_read(self, val):
         super().terminal_read(val)
@@ -333,27 +338,29 @@ class DescribedListSelectionScene(UIScene):
 
     def _scrolling_mode_check(self):
         """ Checks for height and enables/disables scrolling """
-        if self.window_view.bounds.height - 2 < len(self.options):
+        list_height = self.window_view.bounds.height - 2
+        if list_height < len(self.options):
             self.scrolling_mode = True
-            self.scroll_pos = self.selected
             self._scroll()
         else:
             self.scrolling_mode = False
 
     def _scroll(self):
         """ Method for scrolling the options list """
+        list_height = self.window_view.bounds.height - 2
         if self.selected < self.scroll_pos:
             self.scroll_pos = self.selected
-        elif self.selected > self.scroll_pos + self.window_view.bounds.height - 1:
-            self.scroll_pos = self.selected - self.window_view.bounds.height + 1
+        elif self.selected > self.scroll_pos + list_height - 1:
+            self.scroll_pos = self.selected - list_height + 1
         button_y = 0
         for i in range(len(self.options)):
-            if self.scroll_pos <= i < (self.scroll_pos + self.window_view.bounds.height):
+            if self.scroll_pos <= i < (self.scroll_pos + list_height):
                 self.buttons[i].is_hidden = False
                 self.buttons[i].layout_options = self.buttons[i].layout_options.with_updates(top=button_y)
                 button_y += 1
             else:
                 self.buttons[i].is_hidden = True
+            self.buttons[i].superview.set_needs_layout()
         self.window_view.needs_layout = True
 
     def option_activated(self):
