@@ -34,10 +34,12 @@ import commands
 
 #  temporary shit
 LOGO = """
-            =================================================
-====================== Welcome to Desert City! ==========================
-            =================================================
-                     \ =======================/
+    ___                    _       ___ _ _         
+   /   \___  ___  ___ _ __| |_    / __(_) |_ _   _ 
+  / /\ / _ \/ __|/ _ \ '__| __|  / /  | | __| | | |
+ / /_//  __/\__ \  __/ |  | |_  / /___| | |_| |_| |
+/___,' \___||___/\___|_|   \__| \____/|_|\__|\__, |
+                                             |___/ 
 """
 character_bg_descriptions=[
                                              'Many adventurers are lured to the City - in search of treasures, power,' +
@@ -449,16 +451,14 @@ class MainGameScene(UIScene):
                 advance = commands.command_default_direction(game, 1, 1)
             elif player_input == terminal.TK_ESCAPE:
                 self.director.quit()
-            elif player_input == terminal.TK_D:
-                # show drop item menu
+            elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
                                                                 caption='Drop item:',
                                                                 layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
-                                                                    left=0.2, right=0.2
-                                                                )
-                                                                ))
+                                                                    left=0.2, right=0.2)))
+
             handled = True
             if advance:
                 game.start_update_thread()
