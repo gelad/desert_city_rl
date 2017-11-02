@@ -254,17 +254,20 @@ class DescribedListSelectionScene(UIScene):
         self.clear = True
         top_offset = 0
         subviews = []
+        self.buttons = []
         for option in self.options:
             top_offset += 1
-            subviews.append(ButtonViewFixed(text=str(option),
-                                            callback=self.option_activated,
-                                            layout_options=LayoutOptions(
-                                            left=1,
-                                            top=top_offset,
-                                            width='intrinsic',
-                                            height=1,
-                                            bottom=None,
-                                            right=None)))
+            button = ButtonViewFixed(text=str(option),
+                                     callback=self.option_activated,
+                                     layout_options=LayoutOptions(
+                                     left=1,
+                                     top=top_offset,
+                                     width='intrinsic',
+                                     height=1,
+                                     bottom=None,
+                                     right=None))
+            subviews.append(button)
+            self.buttons.append(button)
         self.description_view = LabelViewFixed(text=self.descriptions[self.selected],
                                                align_horz='left',
                                                align_vert='top',
@@ -277,11 +280,19 @@ class DescribedListSelectionScene(UIScene):
                                                     right=None
                                                 ))
         subviews.append(self.description_view)
-        views = [WindowView(title=caption,
-                            style='double',
-                            layout_options=layout_options or LayoutOptions(left=0, top=0),
-                            subviews=subviews)]
+        self.window_view = WindowView(title=caption,
+                                      style='double',
+                                      layout_options=layout_options or LayoutOptions(left=0, top=0),
+                                      subviews=subviews)
+        views = [self.window_view]
         super().__init__(views, *args, **kwargs)
+        self.scrolling_mode = False
+        self.scroll_pos = self.selected
+
+    def terminal_update(self, is_active=False):
+        """ Cannot determine view bounds in __init__, doing scroll check here """
+        super().terminal_update(is_active=is_active)
+        self._scrolling_mode_check()
 
     def terminal_read(self, val):
         super().terminal_read(val)
@@ -305,12 +316,42 @@ class DescribedListSelectionScene(UIScene):
                     self.selected += 1
                 else:
                     self.selected = 0
+            if self.scrolling_mode:
+                self._scroll()
             self.description_view.text = self.descriptions[self.selected]
             self.description_view.needs_layout = True
             return True
         elif val == terminal.TK_ESCAPE:
             self.director.pop_scene(self)
             return True
+        elif val == terminal.TK_RESIZED:
+            self._scrolling_mode_check()
+        return False
+
+    def _scrolling_mode_check(self):
+        """ Checks for height and enables/disables scrolling """
+        if self.window_view.bounds.height - 2 < len(self.options):
+            self.scrolling_mode = True
+            self.scroll_pos = self.selected
+            self._scroll()
+        else:
+            self.scrolling_mode = False
+
+    def _scroll(self):
+        """ Method for scrolling the options list """
+        if self.selected < self.scroll_pos:
+            self.scroll_pos = self.selected
+        elif self.selected > self.scroll_pos + self.window_view.bounds.height - 1:
+            self.scroll_pos = self.selected - self.window_view.bounds.height + 1
+        button_y = 0
+        for i in range(len(self.options)):
+            if self.scroll_pos <= i < (self.scroll_pos + self.window_view.bounds.height):
+                self.buttons[i].is_hidden = False
+                self.buttons[i].layout_options = self.buttons[i].layout_options.with_updates(top=button_y)
+                button_y += 1
+            else:
+                self.buttons[i].is_hidden = True
+        self.window_view.needs_layout = True
 
     def option_activated(self):
         """ Method to call when option is activated (ENTER key pressed) """
@@ -432,8 +473,10 @@ class MainGameScene(UIScene):
         handled = False  # input handled flag
         advance = False  # flag if game_logic time advance needed
         if game.is_waiting_input:
+            if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
+                self.director.quit()
             # movement commands
-            if player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
+            elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
                 advance = commands.command_default_direction(game, -1, 0)
             elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
                 advance = commands.command_default_direction(game, 1, 0)
@@ -449,8 +492,6 @@ class MainGameScene(UIScene):
                 advance = commands.command_default_direction(game, -1, 1)
             elif player_input == terminal.TK_KP_3:
                 advance = commands.command_default_direction(game, 1, 1)
-            elif player_input == terminal.TK_ESCAPE:
-                self.director.quit()
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
@@ -458,7 +499,6 @@ class MainGameScene(UIScene):
                                                                 layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
                                                                     left=0.2, right=0.2)))
-
             handled = True
             if advance:
                 game.start_update_thread()
