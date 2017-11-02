@@ -1,6 +1,9 @@
 """ This module contains "commands" - functions that make "game-logic" actions in accord with player input """
 import actions
 import game_logic
+import game_view
+
+from clubsandwich.ui import LayoutOptions
 
 
 def command_default_direction(game, dx, dy):
@@ -34,5 +37,24 @@ def command_default_direction(game, dx, dy):
         #     return
         # if leave[1] == 1:  # if yes - leave location
         #     self.command_leave_loc()
-    return True  # game time advancement needed
+
+
+def command_pick_up(director, game, dx, dy):
+    """ Command function for player wants to pick up some items  """
+    player = game.player
+    loc = game.current_loc
+    x = player.position[0] + dx
+    y = player.position[1] + dy
+    if loc.is_in_boundaries(x, y):  # check if position of selected cell is in boundaries
+        items = [i for i in loc.cells[x][y].entities if isinstance(i, game_logic.Item)]  # select items in cell
+        if items:  # check if there is an item
+            if len(items) == 1:
+                player.perform(actions.act_pick_up_item, player, items[0])
+            else:  # if there are multiple Items - ask which to pick up?
+                director.push_scene(game_view.PickUpItemSelectionScene(items=items,
+                                                                       game=game,
+                                                                       caption='Pick up item:',
+                                                                       layout_options=LayoutOptions(
+                                                                            top=0.25, bottom=0.25,
+                                                                            left=0.2, right=0.2)))
 

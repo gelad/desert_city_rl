@@ -240,9 +240,6 @@ class CharacterSelectScene(UIScene):
         sg_dict = jsonpickle.loads(sg_file.read())
         for item_id in sg_dict[self.options[self.selected]]:
             game.player.add_item(item_id)
-        #for x in range(25):
-        #    game.player.add_item('item_haste_potion')
-        #    game.player.add_item('item_firebolt_scroll')
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
         self.director.game = game
@@ -382,6 +379,20 @@ class DropItemSelectionScene(DescribedListSelectionScene):
         super().option_activated()
 
 
+class PickUpItemSelectionScene(DescribedListSelectionScene):
+    """ Scene displays a list of items to pick up one """
+    def __init__(self, items, game, *args, **kwargs):
+        descriptions = [i.description for i in items]
+        self.game = game
+        super().__init__(options=items, descriptions=descriptions, *args, **kwargs)
+
+    def option_activated(self):
+        """ Method to drop item when option is activated (ENTER key pressed) """
+        self.game.player.perform(actions.act_pick_up_item, self.game.player, self.options[self.selected])
+        self.game.start_update_thread()
+        super().option_activated()
+
+
 class LoadingScene(UIScene):
     """ Loading scene - currently a placeholder """
     def __init__(self, *args, **kwargs):
@@ -481,27 +492,26 @@ class MainGameScene(UIScene):
         game = self.game
         player = game.player
         handled = False  # input handled flag
-        advance = False  # flag if game_logic time advance needed
         if game.is_waiting_input:
             if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
                 self.director.quit()
             # movement commands
             elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
-                advance = commands.command_default_direction(game, -1, 0)
+                commands.command_default_direction(game=game, dx=-1, dy=0)
             elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
-                advance = commands.command_default_direction(game, 1, 0)
+                commands.command_default_direction(game=game, dx=1, dy=0)
             elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
-                advance = commands.command_default_direction(game, 0, -1)
+                commands.command_default_direction(game=game, dx=0, dy=-1)
             elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
-                advance = commands.command_default_direction(game, 0, 1)
+                commands.command_default_direction(game=game, dx=0, dy=1)
             elif player_input == terminal.TK_KP_7:
-                advance = commands.command_default_direction(game, -1, -1)
+                commands.command_default_direction(game=game, dx=-1, dy=-1)
             elif player_input == terminal.TK_KP_9:
-                advance = commands.command_default_direction(game, 1, -1)
+                commands.command_default_direction(game=game, dx=1, dy=-1)
             elif player_input == terminal.TK_KP_1:
-                advance = commands.command_default_direction(game, -1, 1)
+                commands.command_default_direction(game=game, dx=-1, dy=1)
             elif player_input == terminal.TK_KP_3:
-                advance = commands.command_default_direction(game, 1, 1)
+                commands.command_default_direction(game=game, dx=1, dy=1)
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
@@ -509,9 +519,10 @@ class MainGameScene(UIScene):
                                                                 layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
                                                                     left=0.2, right=0.2)))
+            elif player_input == terminal.TK_G:  # pick up item
+                commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
             handled = True
-            if advance:
-                game.start_update_thread()
+            game.start_update_thread()
         super().terminal_read(val)
         return handled
 
