@@ -112,60 +112,6 @@ class GameLoop(DirectorLoop):
             pass
 
 
-class MainMenuScene(UIScene):
-    """ Scene with main menu options """
-    def __init__(self, *args, **kwargs):
-        views = []
-        self.game = save_load.load_game()  # try to load game
-        views.append(LabelViewFixed(
-                LOGO[1:].rstrip(),
-                layout_options=LayoutOptions.row_top(0.5)))
-        views.append(LabelViewFixed(
-                "Choose one of the options below:",
-                layout_options=LayoutOptions.centered('intrinsic', 'intrinsic')))
-        if self.game:  # is game succesfully loaded - show Continue button
-            views.append(ButtonViewFixed(
-                text="Continue", callback=self.continue_game,
-                layout_options=LayoutOptions.row_bottom(4).with_updates(
-                    left=0.2, width=0.2, right=None)))
-        else:  # if no savegame - show option greyed-out
-            views.append(LabelViewFixed(
-                text="[color=grey]Continue",
-                layout_options=LayoutOptions.row_bottom(4).with_updates(
-                    left=0.2, width=0.2, right=None)))
-        views.append(ButtonViewFixed(
-                text="New Game", callback=self.new_game,
-                layout_options=LayoutOptions.row_bottom(4).with_updates(
-                    left=0.4, width=0.2, right=None)))
-        views.append(ButtonViewFixed(
-                text="Quit",
-                callback=lambda: self.director.pop_scene(),
-                layout_options=LayoutOptions.row_bottom(4).with_updates(
-                    left=0.6, width=0.2, right=None)))
-        super().__init__(views, *args, **kwargs)
-
-    def terminal_read(self, val):
-        # allow menu selection with left/right arrows
-        super().terminal_read(val)
-        if val in (terminal.TK_KP_4, terminal.TK_LEFT):
-            self.view.find_prev_responder()
-            return True
-        elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
-            self.view.find_next_responder()
-            return True
-        self.ctx.clear()
-
-    def become_active(self):
-        self.ctx.clear()
-
-    def new_game(self):
-        self.director.push_scene(CharacterSelectScene())
-
-    def continue_game(self):
-        self.director.push_scene(MainGameScene(self.game))
-        self.director.game = self.game
-
-
 class CharacterSelectScene(UIScene):
     """ Scene displays character background variants with descriptions """
     def __init__(self, *args, **kwargs):
@@ -243,6 +189,128 @@ class CharacterSelectScene(UIScene):
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
         self.director.game = game
+
+# List menu scenes
+
+
+class ListSelectionScene(UIScene):
+    """ Scene displays a list with selectable options """
+    # TODO: refactor and comment this shit..
+    def __init__(self, options, caption='', layout_options=None, alphabet=True, *args, **kwargs):
+        self.options = options
+        self.alphabet = alphabet
+        self.selected = 0
+        self.clear = True
+        top_offset = 0
+        subviews = []
+        self.buttons = []
+        letter_index = ord('a')  # start menu item indexing from 'a'
+        max_option_length = 0  # longest option string - to determine window width
+        for option in self.options:
+            if alphabet:
+                button_text = chr(letter_index) + ') ' + str(option)
+            else:
+                button_text = str(option)
+            max_option_length = max(len(button_text), max_option_length)
+            button = ButtonViewFixed(text=button_text,
+                                     callback=self.option_activated,
+                                     layout_options=LayoutOptions(
+                                        left=1,
+                                        top=top_offset,
+                                        width='intrinsic',
+                                        height=1,
+                                        bottom=None,
+                                        right=None))
+            button.is_hidden = True
+            subviews.append(button)
+            self.buttons.append(button)
+            top_offset += 1
+            letter_index += 1
+        if layout_options == 'intrinsic':  # if layout must derive from options
+            layout_options = LayoutOptions.centered(height=len(options) + 2,
+                                                    width=max(max_option_length + 2, len(caption)) + 2)
+        self.window_view = WindowView(title=caption,
+                                      style='double',
+                                      layout_options=layout_options or LayoutOptions(left=0, top=0),
+                                      subviews=subviews)
+        views = [self.window_view]
+        super().__init__(views, *args, **kwargs)
+        self.scrolling_mode = False
+        self.scroll_pos = self.selected
+
+    def terminal_update(self, is_active=False):
+        """ Cannot determine view bounds in __init__, doing scroll check here """
+        super().terminal_update(is_active=is_active)
+        self._scrolling_mode_check()
+        if not self.scrolling_mode:
+            for button in self.buttons:
+                button.is_hidden = False
+
+    def terminal_read(self, val):
+        super().terminal_read(val)
+        # cycle descriptions with selected options
+        if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
+            # allow traverse with arrows and numpad
+            if val == terminal.TK_TAB:
+                if self.selected < len(self.options) - 1:
+                    self.selected += 1
+                else:
+                    self.selected = 0
+            elif val in (terminal.TK_KP_8, terminal.TK_UP):
+                self.view.find_prev_responder()
+                if self.selected > 0:
+                    self.selected -= 1
+                else:
+                    self.selected = len(self.options) - 1
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+                self.view.find_next_responder()
+                if self.selected < len(self.options) - 1:
+                    self.selected += 1
+                else:
+                    self.selected = 0
+            if self.scrolling_mode:
+                self._scroll()
+            return True
+        elif val in range(terminal.TK_A, len(self.options) + 4) and self.alphabet:  # select by key
+            self.selected = val - 4  # because TK_A = 4
+            self.option_activated()
+        elif val == terminal.TK_ESCAPE:
+            self.director.pop_scene()
+            return True
+        elif val == terminal.TK_RESIZED:
+            self._scrolling_mode_check()
+        return False
+
+    def _scrolling_mode_check(self):
+        """ Checks for height and enables/disables scrolling """
+        list_height = self.window_view.bounds.height - 2
+        if list_height < len(self.options):
+            self.scrolling_mode = True
+            self._scroll()
+        else:
+            self.scrolling_mode = False
+
+    def _scroll(self):
+        """ Method for scrolling the options list """
+        list_height = self.window_view.bounds.height - 2
+        if self.selected < self.scroll_pos:
+            self.scroll_pos = self.selected
+        elif self.selected > self.scroll_pos + list_height - 1:
+            self.scroll_pos = self.selected - list_height + 1
+        button_y = 0
+        for i in range(len(self.options)):
+            if self.scroll_pos <= i < (self.scroll_pos + list_height):
+                self.buttons[i].is_hidden = False
+                self.buttons[i].layout_options = self.buttons[i].layout_options.with_updates(top=button_y)
+                button_y += 1
+            else:
+                self.buttons[i].is_hidden = True
+            self.buttons[i].superview.set_needs_layout()
+        self.window_view.needs_layout = True
+
+    def option_activated(self):
+        """ Method to call when option is activated (ENTER key pressed) """
+        self.director.pop_scene()
 
 
 class DescribedListSelectionScene(UIScene):
@@ -337,7 +405,7 @@ class DescribedListSelectionScene(UIScene):
             self.selected = val - 4  # because TK_A = 4
             self.option_activated()
         elif val == terminal.TK_ESCAPE:
-            self.director.pop_scene(self)
+            self.director.pop_scene()
             return True
         elif val == terminal.TK_RESIZED:
             self._scrolling_mode_check()
@@ -372,35 +440,137 @@ class DescribedListSelectionScene(UIScene):
 
     def option_activated(self):
         """ Method to call when option is activated (ENTER key pressed) """
-        self.director.pop_scene(self)
+        self.director.pop_scene()
 
 
-class DropItemSelectionScene(DescribedListSelectionScene):
-    """ Scene displays a list of items to drop one """
+class ItemManipulationSelectionScene(DescribedListSelectionScene):
+    """ Item manipulation Scene subclass, not intended to use directly (to write less code in item manipulation menus)
+     Does nothing to selected item.
+    """
     def __init__(self, items, game, *args, **kwargs):
         descriptions = [i.description for i in items]
         self.game = game
         super().__init__(options=items, descriptions=descriptions, *args, **kwargs)
 
-    def option_activated(self):
+    def option_activated(self, game_update_needed=True):
+        """ Method to drop item when option is activated (ENTER key pressed) """
+        if game_update_needed:
+            self.game.start_update_thread()
+        super().option_activated()
+
+
+class DropItemSelectionScene(ItemManipulationSelectionScene):
+    """ Scene displays a list of items to drop one """
+    def option_activated(self, *args, **kwargs):
         """ Method to drop item when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_drop_item, self.game.player, self.options[self.selected])
-        self.game.start_update_thread()
-        super().option_activated()
+        super().option_activated(*args, **kwargs)
 
 
-class PickUpItemSelectionScene(DescribedListSelectionScene):
+class TakeOffItemSelectionScene(ItemManipulationSelectionScene):
+    """ Scene displays a list of equipped items to take off one """
+    def option_activated(self, *args, **kwargs):
+        """ Method to take off item when option is activated (ENTER key pressed) """
+        self.game.player.perform(actions.act_unequip_item, self.game.player, self.options[self.selected])
+        super().option_activated(*args, **kwargs)
+
+
+class PickUpItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of items to pick up one """
-    def __init__(self, items, game, *args, **kwargs):
-        descriptions = [i.description for i in items]
+    def option_activated(self, *args, **kwargs):
+        """ Method to pick up item when option is activated (ENTER key pressed) """
+        self.game.player.perform(actions.act_pick_up_item, self.game.player, self.options[self.selected])
+        super().option_activated(*args, **kwargs)
+
+
+class WieldItemSelectionScene(ItemManipulationSelectionScene):
+    """ Scene displays a list of items to wield one """
+    def option_activated(self, *args, **kwargs):
+        """ Method to wield item or display slot dialog when option is activated (ENTER key pressed) """
+        slot = False
+        if len(self.options[self.selected].equip_slots) > 1:
+            director = self.director
+            super().option_activated(*args, **kwargs)  # first pop this scene
+            director.push_scene(WieldSlotSelectionScene(game=self.game,
+                                                        item=self.options[self.selected],
+                                                        caption='Select slot:',
+                                                        layout_options='intrinsic'))
+            return  # no need to pop Slot Selection scene
+        elif len(self.options[self.selected].equip_slots) == 1:
+            slot = list(self.options[self.selected].equip_slots)[0]
+        if slot:  # if selected - equip item
+            self.game.player.perform(actions.act_equip_item, self.game.player, self.options[self.selected], slot)
+        super().option_activated(*args, **kwargs)
+
+
+class WieldSlotSelectionScene(ListSelectionScene):
+    """ Scene displays a list of suitable slots to wield item """
+    def __init__(self, game, item, *args, **kwargs):
         self.game = game
-        super().__init__(options=items, descriptions=descriptions, *args, **kwargs)
+        self.item = item
+        options = list(item.equip_slots)
+        super().__init__(options=options, *args, **kwargs)
 
     def option_activated(self):
-        """ Method to drop item when option is activated (ENTER key pressed) """
-        self.game.player.perform(actions.act_pick_up_item, self.game.player, self.options[self.selected])
-        self.game.start_update_thread()
+        """ Method to wield item when option is activated (ENTER key pressed) """
+        self.game.player.perform(actions.act_equip_item, self.game.player, self.item, self.options[self.selected])
         super().option_activated()
+
+# Other scenes
+
+
+class MainMenuScene(UIScene):
+    """ Scene with main menu options """
+    def __init__(self, *args, **kwargs):
+        views = []
+        self.game = save_load.load_game()  # try to load game
+        views.append(LabelViewFixed(
+                LOGO[1:].rstrip(),
+                layout_options=LayoutOptions.row_top(0.5)))
+        views.append(LabelViewFixed(
+                "Choose one of the options below:",
+                layout_options=LayoutOptions.centered('intrinsic', 'intrinsic')))
+        if self.game:  # is game succesfully loaded - show Continue button
+            views.append(ButtonViewFixed(
+                text="Continue", callback=self.continue_game,
+                layout_options=LayoutOptions.row_bottom(4).with_updates(
+                    left=0.2, width=0.2, right=None)))
+        else:  # if no savegame - show option greyed-out
+            views.append(LabelViewFixed(
+                text="[color=grey]Continue",
+                layout_options=LayoutOptions.row_bottom(4).with_updates(
+                    left=0.2, width=0.2, right=None)))
+        views.append(ButtonViewFixed(
+                text="New Game", callback=self.new_game,
+                layout_options=LayoutOptions.row_bottom(4).with_updates(
+                    left=0.4, width=0.2, right=None)))
+        views.append(ButtonViewFixed(
+                text="Quit",
+                callback=lambda: self.director.pop_scene(),
+                layout_options=LayoutOptions.row_bottom(4).with_updates(
+                    left=0.6, width=0.2, right=None)))
+        super().__init__(views, *args, **kwargs)
+
+    def terminal_read(self, val):
+        # allow menu selection with left/right arrows
+        super().terminal_read(val)
+        if val in (terminal.TK_KP_4, terminal.TK_LEFT):
+            self.view.find_prev_responder()
+            return True
+        elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
+            self.view.find_next_responder()
+            return True
+        self.ctx.clear()
+
+    def become_active(self):
+        self.ctx.clear()
+
+    def new_game(self):
+        self.director.push_scene(CharacterSelectScene())
+
+    def continue_game(self):
+        self.director.push_scene(MainGameScene(self.game))
+        self.director.game = self.game
 
 
 class LoadingScene(UIScene):
@@ -531,10 +701,27 @@ class MainGameScene(UIScene):
                                                                     left=0.2, right=0.2)))
             elif player_input == terminal.TK_G:  # pick up item
                 commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
+            elif player_input == terminal.TK_W:  # wield item
+                self.director.push_scene(WieldItemSelectionScene(items=player.inventory,
+                                                                 game=game,
+                                                                 caption='Wield item:',
+                                                                 layout_options=LayoutOptions(
+                                                                    top=0.1, bottom=0.1,
+                                                                    left=0.2, right=0.2)))
+            elif player_input == terminal.TK_T:  # take off
+                self.director.push_scene(TakeOffItemSelectionScene(items=[sl for sl in
+                                                                          list(player.equipment.values()) if sl],
+                                                                   game=game,
+                                                                   caption='Take off item:',
+                                                                   layout_options=LayoutOptions(
+                                                                        top=0.1, bottom=0.1,
+                                                                        left=0.2, right=0.2)))
             handled = True
             game.start_update_thread()
         super().terminal_read(val)
         return handled
+
+# Views
 
 
 class MapView(View):
