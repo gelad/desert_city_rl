@@ -692,6 +692,8 @@ class MainGameScene(UIScene):
                 commands.command_default_direction(game=game, dx=-1, dy=1)
             elif player_input == terminal.TK_KP_3:
                 commands.command_default_direction(game=game, dx=1, dy=1)
+            elif player_input == terminal.TK_KP_5:  # wait for ticks=player.speed (1 turn)
+                player.perform(actions.act_wait, game.player, game.player.speed)
             elif player_input == 53:  # on '`' show debug messages in log
                 if game.show_debug_log:
                     game.show_debug_log = False
