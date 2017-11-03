@@ -514,6 +514,7 @@ class WieldSlotSelectionScene(ListSelectionScene):
     def option_activated(self):
         """ Method to wield item when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_equip_item, self.game.player, self.item, self.options[self.selected])
+        self.game.start_update_thread()
         super().option_activated()
 
 # Other scenes
@@ -589,58 +590,61 @@ class MainGameScene(UIScene):
     """ Main game scene """
     def __init__(self, game, *args, **kwargs):
         self.game = game
-        self.health_bar = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
-                                                                               top=1,
+        self.health_bar = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
+                                                                               top=0,
                                                                                width='intrinsic',
                                                                                height='intrinsic',
                                                                                bottom=None,
                                                                                right=None))
-        self.player_right_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
-                                                                                      top=3,
+        self.player_right_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
+                                                                                      top=2,
                                                                                       width='intrinsic',
                                                                                       height='intrinsic',
                                                                                       bottom=None,
                                                                                       right=None))
-        self.player_left_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
-                                                                                     top=4,
+        self.player_left_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
+                                                                                     top=3,
                                                                                      width='intrinsic',
                                                                                      height='intrinsic',
                                                                                      bottom=None,
                                                                                      right=None))
-        self.money = LabelViewFixed(text='', layout_options=LayoutOptions(left=0.62,
-                                                                          top=6,
+        self.money = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
+                                                                          top=5,
                                                                           width='intrinsic',
                                                                           height='intrinsic',
                                                                           bottom=None,
                                                                           right=None))
-        views = [MapView(game=game,
-                         layout_options=LayoutOptions(
-                             left=1,
-                             width=0.60,
-                             top=1,
-                             height=None,
-                             bottom=1,
-                             right=None
-                            )),
+        self.map_view = MapView(game=game,
+                                layout_options=LayoutOptions(
+                                    left=1,
+                                    width=0.60,
+                                    top=1,
+                                    height=None,
+                                    bottom=1,
+                                    right=None))
+        self.bars_view = View(subviews=[self.health_bar, self.player_right_hand, self.player_left_hand, self.money],
+                              layout_options=LayoutOptions(
+                                left=0.62,
+                                top=1,
+                                right=1,
+                                bottom=7))
+        self.bars_view.clear = True
+        views = [self.map_view,
                  RectView(style='double', layout_options=LayoutOptions(left=0, top=0)),
                  RectView(style='double', layout_options=LayoutOptions().column_left(1).with_updates(
                      left=0.61,
                      right=None)),
-                 self.health_bar,
-                 self.player_right_hand,
-                 self.player_left_hand,
-                 self.money,
+                 self.bars_view,
                  LogView(game=game, layout_options=LayoutOptions(
                      left=0.62,
                      top=8,
                      right=1,
-                     bottom=1
-                 ))
-                 ]
+                     bottom=1))]
         super().__init__(views, *args, **kwargs)
 
     def become_active(self):
         self.ctx.clear()
+        self.map_view.tick = 11  # to draw map right after
 
     def terminal_update(self, is_active=False):
         """ Update values in bars and tabs before drawing """
@@ -664,6 +668,7 @@ class MainGameScene(UIScene):
             self.player_left_hand.text = 'Left:  ' + str(left)
             money = player.properties['money']
             self.money.text = 'Money: ' + str(money) + ' coins.'
+            self.view.set_needs_layout()
         super().terminal_update(is_active=is_active)
 
     def terminal_read(self, val):
