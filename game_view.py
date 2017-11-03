@@ -692,6 +692,11 @@ class MainGameScene(UIScene):
                 commands.command_default_direction(game=game, dx=-1, dy=1)
             elif player_input == terminal.TK_KP_3:
                 commands.command_default_direction(game=game, dx=1, dy=1)
+            elif player_input == 53:  # on '`' show debug messages in log
+                if game.show_debug_log:
+                    game.show_debug_log = False
+                else:
+                    game.show_debug_log = True
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
@@ -708,7 +713,7 @@ class MainGameScene(UIScene):
                                                                  layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
                                                                     left=0.2, right=0.2)))
-            elif player_input == terminal.TK_T:  # take off
+            elif player_input == terminal.TK_O:  # take 'o'ff
                 self.director.push_scene(TakeOffItemSelectionScene(items=[sl for sl in
                                                                           list(player.equipment.values()) if sl],
                                                                    game=game,
