@@ -467,6 +467,14 @@ class DropItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
+class UseItemSelectionScene(ItemManipulationSelectionScene):
+    """ Scene displays a list of items to use one """
+    def option_activated(self, *args, **kwargs):
+        """ Method to use item when option is activated (ENTER key pressed) """
+        commands.command_use_item(self.game, self.options[self.selected])
+        super().option_activated(*args, **kwargs)
+
+
 class TakeOffItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of equipped items to take off one """
     def option_activated(self, *args, **kwargs):
@@ -704,6 +712,8 @@ class MainGameScene(UIScene):
                     game.show_debug_log = False
                 else:
                     game.show_debug_log = True
+            elif player_input == terminal.TK_G:  # pick up item
+                commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
@@ -711,8 +721,13 @@ class MainGameScene(UIScene):
                                                                 layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
                                                                     left=0.2, right=0.2)))
-            elif player_input == terminal.TK_G:  # pick up item
-                commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
+            elif player_input == terminal.TK_U:  # use item
+                self.director.push_scene(UseItemSelectionScene(items=player.inventory,
+                                                               game=game,
+                                                               caption='Use item:',
+                                                               layout_options=LayoutOptions(
+                                                                   top=0.1, bottom=0.1,
+                                                                   left=0.2, right=0.2)))
             elif player_input == terminal.TK_W:  # wield item
                 self.director.push_scene(WieldItemSelectionScene(items=player.inventory,
                                                                  game=game,
