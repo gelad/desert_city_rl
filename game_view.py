@@ -600,28 +600,28 @@ class MainGameScene(UIScene):
         self.game = game
         self.health_bar = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
                                                                                top=0,
-                                                                               width='intrinsic',
-                                                                               height='intrinsic',
+                                                                               height=1,
                                                                                bottom=None,
-                                                                               right=None))
+                                                                               right=1))
+        self.health_bar.align_horz = 'left'
         self.player_right_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
                                                                                       top=2,
-                                                                                      width='intrinsic',
-                                                                                      height='intrinsic',
+                                                                                      height=1,
                                                                                       bottom=None,
-                                                                                      right=None))
+                                                                                      right=1))
+        self.player_right_hand.align_horz = 'left'
         self.player_left_hand = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
                                                                                      top=3,
-                                                                                     width='intrinsic',
-                                                                                     height='intrinsic',
+                                                                                     height=1,
                                                                                      bottom=None,
-                                                                                     right=None))
+                                                                                     right=1))
+        self.player_left_hand.align_horz = 'left'
         self.money = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
                                                                           top=5,
-                                                                          width='intrinsic',
-                                                                          height='intrinsic',
+                                                                          height=1,
                                                                           bottom=None,
-                                                                          right=None))
+                                                                          right=1))
+        self.money.align_horz = 'left'
         self.map_view = MapView(game=game,
                                 layout_options=LayoutOptions(
                                     left=1,
@@ -637,17 +637,19 @@ class MainGameScene(UIScene):
                                 right=1,
                                 bottom=7))
         self.bars_view.clear = True
+        self.log_view = LogView(game=game, layout_options=LayoutOptions(
+                                    left=0.62,
+                                    top=8,
+                                    right=1,
+                                    bottom=1))
+        self.log_view.clear = True
         views = [self.map_view,
                  RectView(style='double', layout_options=LayoutOptions(left=0, top=0)),
                  RectView(style='double', layout_options=LayoutOptions().column_left(1).with_updates(
                      left=0.61,
                      right=None)),
                  self.bars_view,
-                 LogView(game=game, layout_options=LayoutOptions(
-                     left=0.62,
-                     top=8,
-                     right=1,
-                     bottom=1))]
+                 self.log_view]
         super().__init__(views, *args, **kwargs)
 
     def become_active(self):
@@ -658,7 +660,6 @@ class MainGameScene(UIScene):
         """ Update values in bars and tabs before drawing """
         player = self.game.player
         if is_active:
-            self.health_bar.clear = True
             self.health_bar.text = str(player.hp) + '/' + str(player.maxhp) + ' HP'
             # hp becomes red when hurt
             hp_percent = player.hp / player.maxhp
@@ -676,7 +677,6 @@ class MainGameScene(UIScene):
             self.player_left_hand.text = 'Left:  ' + str(left)
             money = player.properties['money']
             self.money.text = 'Money: ' + str(money) + ' coins.'
-            self.view.set_needs_layout()
         super().terminal_update(is_active=is_active)
 
     def terminal_read(self, val):
