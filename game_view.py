@@ -445,10 +445,42 @@ class DescribedListSelectionScene(UIScene):
 
 class ItemManipulationSelectionScene(DescribedListSelectionScene):
     """ Item manipulation Scene subclass, not intended to use directly (to write less code in item manipulation menus)
-     Does nothing to selected item.
+     Does nothing to selected item. 
     """
     def __init__(self, items, game, *args, **kwargs):
-        descriptions = [i.description for i in items]
+        descriptions = []
+        for item in items:
+            text = ''
+            text += item.description + '\n'
+            text += 'Weight: ' + str(item.weight) + ' kg.\n'
+            if item.properties:
+                if 'bashing' in item.properties:
+                    text += 'Deals ' + str(item.properties['bashing'][0]) + '-' + str(
+                        item.properties['bashing'][1]) + ' bashing damage.\n'
+                if 'slashing' in item.properties:
+                    text += 'Deals ' + str(item.properties['slashing'][0]) + '-' + str(
+                        item.properties['slashing'][1]) + ' slashing damage.\n'
+                if 'piercing' in item.properties:
+                    text += 'Deals ' + str(item.properties['piercing'][0]) + '-' + str(
+                        item.properties['piercing'][1]) + ' piercing damage.\n'
+                if 'fire' in item.properties:
+                    text += 'Deals ' + str(item.properties['fire'][0]) + '-' + str(
+                        item.properties['fire'][1]) + ' fire damage.\n'
+                if 'cold' in item.properties:
+                    text += 'Deals ' + str(item.properties['cold'][0]) + '-' + str(
+                        item.properties['cold'][1]) + ' cold damage.\n'
+                if 'lightning' in item.properties:
+                    text += 'Deals ' + str(item.properties['lightning'][0]) + '-' + str(
+                        item.properties['lightning'][1]) + ' lightning damage.\n'
+            if len(item.effects) > 0:
+                text += 'Effects: '
+                for effect in item.effects:
+                    text += effect.description + '\n'
+            if len(item.abilities) > 0:
+                text += 'Abilities: '
+                for ability in item.abilities:
+                    text += ability.name + '\n'
+            descriptions.append(text)
         self.game = game
         super().__init__(options=items, descriptions=descriptions, *args, **kwargs)
 
