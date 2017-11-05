@@ -316,7 +316,8 @@ class ListSelectionScene(UIScene):
 class DescribedListSelectionScene(UIScene):
     """ Scene displays a list with selectable options and their descriptions to the left """
     # TODO: refactor and comment this shit..
-    def __init__(self, options, descriptions, caption='', layout_options=None, alphabet=True, *args, **kwargs):
+    def __init__(self, options, descriptions, caption='', layout_options=None, alphabet=True, views=None,
+                 *args, **kwargs):
         self.options = options
         self.descriptions = descriptions
         self.alphabet = alphabet
@@ -357,6 +358,8 @@ class DescribedListSelectionScene(UIScene):
                                                     right=None
                                                 ))
         subviews.append(self.description_view)
+        if views:
+            subviews = subviews + views
         self.window_view = WindowView(title=caption,
                                       style='double',
                                       layout_options=layout_options or LayoutOptions(left=0, top=0),
@@ -482,7 +485,14 @@ class ItemManipulationSelectionScene(DescribedListSelectionScene):
                     text += ability.name + '\n'
             descriptions.append(text)
         self.game = game
-        super().__init__(options=items, descriptions=descriptions, *args, **kwargs)
+        self.weight_bar = LabelViewFixed(text='Weight: ' + str(round(self.game.player.carried_weight, 2)) + '/' +
+                                         str(round(self.game.player.properties['max_carry_weight'], 2)) + ' kg.',
+                                         layout_options=LayoutOptions().row_bottom(0).with_updates(width='intrinsic',
+                                                                                                   left=None,
+                                                                                                   right=0))
+        if self.game.player.carried_weight > self.game.player.properties['max_carry_weight']:
+            self.weight_bar.color_fg = terminal.color_from_name('red')
+        super().__init__(options=items, descriptions=descriptions, views=[self.weight_bar], *args, **kwargs)
 
     def option_activated(self, game_update_needed=True):
         """ Method to drop item when option is activated (ENTER key pressed) """
