@@ -640,6 +640,7 @@ class MainGameScene(UIScene):
     """ Main game scene """
     def __init__(self, game, *args, **kwargs):
         self.game = game
+        self.state = 'default'  # game UI state (can be 'looking', 'targeting', etc)
         self.health_bar = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
                                                                                top=0,
                                                                                height=1,
@@ -723,6 +724,16 @@ class MainGameScene(UIScene):
 
     def terminal_read(self, val):
         """ This method handles player input in main scene """
+        handled = False
+        if self.state == 'default':
+            handled = self._handle_input_default(val=val)
+        elif self.state == 'looking':
+            handled = self._handle_input_looking(val=val)
+        super().terminal_read(val)
+        return handled
+
+    def _handle_input_default(self, val):
+        """ This method handles player input in 'default' state """
         player_input = val
         game = self.game
         player = game.player
@@ -775,19 +786,52 @@ class MainGameScene(UIScene):
                                                                  game=game,
                                                                  caption='Wield item:',
                                                                  layout_options=LayoutOptions(
-                                                                    top=0.1, bottom=0.1,
-                                                                    left=0.2, right=0.2)))
+                                                                     top=0.1, bottom=0.1,
+                                                                     left=0.2, right=0.2)))
             elif player_input == terminal.TK_O:  # take 'o'ff
                 self.director.push_scene(TakeOffItemSelectionScene(items=[sl for sl in
                                                                           list(player.equipment.values()) if sl],
                                                                    game=game,
                                                                    caption='Take off item:',
                                                                    layout_options=LayoutOptions(
-                                                                        top=0.1, bottom=0.1,
-                                                                        left=0.2, right=0.2)))
+                                                                       top=0.1, bottom=0.1,
+                                                                       left=0.2, right=0.2)))
+            elif player_input == terminal.TK_L:  # look
+                self.state = 'looking'
             handled = True
             game.start_update_thread()
-        super().terminal_read(val)
+            return handled
+
+    def _handle_input_looking(self, val):
+        """ This method handles player input in 'default' state """
+        player_input = val
+        handled = False  # input handled flag
+        if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
+            self.state = 'default'
+            self.map_view.cam_offset = [0, 0]
+        # camera offset change with directional keys
+        # TODO: move offset change to MapView method
+        elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
+            self.map_view.cam_offset[0] -= 1
+        elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
+            self.map_view.cam_offset[0] += 1
+        elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
+            self.map_view.cam_offset[1] -= 1
+        elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
+            self.map_view.cam_offset[1] += 1
+        elif player_input == terminal.TK_KP_7:
+            self.map_view.cam_offset[0] -= 1
+            self.map_view.cam_offset[1] -= 1
+        elif player_input == terminal.TK_KP_9:
+            self.map_view.cam_offset[0] += 1
+            self.map_view.cam_offset[1] -= 1
+        elif player_input == terminal.TK_KP_1:
+            self.map_view.cam_offset[0] -= 1
+            self.map_view.cam_offset[1] += 1
+        elif player_input == terminal.TK_KP_3:
+            self.map_view.cam_offset[0] += 1
+            self.map_view.cam_offset[1] += 1
+        handled = True
         return handled
 
 # Views
@@ -797,7 +841,7 @@ class MapView(View):
     """ View with game map """
     def __init__(self, game, *args, **kwargs):
         self.game = game  # game object reference for obtaining map info
-        self.cam_offset = (0, 0)  # camera offset (if looking or targeting)
+        self.cam_offset = [0, 0]  # camera offset (if looking or targeting)
         self.last_game_time = game.time_system.current_time()  # last game time (to know when redraw needed)
         self.tick = 0  # frame count (to know when redraw needed)
         super().__init__(*args, **kwargs)
@@ -882,7 +926,7 @@ class MapView(View):
                         terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map] ')
                         # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
                         # ctx.print(Point(x, y), '[font=map] ')   # if out of bounds then draw blank space
-                    if not self.cam_offset == (0, 0):
+                    if not self.cam_offset == [0, 0]:
                         # if camera is not centered on player - draw there a red 'X'
                         ctx.color(terminal.color_from_argb(255, 255, 0, 0))
                         ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
