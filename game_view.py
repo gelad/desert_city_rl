@@ -675,6 +675,12 @@ class MainGameScene(UIScene):
                                     bottom=1,
                                     right=None))
         self.map_view.clear = True
+        self.cell_info_view = LookView(game=game, map_view=self.map_view, layout_options=LayoutOptions(
+                                        left=0.62,
+                                        top=8,
+                                        right=1,
+                                        bottom=1))
+        self.cell_info_view.is_hidden = True
         self.bars_view = View(subviews=[self.health_bar, self.player_right_hand, self.player_left_hand, self.money],
                               layout_options=LayoutOptions(
                                 left=0.62,
@@ -700,7 +706,8 @@ class MainGameScene(UIScene):
                      right=None)),
                  self._title_label,
                  self.bars_view,
-                 self.log_view]
+                 self.log_view,
+                 self.cell_info_view]
         super().__init__(views, *args, **kwargs)
 
     @property
@@ -818,6 +825,8 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_L:  # look
                 self.state = 'looking'
                 self.title = 'LOOKING:'
+                self.cell_info_view.is_hidden = False
+                self.log_view.is_hidden = True
             handled = True
             game.start_update_thread()
             return handled
@@ -829,6 +838,8 @@ class MainGameScene(UIScene):
         if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
             self.state = 'default'
             self.title = ''
+            self.cell_info_view.is_hidden = True
+            self.log_view.is_hidden = False
             self.map_view.cam_offset = [0, 0]
         # camera offset change with directional keys
         elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
@@ -991,3 +1002,52 @@ class LogView(View):
             y += 1
             ctx.color(terminal.color_from_argb(255, line[1][0], line[1][1], line[1][2]))
             ctx.print(Point(0, y), line[0])  # draw each line
+
+
+class LookView(View):
+    """ View with description of cell player looking at """
+    def __init__(self, game, map_view, *args, **kwargs):
+        self.game = game  # game object reference for obtaining map info
+        self.cam_offset = map_view.cam_offset  # map_view needed to obtain cam_offset
+        self.clear = True  # clear before each draw
+        super().__init__(*args, **kwargs)
+
+    @property
+    def intrinsic_size(self):
+        return Size(self.bounds.width, self.bounds.height)
+
+    def draw(self, ctx):
+        if (self.game.player.position[0] + self.cam_offset[0],
+                self.game.player.position[1] + self.cam_offset[1]) in self.game.player.fov_set:  # show if in FOV
+            entities = self.game.current_loc.cells[self.game.player.position[0] + self.cam_offset[0]][
+                self.game.player.position[1] + self.cam_offset[1]].entities  # get entities @ selected cell
+            creatures = [ent for ent in entities if ent.occupies_tile]
+            items = [ent for ent in entities if isinstance(ent, game_logic.Item)]
+            other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
+            cur_y = 0  # a 'cursor' y position
+            for creature in creatures:  # show creature info if any
+                if creature.color[0]+creature.color[1]+creature.color[2] < 100:  # if creature color is too dark
+                    col = (255, 255, 255)  # show name in white
+                else:
+                    col = creature.color
+                ctx.color(terminal.color_from_argb(255, col[0], col[1], col[2]))
+                ctx.print(Point(0, cur_y), creature.name + ' is here.')
+                ctx.color(terminal.color_from_name('white'))
+                cur_y += 1
+                for ln in textwrap.wrap(creature.description, self.bounds.width):
+                    ctx.print(Point(0, cur_y), ln)
+                    cur_y += 1
+            ctx.print(Point(0, cur_y), 'Items:')
+            cur_y += 1
+            for item in items:  # show items if any
+                ctx.color(terminal.color_from_argb(255, item.color[0], item.color[1], item.color[2]))
+                ctx.print(Point(0, cur_y), item.name + ' is here.')
+                ctx.color(terminal.color_from_name('white'))
+                cur_y += 1
+            ctx.print(Point(0, cur_y), 'Other:')
+            cur_y += 1
+            for other in other:  # show other objects
+                ctx.color(terminal.color_from_argb(255, other.color[0], other.color[1], other.color[2]))
+                ctx.print(Point(0, cur_y), other.name + ' is here.')
+                ctx.color(terminal.color_from_name('white'))
+                cur_y += 1
