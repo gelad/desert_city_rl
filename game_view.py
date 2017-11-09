@@ -810,27 +810,22 @@ class MainGameScene(UIScene):
             self.state = 'default'
             self.map_view.cam_offset = [0, 0]
         # camera offset change with directional keys
-        # TODO: move offset change to MapView method
         elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
-            self.map_view.cam_offset[0] -= 1
+            self.map_view.change_cam_offset(-1, 0)
         elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
-            self.map_view.cam_offset[0] += 1
+            self.map_view.change_cam_offset(1, 0)
         elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
-            self.map_view.cam_offset[1] -= 1
+            self.map_view.change_cam_offset(0, -1)
         elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
-            self.map_view.cam_offset[1] += 1
+            self.map_view.change_cam_offset(0, 1)
         elif player_input == terminal.TK_KP_7:
-            self.map_view.cam_offset[0] -= 1
-            self.map_view.cam_offset[1] -= 1
+            self.map_view.change_cam_offset(-1, -1)
         elif player_input == terminal.TK_KP_9:
-            self.map_view.cam_offset[0] += 1
-            self.map_view.cam_offset[1] -= 1
+            self.map_view.change_cam_offset(1, -1)
         elif player_input == terminal.TK_KP_1:
-            self.map_view.cam_offset[0] -= 1
-            self.map_view.cam_offset[1] += 1
+            self.map_view.change_cam_offset(-1, 1)
         elif player_input == terminal.TK_KP_3:
-            self.map_view.cam_offset[0] += 1
-            self.map_view.cam_offset[1] += 1
+            self.map_view.change_cam_offset(1, 1)
         handled = True
         return handled
 
@@ -849,6 +844,12 @@ class MapView(View):
     @property
     def intrinsic_size(self):
         return Size(self.bounds.width, self.bounds.height)
+
+    def change_cam_offset(self, dx, dy):
+        """ Method that alters camera offset by given numbers """
+        # TODO: make 'out of bounds' check
+        self.cam_offset[0] += dx
+        self.cam_offset[1] += dy
 
     @staticmethod
     def cell_graphics(x, y, cell, loc, visible):
