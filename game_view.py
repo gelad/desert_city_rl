@@ -918,25 +918,24 @@ class MapView(View):
                         ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
                         terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
                         terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map]' + cg[0])
-                        # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
-                        # ctx.print(Point(x * 2, y), '[font=map]' + cg[0])
+
                     else:
                         ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
                         terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
                         terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map] ')
-                        # ctx.print(Point(x * 2 + 1, y), ' ')  # draw blank space with bkcolor (big chars bug?)
-                        # ctx.print(Point(x, y), '[font=map] ')   # if out of bounds then draw blank space
-                    if not self.cam_offset == [0, 0]:
-                        # if camera is not centered on player - draw there a red 'X'
-                        ctx.color(terminal.color_from_argb(255, 255, 0, 0))
-                        ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                        # draw blank space with bkcolor (big chars bug?)
-                        terminal.printf(self.layout_options.left + self.bounds.width // 2 + 1,
-                                        self.layout_options.top + self.bounds.height // 2, ' ')
-                        terminal.printf(self.layout_options.left + self.bounds.width // 2,
-                                        self.layout_options.top + self.bounds.height // 2, '[font=map]X')
-                        # ctx.print(Point(self.bounds.width // 2 + 1, self.bounds.height // 2), ' ')
-                        # ctx.print(Point(self.bounds.width // 2, self.bounds.height // 2), '[font=map]X')
+            if not self.cam_offset == [0, 0]:
+                # if camera is not centered on player - draw there a red 'X'
+                ctx.color(terminal.color_from_argb(255, 255, 0, 0))
+                ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
+                # draw blank space with bkcolor (big chars bug?)
+                if self.bounds.width % 2 != 0:  # check if width is odd and apply correction
+                    sub_x = 1
+                else:
+                    sub_x = 0
+                terminal.printf(self.layout_options.left + self.bounds.width // 2 - sub_x + 1,
+                                self.layout_options.top + self.bounds.height // 2, ' ')
+                terminal.printf(self.layout_options.left + self.bounds.width // 2 - sub_x,
+                                self.layout_options.top + self.bounds.height // 2, '[font=map]X')
             self.last_game_time = self.game.time_system.current_time()
             self.tick = 0
 
