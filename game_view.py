@@ -859,6 +859,7 @@ class MainGameScene(UIScene):
         elif player_input == terminal.TK_KP_3:
             self.map_view.change_cam_offset(1, 1)
         handled = True
+        self.map_view.tick = 11  # to redraw map faster
         return handled
 
 # Views
@@ -867,6 +868,7 @@ class MainGameScene(UIScene):
 class MapView(View):
     """ View with game map """
     def __init__(self, game, *args, **kwargs):
+        # TODO: make method or property to force redraw on next tick
         self.game = game  # game object reference for obtaining map info
         self.cam_offset = [0, 0]  # camera offset (if looking or targeting)
         self.last_game_time = game.time_system.current_time()  # last game time (to know when redraw needed)
