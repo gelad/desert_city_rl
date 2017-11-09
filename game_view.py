@@ -640,6 +640,7 @@ class MainGameScene(UIScene):
     """ Main game scene """
     def __init__(self, game, *args, **kwargs):
         self.game = game
+        self._title = ''
         self.state = 'default'  # game UI state (can be 'looking', 'targeting', etc)
         self.health_bar = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
                                                                                top=0,
@@ -673,6 +674,7 @@ class MainGameScene(UIScene):
                                     height=None,
                                     bottom=1,
                                     right=None))
+        self.map_view.clear = True
         self.bars_view = View(subviews=[self.health_bar, self.player_right_hand, self.player_left_hand, self.money],
                               layout_options=LayoutOptions(
                                 left=0.62,
@@ -686,14 +688,31 @@ class MainGameScene(UIScene):
                                     right=1,
                                     bottom=1))
         self.log_view.clear = True
+        self._title_label = LabelViewFixed(text='',
+                                           layout_options=LayoutOptions.row_top(1).with_updates(width='intrinsic',
+                                                                                                left=0.3,
+                                                                                                right=None))
+        self._title_label.clear = True
         views = [self.map_view,
                  RectView(style='double', layout_options=LayoutOptions(left=0, top=0)),
                  RectView(style='double', layout_options=LayoutOptions().column_left(1).with_updates(
                      left=0.61,
                      right=None)),
+                 self._title_label,
                  self.bars_view,
                  self.log_view]
         super().__init__(views, *args, **kwargs)
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, text):
+        """ Window title setter """
+        self._title = str(text)
+        self._title_label.text = self._title
+        self._title_label.set_needs_layout(True)
 
     def become_active(self):
         self.ctx.clear()
@@ -798,6 +817,7 @@ class MainGameScene(UIScene):
                                                                        left=0.2, right=0.2)))
             elif player_input == terminal.TK_L:  # look
                 self.state = 'looking'
+                self.title = 'LOOKING:'
             handled = True
             game.start_update_thread()
             return handled
@@ -808,6 +828,7 @@ class MainGameScene(UIScene):
         handled = False  # input handled flag
         if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
             self.state = 'default'
+            self.title = ''
             self.map_view.cam_offset = [0, 0]
         # camera offset change with directional keys
         elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
