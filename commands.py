@@ -59,21 +59,35 @@ def command_pick_up(director, game, dx, dy):
                                                                             left=0.2, right=0.2)))
 
 
-def command_use_item(game, item):
+def command_use_item(game, item, main_scene):
     """ Command method to use item - chooses usage behavior based on item properties """
     player = game.player
     if 'usable' in item.properties:
-        # TODO: make items usable on self or on target
         if item.properties['usable'] == 'self':  # if item usable on self
             player.perform(actions.act_use_item, player, item, player)
         elif item.properties['usable'] == 'point':  # if item usable on point
-            pass
-            #self.command_target_choose(item.properties['range'], item, self.command_use_item_on_point, player, item)
+            main_scene.start_targeting(range=item.properties['range'],
+                                       t_object=item,
+                                       eligible_types=('point'),
+                                       callback=command_use_item,
+                                       player=player,
+                                       item=item)
         elif item.properties['usable'] == 'battle_entity':  # if item usable on battle entity
-            pass
-            #command_target_choose(item.properties['range'], item, self.command_use_item_on_entity,
-            #                            player, item, game_logic.BattleEntity)
+            main_scene.start_targeting(range=item.properties['range'],
+                                       t_object=item,
+                                       eligible_types=(game_logic.BattleEntity),
+                                       callback=command_use_item_on_target,
+                                       player=player,
+                                       item=item)
         elif item.properties['usable'] == 'battle_entity_or_point':  # if item usable on battle entity or point
-            pass
-            #self.command_target_choose(item.properties['range'], item, self.command_use_item_on_entity_or_point,
-            #                            player, item, game_logic.BattleEntity)
+            main_scene.start_targeting(range=item.properties['range'],
+                                       t_object=item,
+                                       eligible_types=(game_logic.BattleEntity, 'point'),
+                                       callback=command_use_item_on_target,
+                                       player=player,
+                                       item=item)
+
+
+def command_use_item_on_target(target, player, item):
+    """ Command method to use item on targeted point or entity """
+    player.perform(actions.act_use_item, player, item, target)  # use item on target

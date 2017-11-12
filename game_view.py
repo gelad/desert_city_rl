@@ -24,6 +24,7 @@ import sys
 import threading
 import os
 import textwrap
+from math import hypot
 
 import game_logic
 import save_load
@@ -75,6 +76,7 @@ class GameLoop(DirectorLoop):
     def __init__(self):
         self.last_frame_time = time.time()
         self.game = None  # reference to Game object - to save it if closed
+        self.main_game_scene = None  # reference to Main Game Scene
         super().__init__()
 
     def terminal_init(self):
@@ -523,7 +525,7 @@ class UseItemSelectionScene(ItemManipulationSelectionScene):
 
     def option_activated(self, *args, **kwargs):
         """ Method to use item when option is activated (ENTER key pressed) """
-        commands.command_use_item(self.game, self.options[self.selected])
+        commands.command_use_item(self.game, self.options[self.selected], self.director.main_game_scene)
         super().option_activated(*args, **kwargs)
 
 
@@ -660,6 +662,7 @@ class MainGameScene(UIScene):
         self.game = game
         self._title = ''
         self.state = 'default'  # game UI state (can be 'looking', 'targeting', etc)
+        self.target_info = {}  # dictionary containing targeting information when in 'targeting' state
         self.health_bar = LabelViewFixed(text='', layout_options=LayoutOptions(left=0,
                                                                                top=0,
                                                                                height=1,
@@ -739,7 +742,48 @@ class MainGameScene(UIScene):
         self._title_label.text = self._title
         self._title_label.set_needs_layout(True)
 
+    def start_targeting(self, range, t_object, callback, eligible_types, *args, **kwargs):
+        """ Method that accepts targeting info and changes Scene state to 'targeting' """
+        self.target_info = {'range': range,  # targeting max range
+                            't_object': t_object,  # targetable object
+                            'callback': callback,  # function to call when target is chosen
+                            'eligible_types': eligible_types,  # eligible target types
+                            'args': args,
+                            'kwargs': kwargs}
+        self.state = 'targeting'
+        self.title = 'TARGETING: ' + str(t_object)
+        self.cell_info_view.is_hidden = False
+        self.log_view.is_hidden = True
+        self.map_view.cam_offset = [0, 0]
+
+    def stop_targeting(self):
+        """ Method that changes Scene state back to 'default' from 'targeting' """
+        self.target_info.clear()
+        self.state = 'default'
+        self.title = ''
+        self.cell_info_view.is_hidden = True
+        self.log_view.is_hidden = False
+        self.map_view.cam_offset = [0, 0]
+
+    def check_target(self):
+        """ Method that checks if target belongs to one of eligible target types """
+        target = False
+        tx = self.game.player.position[0] + self.map_view.cam_offset[0]  # target cell coordinates
+        ty = self.game.player.position[1] + self.map_view.cam_offset[1]
+        for t in self.target_info['eligible_types']:
+            entity = self.game.player.location.cells[tx][ty].is_there_a(t)
+            if entity:
+                return entity
+        if 'point' in self.target_info['eligible_types'] and self.game.current_loc.is_in_boundaries(tx, ty):
+            return tx, ty
+
     def become_active(self):
+        if not self.director.main_game_scene:
+            self.director.main_game_scene = self
+        elif self.director.main_game_scene == self:
+            pass
+        else:
+            raise(RuntimeError('More than one main game scene!'))
         self.ctx.clear()
         self.map_view.tick = 11  # to draw map right after
 
@@ -773,6 +817,8 @@ class MainGameScene(UIScene):
             handled = self._handle_input_default(val=val)
         elif self.state == 'looking':
             handled = self._handle_input_looking(val=val)
+        elif self.state == 'targeting':
+            handled = self._handle_input_targeting(val=val)
         super().terminal_read(val)
         return handled
 
@@ -861,6 +907,7 @@ class MainGameScene(UIScene):
                 self.title = 'LOOKING:'
                 self.cell_info_view.is_hidden = False
                 self.log_view.is_hidden = True
+                self.map_view.cam_offset = [0, 0]
                 handled = True
             game.start_update_thread()
             return handled
@@ -900,6 +947,57 @@ class MainGameScene(UIScene):
             handled = True
         elif player_input == terminal.TK_KP_3:
             self.map_view.change_cam_offset(1, 1)
+            handled = True
+        if handled:
+            self.map_view.tick = 11  # to redraw map faster
+        return handled
+
+    def _handle_input_targeting(self, val):
+        """ This method handles player input in 'targeting' state """
+        player_input = val
+        handled = False  # input handled flag
+        if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
+            self.stop_targeting()
+            handled = True
+        elif player_input == terminal.TK_ENTER:  # if player chooses the cell
+            target = self.check_target()
+            if target:
+                self.target_info['callback'](target=target, *self.target_info['args'], **self.target_info['kwargs'])
+                self.stop_targeting()
+                self.game.start_update_thread()
+            handled = True
+        # camera offset change with directional keys, check targeting range before camera move
+        elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
+            if hypot(self.map_view.cam_offset[0] - 1, self.map_view.cam_offset[1]) <= self.target_info['range']:
+                self.map_view.change_cam_offset(-1, 0)
+            handled = True
+        elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
+            if hypot(self.map_view.cam_offset[0] + 1, self.map_view.cam_offset[1]) <= self.target_info['range']:
+                self.map_view.change_cam_offset(1, 0)
+            handled = True
+        elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
+            if hypot(self.map_view.cam_offset[0], self.map_view.cam_offset[1] - 1) <= self.target_info['range']:
+                self.map_view.change_cam_offset(0, -1)
+            handled = True
+        elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
+            if hypot(self.map_view.cam_offset[0], self.map_view.cam_offset[1] + 1) <= self.target_info['range']:
+                self.map_view.change_cam_offset(0, 1)
+            handled = True
+        elif player_input == terminal.TK_KP_7:
+            if hypot(self.map_view.cam_offset[0] - 1, self.map_view.cam_offset[1] - 1) < self.target_info['range']:
+                self.map_view.change_cam_offset(-1, -1)
+            handled = True
+        elif player_input == terminal.TK_KP_9:
+            if hypot(self.map_view.cam_offset[0] + 1, self.map_view.cam_offset[1] - 1) < self.target_info['range']:
+                self.map_view.change_cam_offset(1, -1)
+            handled = True
+        elif player_input == terminal.TK_KP_1:
+            if hypot(self.map_view.cam_offset[0] - 1, self.map_view.cam_offset[1] + 1) < self.target_info['range']:
+                self.map_view.change_cam_offset(-1, 1)
+            handled = True
+        elif player_input == terminal.TK_KP_3:
+            if hypot(self.map_view.cam_offset[0] + 1, self.map_view.cam_offset[1] + 1) < self.target_info['range']:
+                self.map_view.change_cam_offset(1, 1)
             handled = True
         if handled:
             self.map_view.tick = 11  # to redraw map faster
@@ -1059,7 +1157,7 @@ class LookView(View):
 
     def __init__(self, game, map_view, *args, **kwargs):
         self.game = game  # game object reference for obtaining map info
-        self.cam_offset = map_view.cam_offset  # map_view needed to obtain cam_offset
+        self.map_view = map_view  # map_view needed to obtain cam_offset
         self.clear = True  # clear before each draw
         super().__init__(*args, **kwargs)
 
@@ -1068,10 +1166,10 @@ class LookView(View):
         return Size(self.bounds.width, self.bounds.height)
 
     def draw(self, ctx):
-        if (self.game.player.position[0] + self.cam_offset[0],
-            self.game.player.position[1] + self.cam_offset[1]) in self.game.player.fov_set:  # show if in FOV
-            entities = self.game.current_loc.cells[self.game.player.position[0] + self.cam_offset[0]][
-                self.game.player.position[1] + self.cam_offset[1]].entities  # get entities @ selected cell
+        if (self.game.player.position[0] + self.map_view.cam_offset[0],
+                self.game.player.position[1] + self.map_view.cam_offset[1]) in self.game.player.fov_set:  # if in FOV
+            entities = self.game.current_loc.cells[self.game.player.position[0] + self.map_view.cam_offset[0]][
+                self.game.player.position[1] + self.map_view.cam_offset[1]].entities  # get entities @ selected cell
             creatures = [ent for ent in entities if ent.occupies_tile]
             items = [ent for ent in entities if isinstance(ent, game_logic.Item)]
             other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
