@@ -41,34 +41,37 @@ LOGO = """
 /___,' \___||___/\___|_|   \__| \____/|_|\__|\__, |
                                              |___/ 
 """
-character_bg_descriptions=[
-                                             'Many adventurers are lured to the City - in search of treasures, power,' +
-                                             ' glory or something else. You are among the others - jack of all trades,' +
-                                             ' master of nothing.'
-                                             ,
-                                             'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
-                                             ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
-                                             'such warrior, proficient in melee combat and wearing a set of armor.'
-                                             ,
-                                             'Mercenaries from distant Northern country called Gantra are well-known ' +
-                                             'as trustworthy soldiers. One of them - with your sturdy crossbow' +
-                                             ' and shooting skills - you headed south, to obtain treasures of mysterious'
-                                             + ' City.'
-                                             ,
-                                             'A talent to use magic is rare among the people of Vaerthol. ' +
-                                             'You lack one, but unlike others, you desperately crave ' +
-                                             'for magic. One man told you a rumor, that in the sands lies a magic city' +
-                                             ' of Neth-Nikakh, where among the other wonders, ordinary people can' +
-                                             ' become powerful ' +
-                                             'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
-                                             ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
-                                             ' magic gift.']
+character_bg_descriptions = [
+    'Many adventurers are lured to the City - in search of treasures, power,' +
+    ' glory or something else. You are among the others - jack of all trades,' +
+    ' master of nothing.'
+    ,
+    'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
+    ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
+    'such warrior, proficient in melee combat and wearing a set of armor.'
+    ,
+    'Mercenaries from distant Northern country called Gantra are well-known ' +
+    'as trustworthy soldiers. One of them - with your sturdy crossbow' +
+    ' and shooting skills - you headed south, to obtain treasures of mysterious'
+    + ' City.'
+    ,
+    'A talent to use magic is rare among the people of Vaerthol. ' +
+    'You lack one, but unlike others, you desperately crave ' +
+    'for magic. One man told you a rumor, that in the sands lies a magic city' +
+    ' of Neth-Nikakh, where among the other wonders, ordinary people can' +
+    ' become powerful ' +
+    'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
+    ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
+    ' magic gift.']
 character_backgrounds = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
+
+
 #  /temporary shit
 
 
 class GameLoop(DirectorLoop):
     """ GameLoop class """
+
     def __init__(self):
         self.last_frame_time = time.time()
         self.game = None  # reference to Game object - to save it if closed
@@ -114,6 +117,7 @@ class GameLoop(DirectorLoop):
 
 class CharacterSelectScene(UIScene):
     """ Scene displays character background variants with descriptions """
+
     def __init__(self, *args, **kwargs):
         self.options = character_backgrounds
         self.bg_texts = character_bg_descriptions
@@ -136,13 +140,13 @@ class CharacterSelectScene(UIScene):
                                                align_horz='left',
                                                align_vert='top',
                                                layout_options=LayoutOptions(
-                                                    left=0.5,
-                                                    top=1,
-                                                    width=0.45,
-                                                    height='intrinsic',
-                                                    bottom=None,
-                                                    right=None
-                                                ))
+                                                   left=0.5,
+                                                   top=1,
+                                                   width=0.45,
+                                                   height='intrinsic',
+                                                   bottom=None,
+                                                   right=None
+                                               ))
         views.append(self.description_view)
         super().__init__(views, *args, **kwargs)
 
@@ -190,11 +194,13 @@ class CharacterSelectScene(UIScene):
         self.director.push_scene(MainGameScene(game))
         self.director.game = game
 
+
 # List menu scenes
 
 
 class ListSelectionScene(UIScene):
     """ Scene displays a list with selectable options """
+
     # TODO: refactor and comment this shit..
     def __init__(self, options, caption='', layout_options=None, alphabet=True, *args, **kwargs):
         self.options = options
@@ -215,12 +221,12 @@ class ListSelectionScene(UIScene):
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
                                      layout_options=LayoutOptions(
-                                        left=1,
-                                        top=top_offset,
-                                        width='intrinsic',
-                                        height=1,
-                                        bottom=None,
-                                        right=None))
+                                         left=1,
+                                         top=top_offset,
+                                         width='intrinsic',
+                                         height=1,
+                                         bottom=None,
+                                         right=None))
             button.is_hidden = True
             subviews.append(button)
             self.buttons.append(button)
@@ -315,6 +321,7 @@ class ListSelectionScene(UIScene):
 
 class DescribedListSelectionScene(UIScene):
     """ Scene displays a list with selectable options and their descriptions to the left """
+
     # TODO: refactor and comment this shit..
     def __init__(self, options, descriptions, caption='', layout_options=None, alphabet=True, views=None,
                  *args, **kwargs):
@@ -335,12 +342,12 @@ class DescribedListSelectionScene(UIScene):
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
                                      layout_options=LayoutOptions(
-                                        left=1,
-                                        top=top_offset,
-                                        width='intrinsic',
-                                        height=1,
-                                        bottom=None,
-                                        right=None))
+                                         left=1,
+                                         top=top_offset,
+                                         width='intrinsic',
+                                         height=1,
+                                         bottom=None,
+                                         right=None))
             button.is_hidden = True
             subviews.append(button)
             self.buttons.append(button)
@@ -350,13 +357,13 @@ class DescribedListSelectionScene(UIScene):
                                                align_horz='left',
                                                align_vert='top',
                                                layout_options=LayoutOptions(
-                                                    left=0.5,
-                                                    top=0,
-                                                    width=0.45,
-                                                    height='intrinsic',
-                                                    bottom=None,
-                                                    right=None
-                                                ))
+                                                   left=0.5,
+                                                   top=0,
+                                                   width=0.45,
+                                                   height='intrinsic',
+                                                   bottom=None,
+                                                   right=None
+                                               ))
         subviews.append(self.description_view)
         if views:
             subviews = subviews + views
@@ -450,6 +457,7 @@ class ItemManipulationSelectionScene(DescribedListSelectionScene):
     """ Item manipulation Scene subclass, not intended to use directly (to write less code in item manipulation menus)
      Does nothing to selected item. 
     """
+
     def __init__(self, items, game, *args, **kwargs):
         descriptions = []
         for item in items:
@@ -486,7 +494,7 @@ class ItemManipulationSelectionScene(DescribedListSelectionScene):
             descriptions.append(text)
         self.game = game
         self.weight_bar = LabelViewFixed(text='Weight: ' + str(round(self.game.player.carried_weight, 2)) + '/' +
-                                         str(round(self.game.player.properties['max_carry_weight'], 2)) + ' kg.',
+                                              str(round(self.game.player.properties['max_carry_weight'], 2)) + ' kg.',
                                          layout_options=LayoutOptions().row_bottom(0).with_updates(width='intrinsic',
                                                                                                    left=None,
                                                                                                    right=0))
@@ -503,6 +511,7 @@ class ItemManipulationSelectionScene(DescribedListSelectionScene):
 
 class DropItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of items to drop one """
+
     def option_activated(self, *args, **kwargs):
         """ Method to drop item when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_drop_item, self.game.player, self.options[self.selected])
@@ -511,6 +520,7 @@ class DropItemSelectionScene(ItemManipulationSelectionScene):
 
 class UseItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of items to use one """
+
     def option_activated(self, *args, **kwargs):
         """ Method to use item when option is activated (ENTER key pressed) """
         commands.command_use_item(self.game, self.options[self.selected])
@@ -519,6 +529,7 @@ class UseItemSelectionScene(ItemManipulationSelectionScene):
 
 class TakeOffItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of equipped items to take off one """
+
     def option_activated(self, *args, **kwargs):
         """ Method to take off item when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_unequip_item, self.game.player, self.options[self.selected])
@@ -527,6 +538,7 @@ class TakeOffItemSelectionScene(ItemManipulationSelectionScene):
 
 class PickUpItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of items to pick up one """
+
     def option_activated(self, *args, **kwargs):
         """ Method to pick up item when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_pick_up_item, self.game.player, self.options[self.selected])
@@ -535,6 +547,7 @@ class PickUpItemSelectionScene(ItemManipulationSelectionScene):
 
 class WieldItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of items to wield one """
+
     def option_activated(self, *args, **kwargs):
         """ Method to wield item or display slot dialog when option is activated (ENTER key pressed) """
         slot = False
@@ -555,6 +568,7 @@ class WieldItemSelectionScene(ItemManipulationSelectionScene):
 
 class WieldSlotSelectionScene(ListSelectionScene):
     """ Scene displays a list of suitable slots to wield item """
+
     def __init__(self, game, item, *args, **kwargs):
         self.game = game
         self.item = item
@@ -567,20 +581,22 @@ class WieldSlotSelectionScene(ListSelectionScene):
         self.game.start_update_thread()
         super().option_activated()
 
+
 # Other scenes
 
 
 class MainMenuScene(UIScene):
     """ Scene with main menu options """
+
     def __init__(self, *args, **kwargs):
         views = []
         self.game = save_load.load_game()  # try to load game
         views.append(LabelViewFixed(
-                LOGO[1:].rstrip(),
-                layout_options=LayoutOptions.row_top(0.5)))
+            LOGO[1:].rstrip(),
+            layout_options=LayoutOptions.row_top(0.5)))
         views.append(LabelViewFixed(
-                "Choose one of the options below:",
-                layout_options=LayoutOptions.centered('intrinsic', 'intrinsic')))
+            "Choose one of the options below:",
+            layout_options=LayoutOptions.centered('intrinsic', 'intrinsic')))
         if self.game:  # is game succesfully loaded - show Continue button
             views.append(ButtonViewFixed(
                 text="Continue", callback=self.continue_game,
@@ -592,14 +608,14 @@ class MainMenuScene(UIScene):
                 layout_options=LayoutOptions.row_bottom(4).with_updates(
                     left=0.2, width=0.2, right=None)))
         views.append(ButtonViewFixed(
-                text="New Game", callback=self.new_game,
-                layout_options=LayoutOptions.row_bottom(4).with_updates(
-                    left=0.4, width=0.2, right=None)))
+            text="New Game", callback=self.new_game,
+            layout_options=LayoutOptions.row_bottom(4).with_updates(
+                left=0.4, width=0.2, right=None)))
         views.append(ButtonViewFixed(
-                text="Quit",
-                callback=lambda: self.director.pop_scene(),
-                layout_options=LayoutOptions.row_bottom(4).with_updates(
-                    left=0.6, width=0.2, right=None)))
+            text="Quit",
+            callback=lambda: self.director.pop_scene(),
+            layout_options=LayoutOptions.row_bottom(4).with_updates(
+                left=0.6, width=0.2, right=None)))
         super().__init__(views, *args, **kwargs)
 
     def terminal_read(self, val):
@@ -626,10 +642,11 @@ class MainMenuScene(UIScene):
 
 class LoadingScene(UIScene):
     """ Loading scene - currently a placeholder """
+
     def __init__(self, *args, **kwargs):
         views = [LabelViewFixed(
-                LOGO[1:].rstrip(),
-                layout_options=LayoutOptions.row_top(0.5))]
+            LOGO[1:].rstrip(),
+            layout_options=LayoutOptions.row_top(0.5))]
         super().__init__(views, *args, **kwargs)
 
     def become_active(self):
@@ -638,6 +655,7 @@ class LoadingScene(UIScene):
 
 class MainGameScene(UIScene):
     """ Main game scene """
+
     def __init__(self, game, *args, **kwargs):
         self.game = game
         self._title = ''
@@ -676,23 +694,23 @@ class MainGameScene(UIScene):
                                     right=None))
         self.map_view.clear = True
         self.cell_info_view = LookView(game=game, map_view=self.map_view, layout_options=LayoutOptions(
-                                        left=0.62,
-                                        top=8,
-                                        right=1,
-                                        bottom=1))
+            left=0.62,
+            top=8,
+            right=1,
+            bottom=1))
         self.cell_info_view.is_hidden = True
         self.bars_view = View(subviews=[self.health_bar, self.player_right_hand, self.player_left_hand, self.money],
                               layout_options=LayoutOptions(
-                                left=0.62,
-                                top=1,
-                                right=1,
-                                bottom=7))
+                                  left=0.62,
+                                  top=1,
+                                  right=1,
+                                  bottom=7))
         self.bars_view.clear = True
         self.log_view = LogView(game=game, layout_options=LayoutOptions(
-                                    left=0.62,
-                                    top=8,
-                                    right=1,
-                                    bottom=1))
+            left=0.62,
+            top=8,
+            right=1,
+            bottom=1))
         self.log_view.clear = True
         self._title_label = LabelViewFixed(text='',
                                            layout_options=LayoutOptions.row_top(1).with_updates(width='intrinsic',
@@ -767,32 +785,44 @@ class MainGameScene(UIScene):
         if game.is_waiting_input:
             if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
                 self.director.quit()
+                handled = True
             # movement commands
             elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
                 commands.command_default_direction(game=game, dx=-1, dy=0)
+                handled = True
             elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
                 commands.command_default_direction(game=game, dx=1, dy=0)
+                handled = True
             elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
                 commands.command_default_direction(game=game, dx=0, dy=-1)
+                handled = True
             elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
                 commands.command_default_direction(game=game, dx=0, dy=1)
+                handled = True
             elif player_input == terminal.TK_KP_7:
                 commands.command_default_direction(game=game, dx=-1, dy=-1)
+                handled = True
             elif player_input == terminal.TK_KP_9:
                 commands.command_default_direction(game=game, dx=1, dy=-1)
+                handled = True
             elif player_input == terminal.TK_KP_1:
                 commands.command_default_direction(game=game, dx=-1, dy=1)
+                handled = True
             elif player_input == terminal.TK_KP_3:
                 commands.command_default_direction(game=game, dx=1, dy=1)
+                handled = True
             elif player_input == terminal.TK_KP_5:  # wait for ticks=player.speed (1 turn)
                 player.perform(actions.act_wait, game.player, game.player.speed)
+                handled = True
             elif player_input == 53:  # on '`' show debug messages in log
                 if game.show_debug_log:
                     game.show_debug_log = False
                 else:
                     game.show_debug_log = True
+                handled = True
             elif player_input == terminal.TK_G:  # pick up item
                 commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
+                handled = True
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
@@ -800,6 +830,7 @@ class MainGameScene(UIScene):
                                                                 layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
                                                                     left=0.2, right=0.2)))
+                handled = True
             elif player_input == terminal.TK_U:  # use item
                 self.director.push_scene(UseItemSelectionScene(items=player.inventory,
                                                                game=game,
@@ -807,6 +838,7 @@ class MainGameScene(UIScene):
                                                                layout_options=LayoutOptions(
                                                                    top=0.1, bottom=0.1,
                                                                    left=0.2, right=0.2)))
+                handled = True
             elif player_input == terminal.TK_W:  # wield item
                 self.director.push_scene(WieldItemSelectionScene(items=player.inventory,
                                                                  game=game,
@@ -814,6 +846,7 @@ class MainGameScene(UIScene):
                                                                  layout_options=LayoutOptions(
                                                                      top=0.1, bottom=0.1,
                                                                      left=0.2, right=0.2)))
+                handled = True
             elif player_input == terminal.TK_O:  # take 'o'ff
                 self.director.push_scene(TakeOffItemSelectionScene(items=[sl for sl in
                                                                           list(player.equipment.values()) if sl],
@@ -822,12 +855,13 @@ class MainGameScene(UIScene):
                                                                    layout_options=LayoutOptions(
                                                                        top=0.1, bottom=0.1,
                                                                        left=0.2, right=0.2)))
+                handled = True
             elif player_input == terminal.TK_L:  # look
                 self.state = 'looking'
                 self.title = 'LOOKING:'
                 self.cell_info_view.is_hidden = False
                 self.log_view.is_hidden = True
-            handled = True
+                handled = True
             game.start_update_thread()
             return handled
 
@@ -841,32 +875,43 @@ class MainGameScene(UIScene):
             self.cell_info_view.is_hidden = True
             self.log_view.is_hidden = False
             self.map_view.cam_offset = [0, 0]
+            handled = True
         # camera offset change with directional keys
         elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
             self.map_view.change_cam_offset(-1, 0)
+            handled = True
         elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
             self.map_view.change_cam_offset(1, 0)
+            handled = True
         elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
             self.map_view.change_cam_offset(0, -1)
+            handled = True
         elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
             self.map_view.change_cam_offset(0, 1)
+            handled = True
         elif player_input == terminal.TK_KP_7:
             self.map_view.change_cam_offset(-1, -1)
+            handled = True
         elif player_input == terminal.TK_KP_9:
             self.map_view.change_cam_offset(1, -1)
+            handled = True
         elif player_input == terminal.TK_KP_1:
             self.map_view.change_cam_offset(-1, 1)
+            handled = True
         elif player_input == terminal.TK_KP_3:
             self.map_view.change_cam_offset(1, 1)
-        handled = True
-        self.map_view.tick = 11  # to redraw map faster
+            handled = True
+        if handled:
+            self.map_view.tick = 11  # to redraw map faster
         return handled
+
 
 # Views
 
 
 class MapView(View):
     """ View with game map """
+
     def __init__(self, game, *args, **kwargs):
         # TODO: make method or property to force redraw on next tick
         self.game = game  # game object reference for obtaining map info
@@ -952,7 +997,8 @@ class MapView(View):
                         ctx.color(terminal.color_from_argb(255, cg[1][0], cg[1][1], cg[1][2]))
                         ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
                         terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
-                        terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map]' + cg[0])
+                        terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y,
+                                        '[font=map]' + cg[0])
 
                     else:
                         ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
@@ -977,6 +1023,7 @@ class MapView(View):
 
 class LogView(View):
     """ View with game log """
+
     def __init__(self, game, *args, **kwargs):
         self.game = game  # game object reference for obtaining map info
         self.clear = True  # clear before each draw
@@ -998,8 +1045,9 @@ class LogView(View):
         for msg in msgs:  # iterate through messages
             for line in textwrap.wrap(msg[0], self.bounds.width):  # wrap them in lines of log_width
                 log_lines.append((line, msg[2]))  # store them in list
-        log_lines = log_lines[-(self.bounds.height - 1):]  # slice list to log_height elements
-        y = 0
+        log_lines = log_lines[-(self.bounds.height - 2):]  # slice list to log_height elements
+        ctx.print(Point(0, 0), '=' * self.bounds.width)
+        y = 1
         for line in log_lines:
             y += 1
             ctx.color(terminal.color_from_argb(255, line[1][0], line[1][1], line[1][2]))
@@ -1008,6 +1056,7 @@ class LogView(View):
 
 class LookView(View):
     """ View with description of cell player looking at """
+
     def __init__(self, game, map_view, *args, **kwargs):
         self.game = game  # game object reference for obtaining map info
         self.cam_offset = map_view.cam_offset  # map_view needed to obtain cam_offset
@@ -1020,7 +1069,7 @@ class LookView(View):
 
     def draw(self, ctx):
         if (self.game.player.position[0] + self.cam_offset[0],
-                self.game.player.position[1] + self.cam_offset[1]) in self.game.player.fov_set:  # show if in FOV
+            self.game.player.position[1] + self.cam_offset[1]) in self.game.player.fov_set:  # show if in FOV
             entities = self.game.current_loc.cells[self.game.player.position[0] + self.cam_offset[0]][
                 self.game.player.position[1] + self.cam_offset[1]].entities  # get entities @ selected cell
             creatures = [ent for ent in entities if ent.occupies_tile]
@@ -1029,7 +1078,7 @@ class LookView(View):
             ctx.print(Point(0, 0), '=' * self.bounds.width)
             cur_y = 1  # a 'cursor' y position
             for creature in creatures:  # show creature info if any
-                if creature.color[0]+creature.color[1]+creature.color[2] < 100:  # if creature color is too dark
+                if creature.color[0] + creature.color[1] + creature.color[2] < 100:  # if creature color is too dark
                     col = (255, 255, 255)  # show name in white
                 else:
                     col = creature.color
