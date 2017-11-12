@@ -90,4 +90,37 @@ def command_use_item(game, item, main_scene):
 
 def command_use_item_on_target(target, player, item):
     """ Command method to use item on targeted point or entity """
-    player.perform(actions.act_use_item, player, item, target)  # use item on target
+    player.perform(actions.act_use_item, player, item, target)
+
+
+def command_throw_choose(game, main_scene):
+        """ Command method for player wants to throw an item in hands - choose target """
+        right = game.player.equipment['RIGHT_HAND']
+        left = game.player.equipment['LEFT_HAND']
+        items = [i for i in [right, left] if i is not None]  # pick equipment in hands
+        if items:  # check if there are any
+            if len(items) == 1:  # if one
+                if game.player.get_throw_range(items[0]) > 0:
+                    main_scene.start_targeting(range=game.player.get_throw_range(items[0]),
+                                               t_object=items[0],
+                                               eligible_types=(game_logic.BattleEntity, 'point'),
+                                               callback=command_throw,
+                                               player=game.player,
+                                               item=items[0])
+                else:
+                    game_logic.Game.add_message(items[0].name.capitalize() + ' is too heavy!',
+                                                'PLAYER', [255, 255, 255])
+            else:  # if multiple items in hands
+                main_scene.director.push_scene(game_view.ThrowItemSelectionScene(items=items,
+                                                                                 game=game,
+                                                                                 caption='Throw item:',
+                                                                                 layout_options=LayoutOptions(
+                                                                                   top=0.30, bottom=0.30,
+                                                                                   left=0.30, right=0.30)))
+        else:
+            game_logic.Game.add_message('Take something in hand to throw it.', 'PLAYER', [255, 255, 255])
+
+
+def command_throw(target, player, item):
+    """ Command method for player wants to throw item """
+    player.perform(actions.act_throw, player, item, target)

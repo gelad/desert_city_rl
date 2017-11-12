@@ -520,6 +520,22 @@ class DropItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
+class ThrowItemSelectionScene(ItemManipulationSelectionScene):
+    """ Scene displays a list of items to throw one """
+
+    def option_activated(self, *args, **kwargs):
+        """ Method to initiate item throwing target selection when option is activated (ENTER key pressed) """
+        rn = self.game.player.get_throw_range(self.options[self.selected])
+        if rn > 0:
+            self.director.main_game_scene.start_targeting(range=rn,
+                                                          t_object=self.options[self.selected],
+                                                          eligible_types=(game_logic.BattleEntity, 'point'),
+                                                          callback=commands.command_throw,
+                                                          player=self.game.player,
+                                                          item=self.options[self.selected])
+        super().option_activated(*args, **kwargs)
+
+
 class UseItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of items to use one """
 
@@ -908,6 +924,9 @@ class MainGameScene(UIScene):
                 self.cell_info_view.is_hidden = False
                 self.log_view.is_hidden = True
                 self.map_view.cam_offset = [0, 0]
+                handled = True
+            elif player_input == terminal.TK_T:  # throw
+                commands.command_throw_choose(game=self.game, main_scene=self)
                 handled = True
             game.start_update_thread()
             return handled
