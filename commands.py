@@ -60,7 +60,7 @@ def command_pick_up(director, game, dx, dy):
 
 
 def command_use_item(game, item, main_scene):
-    """ Command method to use item - chooses usage behavior based on item properties """
+    """ Command function to use item - chooses usage behavior based on item properties """
     player = game.player
     if 'usable' in item.properties:
         if item.properties['usable'] == 'self':  # if item usable on self
@@ -89,12 +89,12 @@ def command_use_item(game, item, main_scene):
 
 
 def command_use_item_on_target(target, player, item):
-    """ Command method to use item on targeted point or entity """
+    """ Command function to use item on targeted point or entity """
     player.perform(actions.act_use_item, player, item, target)
 
 
 def command_throw_choose(game, main_scene):
-        """ Command method for player wants to throw an item in hands - choose target """
+        """ Command function for player wants to throw an item in hands - choose target """
         right = game.player.equipment['RIGHT_HAND']
         left = game.player.equipment['LEFT_HAND']
         items = [i for i in [right, left] if i is not None]  # pick equipment in hands
@@ -122,5 +122,31 @@ def command_throw_choose(game, main_scene):
 
 
 def command_throw(target, player, item):
-    """ Command method for player wants to throw item """
+    """ Command function for player wants to throw item """
     player.perform(actions.act_throw, player, item, target)
+
+
+def command_reload(director, game):
+        """ Command function for player wants to reload ranged weapon (in hands)  """
+        for item in game.player.equipment.values():  # iterate through player equipment
+            if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
+                if len(item.ammo) < item.ammo_max:  # check if it is loaded
+                    # select appropriate ammo items
+                    ammos = [a for a in game.player.inventory if item.ammo_type in a.categories]
+                    if ammos:
+                        if len(ammos) == 1:
+                            game.player.perform(actions.act_reload, game.player, item, ammos[0])
+                        else:
+                            director.push_scene(game_view.AmmoItemSelectionScene(items=ammos,
+                                                                                 game=game,
+                                                                                 ranged_weapon=item,
+                                                                                 caption='Load ammo:',
+                                                                                 layout_options=LayoutOptions(
+                                                                                                 top=0.30, bottom=0.30,
+                                                                                                 left=0.30,
+                                                                                                 right=0.30)))
+                    else:
+                        game_logic.Game.add_message('No ' + item.ammo_type + ' type ammunition.', 'PLAYER',
+                                                    [255, 255, 255])
+                else:
+                    game_logic.Game.add_message(item.name + ' is fully loaded.', 'PLAYER', [255, 255, 255])

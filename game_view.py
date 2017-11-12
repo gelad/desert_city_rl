@@ -536,6 +536,18 @@ class ThrowItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
+class AmmoItemSelectionScene(ItemManipulationSelectionScene):
+    """ Scene displays a list of ammo items to load one """
+    def __init__(self, ranged_weapon, *args, **kwargs):
+        self.ranged_weapon = ranged_weapon
+        super().__init__(*args, **kwargs)
+
+    def option_activated(self, *args, **kwargs):
+        """ Method to load ammo when option is activated (ENTER key pressed) """
+        self.game.player.perform(actions.act_reload, self.game.player, self.ranged_weapon, self.options[self.selected])
+        super().option_activated(*args, **kwargs)
+
+
 class UseItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of items to use one """
 
@@ -884,6 +896,9 @@ class MainGameScene(UIScene):
                 handled = True
             elif player_input == terminal.TK_G:  # pick up item
                 commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
+                handled = True
+            elif player_input == terminal.TK_R:  # reload ranged weapon
+                commands.command_reload(director=self.director, game=game)
                 handled = True
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
