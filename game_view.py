@@ -1026,7 +1026,8 @@ class LookView(View):
             creatures = [ent for ent in entities if ent.occupies_tile]
             items = [ent for ent in entities if isinstance(ent, game_logic.Item)]
             other = [ent for ent in entities if (not isinstance(ent, game_logic.Item)) and (not ent.occupies_tile)]
-            cur_y = 0  # a 'cursor' y position
+            ctx.print(Point(0, 0), '=' * self.bounds.width)
+            cur_y = 1  # a 'cursor' y position
             for creature in creatures:  # show creature info if any
                 if creature.color[0]+creature.color[1]+creature.color[2] < 100:  # if creature color is too dark
                     col = (255, 255, 255)  # show name in white
