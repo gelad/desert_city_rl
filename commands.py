@@ -150,3 +150,36 @@ def command_reload(director, game):
                                                     [255, 255, 255])
                 else:
                     game_logic.Game.add_message(item.name + ' is fully loaded.', 'PLAYER', [255, 255, 255])
+
+
+def command_fire_choose(director, game):
+        """ Command function for player wants to fire ranged weapon - choose target """
+        ranged_weapons = [w for w in list(game.player.equipment.values()) if
+                          isinstance(w, game_logic.ItemRangedWeapon)]  # pick ranged weapons in equipment
+        if ranged_weapons:  # check if there are any
+            if len(ranged_weapons) == 1:  # if one
+                if len(ranged_weapons[0].ammo) > 0:  # if it has ammo loaded
+                    director.main_game_scene.start_targeting(range=ranged_weapons[0].range,
+                                                             t_object=ranged_weapons[0],
+                                                             eligible_types=(game_logic.BattleEntity, 'point'),
+                                                             callback=command_fire,
+                                                             player=game.player,
+                                                             weapon=ranged_weapons[0])
+                else:
+                    game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
+                                                'PLAYER', [255, 255, 255])
+            else:  # if multiple ranged equipped
+                director.push_scene(game_view.FireItemSelectionScene(items=ranged_weapons,
+                                                                     game=game,
+                                                                     caption='Fire weapon:',
+                                                                     layout_options=LayoutOptions(
+                                                                        top=0.30, bottom=0.30,
+                                                                        left=0.30, right=0.30)))
+        else:
+            game_logic.Game.add_message('Equip ranged weapon to fire.', 'PLAYER', [255, 255, 255])
+
+
+def command_fire(target, player, weapon):
+    """ Command function for player wants to fire fanged item """
+    player.perform(actions.act_fire_ranged, player, weapon, target)
+

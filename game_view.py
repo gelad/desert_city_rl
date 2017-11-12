@@ -536,6 +536,24 @@ class ThrowItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
+class FireItemSelectionScene(ItemManipulationSelectionScene):
+    """ Scene displays a list of ranged weapons to throw one """
+
+    def option_activated(self, *args, **kwargs):
+        """ Method to initiate item throwing target selection when option is activated (ENTER key pressed) """
+        if len(self.options[self.selected].ammo) > 0:  # check if loaded
+            self.director.main_game_scene.start_targeting(range=self.options[self.selected].range,
+                                                          t_object=self.options[self.selected],
+                                                          eligible_types=(game_logic.BattleEntity, 'point'),
+                                                          callback=commands.command_fire,
+                                                          player=self.game.player,
+                                                          weapon=self.options[self.selected])
+        else:
+            game_logic.Game.add_message(self.options[self.selected].name + " isn't loaded!",
+                                        'PLAYER', [255, 255, 255])
+        super().option_activated(*args, **kwargs)
+
+
 class AmmoItemSelectionScene(ItemManipulationSelectionScene):
     """ Scene displays a list of ammo items to load one """
     def __init__(self, ranged_weapon, *args, **kwargs):
@@ -942,6 +960,9 @@ class MainGameScene(UIScene):
                 handled = True
             elif player_input == terminal.TK_T:  # throw
                 commands.command_throw_choose(game=self.game, main_scene=self)
+                handled = True
+            elif player_input == terminal.TK_F:  # fire ranged weapon
+                commands.command_fire_choose(director=self.director, game=self.game)
                 handled = True
             game.start_update_thread()
             return handled
