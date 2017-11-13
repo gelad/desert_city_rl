@@ -455,8 +455,154 @@ class DescribedListSelectionScene(UIScene):
         self.director.pop_scene()
 
 
-class ItemManipulationSelectionScene(DescribedListSelectionScene):
-    """ Item manipulation Scene subclass, not intended to use directly (to write less code in item manipulation menus)
+class ItemManipulationSelectionScene(UIScene):
+    """ Item manipulation selection - when item is selected it Inventory menu """
+    def __init__(self, game, item, layout_options=None, *args, **kwargs):
+        # self.clear = True
+        self.game = game
+        self.item = item  # item for manipulation
+        subviews = []
+        top_offset = 0
+        max_option_length = 0
+        if 'usable' in item.properties:  # USE button
+            button = ButtonViewFixed(text='u) Use',
+                                     callback=self._use,
+                                     layout_options=LayoutOptions(
+                                         left=1,
+                                         top=top_offset,
+                                         width='intrinsic',
+                                         height=1,
+                                         bottom=None,
+                                         right=None))
+            max_option_length = max(len(button.text), max_option_length)
+            subviews.append(button)
+            top_offset += 1
+        button = ButtonViewFixed(text='d) Drop',  # DROP button
+                                 callback=self._drop,
+                                 layout_options=LayoutOptions(
+                                     left=1,
+                                     top=top_offset,
+                                     width='intrinsic',
+                                     height=1,
+                                     bottom=None,
+                                     right=None))
+        max_option_length = max(len(button.text), max_option_length)
+        subviews.append(button)
+        top_offset += 1
+        button = ButtonViewFixed(text='w) Wield',  # WIELD button
+                                 callback=self._wield,
+                                 layout_options=LayoutOptions(
+                                     left=1,
+                                     top=top_offset,
+                                     width='intrinsic',
+                                     height=1,
+                                     bottom=None,
+                                     right=None))
+        max_option_length = max(len(button.text), max_option_length)
+        subviews.append(button)
+        top_offset += 1
+        if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
+            if len(item.ammo) < item.ammo_max:  # check if it is loaded
+                button = ButtonViewFixed(text='r) Reload',  # RELOAD button
+                                         callback=self._reload,
+                                         layout_options=LayoutOptions(
+                                             left=1,
+                                             top=top_offset,
+                                             width='intrinsic',
+                                             height=1,
+                                             bottom=None,
+                                             right=None))
+                max_option_length = max(len(button.text), max_option_length)
+                subviews.append(button)
+                top_offset += 1
+            if len(item.ammo) > 0:
+                button = ButtonViewFixed(text='n) uNload',  # UNLOAD button
+                                         callback=self._unload,
+                                         layout_options=LayoutOptions(
+                                             left=1,
+                                             top=top_offset,
+                                             width='intrinsic',
+                                             height=1,
+                                             bottom=None,
+                                             right=None))
+                max_option_length = max(len(button.text), max_option_length)
+                subviews.append(button)
+                top_offset += 1
+        if layout_options == 'intrinsic':  # if layout must derive from options
+            layout_options = LayoutOptions.centered(height=top_offset + 2,
+                                                    width=max(max_option_length + 2, len(str(item))) + 2)
+        self.window_view = WindowView(title=str(item),
+                                      style='double',
+                                      layout_options=layout_options or LayoutOptions(left=0, top=0),
+                                      subviews=subviews)
+        views = [self.window_view]
+        super().__init__(views, *args, **kwargs)
+
+    def terminal_read(self, val):
+        super().terminal_read(val)
+        # cycle descriptions with selected options
+        if val in (terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
+            # allow traverse with arrows and numpad
+            if val in (terminal.TK_KP_8, terminal.TK_UP):
+                self.view.find_prev_responder()
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+                self.view.find_next_responder()
+            return True
+        elif val == terminal.TK_U:  # USE
+            self._use()
+        elif val == terminal.TK_D:  # DROP
+            self._drop()
+        elif val == terminal.TK_W:  # WIELD
+            self._wield()
+        elif val == terminal.TK_R:  # RELOAD
+            self._reload()
+        elif val == terminal.TK_N:  # uNload
+            self._unload()
+        elif val == terminal.TK_ESCAPE:
+            self.director.pop_scene()
+            return True
+        return False
+
+    def option_activated(self):
+        """ Method to call when option is activated (ENTER key pressed) """
+        self.director.pop_scene()
+
+    def _use(self):
+        director = self.director
+        self.option_activated()
+        commands.command_use_item(game=self.game, item=self.item, main_scene=director.main_game_scene)
+
+    def _drop(self):
+        self.option_activated()
+        self.game.player.perform(actions.act_drop_item, self.game.player, self.item)
+        self.game.start_update_thread()
+
+    def _reload(self):
+        director = self.director
+        self.option_activated()
+        commands.command_reload(director=director, game=self.game, item=self.item)
+
+    def _unload(self):
+        pass
+
+    def _wield(self):
+        director = self.director
+        self.option_activated()
+        slot = None
+        if len(self.item.equip_slots) > 1:
+            director.push_scene(WieldSlotSelectionScene(game=self.game,
+                                                        item=self.item,
+                                                        caption='Select slot:',
+                                                        layout_options='intrinsic'))
+            return  # no need to pop Slot Selection scene
+        elif len(self.item.equip_slots) == 1:
+            slot = list(self.item.equip_slots)[0]
+        if slot:  # if selected - equip item
+            self.game.player.perform(actions.act_equip_item, self.game.player, self.item, slot)
+
+
+class ItemSelectionScene(DescribedListSelectionScene):
+    """ Item selection Scene subclass, not intended to use directly (to write less code in item manipulation menus)
      Does nothing to selected item. 
     """
 
@@ -511,7 +657,7 @@ class ItemManipulationSelectionScene(DescribedListSelectionScene):
         super().option_activated()
 
 
-class DropItemSelectionScene(ItemManipulationSelectionScene):
+class DropItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of items to drop one """
 
     def option_activated(self, *args, **kwargs):
@@ -520,7 +666,7 @@ class DropItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
-class ThrowItemSelectionScene(ItemManipulationSelectionScene):
+class ThrowItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of items to throw one """
 
     def option_activated(self, *args, **kwargs):
@@ -536,7 +682,7 @@ class ThrowItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
-class FireItemSelectionScene(ItemManipulationSelectionScene):
+class FireItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of ranged weapons to throw one """
 
     def option_activated(self, *args, **kwargs):
@@ -554,7 +700,7 @@ class FireItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
-class AmmoItemSelectionScene(ItemManipulationSelectionScene):
+class AmmoItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of ammo items to load one """
     def __init__(self, ranged_weapon, *args, **kwargs):
         self.ranged_weapon = ranged_weapon
@@ -566,7 +712,7 @@ class AmmoItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
-class UseItemSelectionScene(ItemManipulationSelectionScene):
+class UseItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of items to use one """
 
     def option_activated(self, *args, **kwargs):
@@ -575,7 +721,19 @@ class UseItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
-class TakeOffItemSelectionScene(ItemManipulationSelectionScene):
+class InventorySelectionScene(ItemSelectionScene):
+    """ Scene displays a list of items to perform different actions """
+
+    def option_activated(self, *args, **kwargs):
+        """ Method to show item manipulation dialog when option is activated (ENTER key pressed) """
+        director = self.director
+        super().option_activated(*args, **kwargs)  # first pop this scene
+        director.push_scene(ItemManipulationSelectionScene(game=self.game,
+                                                                item=self.options[self.selected],
+                                                                layout_options='intrinsic'))
+
+
+class TakeOffItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of equipped items to take off one """
 
     def option_activated(self, *args, **kwargs):
@@ -584,7 +742,7 @@ class TakeOffItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
-class PickUpItemSelectionScene(ItemManipulationSelectionScene):
+class PickUpItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of items to pick up one """
 
     def option_activated(self, *args, **kwargs):
@@ -593,7 +751,7 @@ class PickUpItemSelectionScene(ItemManipulationSelectionScene):
         super().option_activated(*args, **kwargs)
 
 
-class WieldItemSelectionScene(ItemManipulationSelectionScene):
+class WieldItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of items to wield one """
 
     def option_activated(self, *args, **kwargs):
@@ -916,7 +1074,15 @@ class MainGameScene(UIScene):
                 commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
                 handled = True
             elif player_input == terminal.TK_R:  # reload ranged weapon
-                commands.command_reload(director=self.director, game=game)
+                commands.command_reload_equipped(director=self.director, game=game)
+                handled = True
+            elif player_input == terminal.TK_I:  # show inventory
+                self.director.push_scene(InventorySelectionScene(items=player.inventory,
+                                                                 game=game,
+                                                                 caption='Inventory',
+                                                                 layout_options=LayoutOptions(
+                                                                     top=0.1, bottom=0.1,
+                                                                     left=0.2, right=0.2)))
                 handled = True
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,

@@ -126,30 +126,37 @@ def command_throw(target, player, item):
     player.perform(actions.act_throw, player, item, target)
 
 
-def command_reload(director, game):
+def command_reload_equipped(director, game):
         """ Command function for player wants to reload ranged weapon (in hands)  """
+        # TODO: make multiple ranged weapon selection dialog or forbid 2 ranged weapons
         for item in game.player.equipment.values():  # iterate through player equipment
             if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
-                if len(item.ammo) < item.ammo_max:  # check if it is loaded
-                    # select appropriate ammo items
-                    ammos = [a for a in game.player.inventory if item.ammo_type in a.categories]
-                    if ammos:
-                        if len(ammos) == 1:
-                            game.player.perform(actions.act_reload, game.player, item, ammos[0])
-                        else:
-                            director.push_scene(game_view.AmmoItemSelectionScene(items=ammos,
-                                                                                 game=game,
-                                                                                 ranged_weapon=item,
-                                                                                 caption='Load ammo:',
-                                                                                 layout_options=LayoutOptions(
-                                                                                                 top=0.30, bottom=0.30,
-                                                                                                 left=0.30,
-                                                                                                 right=0.30)))
-                    else:
-                        game_logic.Game.add_message('No ' + item.ammo_type + ' type ammunition.', 'PLAYER',
-                                                    [255, 255, 255])
+                command_reload(director=director, game=game, item=item)
+
+
+def command_reload(director, game, item):
+    """ Command function for player wants to reload specific ranged weapon """
+    if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
+        if len(item.ammo) < item.ammo_max:  # check if it is loaded
+            # select appropriate ammo items
+            ammos = [a for a in game.player.inventory if item.ammo_type in a.categories]
+            if ammos:
+                if len(ammos) == 1:
+                    game.player.perform(actions.act_reload, game.player, item, ammos[0])
                 else:
-                    game_logic.Game.add_message(item.name + ' is fully loaded.', 'PLAYER', [255, 255, 255])
+                    director.push_scene(game_view.AmmoItemSelectionScene(items=ammos,
+                                                                         game=game,
+                                                                         ranged_weapon=item,
+                                                                         caption='Load ammo:',
+                                                                         layout_options=LayoutOptions(
+                                                                             top=0.30, bottom=0.30,
+                                                                             left=0.30,
+                                                                             right=0.30)))
+            else:
+                game_logic.Game.add_message('No ' + item.ammo_type + ' type ammunition.', 'PLAYER',
+                                            [255, 255, 255])
+        else:
+            game_logic.Game.add_message(item.name + ' is fully loaded.', 'PLAYER', [255, 255, 255])
 
 
 def command_fire_choose(director, game):
