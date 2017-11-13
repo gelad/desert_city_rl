@@ -457,6 +457,7 @@ class DescribedListSelectionScene(UIScene):
 
 class ItemManipulationSelectionScene(UIScene):
     """ Item manipulation selection - when item is selected it Inventory menu """
+
     def __init__(self, game, item, layout_options=None, *args, **kwargs):
         # self.clear = True
         self.game = game
@@ -702,6 +703,7 @@ class FireItemSelectionScene(ItemSelectionScene):
 
 class AmmoItemSelectionScene(ItemSelectionScene):
     """ Scene displays a list of ammo items to load one """
+
     def __init__(self, ranged_weapon, *args, **kwargs):
         self.ranged_weapon = ranged_weapon
         super().__init__(*args, **kwargs)
@@ -729,8 +731,8 @@ class InventorySelectionScene(ItemSelectionScene):
         director = self.director
         super().option_activated(*args, **kwargs)  # first pop this scene
         director.push_scene(ItemManipulationSelectionScene(game=self.game,
-                                                                item=self.options[self.selected],
-                                                                layout_options='intrinsic'))
+                                                           item=self.options[self.selected],
+                                                           layout_options='intrinsic'))
 
 
 class TakeOffItemSelectionScene(ItemSelectionScene):
@@ -983,7 +985,7 @@ class MainGameScene(UIScene):
         elif self.director.main_game_scene == self:
             pass
         else:
-            raise(RuntimeError('More than one main game scene!'))
+            raise (RuntimeError('More than one main game scene!'))
         self.ctx.clear()
         self.map_view.tick = 11  # to draw map right after
 
@@ -1152,7 +1154,8 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_F:  # fire ranged weapon
                 commands.command_fire_choose(director=self.director, game=self.game)
                 handled = True
-            game.start_update_thread()
+            if handled:
+                game.start_update_thread()
             return handled
 
     def _handle_input_looking(self, val):
@@ -1188,7 +1191,7 @@ class MainGameScene(UIScene):
             self.map_view.change_cam_offset(1, 1)
             handled = True
         if handled:
-            self.map_view.tick = 11  # to redraw map faster
+            self.map_view.force_redraw = True  # to redraw map faster
         return handled
 
     def _handle_input_closing_door(self, val):
@@ -1232,7 +1235,7 @@ class MainGameScene(UIScene):
             handled = True
         if handled:
             self.game.start_update_thread()
-            self.map_view.tick = 11  # to redraw map faster
+            self.map_view.force_redraw = True  # to redraw map faster
         return handled
 
     def _handle_input_smashing(self, val):
@@ -1276,7 +1279,7 @@ class MainGameScene(UIScene):
             handled = True
         if handled:
             self.game.start_update_thread()
-            self.map_view.tick = 11  # to redraw map faster
+            self.map_view.force_redraw = True  # to redraw map faster
         return handled
 
     def _handle_input_targeting(self, val):
@@ -1327,7 +1330,7 @@ class MainGameScene(UIScene):
                 self.map_view.change_cam_offset(1, 1)
             handled = True
         if handled:
-            self.map_view.tick = 11  # to redraw map faster
+            self.map_view.force_redraw = True  # to redraw map faster
         return handled
 
 
@@ -1343,6 +1346,7 @@ class MapView(View):
         self.cam_offset = [0, 0]  # camera offset (if looking or targeting)
         self.last_game_time = game.time_system.current_time()  # last game time (to know when redraw needed)
         self.tick = 0  # frame count (to know when redraw needed)
+        self.force_redraw = False
         super().__init__(*args, **kwargs)
 
     @property
@@ -1403,7 +1407,12 @@ class MapView(View):
         # player on-map coords
         self.tick += 1
         # redraw only if game time changed or every 10 frames
-        if self.last_game_time != self.game.time_system.current_time() or self.tick > 10:
+        if (self.last_game_time != self.game.time_system.current_time() or self.tick > 10) \
+                or self.force_redraw:
+            if self.force_redraw:
+                self.force_redraw = False
+            while self.game.player.state == 'performing':  # if player is acting - wait until action finishes
+                time.sleep(0.05)
             player_x = self.game.player.position[0]
             player_y = self.game.player.position[1]
             # player on-screen coords
@@ -1413,6 +1422,8 @@ class MapView(View):
                 for y in range(0, self.bounds.height):
                     rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
                     rel_y = y - player_scr_y + player_y
+                    if self.game.player.position[0] != player_x or self.game.player.position[1] != player_y:
+                        print('Gotcha!')
                     # checks if location coordinates are valid (in boundaries)
                     if self.game.current_loc.is_in_boundaries(rel_x, rel_y):
                         # obtain cell graphics
@@ -1494,7 +1505,7 @@ class LookView(View):
 
     def draw(self, ctx):
         if (self.game.player.position[0] + self.map_view.cam_offset[0],
-                self.game.player.position[1] + self.map_view.cam_offset[1]) in self.game.player.fov_set:  # if in FOV
+            self.game.player.position[1] + self.map_view.cam_offset[1]) in self.game.player.fov_set:  # if in FOV
             entities = self.game.current_loc.cells[self.game.player.position[0] + self.map_view.cam_offset[0]][
                 self.game.player.position[1] + self.map_view.cam_offset[1]].entities  # get entities @ selected cell
             creatures = [ent for ent in entities if ent.occupies_tile]
