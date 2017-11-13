@@ -963,11 +963,7 @@ class MainGameScene(UIScene):
     def stop_targeting(self):
         """ Method that changes Scene state back to 'default' from 'targeting' """
         self.target_info.clear()
-        self.state = 'default'
-        self.title = ''
-        self.cell_info_view.is_hidden = True
-        self.log_view.is_hidden = False
-        self.map_view.cam_offset = [0, 0]
+        self._set_default_state()
 
     def check_target(self):
         """ Method that checks if target belongs to one of eligible target types """
@@ -1023,8 +1019,20 @@ class MainGameScene(UIScene):
             handled = self._handle_input_looking(val=val)
         elif self.state == 'targeting':
             handled = self._handle_input_targeting(val=val)
+        elif self.state == 'closing_door':
+            handled = self._handle_input_closing_door(val=val)
+        elif self.state == 'smashing':
+            handled = self._handle_input_smashing(val=val)
         super().terminal_read(val)
         return handled
+
+    def _set_default_state(self):
+        """ Method that sets UI state to 'default' """
+        self.state = 'default'
+        self.title = ''
+        self.cell_info_view.is_hidden = True
+        self.log_view.is_hidden = False
+        self.map_view.cam_offset = [0, 0]
 
     def _handle_input_default(self, val):
         """ This method handles player input in 'default' state """
@@ -1130,6 +1138,14 @@ class MainGameScene(UIScene):
                 self.log_view.is_hidden = True
                 self.map_view.cam_offset = [0, 0]
                 handled = True
+            elif player_input == terminal.TK_C:  # close door
+                self.state = 'closing_door'
+                self.title = 'CLOSE WHERE:'
+                handled = True
+            elif player_input == terminal.TK_S:  # smash
+                self.state = 'smashing'
+                self.title = 'SMASH WHERE:'
+                handled = True
             elif player_input == terminal.TK_T:  # throw
                 commands.command_throw_choose(game=self.game, main_scene=self)
                 handled = True
@@ -1143,12 +1159,8 @@ class MainGameScene(UIScene):
         """ This method handles player input in 'default' state """
         player_input = val
         handled = False  # input handled flag
-        if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
-            self.state = 'default'
-            self.title = ''
-            self.cell_info_view.is_hidden = True
-            self.log_view.is_hidden = False
-            self.map_view.cam_offset = [0, 0]
+        if player_input == terminal.TK_ESCAPE:  # exit to default state
+            self._set_default_state()
             handled = True
         # camera offset change with directional keys
         elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
@@ -1179,11 +1191,99 @@ class MainGameScene(UIScene):
             self.map_view.tick = 11  # to redraw map faster
         return handled
 
+    def _handle_input_closing_door(self, val):
+        """ This method handles player input in 'closing_door' state """
+        player_input = val
+        handled = False  # input handled flag
+        if player_input == terminal.TK_ESCAPE:  # exit to default state
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
+            commands.command_close_direction(player=self.game.player, dx=-1, dy=0)
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
+            commands.command_close_direction(player=self.game.player, dx=1, dy=0)
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
+            commands.command_close_direction(player=self.game.player, dx=0, dy=-1)
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
+            commands.command_close_direction(player=self.game.player, dx=0, dy=1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_7:
+            commands.command_close_direction(player=self.game.player, dx=-1, dy=-1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_9:
+            commands.command_close_direction(player=self.game.player, dx=1, dy=-1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_1:
+            commands.command_close_direction(player=self.game.player, dx=-1, dy=1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_3:
+            commands.command_close_direction(player=self.game.player, dx=1, dy=1)
+            self._set_default_state()
+            handled = True
+        if handled:
+            self.game.start_update_thread()
+            self.map_view.tick = 11  # to redraw map faster
+        return handled
+
+    def _handle_input_smashing(self, val):
+        """ This method handles player input in 'closing_door' state """
+        player_input = val
+        handled = False  # input handled flag
+        if player_input == terminal.TK_ESCAPE:  # exit to default state
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
+            commands.command_smash_direction(player=self.game.player, dx=-1, dy=0)
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
+            commands.command_smash_direction(player=self.game.player, dx=1, dy=0)
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
+            commands.command_smash_direction(player=self.game.player, dx=0, dy=-1)
+            self._set_default_state()
+            handled = True
+        elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
+            commands.command_smash_direction(player=self.game.player, dx=0, dy=1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_7:
+            commands.command_smash_direction(player=self.game.player, dx=-1, dy=-1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_9:
+            commands.command_smash_direction(player=self.game.player, dx=1, dy=-1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_1:
+            commands.command_smash_direction(player=self.game.player, dx=-1, dy=1)
+            self._set_default_state()
+            handled = True
+        elif player_input == terminal.TK_KP_3:
+            commands.command_smash_direction(player=self.game.player, dx=1, dy=1)
+            self._set_default_state()
+            handled = True
+        if handled:
+            self.game.start_update_thread()
+            self.map_view.tick = 11  # to redraw map faster
+        return handled
+
     def _handle_input_targeting(self, val):
         """ This method handles player input in 'targeting' state """
         player_input = val
         handled = False  # input handled flag
-        if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
+        if player_input == terminal.TK_ESCAPE:  # exit to default state
             self.stop_targeting()
             handled = True
         elif player_input == terminal.TK_ENTER:  # if player chooses the cell

@@ -39,6 +39,32 @@ def command_default_direction(game, dx, dy):
         #     self.command_leave_loc()
 
 
+def command_close_direction(player, dx, dy):
+        """ Command function for player wants to close door in some direction  """
+        loc = player.location
+        door_x = player.position[0] + dx
+        door_y = player.position[1] + dy
+        if loc.is_in_boundaries(door_x, door_y):  # check if position of selected cell is in boundaries
+            door = loc.cells[door_x][door_y].is_there_a(game_logic.Door)
+            if door:  # check if there is a door
+                if not door.is_closed:  # check if it is closed
+                    player.perform(actions.act_close_door, player, door)  # close door
+
+
+def command_smash_direction(player, dx, dy):
+        """ Command function for player wants to smash something in some direction  """
+        loc = player.location
+        be_x = player.position[0] + dx  # battle entity estimated position
+        be_y = player.position[1] + dy
+        if loc.is_in_boundaries(be_x, be_y):  # check if position of selected cell is in boundaries
+            be = loc.cells[be_x][be_y].is_there_a(game_logic.BattleEntity)
+            if be:  # check if there is a BattleEntity
+                if player.equipment['LEFT_HAND'] or player.equipment['RIGHT_HAND']:
+                    player.perform(actions.act_attack_melee_weapons, player, be)  # attack it in melee with weapon
+                else:
+                    player.perform(actions.act_attack_melee_basic, player, be)  # attack it in melee with hands
+
+
 def command_pick_up(director, game, dx, dy):
     """ Command function for player wants to pick up some items  """
     player = game.player
