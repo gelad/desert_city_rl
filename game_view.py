@@ -1076,6 +1076,12 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_R:  # reload ranged weapon
                 commands.command_reload_equipped(director=self.director, game=game)
                 handled = True
+            elif player_input == terminal.TK_N:  # uNload ranged weapon
+                # TODO: make 'what to unload' selection
+                for item in player.equipment.values():  # unload every equipped item
+                    if isinstance(item, game_logic.ItemRangedWeapon):
+                        player.perform(actions.act_unload, player, item)
+                handled = True
             elif player_input == terminal.TK_I:  # show inventory
                 self.director.push_scene(InventorySelectionScene(items=player.inventory,
                                                                  game=game,
