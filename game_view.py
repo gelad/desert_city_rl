@@ -1493,6 +1493,7 @@ class LogView(View):
         return Size(self.bounds.width, self.bounds.height)
 
     def draw(self, ctx):
+        super().draw(ctx)
         # TODO: draw log only if it changes
         # get log messages, intended to be shown to player
         if self.game.show_debug_log:
@@ -1527,6 +1528,7 @@ class LookView(View):
         return Size(self.bounds.width, self.bounds.height)
 
     def draw(self, ctx):
+        super().draw(ctx)
         if (self.game.player.position[0] + self.map_view.cam_offset[0],
             self.game.player.position[1] + self.map_view.cam_offset[1]) in self.game.player.fov_set:  # if in FOV
             entities = self.game.current_loc.cells[self.game.player.position[0] + self.map_view.cam_offset[0]][
