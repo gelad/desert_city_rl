@@ -3,12 +3,15 @@
 """
 import zlib
 import pickle
+from time import sleep
 
 import gc
 
 
 def save_game(game):
     """ Game saving function """
+    while game.loop_is_running:  # if main game logic loop is in progress - wait until it finishes
+        sleep(0.1)
     gc.collect()  # run garbage collect - remove weakref object without references and so on
     # save game object instance, and observers
     uncompressed = pickle.dumps(game)
