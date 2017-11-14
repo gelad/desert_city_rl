@@ -401,6 +401,9 @@ def act_pick_up_item(action, register_call, actor, item):
     if register_call:  # part executed when function is registered in ActionMgr
         action.t_needed = actor.speed / 4  # pick up action is 1/4 speed
     else:  # part that is executed when action fires
+        if isinstance(actor, game_logic.Player):
+            msg = 'You pick up ' + str(item) + '.'
+            game_logic.Game.add_message(msg, 'PLAYER', [255, 255, 255])
         actor.add_item(item)  # pick up item
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state

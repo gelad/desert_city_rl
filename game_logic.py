@@ -492,6 +492,9 @@ class Inventory(Entity):
 
     def drop_item(self, item):
         """ Item dropping method (in a location) """
+        if isinstance(self, Player):
+            msg = 'You drop ' + str(item) + ' on the ground.'
+            Game.add_message(msg, 'PLAYER', [255, 255, 255])
         item.owner = None
         item.abilities_set_owner(item)  # if it has abilities - set their owner
         self.location.place_entity(item, self.position[0], self.position[1])  # place it on the map
