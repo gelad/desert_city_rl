@@ -1817,6 +1817,7 @@ class Game:
         self.player = None  # player object
         self.state = ''  # game state, like 'playing', 'looking', 'menu'
         self.is_waiting_input = True  # is game paused and waiting for player input
+        self.loop_is_running = False  # this flag must be true when main_loop is running
         self.locations = []  # list of locations
         self.time_system = actions.TimeSystem()  # time system object
         self.show_debug_log = False  # show debug log to player
@@ -1829,10 +1830,15 @@ class Game:
         # threading is used to make UI responsible to input while game logic updates.
         # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
         # TODO: rewrite with proper threading
+        if self.loop_is_running:
+            return  # if loop is already running - don't run another one
         threading._start_new_thread(self._main_loop, ())
 
     def _main_loop(self):
         """ Main game loop function (time advancement, performing actions etc) """
+        if self.loop_is_running:
+            raise(Warning('Multiple main_loops running at the same time!'))
+        self.loop_is_running = True
         while not self.player.state == 'ready':
             if self.state == 'playing':  # check if state is 'playing'
                 if self.is_waiting_input:  # check if game is waiting for player input
@@ -1849,6 +1855,7 @@ class Game:
                         if actor.state == 'ready' and actor.ai:  # pick those who have ai and ready to act
                             actor.ai.act()  # make them act
         self.is_waiting_input = True  # set waiting for input flag True
+        self.loop_is_running = False
 
     def new_game(self):
         """ Method that starts a new game. Mostly a placeholder now. """
