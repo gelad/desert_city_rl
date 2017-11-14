@@ -428,7 +428,10 @@ def act_use_item(action, register_call, actor, item, target):
     else:  # part that is executed when action fires
         if action.data['use_offset'] > 0:
             actor.use_item(item, target)  # use item
-            actor.actions.remove(action)  # remove performed action from actor's list
+            if action in actor.actions:
+                actor.actions.remove(action)  # remove performed action from actor's list
+            else:
+                raise (Warning('Action in not in actor list when trying to remove!'))
             actor.state = 'ready'  # return actor to ready state
             if action.data['use_offset'] < 1:  # if no withdrawal (use_offset = 1) then no withdrawal action
                 withdrawal = action.data['use_time'] * (1 - action.data['use_offset'])

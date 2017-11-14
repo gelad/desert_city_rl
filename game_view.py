@@ -1021,13 +1021,13 @@ class MainGameScene(UIScene):
             for effect in self.game.player.effects:
                 if filled_lines < 6:
                     if effect.eff == 'POISONED':
-                        buffs_line += '[color=green]' + effect.eff + '[/color]══'
+                        buffs_line += '[color=green]' + effect.eff + '[color=dark white]══[/color]'
                         filled_lines += 1
                     elif effect.eff == 'HASTE':
-                        buffs_line += '[color=yellow]' + effect.eff + '[/color]══'
+                        buffs_line += '[color=yellow]' + effect.eff + '[color=dark white]══[/color]'
                         filled_lines += 1
                     elif effect.eff == 'SLOWED':
-                        buffs_line += '[color=blue]' + effect.eff + '[/color]══'
+                        buffs_line += '[color=blue]' + effect.eff + '[color=dark white]══[/color]'
                         filled_lines += 1
             if self._buffs_bar.text != buffs_line:
                 self._buffs_bar.text = buffs_line
