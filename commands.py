@@ -91,6 +91,7 @@ def command_use_item(game, item, main_scene):
     if 'usable' in item.properties:
         if item.properties['usable'] == 'self':  # if item usable on self
             player.perform(actions.act_use_item, player, item, player)
+            game.start_update_thread()
         elif item.properties['usable'] == 'point':  # if item usable on point
             main_scene.start_targeting(range=item.properties['range'],
                                        t_object=item,

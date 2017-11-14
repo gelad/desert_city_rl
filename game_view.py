@@ -926,12 +926,18 @@ class MainGameScene(UIScene):
                                                                                                 left=0.3,
                                                                                                 right=None))
         self._title_label.clear = True
+        self._buffs_bar = LabelViewFixed(text='',
+                                         layout_options=LayoutOptions.row_bottom(1).with_updates(width='intrinsic',
+                                                                                                 left=0.1,
+                                                                                                 right=None))
+        self._buffs_bar.clear = True
         views = [self.map_view,
                  RectView(style='double', layout_options=LayoutOptions(left=0, top=0)),
                  RectView(style='double', layout_options=LayoutOptions().column_left(1).with_updates(
                      left=0.61,
                      right=None)),
                  self._title_label,
+                 self._buffs_bar,
                  self.bars_view,
                  self.log_view,
                  self.cell_info_view]
@@ -1010,6 +1016,23 @@ class MainGameScene(UIScene):
             self.player_left_hand.text = 'Left:  ' + str(left)
             money = player.properties['money']
             self.money.text = 'Money: ' + str(money) + ' coins.'
+            filled_lines = 0
+            buffs_line = ''
+            for effect in self.game.player.effects:
+                if filled_lines < 6:
+                    if effect.eff == 'POISONED':
+                        buffs_line += '[color=green]' + effect.eff + '[/color]══'
+                        filled_lines += 1
+                    elif effect.eff == 'HASTE':
+                        buffs_line += '[color=yellow]' + effect.eff + '[/color]══'
+                        filled_lines += 1
+                    elif effect.eff == 'SLOWED':
+                        buffs_line += '[color=blue]' + effect.eff + '[/color]══'
+                        filled_lines += 1
+            if self._buffs_bar.text != buffs_line:
+                self._buffs_bar.text = buffs_line
+                self._buffs_bar.set_needs_layout(True)
+                self._buffs_bar.frame.width = self._buffs_bar.intrinsic_size.width
         super().terminal_update(is_active=is_active)
 
     def terminal_read(self, val):

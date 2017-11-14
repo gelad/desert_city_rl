@@ -228,7 +228,10 @@ def act_move(action, register_call, actor, dx, dy):
         actor.move(dx, dy)  # move actor to desired coords
         if isinstance(actor, game_logic.Seer):  # check if entity is a Seer
             actor.compute_fov()  # compute actor's FOV
-        actor.actions.remove(action)  # remove performed action from actor's list
+        if action in actor.actions:  # TODO: investigate why action is't there
+            actor.actions.remove(action)  # remove performed action from actor's list
+        else:
+            raise(Warning('Action in not in actor list when trying to remove!'))
         actor.state = 'ready'  # return actor to ready state
         #  withdrawal to make whole action take EXACTLY one step
         actor.perform(act_withdrawal, actor, action.data['t_whole'] / 3 * 2)
