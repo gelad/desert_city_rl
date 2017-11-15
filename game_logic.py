@@ -1832,10 +1832,10 @@ class Game:
         """ This method starts game update thread (containing main loop) """
         # threading is used to make UI responsible to input while game logic updates.
         # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
-        # TODO: rewrite with proper threading
         if self.loop_is_running:
             return  # if loop is already running - don't run another one
-        threading._start_new_thread(self._main_loop, ())
+        t = threading.Thread(target=self._main_loop)
+        t.start()
 
     def _main_loop(self):
         """ Main game loop function (time advancement, performing actions etc) """

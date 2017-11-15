@@ -199,8 +199,8 @@ class CharacterSelectScene(UIScene):
     def _start_new_game_thread(self):
         """ This method starts new game generation thread """
         # threading is used to make UI display LOADING screen while loading new game.
-        # TODO: rewrite with proper threading
-        threading._start_new_thread(self._start_new_game, ())
+        t = threading.Thread(target=self._start_new_game)
+        t.start()
 
     def _start_new_game(self):
         """ This method starts a new game and loads starting gear """
