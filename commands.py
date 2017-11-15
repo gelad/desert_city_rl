@@ -215,3 +215,43 @@ def command_fire(target, player, weapon):
     """ Command function for player wants to fire fanged item """
     player.perform(actions.act_fire_ranged, player, weapon, target)
 
+# def command_leave_loc(self):
+#         """ PLACEHOLDER method for moving to another loc """
+#
+#         old_loc = self.game.current_loc
+#         # show after level score - sold treasures for now
+#         treasures = {}
+#         for item in self.game.player.inventory:
+#             if 'relic' in item.categories:  # if there'll be other types of treasure - add here
+#                 if isinstance(item, game_logic.ItemCharges):
+#                     count = item.charges
+#                 else:
+#                     count = 1
+#                 if item.name in treasures:
+#                     treasures[item.name][0] += count
+#                 else:
+#                     treasures[item.name] = [count, item.properties['value']]
+#                 self.game.player.discard_item(item)
+#                 del item
+#         if len(treasures) > 0:
+#             text = 'You escaped the City alive, and obtained some treasures:\n\n'
+#             total = 0
+#             for tr in treasures.keys():
+#                 text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
+#                         + str(treasures[tr][0] * treasures[tr][1]) + '\n'
+#                 total += treasures[tr][0] * treasures[tr][1]
+#             text += '\nTotal treasures value: ' + str(total) + ' coins.'
+#             self.game.player.properties['money'] += total
+#         else:
+#             text = 'You escaped the City alive, but with nothing of value in your pockets.\n\n'
+#         show_menu_text_above(win_mgr=self.win_mgr, caption='Successiful raid into ruins of Neth-Nikakh.',
+#                              options=['Ok.'], keys=None, texts=text, prev_window=self, width=self.width // 3 * 2,
+#                              text_height=25)
+#         self.game.current_loc = generation.generate_loc('ruins', None, 200, 200)
+#         self.game.add_location(self.game.current_loc)
+#         self.game.player.location.remove_entity(self.game.player)
+#         self.game.current_loc.place_entity(self.game.player, 0, 0)
+#         self.game.current_loc.actors.remove(self.game.player)  # A hack, to make player act first if acting in one tick
+#         self.game.current_loc.actors.insert(0, self.game.player)
+#         self.game.remove_location(old_loc)
+
