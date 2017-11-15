@@ -328,6 +328,35 @@ class Seer(Entity):
             for point in self.fov_set:
                 if self.location.is_in_boundaries(point[0], point[1]):
                     self.location.cells[point[0]][point[1]].explored = True
+                    # TODO: make and use Cell get_cg() method
+                    cell = self.location.cells[point[0]][point[1]]
+                    tile = dataset.get_tile(cell.tile)
+                    char = tile[0]
+                    color = tile[1]
+                    bgcolor = tile[2]
+                    brk = False
+                    for ent in cell.entities:
+                        # iterate through list of entities,if there are any, display them instead of tile
+                        char = ent.char
+                        color = ent.color
+                        if not color:
+                            color = [255, 255, 255]
+                        if ent.occupies_tile:  # check if there is entity, occupying tile - display it on top
+                            color = ent.color
+                            brk = True
+                        if len(cell.entities) > 1:  # if there are multiple items, replace bgcolor
+                            bgcolor = cell.entities[0].color
+                            if color == bgcolor:
+                                bgcolor = [c - 50 for c in bgcolor]
+                                i = 0
+                                for c in bgcolor:
+                                    if c < 0:
+                                        bgcolor[i] = 0
+                                    i += 1
+                        if brk:
+                            break
+                    # update visited cells map (for displaying grey out of vision explored tiles)
+                    self.location.out_of_sight_map[(point[0], point[1])] = [char, color, bgcolor]
 
     def fov_visit_cell(self, x, y):
         """ Method for FOV "visit" - adds visible cell coords to FOV set """

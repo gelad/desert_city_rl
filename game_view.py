@@ -1010,7 +1010,7 @@ class MainGameScene(UIScene):
         else:
             raise (RuntimeError('More than one main game scene!'))
         self.ctx.clear()
-        self.map_view.tick = 11  # to draw map right after
+        self.map_view.force_redraw = True  # to draw map right after
 
     def terminal_update(self, is_active=False):
         """ Update values in bars and tabs before drawing """
@@ -1127,7 +1127,6 @@ class MainGameScene(UIScene):
                 commands.command_reload_equipped(director=self.director, game=game)
                 handled = True
             elif player_input == terminal.TK_N:  # uNload ranged weapon
-                # TODO: make 'what to unload' selection
                 for item in player.equipment.values():  # unload every equipped item
                     if isinstance(item, game_logic.ItemRangedWeapon):
                         player.perform(actions.act_unload, player, item)
@@ -1381,7 +1380,6 @@ class MapView(View):
     """ View with game map """
 
     def __init__(self, game, *args, **kwargs):
-        # TODO: make method or property to force redraw on next tick
         self.game = game  # game object reference for obtaining map info
         self.cam_offset = [0, 0]  # camera offset (if looking or targeting)
         self.last_game_time = game.time_system.current_time()  # last game time (to know when redraw needed)
@@ -1407,6 +1405,7 @@ class MapView(View):
         bgcolor = [0, 0, 0]
         if visible:  # check if cell is visible
             tile = dataset.get_tile(cell.tile)
+            # TODO: make and use Cell get_cg() method
             char = tile[0]
             color = tile[1]
             bgcolor = tile[2]
@@ -1431,14 +1430,13 @@ class MapView(View):
                 if brk:
                     break
             # update visited cells map (for displaying grey out of vision explored tiles)
-            loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
+            # loc.out_of_sight_map[(x, y)] = [char, color, bgcolor]
             return [char, color, bgcolor]
         elif cell.explored:  # check if it was previously explored
-            if (x, y) in loc.out_of_sight_map:  # TODO: HACK, there must not be explored tiles not in out_of_sight
-                prev_seen_cg = loc.out_of_sight_map[(x, y)]  # take cell graphic from out_of_sight map of Location
-                prev_seen_cg[1] = [100, 100, 100]  # make it greyish
-                prev_seen_cg[2] = [50, 50, 50]
-                return prev_seen_cg
+            prev_seen_cg = loc.out_of_sight_map[(x, y)]  # take cell graphic from out_of_sight map of Location
+            prev_seen_cg[1] = [100, 100, 100]  # make it greyish
+            prev_seen_cg[2] = [50, 50, 50]
+            return prev_seen_cg
         return [char, color, bgcolor]
 
     def draw(self, ctx):
