@@ -42,6 +42,15 @@ LOGO = """
 /___,' \___||___/\___|_|   \__| \____/|_|\__|\__, |
                                              |___/ 
 """
+
+LOADING = """
+ _      ____          _____ _____ _   _  _____ 
+| |    / __ \   /\   |  __ \_   _| \ | |/ ____|
+| |   | |  | | /  \  | |  | || | |  \| | |  __ 
+| |   | |  | |/ /\ \ | |  | || | | . ` | | |_ |
+| |___| |__| / ____ \| |__| || |_| |\  | |__| |
+|______\____/_/    \_\_____/_____|_| \_|\_____|                                     
+"""
 character_bg_descriptions = [
     'Many adventurers are lured to the City - in search of treasures, power,' +
     ' glory or something else. You are among the others - jack of all trades,' +
@@ -184,9 +193,17 @@ class CharacterSelectScene(UIScene):
 
     def option_activated(self):
         """ Method to call when option is activated (ENTER key pressed) - New Game start """
-        # TODO: make LOADING scene appear
         self.director.push_scene(LoadingScene())
-        self.director.active_scene.terminal_update()
+        self._start_new_game_thread()
+
+    def _start_new_game_thread(self):
+        """ This method starts new game generation thread """
+        # threading is used to make UI display LOADING screen while loading new game.
+        # TODO: rewrite with proper threading
+        threading._start_new_thread(self._start_new_game, ())
+
+    def _start_new_game(self):
+        """ This method starts a new game and loads starting gear """
         game = game_logic.Game()  # start a new game
         sg_file = open('data/starting_gear.json', 'r')  # load starting gear
         sg_dict = jsonpickle.loads(sg_file.read())
@@ -853,7 +870,7 @@ class LoadingScene(UIScene):
 
     def __init__(self, *args, **kwargs):
         views = [LabelViewFixed(
-            LOGO[1:].rstrip(),
+            LOADING[1:].rstrip(),
             layout_options=LayoutOptions.row_top(0.5))]
         super().__init__(views, *args, **kwargs)
 
