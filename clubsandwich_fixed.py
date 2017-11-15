@@ -9,132 +9,133 @@ from math import floor
 
 
 class LabelViewFixed(View):
-  """
-  Draws the given string inside its bounds. Multi-line strings work fine.
-
-  :param str text: Text to draw
-  :param str color_fg: Foreground color
-  :param str color_bg: Background color (only applies on terminal layer zero)
-  :param 'center'|'left'|'right' align_horz: Horizontal alignment
-  :param 'center'|'top'|'bottom' align_vert: Vertical alignment
-
-  See :py:class:`View` for the rest of the init arguments.
+    """
+    Draws the given string inside its bounds. Multi-line strings work fine.
   
-  FIX: bearlib tags in [] now don't affect text alignment
-  CHANGE: added word wrap if string exceeds terminal boundary
-  """
-  def __init__(
-      self, text, color_fg='#ffffff', color_bg='#000000',
-      align_horz='center', align_vert='center',
-      *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self.align_horz = align_horz
-    self.align_vert = align_vert
-    self.text = text
-    self.color_fg = color_fg
-    self.color_bg = color_bg
+    :param str text: Text to draw
+    :param str color_fg: Foreground color
+    :param str color_bg: Background color (only applies on terminal layer zero)
+    :param 'center'|'left'|'right' align_horz: Horizontal alignment
+    :param 'center'|'top'|'bottom' align_vert: Vertical alignment
+  
+    See :py:class:`View` for the rest of the init arguments.
+    
+    FIX: bearlib tags in [] now don't affect text alignment
+    CHANGE: added word wrap if string exceeds terminal boundary
+    """
 
-  @property
-  def intrinsic_size(self):
-      width, height = terminal.measure(self.text)
-      return Size(width, height)
+    def __init__(
+            self, text, color_fg='#ffffff', color_bg='#000000',
+            align_horz='center', align_vert='center', wrap=True,
+            *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.align_horz = align_horz
+        self.align_vert = align_vert
+        self.text = text
+        self.color_fg = color_fg
+        self.color_bg = color_bg
+        self.wrap = wrap
 
-  def draw(self, ctx):
-    ctx.color(self.color_fg)
-    ctx.bkcolor(self.color_bg or '#000000')
-    if self.clear:
-      ctx.clear_area(self.bounds)
-    x = 0
-    if self.align_horz == 'center':
-      x = self.bounds.width / 2 - self.intrinsic_size.width / 2
-    elif self.align_horz == 'right':
-      x = self.bounds.width - self.intrinsic_size.width
+    @property
+    def intrinsic_size(self):
+        width, height = terminal.measure(self.text)
+        return Size(width, height)
 
-    y = 0
-    if self.align_vert == 'center':
-      y = self.bounds.height / 2 - self.intrinsic_size.height / 2
-    elif self.align_vert == 'bottom':
-      y = self.bounds.height - self.intrinsic_size.height
-    #  TODO: make wordwrap parameter?
-    if self.intrinsic_size.width > self.bounds.width:  # if width exceeds bounds - wrap words
-        w = self.bounds.width
-    else:
-        w = 0
-    ctx.print(Point(x, y).floored, self.text, w)
+    def draw(self, ctx):
+        ctx.color(self.color_fg)
+        ctx.bkcolor(self.color_bg or '#000000')
+        if self.clear:
+            ctx.clear_area(self.bounds)
+        x = 0
+        if self.align_horz == 'center':
+            x = self.bounds.width / 2 - self.intrinsic_size.width / 2
+        elif self.align_horz == 'right':
+            x = self.bounds.width - self.intrinsic_size.width
 
-  def debug_string(self):
-    return super().debug_string() + ' ' + repr(self.text)
+        y = 0
+        if self.align_vert == 'center':
+            y = self.bounds.height / 2 - self.intrinsic_size.height / 2
+        elif self.align_vert == 'bottom':
+            y = self.bounds.height - self.intrinsic_size.height
+        if self.intrinsic_size.width > self.bounds.width and self.wrap:  # if width exceeds bounds - wrap words
+            w = self.bounds.width
+        else:
+            w = 0
+        ctx.print(Point(x, y).floored, self.text, w)
+
+    def debug_string(self):
+        return super().debug_string() + ' ' + repr(self.text)
 
 
 class ButtonViewFixed(View):
-  """
-  :param str text: Button title
-  :param func callback: Function to call when button is activated. Takes no
-                        arguments.
-  :param func callback_selected: Function to call when button is selected
-  :param str align_horz: Horizontal alignment. See :py:class:`LabelView`.
-  :param str align_vert: Vertical alignment. See :py:class:`LabelView`.
+    """
+    :param str text: Button title
+    :param func callback: Function to call when button is activated. Takes no
+                          arguments.
+    :param func callback_selected: Function to call when button is selected
+    :param str align_horz: Horizontal alignment. See :py:class:`LabelView`.
+    :param str align_vert: Vertical alignment. See :py:class:`LabelView`.
+  
+    See :py:class:`View` for the rest of the init arguments.
+  
+    Contains a label. Can be first responder. When a button is the first
+    responder:
+  
+    * The label is drawn black-on-white instead of white-on-black
+    * Pressing the Enter key calls *callback*
+    FIX: bearlib tags in [] now don't affect text alignment (LabelViewFixed is used)
+    ADDED: callback_selected
+    ADDED: callback returns link to button
+    """
 
-  See :py:class:`View` for the rest of the init arguments.
+    def __init__(
+            self, text, callback, callback_selected=None, align_horz='center', align_vert='center',
+            *args, **kwargs):
+        self.label_view = LabelViewFixed(text, align_horz=align_horz, align_vert=align_vert)
+        super().__init__(subviews=[self.label_view], *args, **kwargs)
+        self.callback = callback
+        self.callback_selected = callback_selected
 
-  Contains a label. Can be first responder. When a button is the first
-  responder:
+    def set_needs_layout(self, val):
+        super().set_needs_layout(val)
+        self.label_view.set_needs_layout(val)
 
-  * The label is drawn black-on-white instead of white-on-black
-  * Pressing the Enter key calls *callback*
-  FIX: bearlib tags in [] now don't affect text alignment (LabelViewFixed is used)
-  ADDED: callback_selected
-  ADDED: callback returns link to button
-  """
-  def __init__(
-      self, text, callback, callback_selected=None, align_horz='center', align_vert='center',
-      *args, **kwargs):
-    self.label_view = LabelViewFixed(text, align_horz=align_horz, align_vert=align_vert)
-    super().__init__(subviews=[self.label_view], *args, **kwargs)
-    self.callback = callback
-    self.callback_selected = callback_selected
+    def did_become_first_responder(self):
+        self.label_view.color_fg = '#000000'
+        self.label_view.color_bg = '#ffffff'
+        if self.callback_selected:
+            self.callback_selected()
 
-  def set_needs_layout(self, val):
-    super().set_needs_layout(val)
-    self.label_view.set_needs_layout(val)
+    def did_resign_first_responder(self):
+        self.label_view.color_fg = '#ffffff'
+        self.label_view.color_bg = '#000000'
 
-  def did_become_first_responder(self):
-      self.label_view.color_fg = '#000000'
-      self.label_view.color_bg = '#ffffff'
-      if self.callback_selected:
-          self.callback_selected()
+    def draw(self, ctx):
+        if self.clear:
+            ctx.bkcolor(self.color_bg)
+            ctx.clear_area(self.bounds)
 
+    @property
+    def text(self):
+        return self.label_view.text
 
-  def did_resign_first_responder(self):
-      self.label_view.color_fg = '#ffffff'
-      self.label_view.color_bg = '#000000'
+    @text.setter
+    def text(self, new_value):
+        self.label_view.text = new_value
 
-  def draw(self, ctx):
-    if self.clear:
-      ctx.bkcolor(self.color_bg)
-      ctx.clear_area(self.bounds)
+    @property
+    def intrinsic_size(self):
+        return self.label_view.intrinsic_size
 
-  @property
-  def text(self):
-    return self.label_view.text
+    def layout_subviews(self):
+        super().layout_subviews()
+        self.label_view.frame = self.bounds
 
-  @text.setter
-  def text(self, new_value):
-    self.label_view.text = new_value
+    @property
+    def can_become_first_responder(self):
+        return True
 
-  @property
-  def intrinsic_size(self):
-    return self.label_view.intrinsic_size
-
-  def layout_subviews(self):
-    super().layout_subviews()
-    self.label_view.frame = self.bounds
-
-  @property
-  def can_become_first_responder(self):
-    return True
-
-  def terminal_read(self, val):
-    if val == terminal.TK_ENTER:
-      self.callback()
-      return True
+    def terminal_read(self, val):
+        if val == terminal.TK_ENTER:
+            self.callback()
+            return True
