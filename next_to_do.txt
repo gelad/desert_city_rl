@@ -71,6 +71,8 @@ Add prefab_info store variant-specific layer numbers, to place additional entiti
 Make some fences, paths and roads on map.
 BUG: explosive potion vanishes if taken off after throw (when has > 1 charge)
 BUG: poison stops working if move to another location.
+Make 2-handed weapons, especially ranged.
+Make multi-bodypart armor. (?)
 Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.
 Inform player if targeting failed.
 Make door-opening mobs.

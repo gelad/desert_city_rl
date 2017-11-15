@@ -24,7 +24,6 @@ def command_default_direction(game, dx, dy):
         if door:  # check if there is a door
             if door.is_closed:  # check if it is closed
                 player.perform(actions.act_open_door, player, door)  # open door
-        # TODO: here must be more complicated check - if target is hostile, etc
         enemy = loc.cells[new_x][new_y].is_there_a(game_logic.Fighter)
         if enemy:  # check if there an enemy
             if player.equipment['LEFT_HAND'] or player.equipment['RIGHT_HAND']:
@@ -155,7 +154,6 @@ def command_throw(target, player, item):
 
 def command_reload_equipped(director, game):
         """ Command function for player wants to reload ranged weapon (in hands)  """
-        # TODO: make multiple ranged weapon selection dialog or forbid 2 ranged weapons
         for item in game.player.equipment.values():  # iterate through player equipment
             if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
                 command_reload(director=director, game=game, item=item)
