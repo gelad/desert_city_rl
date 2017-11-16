@@ -1206,28 +1206,28 @@ class MainGameScene(UIScene):
             handled = True
         # camera offset change with directional keys
         elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
-            self.map_view.change_cam_offset(-1, 0)
+            self.map_view.move_camera(-1, 0)
             handled = True
         elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
-            self.map_view.change_cam_offset(1, 0)
+            self.map_view.move_camera(1, 0)
             handled = True
         elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
-            self.map_view.change_cam_offset(0, -1)
+            self.map_view.move_camera(0, -1)
             handled = True
         elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
-            self.map_view.change_cam_offset(0, 1)
+            self.map_view.move_camera(0, 1)
             handled = True
         elif player_input == terminal.TK_KP_7:
-            self.map_view.change_cam_offset(-1, -1)
+            self.map_view.move_camera(-1, -1)
             handled = True
         elif player_input == terminal.TK_KP_9:
-            self.map_view.change_cam_offset(1, -1)
+            self.map_view.move_camera(1, -1)
             handled = True
         elif player_input == terminal.TK_KP_1:
-            self.map_view.change_cam_offset(-1, 1)
+            self.map_view.move_camera(-1, 1)
             handled = True
         elif player_input == terminal.TK_KP_3:
-            self.map_view.change_cam_offset(1, 1)
+            self.map_view.move_camera(1, 1)
             handled = True
         if handled:
             self.map_view.force_redraw = True  # to redraw map faster
@@ -1338,35 +1338,35 @@ class MainGameScene(UIScene):
         # camera offset change with directional keys, check targeting range before camera move
         elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
             if hypot(self.map_view.cam_offset[0] - 1, self.map_view.cam_offset[1]) <= self.target_info['range']:
-                self.map_view.change_cam_offset(-1, 0)
+                self.map_view.move_camera(-1, 0)
             handled = True
         elif player_input in (terminal.TK_KP_6, terminal.TK_RIGHT):
             if hypot(self.map_view.cam_offset[0] + 1, self.map_view.cam_offset[1]) <= self.target_info['range']:
-                self.map_view.change_cam_offset(1, 0)
+                self.map_view.move_camera(1, 0)
             handled = True
         elif player_input in (terminal.TK_KP_8, terminal.TK_UP):
             if hypot(self.map_view.cam_offset[0], self.map_view.cam_offset[1] - 1) <= self.target_info['range']:
-                self.map_view.change_cam_offset(0, -1)
+                self.map_view.move_camera(0, -1)
             handled = True
         elif player_input in (terminal.TK_KP_2, terminal.TK_DOWN):
             if hypot(self.map_view.cam_offset[0], self.map_view.cam_offset[1] + 1) <= self.target_info['range']:
-                self.map_view.change_cam_offset(0, 1)
+                self.map_view.move_camera(0, 1)
             handled = True
         elif player_input == terminal.TK_KP_7:
             if hypot(self.map_view.cam_offset[0] - 1, self.map_view.cam_offset[1] - 1) < self.target_info['range']:
-                self.map_view.change_cam_offset(-1, -1)
+                self.map_view.move_camera(-1, -1)
             handled = True
         elif player_input == terminal.TK_KP_9:
             if hypot(self.map_view.cam_offset[0] + 1, self.map_view.cam_offset[1] - 1) < self.target_info['range']:
-                self.map_view.change_cam_offset(1, -1)
+                self.map_view.move_camera(1, -1)
             handled = True
         elif player_input == terminal.TK_KP_1:
             if hypot(self.map_view.cam_offset[0] - 1, self.map_view.cam_offset[1] + 1) < self.target_info['range']:
-                self.map_view.change_cam_offset(-1, 1)
+                self.map_view.move_camera(-1, 1)
             handled = True
         elif player_input == terminal.TK_KP_3:
             if hypot(self.map_view.cam_offset[0] + 1, self.map_view.cam_offset[1] + 1) < self.target_info['range']:
-                self.map_view.change_cam_offset(1, 1)
+                self.map_view.move_camera(1, 1)
             handled = True
         if handled:
             self.map_view.force_redraw = True  # to redraw map faster
@@ -1391,11 +1391,15 @@ class MapView(View):
     def intrinsic_size(self):
         return Size(self.bounds.width, self.bounds.height)
 
-    def change_cam_offset(self, dx, dy):
+    def move_camera(self, dx, dy):
         """ Method that alters camera offset by given numbers """
-        # TODO: make 'out of bounds' check
-        self.cam_offset[0] += dx
-        self.cam_offset[1] += dy
+        player_x = self.game.player.position[0]
+        player_y = self.game.player.position[1]
+        rel_x = player_x + self.cam_offset[0]  # game location coordinates in accordance to screen coordinates
+        rel_y = player_y + self.cam_offset[1]
+        if self.game.current_loc.is_in_boundaries(rel_x + dx, rel_y + dy):
+            self.cam_offset[0] += dx
+            self.cam_offset[1] += dy
 
     @staticmethod
     def cell_graphics(x, y, cell, loc, visible):
