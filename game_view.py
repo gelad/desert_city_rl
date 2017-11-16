@@ -220,12 +220,12 @@ class CharacterSelectScene(UIScene):
 class ListSelectionScene(UIScene):
     """ Scene displays a list with selectable options """
 
-    # TODO: refactor and comment this shit..
     def __init__(self, options, caption='', layout_options=None, alphabet=True, *args, **kwargs):
         self.options = options
-        self.alphabet = alphabet
-        self.selected = 0
+        self.alphabet = alphabet  # flag that allows option selection by A..Z keys
+        self.selected = 0  # currently selected option index
         self.clear = True
+        # button creation
         top_offset = 0
         subviews = []
         self.buttons = []
@@ -260,6 +260,7 @@ class ListSelectionScene(UIScene):
                                       subviews=subviews)
         views = [self.window_view]
         super().__init__(views, *args, **kwargs)
+        # initiate scrolling
         self.scrolling_mode = False
         self.scroll_pos = self.selected
 
@@ -341,14 +342,14 @@ class ListSelectionScene(UIScene):
 class DescribedListSelectionScene(UIScene):
     """ Scene displays a list with selectable options and their descriptions to the left """
 
-    # TODO: refactor and comment this shit..
     def __init__(self, options, descriptions, caption='', layout_options=None, alphabet=True, views=None,
                  *args, **kwargs):
         self.options = options
         self.descriptions = descriptions
-        self.alphabet = alphabet
-        self.selected = 0
+        self.alphabet = alphabet  # flag that allows option selection by A..Z keys
+        self.selected = 0  # currently selected option index
         self.clear = True
+        # buttons creation
         top_offset = 0
         subviews = []
         self.buttons = []
@@ -392,6 +393,7 @@ class DescribedListSelectionScene(UIScene):
                                       subviews=subviews)
         views = [self.window_view]
         super().__init__(views, *args, **kwargs)
+        # scrolling initialization
         self.scrolling_mode = False
         self.scroll_pos = self.selected
 
@@ -1486,7 +1488,6 @@ class LogView(View):
 
     def draw(self, ctx):
         super().draw(ctx)
-        # TODO: draw log only if it changes
         # get log messages, intended to be shown to player
         if self.game.show_debug_log:
             msgs = [m for m in game_logic.Game.log if m[1] == 'DEBUG']
