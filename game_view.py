@@ -24,7 +24,7 @@ import sys
 import threading
 import os
 import textwrap
-from math import hypot
+from math import hypot, floor
 
 import game_logic
 import save_load
@@ -219,20 +219,28 @@ class SingleButtonMessageScene(UIScene):
     def __init__(self, message, title='', button_text='OK.', close_on_esc=True,
                  callback=None, layout_options=None, *args, **kwargs):
         self.message = message
+        self.title = title
         self.close_on_esc = close_on_esc
         if not callback:
             callback = self._default_button_action
-        views = [WindowView(title=title, layout_options=layout_options, subviews=
-                            [LabelViewFixed(text=message, align_vert='left', align_horz='top',
-                                            layout_options=LayoutOptions(top=0,
-                                                                         left=0)),
-                             ButtonViewFixed(text=button_text, callback=callback,
-                                             layout_options=LayoutOptions(bottom=0,
-                                                                          left=0,
-                                                                          width='intrinsic',
-                                                                          height='intrinsic',
-                                                                          right=None,
-                                                                          top=None))])]
+        if layout_options == 'intrinsic':
+            size = self._calculate_size()
+            layout_options = LayoutOptions(width=size.width,
+                                           height=size.height,
+                                           top=None, bottom=None,
+                                           left=None, right=None)
+        self.window_view = WindowView(title=title, layout_options=layout_options, subviews=
+                                      [LabelViewFixed(text=message, align_vert='left', align_horz='top',
+                                                      layout_options=LayoutOptions(top=0,
+                                                                                   left=0)),
+                                       ButtonViewFixed(text=button_text, callback=callback,
+                                                       layout_options=LayoutOptions(bottom=0,
+                                                                                    left=0,
+                                                                                    width='intrinsic',
+                                                                                    height='intrinsic',
+                                                                                    right=None,
+                                                                                    top=None))])
+        views = [self.window_view]
         super().__init__(views, *args, **kwargs)
 
     def terminal_read(self, val):
@@ -242,8 +250,24 @@ class SingleButtonMessageScene(UIScene):
             self.director.pop_scene()
             return True
         elif val == terminal.TK_RESIZED:
-            pass  # TODO: make resize method
+            new_size = self._calculate_size()
+            self.window_view.layout_options = LayoutOptions(width=new_size.width, height=new_size.height,
+                                                            top=None, bottom=None,
+                                                            left=None, right=None)
+            self.window_view.set_needs_layout(True)
         return False
+
+    def _calculate_size(self):
+        """ Method for autosize """
+        t_width = terminal.state(terminal.TK_WIDTH)
+        t_height = terminal.state(terminal.TK_HEIGHT)
+        aspect_ratio = (t_width / t_height)
+        for height in range(4, t_height):
+            width = max((len(self.title), round(aspect_ratio * height)))
+            wrapped_text = textwrap.wrap(self.message, width)
+            if len(wrapped_text) + 3 <= height:
+                return Size(width=width + 2, height=len(wrapped_text) + 4)
+        return Size(width=t_width - 2, height=t_height - 2)
 
     def _default_button_action(self):
         """ Default action when button is pressed - pop this scene """
@@ -1214,9 +1238,7 @@ class MainGameScene(UIScene):
                 self.director.push_scene(SingleButtonMessageScene(message='Test message\n'
                                                                           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur porta mattis turpis, non accumsan erat posuere non. Quisque facilisis ligula ut mattis finibus. Vivamus ut pharetra enim.',
                                                                   title='Help',
-                                                                  layout_options=LayoutOptions(
-                                                                       top=0.3, bottom=0.3,
-                                                                       left=0.3, right=0.3)))
+                                                                  layout_options='intrinsic'))
                 handled = True
             elif player_input == terminal.TK_F11:  # debug command exec
                 self.director.push_scene(DebugLineInputScene(game=game))
