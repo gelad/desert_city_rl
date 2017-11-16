@@ -2,8 +2,10 @@
 import actions
 import game_logic
 import game_view
+import save_load
 
 from clubsandwich.ui import LayoutOptions
+from bearlibterminal import terminal
 
 
 def command_default_direction(game, dx, dy):
@@ -214,6 +216,29 @@ def command_fire_choose(director, game):
 def command_fire(target, player, weapon):
     """ Command function for player wants to fire fanged item """
     player.perform(actions.act_fire_ranged, player, weapon, target)
+
+
+def command_player_dead(game, director):
+    """ Command that is excutes if player dies """
+    game_logic.Game.log.clear()
+    director.game = None
+    del game
+    director.push_scene(game_view.SingleButtonMessageScene(message='Horrors of the Desert City got you.',
+                                                           title='You are dead.',
+                                                           button_text='Return to main menu',
+                                                           callback=
+                                                           lambda: command_return_to_main_menu(director),
+                                                           layout_options='intrinsic'))
+
+
+def command_return_to_main_menu(director):
+    """ Command that returns to main menu, closing all scenes
+        Actually, runs game anew
+    """
+    director.pop_to_first_scene()
+    terminal.clear()
+    director.main_game_scene = None
+    director.push_scene(game_view.MainMenuScene())
 
 
 def command_execute_debug_line(line, game, director):

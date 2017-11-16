@@ -70,6 +70,7 @@ n - uNload ranged weapon
 c - close door
 s - smash (melee attack inanimate object, i.e. wall)
 Esc - Save and exit"""
+
 character_bg_descriptions = [
     'Many adventurers are lured to the City - in search of treasures, power,' +
     ' glory or something else. You are among the others - jack of all trades,' +
@@ -92,6 +93,7 @@ character_bg_descriptions = [
     'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
     ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
     ' magic gift.']
+
 character_backgrounds = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
 #  /temporary shit
 
@@ -124,7 +126,9 @@ class GameLoop(DirectorLoop):
         return MainMenuScene()
 
     def loop_until_terminal_exits(self):
-        """ Loop changed, added sleep(), to prevent unnecessary high CPU load """
+        """ Loop changed, added sleep(), to prevent unnecessary high CPU load,
+            added player death check 
+        """
         try:
             has_run_one_loop = False
             current_time = time.time()
@@ -134,6 +138,13 @@ class GameLoop(DirectorLoop):
                     time.sleep(sleep_time)
                 self.last_frame_time = current_time
                 has_run_one_loop = True
+                if self.game:  # delete save if player dead and run death command
+                    if self.game.player.state == 'dead':
+                        try:
+                            os.remove('savegame')
+                        except FileNotFoundError:
+                            pass
+                        commands.command_player_dead(game=self.game, director=self)
             if not has_run_one_loop:
                 print(
                     "Exited after only one loop iteration. Did you forget to" +
