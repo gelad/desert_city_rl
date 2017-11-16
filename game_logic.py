@@ -261,7 +261,7 @@ class BattleEntity(Entity):
                             dmg_before_block = damage  # remember damage before block
                             # damage is damage passed through shield
                             damage = shield.block(damage=damage, dmg_type=dmg_type)
-                            if damage != dmg_before_block and isinstance(self, Player):  # TODO: move this elsewhere
+                            if damage != dmg_before_block and isinstance(self, Player):
                                 msg = 'Your ' + shield.name + ' blocks ' + str(dmg_before_block - damage) + ' damage.'
                                 Game.add_message(msg, 'PLAYER', [255, 255, 255])
             protection = self.get_protection(dmg_type)  # get (armor, block) tuple
