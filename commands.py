@@ -215,6 +215,17 @@ def command_fire(target, player, weapon):
     """ Command function for player wants to fire fanged item """
     player.perform(actions.act_fire_ranged, player, weapon, target)
 
+
+def command_execute_debug_line(line, game, director):
+    """ Executes single debug command line """
+    # unsafe, but will do for now
+    try:
+        eval(line, globals(), locals())
+    except:
+        game_logic.Game.add_message('Failed to execute line: ' + line, 'DEBUG', [255, 0, 0])
+        print('WARNING! Failed to execute debug line: ' + line)
+
+
 # def command_leave_loc(self):
 #         """ PLACEHOLDER method for moving to another loc """
 #

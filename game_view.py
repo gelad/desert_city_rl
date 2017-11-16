@@ -1174,6 +1174,9 @@ class MainGameScene(UIScene):
                                                                        top=0.1, bottom=0.1,
                                                                        left=0.2, right=0.2)))
                 handled = True
+            elif player_input == terminal.TK_F11:  # debug command exec
+                self.director.push_scene(DebugLineInputScene(game=game))
+                handled = True
             elif player_input == terminal.TK_L:  # look
                 self.state = 'looking'
                 self.title = 'LOOKING:'
@@ -1373,6 +1376,20 @@ class MainGameScene(UIScene):
         if handled:
             self.map_view.force_redraw = True  # to redraw map faster
         return handled
+
+
+class DebugLineInputScene(UIScene):
+    """ Scene that allows debug commands entering and execution """
+
+    def __init__(self, game, *args, **kwargs):
+        self.game = game
+        views = [SingleLineTextInputView(callback=self._execute, layout_options=LayoutOptions.row_top(5))]
+        super().__init__(views, *args, **kwargs)
+
+    def _execute(self, text):
+        director = self.director
+        self.director.pop_scene()
+        commands.command_execute_debug_line(line=text, game=self.game, director=director)
 
 
 # Views
