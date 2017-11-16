@@ -24,6 +24,7 @@ import sys
 import threading
 import os
 import textwrap
+import itertools
 from math import hypot, floor
 
 import game_logic
@@ -51,6 +52,24 @@ LOADING = """
 | |___| |__| / ____ \| |__| || |_| |\  | |__| |
 |______\____/_/    \_\_____/_____|_| \_|\_____|                                     
 """
+
+HELP_TEXT = """Movement: Arrow keys and Keypad 1-9 
+Keypad 5 - 'wait 1 turn' command
+F1 - display this help message
+i - show player inventory
+l - look around
+g - pick up item from Ground
+u - use item
+w - wield (equip) item
+t - throw item from hand
+f - fire ranged weapon
+r - reload 
+d - drop item
+o - take Off equipped item
+n - uNload ranged weapon
+c - close door
+s - smash (melee attack inanimate object, i.e. wall)
+Esc - Save and exit"""
 character_bg_descriptions = [
     'Many adventurers are lured to the City - in search of treasures, power,' +
     ' glory or something else. You are among the others - jack of all trades,' +
@@ -262,11 +281,21 @@ class SingleButtonMessageScene(UIScene):
         t_width = terminal.state(terminal.TK_WIDTH)
         t_height = terminal.state(terminal.TK_HEIGHT)
         aspect_ratio = (t_width / t_height)
+        # try increasing height and width while checking message text to fit
         for height in range(4, t_height):
+            # make width grow in accord with aspect ratio to get more wide window
             width = max((len(self.title), round(aspect_ratio * height)))
-            wrapped_text = textwrap.wrap(self.message, width)
+            wrapped_text = []
+            # simple wrap() won't do, because text with \n will get fucked up
+            for line in self.message.splitlines():
+                if line:
+                    if len(line) <= width:
+                        wrapped_text.append(line)
+                    else:
+                        wrapped_text.extend(textwrap.wrap(line, width))
             if len(wrapped_text) + 3 <= height:
-                return Size(width=width + 2, height=len(wrapped_text) + 4)
+                # returning width of most long text line - previous algorithm produces some excess width
+                return Size(width=len(max(wrapped_text, key=len)) + 2, height=len(wrapped_text) + 4)
         return Size(width=t_width - 2, height=t_height - 2)
 
     def _default_button_action(self):
@@ -1235,8 +1264,7 @@ class MainGameScene(UIScene):
                                                                        left=0.2, right=0.2)))
                 handled = True
             elif player_input == terminal.TK_F1:  # help message windows
-                self.director.push_scene(SingleButtonMessageScene(message='Test message\n'
-                                                                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur porta mattis turpis, non accumsan erat posuere non. Quisque facilisis ligula ut mattis finibus. Vivamus ut pharetra enim.',
+                self.director.push_scene(SingleButtonMessageScene(message=HELP_TEXT,
                                                                   title='Help',
                                                                   layout_options='intrinsic'))
                 handled = True
