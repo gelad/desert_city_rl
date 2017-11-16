@@ -81,9 +81,6 @@ def generate_loc(loc_type, settings, width, height):
                         room_min = 2
                         room_max = 5
                         building_settings = {'room_min': room_min, 'room_max': room_max}
-                    # TODO: think if 'cells' are needed in plan or not
-                    plot['cells'] = [[loc.cells[x][y] for y in range(plot_y, plot_y + grid_size)] for x
-                                                     in range(plot_x, plot_x + grid_size)]
                     floor_cells = []  # empty floor cells for item gen
                     building = subgen_building(building=build_type, build_w=build_w, build_h=build_h,
                                                settings=building_settings)

@@ -65,6 +65,7 @@ Rework building destruction at generation time. (DONE)
 Add road tile. (DONE)
 Rework loc generation with prefabs. (DONE)
 Added simple multi-room houses. (DONE)
+Moving to Clubsandwich (BearLibTerminal) (DONE)
 
 
 Add prefab_info store variant-specific layer numbers, to place additional entities for variant. ?? 9 layers max
