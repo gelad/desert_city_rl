@@ -81,3 +81,5 @@ BUG: attempted reload command after player death (player can perform actions aft
 Make 'give item' debug command.
 Separate abilities from entities in dataset section.
 Make Loading progress bar.
+Make road-specific buildings like carts, wagons, small shops etc.
+Make more big map features - squares, crossroads, etc.

@@ -192,7 +192,6 @@ def generate_small_features(loc, settings=None):
                                 loc.place_entity('wall_sandstone', x, y)
                             elif random.randrange(100) > 50:
                                 loc.place_entity('debris_large_sandstone', x, y)
-        # TODO: make more complex ruins and walls
         elif feat_type == "long_wall":
             direction = game_logic.weighted_choice([('horizontal', 50), ('vertical', 50)])
             if direction == 'vertical':
@@ -224,7 +223,6 @@ def generate_loc_plan(loc_type, settings):
     if loc_type == 'clear':
         pass
     elif loc_type == 'ruins':
-        # TODO: add more "big features" - squares, multi-plot buildings, etc
         roads = random.randrange(0, 3)  # 0 to 3 roads on ruins location
         # simple road generation
         for n in range(roads):
@@ -257,7 +255,6 @@ def generate_loc_plan(loc_type, settings):
                     if build_type is not None:
                         plan[x][y]['structure'] = 'building'
                         plan[x][y]['build_type'] = build_type
-                # TODO: make road-specific buildings like carts, wagons, small shops etc
     return plan
 
 
@@ -394,7 +391,7 @@ def subgen_multiroom_fit_room(build_w, build_h, pattern, candidate):
                 break
     if not intersect:  # if no intersection - place the room
         subgen_multiroom_place_room(x1=x1, y1=y1, x2=x2, y2=y2, pattern=pattern)
-        pattern[c_x][c_y] = 'door'  # TODO: move door making to room placement code
+        pattern[c_x][c_y] = 'door'  # make a door at the room intersection point
         placed = {'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2}
     return placed
 
