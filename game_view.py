@@ -74,8 +74,6 @@ character_bg_descriptions = [
     ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
     ' magic gift.']
 character_backgrounds = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
-
-
 #  /temporary shit
 
 
@@ -212,6 +210,44 @@ class CharacterSelectScene(UIScene):
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
         self.director.game = game
+
+# Dialogue and message scenes
+
+
+class SingleButtonMessageScene(UIScene):
+    """ A simple message with single button that closes it """
+    def __init__(self, message, title='', button_text='OK.', close_on_esc=True,
+                 callback=None, layout_options=None, *args, **kwargs):
+        self.message = message
+        self.close_on_esc = close_on_esc
+        if not callback:
+            callback = self._default_button_action
+        views = [WindowView(title=title, layout_options=layout_options, subviews=
+                            [LabelViewFixed(text=message, align_vert='left', align_horz='top',
+                                            layout_options=LayoutOptions(top=0,
+                                                                         left=0)),
+                             ButtonViewFixed(text=button_text, callback=callback,
+                                             layout_options=LayoutOptions(bottom=0,
+                                                                          left=0,
+                                                                          width='intrinsic',
+                                                                          height='intrinsic',
+                                                                          right=None,
+                                                                          top=None))])]
+        super().__init__(views, *args, **kwargs)
+
+    def terminal_read(self, val):
+        """ Handles input """
+        super().terminal_read(val)
+        if val == terminal.TK_ESCAPE and self.close_on_esc:
+            self.director.pop_scene()
+            return True
+        elif val == terminal.TK_RESIZED:
+            pass  # TODO: make resize method
+        return False
+
+    def _default_button_action(self):
+        """ Default action when button is pressed - pop this scene """
+        self.director.pop_scene()
 
 
 # List menu scenes
@@ -1173,6 +1209,14 @@ class MainGameScene(UIScene):
                                                                    layout_options=LayoutOptions(
                                                                        top=0.1, bottom=0.1,
                                                                        left=0.2, right=0.2)))
+                handled = True
+            elif player_input == terminal.TK_F1:  # help message windows
+                self.director.push_scene(SingleButtonMessageScene(message='Test message\n'
+                                                                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur porta mattis turpis, non accumsan erat posuere non. Quisque facilisis ligula ut mattis finibus. Vivamus ut pharetra enim.',
+                                                                  title='Help',
+                                                                  layout_options=LayoutOptions(
+                                                                       top=0.3, bottom=0.3,
+                                                                       left=0.3, right=0.3)))
                 handled = True
             elif player_input == terminal.TK_F11:  # debug command exec
                 self.director.push_scene(DebugLineInputScene(game=game))
