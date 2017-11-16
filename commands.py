@@ -219,6 +219,10 @@ def command_fire(target, player, weapon):
 def command_execute_debug_line(line, game, director):
     """ Executes single debug command line """
     # unsafe, but will do for now
+    player = game.player
+    loc = game.current_loc
+    x = game.player.position[0]
+    y = game.player.position[1]
     try:
         eval(line, globals(), locals())
     except:
