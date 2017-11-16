@@ -512,7 +512,6 @@ def get_random_prefab_variant(prefab_info, settings=None):
 
 def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, build_w, build_h, settings=None):
     """ Function, that fills prefab with tiles and pre-defined Entites (such as walls, windows, doors) """
-    cell_groups = {}  # empty floor cells for item and mob generation
     prefabs = []  # list of sub-prefabs, if any. Placed after all other entities
     for x in range(build_w):
         for y in range(build_h):
@@ -604,7 +603,11 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                 del pr_set['destruct']
         pr_name = pr_str[pr_str.find('NAME:') + 5:]
         place_prefab(name=pr_name, loc=loc, plot_x=loc_cell_x + offset_x, plot_y=loc_cell_y + offset_y, settings=pr_set)
-    # make cell groups, according to prefab # TODO: Move cell groups creation to separate function
+
+
+def create_cell_groups(build_h, build_w, build_x, build_y, loc, prefab):
+    """ Creates cell groups for object placement """
+    cell_groups = {}  # empty floor cells for item and mob generation
     for x in range(build_w):
         for y in range(build_h):
             loc_cell_x = x + build_x  # location cell coords - for blocked check
@@ -615,8 +618,6 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                     cell_groups[cell_group_char].add((loc_cell_x, loc_cell_y))  # add cell to group
                 else:  # if not - create new group with 1 cell
                     cell_groups.update({cell_group_char: {(loc_cell_x, loc_cell_y)}})
-    if len(cell_groups) == 0:
-        pass
     return cell_groups
 
 
@@ -692,8 +693,10 @@ def place_prefab(name, loc, plot_x, plot_y, plot_size=0, settings=None):
                 prefab['layer_data'][l]['cells'] = list(zip(*cells[::-1]))
             i += 1
     # actual pre-defined entities and tiles placing
-    cell_groups = fill_prefab(loc=loc, prefab=prefab, prefab_info=prefab_info, prefab_variant=prefab_variant,
-                              build_x=build_x, build_y=build_y, build_w=build_w, build_h=build_h, settings=settings)
+    fill_prefab(loc=loc, prefab=prefab, prefab_info=prefab_info, prefab_variant=prefab_variant,
+                build_x=build_x, build_y=build_y, build_w=build_w, build_h=build_h, settings=settings)
+    cell_groups = create_cell_groups(build_h=build_h, build_w=build_w, build_x=build_x, build_y=build_y,
+                                     loc=loc, prefab=prefab)
     if 'destruct' in settings:  # prefab destruction according to settings
         destruct(loc=loc, start_x=build_x, start_y=build_y, width=build_w, height=build_h,
                  settings=settings['destruct'])
