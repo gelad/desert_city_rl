@@ -1461,11 +1461,16 @@ class MapView(View):
                 # if camera is not centered on player - draw there a red 'X'
                 ctx.color(terminal.color_from_argb(255, 255, 0, 0))
                 ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                # draw blank space with bkcolor (big chars bug?)
-                if self.bounds.width % 2 != 0:  # check if width is odd and apply correction
-                    sub_x = 1
-                else:
+                # some magic - center of the map coordinates correction
+                sub_x = 0
+                magic = self.bounds.width % 4
+                # check width divided by 4 and apply correction
+                if magic == 1:
                     sub_x = 0
+                elif magic == 2:
+                    sub_x = 1
+                elif magic == 3:
+                    sub_x = 1
                 terminal.printf(self.layout_options.left + self.bounds.width // 2 - sub_x + 1,
                                 self.layout_options.top + self.bounds.height // 2, ' ')
                 terminal.printf(self.layout_options.left + self.bounds.width // 2 - sub_x,
