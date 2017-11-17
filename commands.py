@@ -96,21 +96,21 @@ def command_use_item(game, item, main_scene):
         elif item.properties['usable'] == 'point':  # if item usable on point
             main_scene.start_targeting(range=item.properties['range'],
                                        t_object=item,
-                                       eligible_types=('point'),
+                                       eligible_types=['point'],
                                        callback=command_use_item,
                                        player=player,
                                        item=item)
         elif item.properties['usable'] == 'battle_entity':  # if item usable on battle entity
             main_scene.start_targeting(range=item.properties['range'],
                                        t_object=item,
-                                       eligible_types=(game_logic.BattleEntity),
+                                       eligible_types=[game_logic.BattleEntity],
                                        callback=command_use_item_on_target,
                                        player=player,
                                        item=item)
         elif item.properties['usable'] == 'battle_entity_or_point':  # if item usable on battle entity or point
             main_scene.start_targeting(range=item.properties['range'],
                                        t_object=item,
-                                       eligible_types=(game_logic.BattleEntity, 'point'),
+                                       eligible_types=[game_logic.BattleEntity, 'point'],
                                        callback=command_use_item_on_target,
                                        player=player,
                                        item=item)

@@ -180,6 +180,7 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
 
             # if pathfinding takes too long - no path
             if time.time() - start_time > 0.1:  # TODO: A crutch! Need to make better pathfinding.
+                print('Warning! pathfinding failed - exceeded time limit.')
                 return None, []
 
             closed_set.add(current)
