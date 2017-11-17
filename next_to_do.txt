@@ -66,10 +66,11 @@ Add road tile. (DONE)
 Rework loc generation with prefabs. (DONE)
 Added simple multi-room houses. (DONE)
 Moving to Clubsandwich (BearLibTerminal) (DONE)
+Make some fences, paths and roads on map. (DONE)
 
-
+Make entity in range/rect search method in location.
+Make simple trading/sleeping base between raids.
 Add prefab_info store variant-specific layer numbers, to place additional entities for variant. ?? 9 layers max
-Make some fences, paths and roads on map.
 BUG: explosive potion vanishes if taken off after throw (when has > 1 charge)
 BUG: poison stops working if move to another location.
 BUG: too long delay before throwing item.
