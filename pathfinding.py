@@ -25,6 +25,7 @@ the cost exceeded the specified maximum
 """
 
 import math
+import time
 from heapq import *
 
 
@@ -157,7 +158,8 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
         translated almost directly into python.
         http://en.wikipedia.org/wiki/A*_search_algorithm
         """
-        # max_cost=50
+        # max_cost=100
+        start_time = time.time()
         oheap = []
         closed_set = set()
         came_from = {}
@@ -175,6 +177,10 @@ def pathfinder(neighbors=grid_neighbors(100, 100),
 
             if current == end:
                 return g_score[current], reconstruct_path(came_from, end)
+
+            # if pathfinding takes too long - no path
+            if time.time() - start_time > 0.1:  # TODO: A crutch! Need to make better pathfinding.
+                return None, []
 
             closed_set.add(current)
             for neighbor in neighbors(current):

@@ -19,6 +19,17 @@ import threading
 from math import hypot
 from math import ceil
 
+#import cProfile
+
+
+# class ProfiledThread(threading.Thread):
+#     # Overrides threading.Thread.run()
+#     def run(self):
+#         profiler = cProfile.Profile()
+#         try:
+#             return profiler.runcall(threading.Thread.run, self)
+#         finally:
+#             profiler.dump_stats('myprofile-%d.profile' % (self.ident,))
 
 class Cell:
     """
@@ -1865,6 +1876,7 @@ class Game:
         # Also, removed situations, when long keypresses result in multiple moves at once instead of one-by-one
         if self.loop_is_running:
             return  # if loop is already running - don't run another one
+        # t = ProfiledThread(target=self._main_loop)
         t = threading.Thread(target=self._main_loop)
         t.start()
 
