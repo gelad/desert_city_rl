@@ -333,7 +333,9 @@ class MultiButtonMessageScene(UIScene):
         button_offset = 0
         max_l = 0
         self.longest_text = ''
-        for button in -buttons:  # revert list to start adding buttons from end
+        self.text_view = LabelViewFixed(text='', align_vert='left', align_horz='top',
+                                        layout_options=LayoutOptions(top=0, left=0))
+        for button in buttons:
             caption, text, callback = button
             if len(text) > max_l:
                 max_l = len(text)
@@ -341,7 +343,8 @@ class MultiButtonMessageScene(UIScene):
             if not callback:
                 callback = self._default_button_action
             b = ButtonViewFixed(text=caption, callback=callback,
-                                layout_options=LayoutOptions(bottom=button_offset,
+                                callback_selected=lambda: self.text_view.set_text(text),
+                                layout_options=LayoutOptions(bottom=len(buttons) - button_offset,
                                                              left=0,
                                                              width='intrinsic',
                                                              height='intrinsic',
@@ -349,8 +352,7 @@ class MultiButtonMessageScene(UIScene):
                                                              top=None))
             subviews.append(b)
             button_offset += 1
-        subviews = [LabelViewFixed(text='', align_vert='left', align_horz='top',
-                                   layout_options=LayoutOptions(top=0, left=0))] + subviews
+        subviews = [self.text_view] + subviews
         if layout_options == 'intrinsic':
             size = self._calculate_size()
             layout_options = LayoutOptions(width=size.width,
@@ -381,7 +383,7 @@ class MultiButtonMessageScene(UIScene):
         t_height = terminal.state(terminal.TK_HEIGHT)
         aspect_ratio = (t_width / t_height)
         # try increasing height and width while checking message text to fit
-        for height in range(4, t_height):
+        for height in range(len(self.buttons) + 3, t_height):
             # make width grow in accord with aspect ratio to get more wide window
             width = max((len(self.title), round(aspect_ratio * height)))
             wrapped_text = []
@@ -392,10 +394,10 @@ class MultiButtonMessageScene(UIScene):
                         wrapped_text.append(line)
                     else:
                         wrapped_text.extend(textwrap.wrap(line, width))
-            if len(wrapped_text) + 3 <= height:
+            if len(wrapped_text) + len(self.buttons) + 2 <= height:
                 # returning width of most long text line - previous algorithm produces some excess width
-                return Size(width=len(max(wrapped_text, key=len)) + 2, height=len(wrapped_text) + 4)
-        return Size(width=t_width - 2, height=t_height - 2)
+                return Size(width=len(max(wrapped_text, key=len)) + 2, height=len(wrapped_text) + len(self.buttons) + 3)
+        return Size(width=t_width - 2, height=t_height - 2)  # if cannot auto size properly - full window
 
     def _default_button_action(self):
         """ Default action when button is pressed - pop this scene """
@@ -1279,8 +1281,12 @@ class MainGameScene(UIScene):
         player = game.player
         handled = False  # input handled flag
         if game.is_waiting_input:
-            if player_input == terminal.TK_ESCAPE:  # game quit on ESC - will be y/n prompt in the future
-                self.director.quit()
+            if player_input == terminal.TK_ESCAPE:  # game quit on ESC
+                text = 'Do you really want to quit?'
+                self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda:self.director.quit),
+                                                                          ('No', text, None)],
+                                                                 title='Confirm exit',
+                                                                 layout_options='intrinsic'))
                 handled = True
             # movement commands
             elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):

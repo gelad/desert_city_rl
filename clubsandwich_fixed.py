@@ -41,6 +41,12 @@ class LabelViewFixed(View):
         width, height = terminal.measure(self.text)
         return Size(width, height)
 
+    def set_text(self, text):
+        """ Method that sets text and raises size change flag """
+        self.text = text
+        if self.superview:
+            self.superview.set_needs_layout(True)
+
     def draw(self, ctx):
         ctx.color(self.color_fg)
         ctx.bkcolor(self.color_bg or '#000000')
