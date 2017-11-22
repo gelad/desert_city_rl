@@ -314,6 +314,94 @@ class SingleButtonMessageScene(UIScene):
         self.director.pop_scene()
 
 
+class MultiButtonMessageScene(UIScene):
+    """ A message with multiple buttons """
+    def __init__(self, buttons, title='', close_on_esc=True, layout_options=None, *args, **kwargs):
+        """
+        :param buttons: a list of tuples (caption, text, callback)
+        :param title: string with window caption
+        :param close_on_esc: bool, shall window close on ESC button hit?
+        :param layout_options: LayoutOptions() object or 'intrinsic' string for auto size
+        :param args: other possible UIScene args
+        :param kwargs: other possible UIScene args
+        """
+
+        self.buttons = buttons
+        self.title = title
+        self.close_on_esc = close_on_esc
+        subviews = []
+        button_offset = 0
+        max_l = 0
+        self.longest_text = ''
+        for button in -buttons:  # revert list to start adding buttons from end
+            caption, text, callback = button
+            if len(text) > max_l:
+                max_l = len(text)
+                self.longest_text = text
+            if not callback:
+                callback = self._default_button_action
+            b = ButtonViewFixed(text=caption, callback=callback,
+                                layout_options=LayoutOptions(bottom=button_offset,
+                                                             left=0,
+                                                             width='intrinsic',
+                                                             height='intrinsic',
+                                                             right=None,
+                                                             top=None))
+            subviews.append(b)
+            button_offset += 1
+        subviews = [LabelViewFixed(text='', align_vert='left', align_horz='top',
+                                   layout_options=LayoutOptions(top=0, left=0))] + subviews
+        if layout_options == 'intrinsic':
+            size = self._calculate_size()
+            layout_options = LayoutOptions(width=size.width,
+                                           height=size.height,
+                                           top=None, bottom=None,
+                                           left=None, right=None)
+        self.window_view = WindowView(title=title, layout_options=layout_options, subviews=subviews)
+        views = [self.window_view]
+        super().__init__(views, *args, **kwargs)
+
+    def terminal_read(self, val):
+        """ Handles input """
+        super().terminal_read(val)
+        if val == terminal.TK_ESCAPE and self.close_on_esc:
+            self.director.pop_scene()
+            return True
+        elif val == terminal.TK_RESIZED:
+            new_size = self._calculate_size()
+            self.window_view.layout_options = LayoutOptions(width=new_size.width, height=new_size.height,
+                                                            top=None, bottom=None,
+                                                            left=None, right=None)
+            self.window_view.set_needs_layout(True)
+        return False
+
+    def _calculate_size(self):
+        """ Method for autosize """
+        t_width = terminal.state(terminal.TK_WIDTH)
+        t_height = terminal.state(terminal.TK_HEIGHT)
+        aspect_ratio = (t_width / t_height)
+        # try increasing height and width while checking message text to fit
+        for height in range(4, t_height):
+            # make width grow in accord with aspect ratio to get more wide window
+            width = max((len(self.title), round(aspect_ratio * height)))
+            wrapped_text = []
+            # simple wrap() won't do, because text with \n will get fucked up
+            for line in self.longest_text.splitlines():
+                if line:
+                    if len(line) <= width:
+                        wrapped_text.append(line)
+                    else:
+                        wrapped_text.extend(textwrap.wrap(line, width))
+            if len(wrapped_text) + 3 <= height:
+                # returning width of most long text line - previous algorithm produces some excess width
+                return Size(width=len(max(wrapped_text, key=len)) + 2, height=len(wrapped_text) + 4)
+        return Size(width=t_width - 2, height=t_height - 2)
+
+    def _default_button_action(self):
+        """ Default action when button is pressed - pop this scene """
+        self.director.pop_scene()
+
+
 # List menu scenes
 
 
@@ -1137,6 +1225,12 @@ class MainGameScene(UIScene):
             self.money.text = 'Money: ' + str(money) + ' coins.'
             filled_lines = 0
             buffs_line = ''
+            if player.carried_weight > player.properties['max_carry_weight'] * 1.5:
+                buffs_line += '[color=red]OVERBURDENED[color=dark white]══[/color]'
+                filled_lines += 1
+            elif player.carried_weight > player.properties['max_carry_weight']:
+                buffs_line += '[color=yellow]BURDENED[color=dark white]══[/color]'
+                filled_lines += 1
             for effect in self.game.player.effects:
                 if filled_lines < 6:
                     if effect.eff == 'POISONED':
