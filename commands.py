@@ -32,9 +32,8 @@ def command_default_direction(game, dx, dy):
                 player.perform(actions.act_attack_melee_weapons, player, enemy)  # attack it in melee with weapon
             else:
                 player.perform(actions.act_attack_melee_basic, player, enemy)  # attack it in melee with hands
-    else:  # TODO: PLACEHOLDER - moving to another level
-        pass
-        #command_ask_leave_loc(game)
+    else:  # if desired cell is out of bounds - ask player if he wants to leave this location
+        command_ask_leave_loc(game)
 
 
 def command_close_direction(player, dx, dy):
@@ -260,13 +259,37 @@ def command_execute_debug_line(line, game):
 
 
 def command_ask_leave_loc(game):
-    """ Function that prompts player before actually leaving location """
-    pass
+    """
+    Function that prompts player before actually leaving location
+    :param game: a Game object
+    """
+    director = game_view.GameLoop.active_director
+    flee = False
+    text = 'Do you really want to leave this location?'
+    for point in game_logic.circle_points(r=25, include_center=False):  # check for an enemy near player
+        x = point[0] + game.player.position[0]
+        y = point[1] + game.player.position[1]
+        if game.current_loc.is_in_boundaries(x, y):
+            if game.current_loc.cells[x][y].is_there_a(game_logic.Fighter):
+                flee = True  # if there are an enemy - set flee flag on
+                text += '\nWARNING: There are enemies nearby! If you choose to leave now, you will be chased, and'
+                text += ' probably lose some items while fleeing.'
+                break
+    director.push_scene(game_view.MultiButtonMessageScene(buttons=[('Yes, head back to the camp.', text,
+                                                            lambda g=game, f=flee: command_leave_loc(game=g, flee=f)),
+                                                                   ('No, stay here.', text, None)],
+                                                          title='Leaving location',
+                                                          layout_options='intrinsic'))
 
 
 def command_leave_loc(game, flee=False):
-    """ Function to execute when player wants to leave location """
+    """
+    Function to execute when player wants to leave location
+    :param game: a Game object
+    :param flee: flee flag - if fleeing, some penalties take place
+    """
     director = game_view.GameLoop.active_director
+
 
 # def command_leave_loc(self):
 #         """ PLACEHOLDER method for moving to another loc """
