@@ -101,10 +101,13 @@ character_backgrounds = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic see
 class GameLoop(DirectorLoop):
     """ GameLoop class """
 
+    active_director = None
+
     def __init__(self):
         self.last_frame_time = time.time()
         self.game = None  # reference to Game object - to save it if closed
         self.main_game_scene = None  # reference to Main Game Scene
+        GameLoop.active_director = self  # assign self to global director
         super().__init__()
 
     def terminal_init(self):
@@ -120,6 +123,7 @@ class GameLoop(DirectorLoop):
                     os.remove('savegame')
                 except FileNotFoundError:
                     pass
+        GameLoop.active_director = None
         super().quit()
 
     def get_initial_scene(self):
@@ -144,7 +148,7 @@ class GameLoop(DirectorLoop):
                             os.remove('savegame')
                         except FileNotFoundError:
                             pass
-                        commands.command_player_dead(game=self.game, director=self)
+                        commands.command_player_dead(game=self.game)
             if not has_run_one_loop:
                 print(
                     "Exited after only one loop iteration. Did you forget to" +
@@ -794,7 +798,7 @@ class ItemManipulationSelectionScene(UIScene):
     def _reload(self):
         director = self.director
         self.option_activated()
-        commands.command_reload(director=director, game=self.game, item=self.item)
+        commands.command_reload(game=self.game, item=self.item)
 
     def _unload(self):
         pass
@@ -1327,10 +1331,10 @@ class MainGameScene(UIScene):
                     game.show_debug_log = True
                 handled = True
             elif player_input == terminal.TK_G:  # pick up item
-                commands.command_pick_up(director=self.director, game=game, dx=0, dy=0)
+                commands.command_pick_up(game=game, dx=0, dy=0)
                 handled = True
             elif player_input == terminal.TK_R:  # reload ranged weapon
-                commands.command_reload_equipped(director=self.director, game=game)
+                commands.command_reload_equipped(game=game)
                 handled = True
             elif player_input == terminal.TK_N:  # uNload ranged weapon
                 for item in player.equipment.values():  # unload every equipped item
@@ -1405,7 +1409,7 @@ class MainGameScene(UIScene):
                 commands.command_throw_choose(game=self.game, main_scene=self)
                 handled = True
             elif player_input == terminal.TK_F:  # fire ranged weapon
-                commands.command_fire_choose(director=self.director, game=self.game)
+                commands.command_fire_choose(game=self.game)
                 handled = True
             if handled:
                 game.start_update_thread()
@@ -1598,7 +1602,7 @@ class DebugLineInputScene(UIScene):
     def _execute(self, text):
         director = self.director
         self.director.pop_scene()
-        commands.command_execute_debug_line(line=text, game=self.game, director=director)
+        commands.command_execute_debug_line(line=text, game=self.game)
 
 
 # Views

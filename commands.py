@@ -34,10 +34,7 @@ def command_default_direction(game, dx, dy):
                 player.perform(actions.act_attack_melee_basic, player, enemy)  # attack it in melee with hands
     else:  # TODO: PLACEHOLDER - moving to another level
         pass
-        # if not leave:
-        #     return
-        # if leave[1] == 1:  # if yes - leave location
-        #     self.command_leave_loc()
+        #command_ask_leave_loc(game)
 
 
 def command_close_direction(player, dx, dy):
@@ -66,8 +63,9 @@ def command_smash_direction(player, dx, dy):
                     player.perform(actions.act_attack_melee_basic, player, be)  # attack it in melee with hands
 
 
-def command_pick_up(director, game, dx, dy):
+def command_pick_up(game, dx, dy):
     """ Command function for player wants to pick up some items  """
+    director = game_view.GameLoop.active_director
     player = game.player
     loc = game.current_loc
     x = player.position[0] + dx
@@ -154,15 +152,17 @@ def command_throw(target, player, item):
     player.perform(actions.act_throw, player, item, target)
 
 
-def command_reload_equipped(director, game):
-        """ Command function for player wants to reload ranged weapon (in hands)  """
-        for item in game.player.equipment.values():  # iterate through player equipment
-            if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
-                command_reload(director=director, game=game, item=item)
+def command_reload_equipped(game):
+    """ Command function for player wants to reload ranged weapon (in hands)  """
+    director = game_view.GameLoop.active_director
+    for item in game.player.equipment.values():  # iterate through player equipment
+        if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
+            command_reload(game=game, item=item)
 
 
-def command_reload(director, game, item):
+def command_reload(game, item):
     """ Command function for player wants to reload specific ranged weapon """
+    director = game_view.GameLoop.active_director
     if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
         if len(item.ammo) < item.ammo_max:  # check if it is loaded
             # select appropriate ammo items
@@ -186,31 +186,32 @@ def command_reload(director, game, item):
             game_logic.Game.add_message(item.name + ' is fully loaded.', 'PLAYER', [255, 255, 255])
 
 
-def command_fire_choose(director, game):
-        """ Command function for player wants to fire ranged weapon - choose target """
-        ranged_weapons = [w for w in list(game.player.equipment.values()) if
-                          isinstance(w, game_logic.ItemRangedWeapon)]  # pick ranged weapons in equipment
-        if ranged_weapons:  # check if there are any
-            if len(ranged_weapons) == 1:  # if one
-                if len(ranged_weapons[0].ammo) > 0:  # if it has ammo loaded
-                    director.main_game_scene.start_targeting(range=ranged_weapons[0].range,
-                                                             t_object=ranged_weapons[0],
-                                                             eligible_types=(game_logic.BattleEntity, 'point'),
-                                                             callback=command_fire,
-                                                             player=game.player,
-                                                             weapon=ranged_weapons[0])
-                else:
-                    game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
-                                                'PLAYER', [255, 255, 255])
-            else:  # if multiple ranged equipped
-                director.push_scene(game_view.FireItemSelectionScene(items=ranged_weapons,
-                                                                     game=game,
-                                                                     caption='Fire weapon:',
-                                                                     layout_options=LayoutOptions(
-                                                                        top=0.30, bottom=0.30,
-                                                                        left=0.30, right=0.30)))
-        else:
-            game_logic.Game.add_message('Equip ranged weapon to fire.', 'PLAYER', [255, 255, 255])
+def command_fire_choose(game):
+    """ Command function for player wants to fire ranged weapon - choose target """
+    director = game_view.GameLoop.active_director
+    ranged_weapons = [w for w in list(game.player.equipment.values()) if
+                      isinstance(w, game_logic.ItemRangedWeapon)]  # pick ranged weapons in equipment
+    if ranged_weapons:  # check if there are any
+        if len(ranged_weapons) == 1:  # if one
+            if len(ranged_weapons[0].ammo) > 0:  # if it has ammo loaded
+                director.main_game_scene.start_targeting(range=ranged_weapons[0].range,
+                                                         t_object=ranged_weapons[0],
+                                                         eligible_types=(game_logic.BattleEntity, 'point'),
+                                                         callback=command_fire,
+                                                         player=game.player,
+                                                         weapon=ranged_weapons[0])
+            else:
+                game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
+                                            'PLAYER', [255, 255, 255])
+        else:  # if multiple ranged equipped
+            director.push_scene(game_view.FireItemSelectionScene(items=ranged_weapons,
+                                                                 game=game,
+                                                                 caption='Fire weapon:',
+                                                                 layout_options=LayoutOptions(
+                                                                     top=0.30, bottom=0.30,
+                                                                     left=0.30, right=0.30)))
+    else:
+        game_logic.Game.add_message('Equip ranged weapon to fire.', 'PLAYER', [255, 255, 255])
 
 
 def command_fire(target, player, weapon):
@@ -218,32 +219,35 @@ def command_fire(target, player, weapon):
     player.perform(actions.act_fire_ranged, player, weapon, target)
 
 
-def command_player_dead(game, director):
+def command_player_dead(game):
     """ Command that is excutes if player dies """
     game_logic.Game.log.clear()
+    director = game_view.GameLoop.active_director
     director.game = None
     del game
     director.push_scene(game_view.SingleButtonMessageScene(message='Horrors of the Desert City got you.',
                                                            title='You are dead.',
                                                            button_text='Return to main menu',
                                                            callback=
-                                                           lambda: command_return_to_main_menu(director),
+                                                           lambda: command_return_to_main_menu(),
                                                            layout_options='intrinsic'))
 
 
-def command_return_to_main_menu(director):
+def command_return_to_main_menu():
     """ Command that returns to main menu, closing all scenes
         Actually, runs game anew
     """
+    director = game_view.GameLoop.active_director
     director.pop_to_first_scene()
     terminal.clear()
     director.main_game_scene = None
     director.push_scene(game_view.MainMenuScene())
 
 
-def command_execute_debug_line(line, game, director):
+def command_execute_debug_line(line, game):
     """ Executes single debug command line """
     # unsafe, but will do for now
+    director = game_view.GameLoop.active_director
     player = game.player
     loc = game.current_loc
     x = game.player.position[0]
@@ -254,6 +258,15 @@ def command_execute_debug_line(line, game, director):
         game_logic.Game.add_message('Failed to execute line: ' + line, 'DEBUG', [255, 0, 0])
         print('WARNING! Failed to execute debug line: ' + line)
 
+
+def command_ask_leave_loc(game):
+    """ Function that prompts player before actually leaving location """
+    pass
+
+
+def command_leave_loc(game, flee=False):
+    """ Function to execute when player wants to leave location """
+    director = game_view.GameLoop.active_director
 
 # def command_leave_loc(self):
 #         """ PLACEHOLDER method for moving to another loc """
