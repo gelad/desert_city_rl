@@ -1912,7 +1912,22 @@ class Game:
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23, damage=1,
                              categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
-        self.current_loc.place_entity(self.player, 0, 0)
+        start_x, start_y = 0, 0
+        for i in range(100):  # look for acceptable random position
+            x = random.randrange(self.current_loc.width // 4, self.current_loc.width // 4 * 3)
+            y = random.randrange(self.current_loc.height // 4, self.current_loc.height // 4 * 3)
+            if self.current_loc.cells[x][y].is_movement_allowed:
+                enemies_near = False
+                for point in circle_points(r=20, include_center=False):  # check for an enemy near player
+                    p_x = point[0] + x
+                    p_y = point[1] + y
+                    if self.current_loc.cells[p_x][p_y].is_there_a(Fighter):
+                        enemies_near = True
+                        break
+                if not enemies_near:
+                    start_x, start_y = x, y
+                    break
+        self.current_loc.place_entity(self.player, start_x, start_y)
         # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
         # self.current_loc.place_entity('mob_frost_wisp', 20, 20)
         self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
