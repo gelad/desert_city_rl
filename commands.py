@@ -2,7 +2,10 @@
 import actions
 import game_logic
 import game_view
+import generation
 import save_load
+
+import random
 
 from clubsandwich.ui import LayoutOptions
 from bearlibterminal import terminal
@@ -289,7 +292,86 @@ def command_leave_loc(game, flee=False):
     :param flee: flee flag - if fleeing, some penalties take place
     """
     director = game_view.GameLoop.active_director
+    old_loc = game.current_loc
+    player = game.player
+    raid_report_text = ''
+    # fleeing report section
+    if flee:  # check if player is fleeing from enemies
+        lost_items = []
+        for item in player.inventory:
+            if game_logic.weighted_choice([(True, 50), (False, 50)]):  # lose some inventory items
+                lost_items.append(item)
+                player.discard_item(item=item)
+        for item in [sl for sl in list(player.equipment.values()) if sl]:  # lose some equipped items
+            if game_logic.weighted_choice([(True, 25), (False, 75)]):
+                lost_items.append(item)
+                player.unequip_item(item=item)
+                player.discard_item(item=item)
+        if len(lost_items) > 0:
+            raid_report_text += 'You fled from the enemies, but lost some items in the process:\n'
+            for item in lost_items:
+                raid_report_text += str(item) + ', '
+                del item
+            raid_report_text[-2:] = '.\n'
+        else:
+            raid_report_text += 'You fled from the enemies and kept all of your items. Lucky!\n'
+    # treasures report section
+    treasures = {}
+    for item in player.inventory:
+        if 'relic' in item.categories:  # if there'll be other types of treasure - add here
+            if isinstance(item, game_logic.ItemCharges):
+                count = item.charges
+            else:
+                count = 1
+            if item.name in treasures:
+                treasures[item.name][0] += count
+            else:
+                treasures[item.name] = [count, item.properties['value']]
+    if len(treasures) > 0:
+        raid_report_text += 'You obtained some treasures:\n\n'
+        total = 0
+        for tr in treasures.keys():
+            raid_report_text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
+                    + str(treasures[tr][0] * treasures[tr][1]) + '\n'
+            total += treasures[tr][0] * treasures[tr][1]
+            raid_report_text += '\nTotal treasures value: ' + str(total) + ' coins.'
+        else:
+            raid_report_text += 'You escaped the City with nothing of value in your pockets.'+\
+                                ' At least you managed to stay alive.\n'
+    # actual leaving location section
+    # TODO: location transition needs testing (eliminate leftovers, don't lose anything)
+    player.location.remove_entity(player)
+    player.effects.clear()  # simply clear list for now. Needs testing
+    game.remove_location(old_loc)
+    # PLACEHOLDER - just transfer player to another ruins for now
+    command_enter_loc(game=game, new_loc=generation.generate_loc('ruins', None, 200, 200))
 
+
+def command_enter_loc(game, new_loc):
+    """
+    :param game: a Game object
+    :param new_loc: Location object, to which transfer the player
+    """
+    game.current_loc = new_loc
+    game.add_location(game.current_loc)
+    start_x, start_y = 0, 0
+    for i in range(100):  # look for acceptable random position
+        x = random.randrange(new_loc.width // 4, new_loc.width // 4 * 3)
+        y = random.randrange(new_loc.height // 4, new_loc.height // 4 * 3)
+        if new_loc.cells[x][y].is_movement_allowed:
+            enemies_near = False
+            for point in game_logic.circle_points(r=20, include_center=False):  # check for an enemy near player
+                p_x = point[0] + x
+                p_y = point[1] + y
+                if game.current_loc.cells[p_x][p_y].is_there_a(game_logic.Fighter):
+                    enemies_near = True
+                    break
+            if not enemies_near:
+                start_x, start_y = x, y
+                break
+    game.current_loc.place_entity(game.player, start_x, start_y)
+    game.current_loc.actors.remove(game.player)  # A hack, to make player act first if acting in one tick
+    game.current_loc.actors.insert(0, game.player)
 
 # def command_leave_loc(self):
 #         """ PLACEHOLDER method for moving to another loc """
