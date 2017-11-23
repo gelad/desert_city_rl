@@ -337,13 +337,14 @@ class MultiButtonMessageScene(UIScene):
                                         layout_options=LayoutOptions(top=0, left=0))
         for button in buttons:
             caption, text, callback = button
+            button_offset += 1
             if len(text) > max_l:
                 max_l = len(text)
                 self.longest_text = text
             if not callback:
                 callback = self._default_button_action
             b = ButtonViewFixed(text=caption, callback=callback,
-                                callback_selected=lambda: self.text_view.set_text(text),
+                                callback_selected=lambda txt=text: self.text_view.set_text(txt),
                                 layout_options=LayoutOptions(bottom=len(buttons) - button_offset,
                                                              left=0,
                                                              width='intrinsic',
@@ -351,7 +352,6 @@ class MultiButtonMessageScene(UIScene):
                                                              right=None,
                                                              top=None))
             subviews.append(b)
-            button_offset += 1
         subviews = [self.text_view] + subviews
         if layout_options == 'intrinsic':
             size = self._calculate_size()
@@ -369,6 +369,10 @@ class MultiButtonMessageScene(UIScene):
         if val == terminal.TK_ESCAPE and self.close_on_esc:
             self.director.pop_scene()
             return True
+        elif val in (terminal.TK_KP_8, terminal.TK_UP):
+            self.view.find_prev_responder()
+        elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+            self.view.find_next_responder()
         elif val == terminal.TK_RESIZED:
             new_size = self._calculate_size()
             self.window_view.layout_options = LayoutOptions(width=new_size.width, height=new_size.height,
@@ -1283,7 +1287,7 @@ class MainGameScene(UIScene):
         if game.is_waiting_input:
             if player_input == terminal.TK_ESCAPE:  # game quit on ESC
                 text = 'Do you really want to quit?'
-                self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda:self.director.quit),
+                self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda:self.director.quit()),
                                                                           ('No', text, None)],
                                                                  title='Confirm exit',
                                                                  layout_options='intrinsic'))
