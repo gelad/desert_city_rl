@@ -272,8 +272,8 @@ def command_ask_leave_loc(game):
         if game.current_loc.is_in_boundaries(x, y):
             if game.current_loc.cells[x][y].is_there_a(game_logic.Fighter):
                 flee = True  # if there are an enemy - set flee flag on
-                text += '\nWARNING: There are enemies nearby! If you choose to leave now, you will be chased, and'
-                text += ' probably lose some items while fleeing.'
+                text += '\n[color=red]WARNING: There are enemies nearby! If you choose to leave now, you will '
+                text += 'be chased, and probably lose some items while fleeing.'
                 break
     director.push_scene(game_view.MultiButtonMessageScene(buttons=[('Yes, head back to the camp.', text,
                                                             lambda g=game, f=flee: command_leave_loc(game=g, flee=f)),

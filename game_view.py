@@ -335,16 +335,21 @@ class MultiButtonMessageScene(UIScene):
         self.close_on_esc = close_on_esc
         subviews = []
         button_offset = 0
-        max_l = 0
+        max_text_l = 0
+        max_caption_l = 0
         self.longest_text = ''
+        self.longest_caption = ''
         self.text_view = LabelViewFixed(text='', align_vert='left', align_horz='top',
                                         layout_options=LayoutOptions(top=0, left=0))
         for button in buttons:
             caption, text, callback = button
             button_offset += 1
-            if len(text) > max_l:
-                max_l = len(text)
+            if len(text) > max_text_l:
+                max_text_l = len(text)
                 self.longest_text = text
+            if len(caption) > max_caption_l:
+                max_caption_l = len(text)
+                self.longest_caption = caption
             if not callback:
                 callback = self._default_button_action
             b = ButtonViewFixed(text=caption, callback=callback,
@@ -393,7 +398,7 @@ class MultiButtonMessageScene(UIScene):
         # try increasing height and width while checking message text to fit
         for height in range(len(self.buttons) + 3, t_height):
             # make width grow in accord with aspect ratio to get more wide window
-            width = max((len(self.title), round(aspect_ratio * height)))
+            width = max((len(self.title), len(self.longest_caption), round(aspect_ratio * height)))
             wrapped_text = []
             # simple wrap() won't do, because text with \n will get fucked up
             for line in self.longest_text.splitlines():
