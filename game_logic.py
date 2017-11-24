@@ -1822,6 +1822,7 @@ class Location:
         actor = self.cells[dest_x][dest_y].is_there_a(Actor)
         if actor:  # if there is an actor - add 'not moved' turns count to prevent monster jams in narrow places
             if actor.not_moved > 100:
+                # TODO: actually DEBUG
                 print('not moved = ' + str(actor.not_moved))
             return self.cells[dest_x][dest_y].get_move_cost() + actor.not_moved * actor.speed
         else:
@@ -1926,34 +1927,12 @@ class Game:
         self.loop_is_running = False
 
     def new_game(self):
-        """ Method that starts a new game. Mostly a placeholder now. """
-        self.current_loc = generation.generate_loc('ruins', None, 200, 200)
-        self.add_location(self.current_loc)
+        """ Method that starts a new game. """
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23, damage=1,
                              categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
-        start_x, start_y = 0, 0
-        for i in range(100):  # look for acceptable random position
-            x = random.randrange(self.current_loc.width // 4, self.current_loc.width // 4 * 3)
-            y = random.randrange(self.current_loc.height // 4, self.current_loc.height // 4 * 3)
-            if self.current_loc.cells[x][y].is_movement_allowed:
-                enemies_near = False
-                for point in circle_points(r=20, include_center=False):  # check for an enemy near player
-                    p_x = point[0] + x
-                    p_y = point[1] + y
-                    if self.current_loc.cells[p_x][p_y].is_there_a(Fighter):
-                        enemies_near = True
-                        break
-                if not enemies_near:
-                    start_x, start_y = x, y
-                    break
-        self.current_loc.place_entity(self.player, start_x, start_y)
-        # self.player.add_item(self.current_loc.place_entity('item_wall_smasher', 10, 10))
-        # self.current_loc.place_entity('mob_frost_wisp', 20, 20)
-        self.current_loc.actors.remove(self.player)  # A hack, to make player act first if acting in one tick
-        self.current_loc.actors.insert(0, self.player)
         self.is_waiting_input = True
-        self.state = 'playing'
+        self.state = 'camp'
 
     def enter_camp(self):
         """ Method that must be called when player enters camp """
@@ -1989,7 +1968,7 @@ class Game:
 
     @staticmethod
     def clear_log():
-        """ Method that clears mesage log """
+        """ Method that clears message log """
         Game.log.clear()
 
 

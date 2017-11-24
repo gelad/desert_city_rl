@@ -236,14 +236,7 @@ class CharacterSelectScene(UIScene):
 
     def option_activated(self):
         """ Method to call when option is activated (ENTER key pressed) - New Game start """
-        self.director.push_scene(LoadingScene())
-        self._start_new_game_thread()
-
-    def _start_new_game_thread(self):
-        """ This method starts new game generation thread """
-        # threading is used to make UI display LOADING screen while loading new game.
-        t = threading.Thread(target=self._start_new_game)
-        t.start()
+        self._start_new_game()
 
     def _start_new_game(self):
         """ This method starts a new game and loads starting gear """
@@ -254,6 +247,7 @@ class CharacterSelectScene(UIScene):
             game.player.add_item(item_id)
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
+        self.director.push_scene(CampMenuScene(game))
         self.director.game = game
 
 # Dialogue and message scenes
@@ -1143,11 +1137,19 @@ class MainMenuScene(UIScene):
 class LoadingScene(UIScene):
     """ Loading scene - currently a placeholder """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, watch_thread=None, *args, **kwargs):
+        self.watch_thread = watch_thread
         views = [LabelViewFixed(
             LOADING[1:].rstrip(),
             layout_options=LayoutOptions.row_top(0.5))]
         super().__init__(views, *args, **kwargs)
+
+    def terminal_update(self, is_active=False):
+        if self.watch_thread:  # every frame check if specified thread is alive. If not, pop Loading scene
+            if not self.watch_thread.is_alive():
+                if self.director.active_scene == self:
+                    self.director.pop_scene()
+        super().terminal_update(is_active=is_active)
 
     def become_active(self):
         self.ctx.clear()

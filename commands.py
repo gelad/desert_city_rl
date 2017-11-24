@@ -6,6 +6,7 @@ import generation
 import save_load
 
 import random
+import threading
 
 from clubsandwich.ui import LayoutOptions
 from bearlibterminal import terminal
@@ -346,8 +347,8 @@ def command_leave_loc(game, flee=False):
     game.remove_location(old_loc)
     game.enter_camp()
     director.pop_scene()
-    director.push_scene(game_view.SingleButtonMessageScene(message=raid_report_text + '\n\n',
-                                                           title='Successful raid to the City.',
+    director.push_scene(game_view.SingleButtonMessageScene(message=raid_report_text + '\n \n ',
+                                                           title='Successful raid.',
                                                            layout_options='intrinsic', close_on_esc=False,
                                                            callback=lambda: (director.pop_scene(),
                                                                              director.push_scene(game_view.CampMenuScene
