@@ -71,7 +71,7 @@ c - close door
 s - smash (melee attack inanimate object, i.e. wall)
 Esc - Save and exit"""
 
-character_bg_descriptions = [
+CHARACTER_BG_DESCRIPTIONS = [
     'Many adventurers are lured to the City - in search of treasures, power,' +
     ' glory or something else. You are among the others - jack of all trades,' +
     ' master of nothing.'
@@ -94,7 +94,13 @@ character_bg_descriptions = [
     ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
     ' magic gift.']
 
-character_backgrounds = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
+CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
+
+CAMP_MENU_DESCRIPTIONS = ["""Head back to the Desert City. It's about it, after all.""",
+                          """Horrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.""",
+                          """Traders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.""",
+                          """Equipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just not bring him empty cans.""",
+                          """Tavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also."""]
 #  /temporary shit
 
 
@@ -162,8 +168,8 @@ class CharacterSelectScene(UIScene):
     """ Scene displays character background variants with descriptions """
 
     def __init__(self, *args, **kwargs):
-        self.options = character_backgrounds
-        self.bg_texts = character_bg_descriptions
+        self.options = CHARACTER_BACKGROUNDS
+        self.bg_texts = CHARACTER_BG_DESCRIPTIONS
         self.selected = 0
         views = []
         views.append(RectView(style='double', layout_options=LayoutOptions(left=0, top=0)))
@@ -256,7 +262,7 @@ class CharacterSelectScene(UIScene):
 class SingleButtonMessageScene(UIScene):
     """ A simple message with single button that closes it """
     def __init__(self, message, title='', button_text='OK.', close_on_esc=True,
-                 callback=None, layout_options=None, *args, **kwargs):
+                 callback=None, layout_options='intrinsic', *args, **kwargs):
         self.message = message
         self.title = title
         self.close_on_esc = close_on_esc
@@ -325,7 +331,7 @@ class SingleButtonMessageScene(UIScene):
 
 class MultiButtonMessageScene(UIScene):
     """ A message with multiple buttons """
-    def __init__(self, buttons, title='', close_on_esc=True, layout_options=None, *args, **kwargs):
+    def __init__(self, buttons, title='', close_on_esc=True, layout_options='intrinsic', *args, **kwargs):
         """
         :param buttons: a list of tuples (caption, text, callback)
         :param title: string with window caption
@@ -421,6 +427,42 @@ class MultiButtonMessageScene(UIScene):
         """ Default action when button is pressed - pop this scene """
         self.director.pop_scene()
 
+
+class CampMenuScene(MultiButtonMessageScene):
+    """ A Scene with camp menu """
+    def __init__(self, game, *args, **kwargs):
+        self.game = game
+        buttons = [('Delve into Desert City', CAMP_MENU_DESCRIPTIONS[0], self._to_desert_city),
+                   ('Get some rest.', CAMP_MENU_DESCRIPTIONS[1], self._take_rest),
+                   ('Sell treasures.', CAMP_MENU_DESCRIPTIONS[2], self._to_market),
+                   ('Go to equipment merchant.', CAMP_MENU_DESCRIPTIONS[3], self._to_equipment_merchant),
+                   ('Visit the tavern (closed for now).', CAMP_MENU_DESCRIPTIONS[4], self._to_tavern)]
+        super().__init__(buttons=buttons, title='Treasure hunters camp near Neth-Nikakh', *args, **kwargs)
+
+    def _to_desert_city(self):
+        """ Method that starts raid to the Desert City. Now simply moves player to new 'ruins' location. """
+        commands.command_enter_loc(game=self.game, new_loc=generation.generate_loc('ruins', None, 200, 200))
+        director = self.director
+        director.pop_scene()
+        director.push_scene(SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
+                                                     title='Entering ruins.',
+                                                     layout_options='intrinsic'))
+
+    def _take_rest(self):
+        """ Method that replenshes player health for now """
+        self.game.player.heal(heal=self.game.player.maxhp, healer=self.game.player)
+        self.director.push_scene(SingleButtonMessageScene(message="""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!""",
+                                                          title='Rested.',
+                                                          layout_options='intrinsic'))
+
+    def _to_market(self):
+        pass
+
+    def _to_equipment_merchant(self):
+        pass
+
+    def _to_tavern(self):
+        pass
 
 # List menu scenes
 

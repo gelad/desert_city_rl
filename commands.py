@@ -345,11 +345,13 @@ def command_leave_loc(game, flee=False):
     player.effects.clear()  # simply clear list for now. Needs testing
     game.remove_location(old_loc)
     # PLACEHOLDER - just transfer player to another ruins for now
-    command_enter_loc(game=game, new_loc=generation.generate_loc('ruins', None, 200, 200))
     director.pop_scene()
     director.push_scene(game_view.SingleButtonMessageScene(message=raid_report_text + '\n\n',
                                                            title='Successful raid to the City.',
-                                                           layout_options='intrinsic'))
+                                                           layout_options='intrinsic', close_on_esc=False,
+                                                           callback=lambda: (director.pop_scene(),
+                                                                             director.push_scene(game_view.CampMenuScene
+                                                                                 (game=game)))))
 
 
 def command_enter_loc(game, new_loc):
