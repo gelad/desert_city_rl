@@ -1955,6 +1955,17 @@ class Game:
         self.is_waiting_input = True
         self.state = 'playing'
 
+    def enter_camp(self):
+        """ Method that must be called when player enters camp """
+        self.state = 'camp'
+
+    def leave_camp(self):
+        """ Method that must be called when player leaves camp """
+        if self.current_loc:
+            self.state = 'playing'
+        else:
+            raise RuntimeError('Left camp to None location.')
+
     def add_location(self, location):
         """ Method that adds a location to the game """
         self.time_system.register_act_mgr(location.action_mgr)  # register act manager to time system

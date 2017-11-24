@@ -439,9 +439,21 @@ class CampMenuScene(MultiButtonMessageScene):
                    ('Visit the tavern (closed for now).', CAMP_MENU_DESCRIPTIONS[4], self._to_tavern)]
         super().__init__(buttons=buttons, title='Treasure hunters camp near Neth-Nikakh', *args, **kwargs)
 
+    def terminal_read(self, val):
+        """ Handles input (intercept ESC button - exit game) """
+        if val == terminal.TK_ESCAPE and self.close_on_esc:
+            text = 'Do you really want to quit?'
+            self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda: self.director.quit()),
+                                                                      ('No', text, None)],
+                                                             title='Confirm exit',
+                                                             layout_options='intrinsic'))
+            return True
+        return super().terminal_read(val)
+
     def _to_desert_city(self):
         """ Method that starts raid to the Desert City. Now simply moves player to new 'ruins' location. """
         commands.command_enter_loc(game=self.game, new_loc=generation.generate_loc('ruins', None, 200, 200))
+        self.game.leave_camp()
         director = self.director
         director.pop_scene()
         director.push_scene(SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
@@ -1121,8 +1133,10 @@ class MainMenuScene(UIScene):
 
     def continue_game(self):
         director = self.director
-        director.push_scene(MainGameScene(self.game))
         director.game = self.game
+        director.push_scene(MainGameScene(self.game))
+        if self.game.state == 'camp':
+            director.push_scene(CampMenuScene(self.game))
 
 
 class LoadingScene(UIScene):
