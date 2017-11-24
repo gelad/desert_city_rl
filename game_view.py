@@ -426,7 +426,7 @@ class CampMenuScene(MultiButtonMessageScene):
     """ A Scene with camp menu """
     def __init__(self, game, *args, **kwargs):
         self.game = game
-        buttons = [('Delve into Desert City', CAMP_MENU_DESCRIPTIONS[0], self._to_desert_city),
+        buttons = [('Delve into Desert City', CAMP_MENU_DESCRIPTIONS[0], self._to_city_start_thread),
                    ('Get some rest.', CAMP_MENU_DESCRIPTIONS[1], self._take_rest),
                    ('Sell treasures.', CAMP_MENU_DESCRIPTIONS[2], self._to_market),
                    ('Go to equipment merchant.', CAMP_MENU_DESCRIPTIONS[3], self._to_equipment_merchant),
@@ -444,12 +444,22 @@ class CampMenuScene(MultiButtonMessageScene):
             return True
         return super().terminal_read(val)
 
+    def _to_city_start_thread(self):
+        """ 
+        Method that starts thread with location generation and transition 
+        Threading is needed to show Loading screen while generating a location    
+        """
+        t = threading.Thread(target=self._to_desert_city)
+        t.start()
+        self.director.push_scene(LoadingScene(watch_thread=t))
+
     def _to_desert_city(self):
         """ Method that starts raid to the Desert City. Now simply moves player to new 'ruins' location. """
         commands.command_enter_loc(game=self.game, new_loc=generation.generate_loc('ruins', None, 200, 200))
         self.game.leave_camp()
         director = self.director
-        director.pop_scene()
+        director.pop_scene()  # pop loading scene
+        director.pop_scene()  # pop camp scene
         director.push_scene(SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
                                                      title='Entering ruins.',
                                                      layout_options='intrinsic'))
