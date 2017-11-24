@@ -142,7 +142,7 @@ def __checkQuadrant(visited, startX, startY, dx, dy, \
   extentX, extentY, funcVisitTile, funcTileBlocked, radius):
     activeViews = []
 
-    perm = 5 / 10  # Permissiveness magic number
+    perm = 100 / 100  # Permissiveness magic number. At 100 it's symmetric. At 50 not symmetric but more obscure.
 
     shallowLine = __Line(1 - perm, 1 * perm, extentX, 0)
     steepLine = __Line(1 * perm, 1 - perm, 0, extentY)
