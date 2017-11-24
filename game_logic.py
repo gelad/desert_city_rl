@@ -703,6 +703,12 @@ class SimpleMeleeChaserAI(AI):
                         step_cell = path[0]  # move closer to last known player position
                         self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
                         moved = True
+                    else:  # if no path for 3 turns - go idle
+                        if self.owner.not_moved > 3:
+                            self.seen = False
+                            self.seen_x = -1
+                            self.seen_y = -1
+                            self.state = 'idle'
                 else:  # if in last seen player position, and no player in FOV - stop searching, go idle
                     self.seen = False
                     self.seen_x = -1
@@ -800,6 +806,12 @@ class AbilityUserAI(AI):
                     acted = True
                     self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
                     moved = True
+                else:  # if no path for 3 turns - go idle
+                    if self.owner.not_moved > 3:
+                        self.seen = False
+                        self.seen_x = -1
+                        self.seen_y = -1
+                        self.state = 'idle'
             else:  # if in last seen player position, and no player in FOV - stop searching, go idle
                 self.seen = False
                 self.seen_x = -1
@@ -872,6 +884,12 @@ class AbilityUserAI(AI):
                     acted = True
                     self.owner.perform(actions.act_move, self.owner, step_cell[0] - x, step_cell[1] - y)
                     moved = True
+                else:  # if no path for 3 turns - go idle
+                    if self.owner.not_moved > 3:
+                        self.seen = False
+                        self.seen_x = -1
+                        self.seen_y = -1
+                        self.state = 'idle'
             else:  # if in last seen player position, and no player in FOV - stop searching, go idle
                 self.seen = False
                 self.seen_x = -1
