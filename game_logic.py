@@ -1987,6 +1987,11 @@ class Game:
         """ Method that adds a message to log """
         Game.log.append((message, level, color))
 
+    @staticmethod
+    def clear_log():
+        """ Method that clears mesage log """
+        Game.log.clear()
+
 
 # ======================================= UTILITY FUNCTIONS ============================================
 def weighted_choice(choices):

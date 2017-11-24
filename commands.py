@@ -361,6 +361,7 @@ def command_enter_loc(game, new_loc):
     """
     game.current_loc = new_loc
     game.add_location(game.current_loc)
+    game_logic.Game.clear_log()
     start_x, start_y = 0, 0
     for i in range(100):  # look for acceptable random position
         x = random.randrange(new_loc.width // 4, new_loc.width // 4 * 3)

@@ -99,7 +99,7 @@ CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic see
 CAMP_MENU_DESCRIPTIONS = ["""Head back to the Desert City. It's about it, after all.""",
                           """Horrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.""",
                           """Traders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.""",
-                          """Equipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just not bring him empty cans.""",
+                          """Equipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.""",
                           """Tavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also."""]
 #  /temporary shit
 
@@ -462,7 +462,8 @@ class CampMenuScene(MultiButtonMessageScene):
 
     def _take_rest(self):
         """ Method that replenshes player health for now """
-        self.game.player.heal(heal=self.game.player.maxhp, healer=self.game.player)
+        if self.game.player.hp < self.game.player.maxhp:
+            self.game.player.heal(heal=self.game.player.maxhp, healer=self.game.player)
         self.director.push_scene(SingleButtonMessageScene(message="""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!""",
                                                           title='Rested.',
                                                           layout_options='intrinsic'))
