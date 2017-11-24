@@ -218,9 +218,14 @@ class CharacterSelectScene(UIScene):
                     self.selected += 1
                 else:
                     self.selected = 0
+            elif val == terminal.TK_ESCAPE:  # on escape return to main menu
+                self.director.pop_scene()
             self.ctx.clear()
             self.description_view.text = self.bg_texts[self.selected]
             self.description_view.needs_layout = True
+            return True
+        elif val == terminal.TK_ESCAPE:  # on escape return to main menu
+            self.director.pop_scene()
             return True
 
     def option_activated(self):
@@ -1043,7 +1048,7 @@ class MainMenuScene(UIScene):
                 left=0.4, width=0.2, right=None)))
         views.append(ButtonViewFixed(
             text="Quit",
-            callback=lambda: self.director.pop_scene(),
+            callback=lambda: self.director.quit(),
             layout_options=LayoutOptions.row_bottom(4).with_updates(
                 left=0.6, width=0.2, right=None)))
         super().__init__(views, *args, **kwargs)
@@ -1057,17 +1062,25 @@ class MainMenuScene(UIScene):
         elif val in (terminal.TK_KP_6, terminal.TK_RIGHT):
             self.view.find_next_responder()
             return True
+        elif val == terminal.TK_ESCAPE:  # prompt exit game on esc
+            text = 'Do you really want to quit?'
+            self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda: self.director.quit()),
+                                                                      ('No', text, None)],
+                                                             title='Confirm exit',
+                                                             layout_options='intrinsic'))
         self.ctx.clear()
 
     def become_active(self):
         self.ctx.clear()
 
     def new_game(self):
-        self.director.push_scene(CharacterSelectScene())
+        director = self.director
+        director.push_scene(CharacterSelectScene())
 
     def continue_game(self):
-        self.director.push_scene(MainGameScene(self.game))
-        self.director.game = self.game
+        director = self.director
+        director.push_scene(MainGameScene(self.game))
+        director.game = self.game
 
 
 class LoadingScene(UIScene):

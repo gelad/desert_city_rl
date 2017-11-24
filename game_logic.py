@@ -1821,6 +1821,8 @@ class Location:
             return self.cells[dest_x][dest_y].get_move_cost()
         actor = self.cells[dest_x][dest_y].is_there_a(Actor)
         if actor:  # if there is an actor - add 'not moved' turns count to prevent monster jams in narrow places
+            if actor.not_moved > 100:
+                print('not moved > 100')
             return self.cells[dest_x][dest_y].get_move_cost() + actor.not_moved * actor.speed
         else:
             return self.path_map[dest_x][dest_y]

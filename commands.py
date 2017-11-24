@@ -241,6 +241,7 @@ def command_return_to_main_menu():
     """
     director = game_view.GameLoop.active_director
     director.pop_to_first_scene()
+    director.pop_scene(may_exit=False)
     terminal.clear()
     director.main_game_scene = None
     director.push_scene(game_view.MainMenuScene())
