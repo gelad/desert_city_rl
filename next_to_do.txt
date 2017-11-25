@@ -67,9 +67,10 @@ Rework loc generation with prefabs. (DONE)
 Added simple multi-room houses. (DONE)
 Moving to Clubsandwich (BearLibTerminal) (DONE)
 Make some fences, paths and roads on map. (DONE)
+Make simple trading/sleeping base between raids. (DONE)
+Make 'give item' debug command. (DONE - actually made sort of debug console)
 
 Make entity in range/rect search method in location.
-Make simple trading/sleeping base between raids.
 Add prefab_info store variant-specific layer numbers, to place additional entities for variant. ?? 9 layers max
 BUG: explosive potion vanishes if taken off after throw (when has > 1 charge)
 BUG: poison stops working if move to another location.
@@ -80,7 +81,6 @@ Make Announcer object that keeps track on events, and if they have to be seen by
 Inform player if targeting failed.
 Make door-opening mobs.
 BUG: attempted reload command after player death (player can perform actions after death?)
-Make 'give item' debug command.
 Separate abilities from entities in dataset section.
 Make Loading progress bar.
 Make road-specific buildings like carts, wagons, small shops etc.

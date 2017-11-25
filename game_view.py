@@ -96,11 +96,11 @@ CHARACTER_BG_DESCRIPTIONS = [
 
 CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
 
-CAMP_MENU_DESCRIPTIONS = ["""Head back to the Desert City. It's about it, after all.""",
-                          """Horrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.""",
-                          """Traders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.""",
-                          """Equipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.""",
-                          """Tavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also."""]
+CAMP_MENU_DESCRIPTIONS = ["""\n\tGo to the Desert City. It's about it, after all.\n """,
+                          """\n\tHorrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.\n """,
+                          """\n\tTraders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.\n """,
+                          """\n\tEquipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.\n """,
+                          """\n\tTavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also.\n """]
 
 FIRST_CAMP_ARRIVAL_MESSAGE = """\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
 \tIt's more like a small town, except lots of armed people wandering around, and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
@@ -472,6 +472,7 @@ class CampMenuScene(MultiButtonMessageScene):
         director = self.director
         while director.active_scene is not director.main_game_scene:  # pop to main game scene
             director.pop_scene()
+        self.ctx.clear()
         director.push_scene(SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
                                                      title='Entering ruins.',
                                                      layout_options='intrinsic'))
@@ -489,6 +490,7 @@ class CampMenuScene(MultiButtonMessageScene):
         # treasures report section
         report_text = ''
         treasures = {}
+        sold = []
         player = self.game.player
         for item in player.inventory:
             if 'relic' in item.categories:  # if there'll be other types of treasure - add here
@@ -500,7 +502,9 @@ class CampMenuScene(MultiButtonMessageScene):
                     treasures[item.name][0] += count
                 else:
                     treasures[item.name] = [count, item.properties['value']]
-                player.discard_item(item=item)  # remove sold item from inventory
+                sold.append(item)
+        for item in sold:
+            player.discard_item(item=item)  # remove sold items from inventory
         if len(treasures) > 0:
             report_text += 'You sold some treasures:\n\n'
             total = 0
@@ -508,12 +512,12 @@ class CampMenuScene(MultiButtonMessageScene):
                 report_text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
                                     + str(treasures[tr][0] * treasures[tr][1]) + '\n'
                 total += treasures[tr][0] * treasures[tr][1]
-            report_text += '\nTotal treasures value: ' + str(total) + ' coins.'
+            report_text += '\nTotal treasures value: ' + str(total) + ' coins.\n '
             player.properties['money'] += total  # give player the money
         else:
             report_text += 'All you have to do in the marketplace today is wandering around.' + \
-                                """ You don't have anything to sell right now.\n"""
-            self.director.push_scene(SingleButtonMessageScene(message=report_text, title='Marketplace.'))
+                                """ You don't have anything to sell right now.\n """
+        self.director.push_scene(SingleButtonMessageScene(message=report_text, title='Marketplace.'))
 
     def _to_equipment_merchant(self):
         pass
