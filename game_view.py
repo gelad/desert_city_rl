@@ -101,6 +101,10 @@ CAMP_MENU_DESCRIPTIONS = ["""Head back to the Desert City. It's about it, after 
                           """Traders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.""",
                           """Equipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.""",
                           """Tavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also."""]
+
+FIRST_CAMP_ARRIVAL_MESSAGE = """Finally, your long journey came to an end. The last part, traveling with the caravan through Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
+It's more like a small town, except lots of armed people wandering around and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
+You stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage."""
 #  /temporary shit
 
 
@@ -248,6 +252,10 @@ class CharacterSelectScene(UIScene):
         sg_file.close()
         self.director.push_scene(MainGameScene(game))
         self.director.push_scene(CampMenuScene(game))
+        self.director.push_scene(SingleButtonMessageScene(message=FIRST_CAMP_ARRIVAL_MESSAGE,
+                                                          title='Arrival to treasure hunters camp',
+                                                          callback=lambda: (self.director.pop_scene(),
+                                                                            terminal.clear())))
         self.director.game = game
 
 # Dialogue and message scenes
