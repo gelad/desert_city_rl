@@ -102,9 +102,9 @@ CAMP_MENU_DESCRIPTIONS = ["""Head back to the Desert City. It's about it, after 
                           """Equipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.""",
                           """Tavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also."""]
 
-FIRST_CAMP_ARRIVAL_MESSAGE = """Finally, your long journey came to an end. The last part, traveling with the caravan through Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
-It's more like a small town, except lots of armed people wandering around and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
-You stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage."""
+FIRST_CAMP_ARRIVAL_MESSAGE = """\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
+\tIt's more like a small town, except lots of armed people wandering around, and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
+\tYou can stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage.\n """
 #  /temporary shit
 
 
@@ -452,6 +452,10 @@ class CampMenuScene(MultiButtonMessageScene):
             return True
         return super().terminal_read(val)
 
+    def become_active(self):
+        """ Clears screen when active """
+        self.ctx.clear()
+
     def _to_city_start_thread(self):
         """ 
         Method that starts thread with location generation and transition 
@@ -466,8 +470,8 @@ class CampMenuScene(MultiButtonMessageScene):
         commands.command_enter_loc(game=self.game, new_loc=generation.generate_loc('ruins', None, 200, 200))
         self.game.leave_camp()
         director = self.director
-        director.pop_scene()  # pop loading scene
-        director.pop_scene()  # pop camp scene
+        while director.active_scene is not director.main_game_scene:  # pop to main game scene
+            director.pop_scene()
         director.push_scene(SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
                                                      title='Entering ruins.',
                                                      layout_options='intrinsic'))
@@ -481,7 +485,35 @@ class CampMenuScene(MultiButtonMessageScene):
                                                           layout_options='intrinsic'))
 
     def _to_market(self):
-        pass
+        """ Method that sells treasure items to market and shows a report """
+        # treasures report section
+        report_text = ''
+        treasures = {}
+        player = self.game.player
+        for item in player.inventory:
+            if 'relic' in item.categories:  # if there'll be other types of treasure - add here
+                if isinstance(item, game_logic.ItemCharges):
+                    count = item.charges
+                else:
+                    count = 1
+                if item.name in treasures:
+                    treasures[item.name][0] += count
+                else:
+                    treasures[item.name] = [count, item.properties['value']]
+                player.discard_item(item=item)  # remove sold item from inventory
+        if len(treasures) > 0:
+            report_text += 'You sold some treasures:\n\n'
+            total = 0
+            for tr in treasures.keys():
+                report_text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
+                                    + str(treasures[tr][0] * treasures[tr][1]) + '\n'
+                total += treasures[tr][0] * treasures[tr][1]
+            report_text += '\nTotal treasures value: ' + str(total) + ' coins.'
+            player.properties['money'] += total  # give player the money
+        else:
+            report_text += 'All you have to do in the marketplace today is wandering around.' + \
+                                """ You don't have anything to sell right now.\n"""
+            self.director.push_scene(SingleButtonMessageScene(message=report_text, title='Marketplace.'))
 
     def _to_equipment_merchant(self):
         pass
