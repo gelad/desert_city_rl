@@ -930,6 +930,7 @@ class ItemManipulationSelectionScene(UIScene):
             slot = list(self.item.equip_slots)[0]
         if slot:  # if selected - equip item
             self.game.player.perform(actions.act_equip_item, self.game.player, self.item, slot)
+            self.option_activated()
 
 
 class ItemSelectionScene(DescribedListSelectionScene):
