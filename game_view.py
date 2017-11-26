@@ -1811,13 +1811,11 @@ class MapView(View):
                                                 self.game.player.is_in_fov(rel_x, rel_y))
                         ctx.color(terminal.color_from_argb(255, cg[1][0], cg[1][1], cg[1][2]))
                         ctx.bkcolor(terminal.color_from_argb(255, cg[2][0], cg[2][1], cg[2][2]))
-                        terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
                         terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y,
                                         '[font=map]' + cg[0])
 
                     else:
                         ctx.bkcolor(terminal.color_from_argb(255, 0, 0, 0))
-                        terminal.printf(self.layout_options.left + x * 2 + 1, self.layout_options.top + y, ' ')
                         terminal.printf(self.layout_options.left + x * 2, self.layout_options.top + y, '[font=map] ')
             if not self.cam_offset == [0, 0]:
                 # if camera is not centered on player - draw there a red 'X'
@@ -1833,8 +1831,6 @@ class MapView(View):
                     sub_x = 1
                 elif magic == 3:
                     sub_x = 1
-                terminal.printf(self.layout_options.left + self.bounds.width // 2 - sub_x + 1,
-                                self.layout_options.top + self.bounds.height // 2, ' ')
                 terminal.printf(self.layout_options.left + self.bounds.width // 2 - sub_x,
                                 self.layout_options.top + self.bounds.height // 2, '[font=map]X')
             self.last_game_time = self.game.time_system.current_time()
