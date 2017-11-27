@@ -496,7 +496,7 @@ class CampMenuScene(MultiButtonMessageScene):
             report_text += _('You sold some treasures:\n\n')
             total = 0
             for tr in treasures.keys():
-                report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}').format(tr_name=_(tr),
+                report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}\n').format(tr_name=_(tr),
                                                                     tr_count=str(treasures[tr][0]),
                                                                     tr_value=str(treasures[tr][1]),
                                                                     tr_total=str(treasures[tr][0] * treasures[tr][1]))
@@ -532,9 +532,9 @@ class ListSelectionScene(UIScene):
         max_option_length = 0  # longest option string - to determine window width
         for option in self.options:
             if alphabet:
-                button_text = chr(letter_index) + ') ' + str(option)
+                button_text = chr(letter_index) + ') ' + _(str(option))
             else:
-                button_text = str(option)
+                button_text = _(str(option))
             max_option_length = max(len(button_text), max_option_length)
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
@@ -655,9 +655,9 @@ class DescribedListSelectionScene(UIScene):
         letter_index = ord('a')  # start menu item indexing from 'a'
         for option in self.options:
             if alphabet:
-                button_text = chr(letter_index) + ') ' + str(option)
+                button_text = chr(letter_index) + ') ' + _(str(option))
             else:
-                button_text = str(option)
+                button_text = _(str(option))
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
                                      layout_options=LayoutOptions(
@@ -934,36 +934,42 @@ class ItemSelectionScene(DescribedListSelectionScene):
             text += _('Weight: ') + str(item.weight) + _(' kg.\n')
             if item.properties:
                 if 'bashing' in item.properties:
-                    #text +=
-                    text += _('Deals ') + str(item.properties['bashing'][0]) + '-' + str(
-                        item.properties['bashing'][1]) + ' bashing damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} bashing damage.\n').format(
+                        min_damage=str(item.properties['bashing'][0]),
+                        max_damage=str(item.properties['bashing'][1]))
                 if 'slashing' in item.properties:
-                    text += 'Deals ' + str(item.properties['slashing'][0]) + '-' + str(
-                        item.properties['slashing'][1]) + ' slashing damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} slashing damage.\n').format(
+                        min_damage=str(item.properties['slashing'][0]),
+                        max_damage=str(item.properties['slashing'][1]))
                 if 'piercing' in item.properties:
-                    text += 'Deals ' + str(item.properties['piercing'][0]) + '-' + str(
-                        item.properties['piercing'][1]) + ' piercing damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} piercing damage.\n').format(
+                        min_damage=str(item.properties['piercing'][0]),
+                        max_damage=str(item.properties['piercing'][1]))
                 if 'fire' in item.properties:
-                    text += 'Deals ' + str(item.properties['fire'][0]) + '-' + str(
-                        item.properties['fire'][1]) + ' fire damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} fire damage.\n').format(
+                        min_damage=str(item.properties['fire'][0]),
+                        max_damage=str(item.properties['fire'][1]))
                 if 'cold' in item.properties:
-                    text += 'Deals ' + str(item.properties['cold'][0]) + '-' + str(
-                        item.properties['cold'][1]) + ' cold damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} cold damage.\n').format(
+                        min_damage=str(item.properties['cold'][0]),
+                        max_damage=str(item.properties['cold'][1]))
                 if 'lightning' in item.properties:
-                    text += 'Deals ' + str(item.properties['lightning'][0]) + '-' + str(
-                        item.properties['lightning'][1]) + ' lightning damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} lightning damage.\n').format(
+                        min_damage=str(item.properties['lightning'][0]),
+                        max_damage=str(item.properties['lightning'][1]))
             if len(item.effects) > 0:
-                text += 'Effects: '
+                text += _('Effects: ')
                 for effect in item.effects:
-                    text += effect.description + '\n'
+                    text += _(effect.description) + '\n'
             if len(item.abilities) > 0:
-                text += 'Abilities: '
+                text += _('Abilities: ')
                 for ability in item.abilities:
-                    text += ability.name + '\n'
+                    text += _(ability.name) + '\n'
             descriptions.append(text)
         self.game = game
-        self.weight_bar = LabelViewFixed(text='Weight: ' + str(round(self.game.player.carried_weight, 2)) + '/' +
-                                              str(round(self.game.player.properties['max_carry_weight'], 2)) + ' kg.',
+        weight_text = _('Weight: {current} / {max} kg.').format(current=str(round(self.game.player.carried_weight, 2)),
+                                             max=str(round(self.game.player.properties['max_carry_weight'], 2)))
+        self.weight_bar = LabelViewFixed(text=weight_text,
                                          layout_options=LayoutOptions().row_bottom(0).with_updates(width='intrinsic',
                                                                                                    left=None,
                                                                                                    right=0))
@@ -1016,7 +1022,7 @@ class FireItemSelectionScene(ItemSelectionScene):
                                                           player=self.game.player,
                                                           weapon=self.options[self.selected])
         else:
-            game_logic.Game.add_message(self.options[self.selected].name + " isn't loaded!",
+            game_logic.Game.add_message(_("{weapon} isn't loaded!").format(weapon=_(self.options[self.selected].name)),
                                         'PLAYER', [255, 255, 255])
         super().option_activated(*args, **kwargs)
 
@@ -1084,7 +1090,7 @@ class WieldItemSelectionScene(ItemSelectionScene):
             super().option_activated(*args, **kwargs)  # first pop this scene
             director.push_scene(WieldSlotSelectionScene(game=self.game,
                                                         item=self.options[self.selected],
-                                                        caption='Select slot:',
+                                                        caption=_('Select slot:'),
                                                         layout_options='intrinsic'))
             return  # no need to pop Slot Selection scene
         elif len(self.options[self.selected].equip_slots) == 1:
@@ -1112,7 +1118,7 @@ class WieldSlotSelectionScene(ListSelectionScene):
 
 # Other scenes
 
-
+# TODO: continue _() here ==============================================
 class MainMenuScene(UIScene):
     """ Scene with main menu options """
 
