@@ -8,7 +8,6 @@ import configparser
 
 class MyFallback(gettext.NullTranslations):
     def gettext(self, msg):
-        print(self.info())
         print('Translation not found for: {msg}'.format(msg=msg))
         return msg
 

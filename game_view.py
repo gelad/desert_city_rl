@@ -430,10 +430,10 @@ class CampMenuScene(MultiButtonMessageScene):
     def terminal_read(self, val):
         """ Handles input (intercept ESC button - exit game) """
         if val == terminal.TK_ESCAPE and self.close_on_esc:
-            text = 'Do you really want to quit?'
-            self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda: self.director.quit()),
-                                                                      ('No', text, None)],
-                                                             title='Confirm exit',
+            text = _('Do you really want to quit?')
+            self.director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda: self.director.quit()),
+                                                                      (_('No'), text, None)],
+                                                             title=_('Confirm exit'),
                                                              layout_options='intrinsic'))
             return True
         return super().terminal_read(val)
@@ -458,8 +458,8 @@ class CampMenuScene(MultiButtonMessageScene):
         director = self.director
         while director.active_scene is not director.main_game_scene:  # pop to main game scene
             director.pop_scene()
-        message_scene = SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
-                                                     title='Entering ruins.',
+        message_scene = SingleButtonMessageScene(message=_("""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers."""),
+                                                     title=_('Entering ruins.'),
                                                      layout_options='intrinsic')
         message_scene.clear = True
         director.push_scene(message_scene)
@@ -468,8 +468,8 @@ class CampMenuScene(MultiButtonMessageScene):
         """ Method that replenshes player health for now """
         if self.game.player.hp < self.game.player.maxhp:
             self.game.player.heal(heal=self.game.player.maxhp, healer=self.game.player)
-        self.director.push_scene(SingleButtonMessageScene(message="""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!""",
-                                                          title='Rested.',
+        self.director.push_scene(SingleButtonMessageScene(message=_("""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!"""),
+                                                          title=_('Rested.'),
                                                           layout_options='intrinsic'))
 
     def _to_market(self):
@@ -493,18 +493,19 @@ class CampMenuScene(MultiButtonMessageScene):
         for item in sold:
             player.discard_item(item=item)  # remove sold items from inventory
         if len(treasures) > 0:
-            report_text += 'You sold some treasures:\n\n'
+            report_text += _('You sold some treasures:\n\n')
             total = 0
             for tr in treasures.keys():
-                report_text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
-                                    + str(treasures[tr][0] * treasures[tr][1]) + '\n'
+                report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}').format(tr_name=_(tr),
+                                                                    tr_count=str(treasures[tr][0]),
+                                                                    tr_value=str(treasures[tr][1]),
+                                                                    tr_total=str(treasures[tr][0] * treasures[tr][1]))
                 total += treasures[tr][0] * treasures[tr][1]
-            report_text += '\nTotal treasures value: ' + str(total) + ' coins.\n '
+            report_text += _('\nTotal treasures value: ') + str(total) + _(' coins.\n ')
             player.properties['money'] += total  # give player the money
         else:
-            report_text += 'All you have to do in the marketplace today is wandering around.' + \
-                                """ You don't have anything to sell right now.\n """
-        self.director.push_scene(SingleButtonMessageScene(message=report_text, title='Marketplace.'))
+            report_text += _("""All you have to do in the marketplace today is wandering around. You don't have anything to sell right now.\n """)
+        self.director.push_scene(SingleButtonMessageScene(message=report_text, title=_('Marketplace.')))
 
     def _to_equipment_merchant(self):
         pass
@@ -783,7 +784,7 @@ class ItemManipulationSelectionScene(UIScene):
         top_offset = 0
         max_option_length = 0
         if 'usable' in item.properties:  # USE button
-            button = ButtonViewFixed(text='u) Use',
+            button = ButtonViewFixed(text=_('u) Use'),
                                      callback=self._use,
                                      layout_options=LayoutOptions(
                                          left=1,
@@ -795,7 +796,7 @@ class ItemManipulationSelectionScene(UIScene):
             max_option_length = max(len(button.text), max_option_length)
             subviews.append(button)
             top_offset += 1
-        button = ButtonViewFixed(text='d) Drop',  # DROP button
+        button = ButtonViewFixed(text=_('d) Drop'),  # DROP button
                                  callback=self._drop,
                                  layout_options=LayoutOptions(
                                      left=1,
@@ -807,7 +808,7 @@ class ItemManipulationSelectionScene(UIScene):
         max_option_length = max(len(button.text), max_option_length)
         subviews.append(button)
         top_offset += 1
-        button = ButtonViewFixed(text='w) Wield',  # WIELD button
+        button = ButtonViewFixed(text=_('w) Wield'),  # WIELD button
                                  callback=self._wield,
                                  layout_options=LayoutOptions(
                                      left=1,
@@ -821,7 +822,7 @@ class ItemManipulationSelectionScene(UIScene):
         top_offset += 1
         if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
             if len(item.ammo) < item.ammo_max:  # check if it is loaded
-                button = ButtonViewFixed(text='r) Reload',  # RELOAD button
+                button = ButtonViewFixed(text=_('r) Reload'),  # RELOAD button
                                          callback=self._reload,
                                          layout_options=LayoutOptions(
                                              left=1,
@@ -834,7 +835,7 @@ class ItemManipulationSelectionScene(UIScene):
                 subviews.append(button)
                 top_offset += 1
             if len(item.ammo) > 0:
-                button = ButtonViewFixed(text='n) uNload',  # UNLOAD button
+                button = ButtonViewFixed(text=_('n) uNload'),  # UNLOAD button
                                          callback=self._unload,
                                          layout_options=LayoutOptions(
                                              left=1,
@@ -910,7 +911,7 @@ class ItemManipulationSelectionScene(UIScene):
         if len(self.item.equip_slots) > 1:
             director.push_scene(WieldSlotSelectionScene(game=self.game,
                                                         item=self.item,
-                                                        caption='Select slot:',
+                                                        caption=_('Select slot:'),
                                                         layout_options='intrinsic'))
             return  # no need to pop Slot Selection scene
         elif len(self.item.equip_slots) == 1:
@@ -930,10 +931,11 @@ class ItemSelectionScene(DescribedListSelectionScene):
         for item in items:
             text = ''
             text += item.description + '\n'
-            text += 'Weight: ' + str(item.weight) + ' kg.\n'
+            text += _('Weight: ') + str(item.weight) + _(' kg.\n')
             if item.properties:
                 if 'bashing' in item.properties:
-                    text += 'Deals ' + str(item.properties['bashing'][0]) + '-' + str(
+                    #text +=
+                    text += _('Deals ') + str(item.properties['bashing'][0]) + '-' + str(
                         item.properties['bashing'][1]) + ' bashing damage.\n'
                 if 'slashing' in item.properties:
                     text += 'Deals ' + str(item.properties['slashing'][0]) + '-' + str(
