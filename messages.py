@@ -6,6 +6,20 @@ import locale
 import configparser
 
 
+class MyFallback(gettext.NullTranslations):
+    def gettext(self, msg):
+        print(self.info())
+        print('Translation not found for: {msg}'.format(msg=msg))
+        return msg
+
+
+class MyTranslations(gettext.GNUTranslations, object):
+    def __init__(self, *args, **kwargs):
+        super(MyTranslations, self).__init__(*args, **kwargs)
+        if self.info()['language'] != 'en_US':  # if it's english - no fallback, default strings are fine
+            self.add_fallback(MyFallback())
+
+
 def lang_init():
     """
     Initialize a translation framework (gettext).
@@ -28,7 +42,11 @@ def lang_init():
         _locale, _encoding = locale.getdefaultlocale()  # Default system values
     path = sys.argv[0]
     path = os.path.join(os.path.dirname(path), 'lang')
-    lang = gettext.translation('dc_rl', path, [_locale])
+    try:
+        lang = gettext.translation(domain='dc_rl', localedir=path, languages=[_locale], class_=MyTranslations)
+    except FileNotFoundError:
+        print('No {l} locale found, switching to en_US.'.format(l=_locale))
+        lang = gettext.translation(domain='dc_rl', localedir=path, languages=['en_US'], class_=MyTranslations)
     return lang.gettext
 
 
@@ -40,6 +58,11 @@ class _Msg:
     def __init__(self):
         pass
 
+    @staticmethod
+    def m(msg):
+        """ Just simple string search in translations """
+        return _(msg)
 
-MSG = _Msg()
+
+Msg = _Msg()
 

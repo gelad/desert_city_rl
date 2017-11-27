@@ -1,6 +1,6 @@
 import game_view
 import dataset
-#import messages
+import messages
 
 # HERE PROGRAM RUN STARTS
 dataset.initialize()

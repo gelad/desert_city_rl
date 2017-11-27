@@ -12,6 +12,8 @@ import abilities
 import dataset
 import generation
 
+from messages import _  # translation function
+
 import random
 import pickle
 import copy
@@ -1389,8 +1391,9 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 # fire Entity event
                 events.Event(self, {'type': 'hit_weapon_attack', 'target': target,
                                     'damage': damage_dealt, 'dmg_type': dmg_type, 'weapon': weapon})
-                msg = self.name + ' attacks ' + target.name + ' with ' \
-                      + weapon.name + ' and deals ' + str(damage_dealt) + ' damage!'
+                msg = _('{name} attacks {target_name} with {weapon_name} and deals {damage_dealt} damage!').format(
+                    name=_(self.name), target_name=_(target.name), weapon_name=_(weapon.name),
+                    damage_dealt=str(damage_dealt))
                 Game.add_message(msg, 'PLAYER', [255, 255, 255])
                 msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
                     target.position[0]) + ':' + str(target.position[1])

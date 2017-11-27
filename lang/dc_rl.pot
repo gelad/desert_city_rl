@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2017-11-27 20:37+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=cp1251\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: game_logic.py:1394
+msgid "{name} attacks {target_name} with {weapon_name} and deals {damage_dealt} damage!"
+msgstr ""
+
+#: game_view.py:58
+msgid ""
+"Movement: Arrow keys and Keypad 1-9 \n"
+"Keypad 5 - 'wait 1 turn' command\n"
+"F1 - display this help message\n"
+"i - show player inventory\n"
+"l - look around\n"
+"g - pick up item from Ground\n"
+"u - use item\n"
+"w - wield (equip) item\n"
+"t - throw item from hand\n"
+"f - fire ranged weapon\n"
+"r - reload \n"
+"d - drop item\n"
+"o - take Off equipped item\n"
+"n - uNload ranged weapon\n"
+"c - close door\n"
+"s - smash (melee attack inanimate object, i.e. wall)\n"
+"Esc - Save and exit"
+msgstr ""
+
+#: game_view.py:99
+msgid "Adventurer"
+msgstr ""
+
+#: game_view.py:99
+msgid "Gantra mercenary"
+msgstr ""
+
+#: game_view.py:99
+msgid "Magic seeker"
+msgstr ""
+
+#: game_view.py:99
+msgid "Warrior"
+msgstr ""
+

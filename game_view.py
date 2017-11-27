@@ -34,6 +34,8 @@ import dataset
 import generation
 import commands
 
+from messages import _  # translation function
+
 #  temporary shit
 LOGO = """
     ___                    _       ___ _ _         
@@ -53,7 +55,7 @@ LOADING = """
 |______\____/_/    \_\_____/_____|_| \_|\_____|                                     
 """
 
-HELP_TEXT = """Movement: Arrow keys and Keypad 1-9 
+HELP_TEXT = _("""Movement: Arrow keys and Keypad 1-9 
 Keypad 5 - 'wait 1 turn' command
 F1 - display this help message
 i - show player inventory
@@ -69,42 +71,26 @@ o - take Off equipped item
 n - uNload ranged weapon
 c - close door
 s - smash (melee attack inanimate object, i.e. wall)
-Esc - Save and exit"""
+Esc - Save and exit""")
 
-CHARACTER_BG_DESCRIPTIONS = [
-    'Many adventurers are lured to the City - in search of treasures, power,' +
-    ' glory or something else. You are among the others - jack of all trades,' +
-    ' master of nothing.'
-    ,
-    'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
-    ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
-    'such warrior, proficient in melee combat and wearing a set of armor.'
-    ,
-    'Mercenaries from distant Northern country called Gantra are well-known ' +
-    'as trustworthy soldiers. One of them - with your sturdy crossbow' +
-    ' and shooting skills - you headed south, to obtain treasures of mysterious'
-    + ' City.'
-    ,
-    'A talent to use magic is rare among the people of Vaerthol. ' +
-    'You lack one, but unlike others, you desperately crave ' +
-    'for magic. One man told you a rumor, that in the sands lies a magic city' +
-    ' of Neth-Nikakh, where among the other wonders, ordinary people can' +
-    ' become powerful ' +
-    'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
-    ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
-    ' magic gift.']
+CHARACTER_BG_DESCRIPTIONS = [_('Many adventurers are lured to the City - in search of treasures, power, glory or something else. You are among the others - jack of all trades, master of nothing.'),
+    _('Mighty warriors visit Neth-Nikakh to prove their strength by fighting horrors, created by dark magic. Treasures are also nice bonus. You are such warrior, proficient in melee combat and wearing a set of armor.')
+    ,_('Mercenaries from distant Northern country called Gantra are well-known as trustworthy soldiers. One of them - with your sturdy crossbow and shooting skills - you headed south, to obtain treasures of mysterious City.'),
+    _('A talent to use magic is rare among the people of Vaerthol. You lack one, but unlike others, you desperately crave for magic. One man told you a rumor, that in the sands lies a magic city of Neth-Nikakh, where among the other wonders, ordinary people can become powerful mages. So, you packed your spellbooks (useless for non-mage, of course), scrolls (not-so-useless), and headed South, to finally obtain desired magic gift.')]
 
-CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
+CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']  # they are used as keys
+CHARACTER_BACKGROUNDS_TRAN = [_('Adventurer'), _('Warrior'), _('Gantra mercenary'), _('Magic seeker')]  # translations
+del CHARACTER_BACKGROUNDS_TRAN  # not used (it's a shitty hack to add them to pot file every time)
 
-CAMP_MENU_DESCRIPTIONS = ["""\n\tGo to the Desert City. It's about it, after all.\n """,
-                          """\n\tHorrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.\n """,
-                          """\n\tTraders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.\n """,
-                          """\n\tEquipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.\n """,
-                          """\n\tTavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also.\n """]
+CAMP_MENU_DESCRIPTIONS = [_("""\n\tGo to the Desert City. It's about it, after all.\n """),
+                          _("""\n\tHorrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.\n """),
+                          _("""\n\tTraders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.\n """),
+                          _("""\n\tEquipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.\n """),
+                          _("""\n\tTavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also.\n """)]
 
-FIRST_CAMP_ARRIVAL_MESSAGE = """\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
+FIRST_CAMP_ARRIVAL_MESSAGE = _("""\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
 \tIt's more like a small town, except lots of armed people wandering around, and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
-\tYou can stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage.\n """
+\tYou can stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage.\n """)
 #  /temporary shit
 
 
@@ -180,7 +166,7 @@ class CharacterSelectScene(UIScene):
         top_offset = 0
         for option in self.options:
             top_offset += 1
-            views.append(ButtonViewFixed(text=option,
+            views.append(ButtonViewFixed(text=_(option),
                                          callback=self.option_activated,
                                          layout_options=LayoutOptions(
                                              left=2,
@@ -253,7 +239,7 @@ class CharacterSelectScene(UIScene):
         self.director.push_scene(MainGameScene(game))
         self.director.push_scene(CampMenuScene(game))
         self.director.push_scene(SingleButtonMessageScene(message=FIRST_CAMP_ARRIVAL_MESSAGE,
-                                                          title='Arrival to treasure hunters camp',
+                                                          title=_('Arrival to treasure hunters camp'),
                                                           callback=lambda: (self.director.pop_scene(),
                                                                             terminal.clear())))
         self.director.game = game
@@ -434,12 +420,12 @@ class CampMenuScene(MultiButtonMessageScene):
     """ A Scene with camp menu """
     def __init__(self, game, *args, **kwargs):
         self.game = game
-        buttons = [('Delve into Desert City', CAMP_MENU_DESCRIPTIONS[0], self._to_city_start_thread),
-                   ('Get some rest.', CAMP_MENU_DESCRIPTIONS[1], self._take_rest),
-                   ('Sell treasures.', CAMP_MENU_DESCRIPTIONS[2], self._to_market),
-                   ('Go to equipment merchant.', CAMP_MENU_DESCRIPTIONS[3], self._to_equipment_merchant),
-                   ('Visit the tavern (closed for now).', CAMP_MENU_DESCRIPTIONS[4], self._to_tavern)]
-        super().__init__(buttons=buttons, title='Treasure hunters camp near Neth-Nikakh', *args, **kwargs)
+        buttons = [(_('Delve into Desert City'), CAMP_MENU_DESCRIPTIONS[0], self._to_city_start_thread),
+                   (_('Get some rest.'), CAMP_MENU_DESCRIPTIONS[1], self._take_rest),
+                   (_('Sell treasures.'), CAMP_MENU_DESCRIPTIONS[2], self._to_market),
+                   (_('Go to equipment merchant.'), CAMP_MENU_DESCRIPTIONS[3], self._to_equipment_merchant),
+                   (_('Visit the tavern (closed for now).'), CAMP_MENU_DESCRIPTIONS[4], self._to_tavern)]
+        super().__init__(buttons=buttons, title=_('Treasure hunters camp near Neth-Nikakh'), *args, **kwargs)
 
     def terminal_read(self, val):
         """ Handles input (intercept ESC button - exit game) """

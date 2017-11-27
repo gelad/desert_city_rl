@@ -1,0 +1,79 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# gelad <test@test>, 2017.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2017-11-27 20:37+0200\n"
+"PO-Revision-Date: 2017-11-27 20:44+0200\n"
+"Last-Translator: gelad <test@test>\n"
+"Language-Team: test\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 2.0.4\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: game_logic.py:1394
+msgid ""
+"{name} attacks {target_name} with {weapon_name} and deals {damage_dealt} "
+"damage!"
+msgstr ""
+"{name} атакует {target_name} {weapon_name} и наносит {damage_dealt} урона!"
+
+#: game_view.py:58
+msgid ""
+"Movement: Arrow keys and Keypad 1-9 \n"
+"Keypad 5 - 'wait 1 turn' command\n"
+"F1 - display this help message\n"
+"i - show player inventory\n"
+"l - look around\n"
+"g - pick up item from Ground\n"
+"u - use item\n"
+"w - wield (equip) item\n"
+"t - throw item from hand\n"
+"f - fire ranged weapon\n"
+"r - reload \n"
+"d - drop item\n"
+"o - take Off equipped item\n"
+"n - uNload ranged weapon\n"
+"c - close door\n"
+"s - smash (melee attack inanimate object, i.e. wall)\n"
+"Esc - Save and exit"
+msgstr ""
+"Перемещение: стрелки или цифровая клавиатура 1-9 \n"
+"Кнопка 5 на цифровой клавиатуре - команда 'подождать 1 ход'\n"
+"F1 - показать это сообщение\n"
+"i - показать инвентарь\n"
+"l - осмотреться\n"
+"g - поднять предмет\n"
+"u - использовать предмет\n"
+"w - одеть (взять в руку) предмет\n"
+"t - бросить предмет в руке\n"
+"f - выстрелить из дальнобойного оружия\n"
+"r - перезарядить оружие \n"
+"d - бросить предмет\n"
+"o - снять надетый предмет\n"
+"n - разрядить оружие\n"
+"c - закрыть (дверь)\n"
+"s - ударить в определенном направлении\n"
+"Esc - Сохранить игру и выйти"
+
+#: game_view.py:99
+msgid "Adventurer"
+msgstr "Авантюрист"
+
+#: game_view.py:99
+msgid "Gantra mercenary"
+msgstr "Гантрийский наёмник"
+
+#: game_view.py:99
+msgid "Magic seeker"
+msgstr "Искатель магии"
+
+#: game_view.py:99
+msgid "Warrior"
+msgstr "Воин"
