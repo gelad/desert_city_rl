@@ -472,10 +472,11 @@ class CampMenuScene(MultiButtonMessageScene):
         director = self.director
         while director.active_scene is not director.main_game_scene:  # pop to main game scene
             director.pop_scene()
-        self.ctx.clear()
-        director.push_scene(SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
+        message_scene = SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
                                                      title='Entering ruins.',
-                                                     layout_options='intrinsic'))
+                                                     layout_options='intrinsic')
+        message_scene.clear = True
+        director.push_scene(message_scene)
 
     def _take_rest(self):
         """ Method that replenshes player health for now """
