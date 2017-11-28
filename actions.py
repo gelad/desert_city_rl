@@ -4,6 +4,8 @@
 import game_logic
 import events
 
+from messages import _  # translation function
+
 import pickle
 
 
@@ -133,8 +135,11 @@ def act_launch_projectile(action, register_call, projectile_type, launcher, targ
             projectile.ai.target = target
             launcher.location.reg_entity(projectile)  # register projectile to location
             projectile.launch(launcher.position[0], launcher.position[1])
-            game_logic.Game.add_message(
-                launcher.name + ' launches a ' + projectile.name + '!', 'PLAYER', message_color)
+            game_logic.Game.add_message(message=
+                                _('{launcher_name} launches a {projectile_name}!').format(
+                                    launcher_name=launcher.name,
+                                    projectile_name=projectile.name),
+                                level='PLAYER', color=message_color)
 
 
 def act_use_ability(action, register_call, actor, target, ability, whole_time, use_offset):
@@ -173,8 +178,10 @@ def act_apply_timed_effect(action, register_call, target, effect, message_color)
     else:  # part that is executed when action fires
         if target and effect in target.effects:  # if target still exists and effect too
             if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect end
-                game_logic.Game.add_message(effect.eff.capitalize().replace('_', ' ') + ': ' + ' effect fades away.',
-                                            'PLAYER', message_color)
+                game_logic.Game.add_message(message=
+                                            _('{eff_name} effect fades away.').format(
+                                                eff_name=_(effect.eff).replace('_', ' ').capitalize()),
+                                            level='PLAYER', color=message_color)
             target.effects.remove(effect)  # remove effect
 
 
@@ -188,7 +195,9 @@ def act_deal_periodic_damage(action, register_call, act_mgr, target, effect,
             else:
                 act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect, message_color)  # apply a new timed effect
                 if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
-                    game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', message_color)
+                    game_logic.Game.add_message(message=
+                                                _('{eff_name}!').format(eff_name=_(effect.eff)).capitalize(),
+                                                level='PLAYER', color=message_color)
         else:  # if not stackable
             if effect in target.effects:  # if there is particularly this effect in
                 pass  # do nothing, do damage further
@@ -199,7 +208,9 @@ def act_deal_periodic_damage(action, register_call, act_mgr, target, effect,
                 else:
                     act_mgr.register_action(whole_time, act_apply_timed_effect, target, effect, message_color)  # apply a new timed effect
                     if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
-                        game_logic.Game.add_message(effect.eff.capitalize() + '!', 'PLAYER', message_color)
+                        game_logic.Game.add_message(message=
+                                                    _('{eff_name}!').format(eff_name=_(effect.eff)).capitalize(),
+                                                    level='PLAYER', color=message_color)
         action.t_needed = period  # set needed time to 1 period of damage
     else:  # part that is executed when action fires
         if target and not target.dead:  # if target still exists
@@ -207,8 +218,11 @@ def act_deal_periodic_damage(action, register_call, act_mgr, target, effect,
                 strike = game_logic.Strike(strike_type='periodic', damage=damage, dmg_type=dmg_type)
                 damage_dealt = target.take_strike(strike=strike)  # strike
                 if isinstance(target, game_logic.Player):  # if Player was a target - inform about effect
-                    game_logic.Game.add_message(effect.eff.capitalize() + ': ' + str(damage_dealt) + ' damage.',
-                                                'PLAYER', message_color)
+                    game_logic.Game.add_message(message=
+                                                _('{eff_name}: {damage} damage.').format(
+                                                    eff_name=_(effect.eff),
+                                                    damage=str(damage_dealt)).capitalize(),
+                                                level='PLAYER', color=message_color)
                 act_mgr.register_action(whole_time, act_deal_periodic_damage, act_mgr, target, effect,
                                         damage, dmg_type, period, whole_time, message_color, stackable)  # apply next tick of damage
 
@@ -402,8 +416,8 @@ def act_pick_up_item(action, register_call, actor, item):
         action.t_needed = actor.speed / 4  # pick up action is 1/4 speed
     else:  # part that is executed when action fires
         if isinstance(actor, game_logic.Player):
-            msg = 'You pick up ' + str(item) + '.'
-            game_logic.Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            msg = _('You pick up {item}.').format(item=str(item))
+            game_logic.Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
         actor.add_item(item)  # pick up item
         actor.actions.remove(action)  # remove performed action from actor's list
         actor.state = 'ready'  # return actor to ready state
