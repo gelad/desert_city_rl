@@ -137,8 +137,8 @@ def act_launch_projectile(action, register_call, projectile_type, launcher, targ
             projectile.launch(launcher.position[0], launcher.position[1])
             game_logic.Game.add_message(message=
                                 _('{launcher_name} launches a {projectile_name}!').format(
-                                    launcher_name=launcher.name,
-                                    projectile_name=projectile.name),
+                                    launcher_name=str(launcher),
+                                    projectile_name=str(projectile)),
                                 level='PLAYER', color=message_color)
 
 

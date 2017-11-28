@@ -143,6 +143,11 @@ class Entity:
     @property
     def description(self):
         """ Description property - return translated desc """
+        try:
+            if 'corpse' in self.categories:
+                return self._description
+        except AttributeError:
+            pass
         return _(self._description)
 
     @description.setter
@@ -157,6 +162,11 @@ class Entity:
 
     def __str__(self):
         """ Method returns string representation of an entity - it's name, translated """
+        try:
+            if 'corpse' in self.categories:
+                return self.name
+        except AttributeError:
+            pass
         return _(self.name)
 
     def relocate(self, x, y):
@@ -288,7 +298,7 @@ class BattleEntity(Entity):
                             damage = shield.block(damage=damage, dmg_type=dmg_type)
                             if damage != dmg_before_block and isinstance(self, Player):
                                 msg = _('Your {shield_name} blocks {blocked_damage} damage.').format(
-                                        shield_name=shield.name,
+                                        shield_name=str(shield),
                                         blocked_damage=str(dmg_before_block - damage)).capitalize()
                                 Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
             protection = self.get_protection(dmg_type)  # get (armor, block) tuple
@@ -356,6 +366,7 @@ class BattleEntity(Entity):
         if self.corpse == '':  # if default corpse
             corpse = Item(name=_("{name}'s corpse").format(name=str(self)), data_id=self.name + '_corpse',
                           description=_('A dead {name}.').format(name=str(self)).capitalize(),
+                          categories={'corpse'},
                           char='%', color=self.color, weight=self.weight)
         elif self.corpse == 'no corpse':  # if no corpse
             return None
@@ -1342,7 +1353,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 # fire Entity event
                 events.Event(self, {'type': 'hit_basic_attack', 'target': target, 'attacker': self,
                                     'damage': damage_dealt, 'dmg_type': self.dmg_type})
-                msg = '{name} attacks {target} and deals {damage} damage!'.format(
+                msg = _('{name} attacks {target} and deals {damage} damage!').format(
                     name=str(self),
                     target=str(target),
                     damage=str(damage_dealt)).capitalize()
@@ -1946,7 +1957,7 @@ class Game:
 
     def new_game(self):
         """ Method that starts a new game. """
-        self.player = Player(name=_('Player'), data_id='player', description=_('A player character.'), char='@',
+        self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23, damage=1,
                              categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
         self.is_waiting_input = True

@@ -975,7 +975,7 @@ class ItemSelectionScene(DescribedListSelectionScene):
             if len(item.effects) > 0:
                 text += _('Effects: ')
                 for effect in item.effects:
-                    text += _(effect.description) + '\n'
+                    text += effect.description + '\n'
             if len(item.abilities) > 0:
                 text += _('Abilities: ')
                 for ability in item.abilities:
@@ -1907,23 +1907,23 @@ class LookView(View):
                 else:
                     col = creature.color
                 ctx.color(terminal.color_from_argb(255, col[0], col[1], col[2]))
-                ctx.print(Point(0, cur_y), _('{creature_name} is here.').format(creature_name=_(creature.name)))
+                ctx.print(Point(0, cur_y), _('{creature_name} is here.').format(creature_name=str(creature)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
-                for ln in textwrap.wrap(_(creature.description), self.bounds.width):
+                for ln in textwrap.wrap(creature.description, self.bounds.width):
                     ctx.print(Point(0, cur_y), ln)
                     cur_y += 1
             ctx.print(Point(0, cur_y), _('Items:'))
             cur_y += 1
             for item in items:  # show items if any
                 ctx.color(terminal.color_from_argb(255, item.color[0], item.color[1], item.color[2]))
-                ctx.print(Point(0, cur_y), _('{item_name} is here.').format(item_name=_(item.name)))
+                ctx.print(Point(0, cur_y), _('{item_name} is here.').format(item_name=str(item)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
             ctx.print(Point(0, cur_y), _('Other:'))
             cur_y += 1
             for other in other:  # show other objects
                 ctx.color(terminal.color_from_argb(255, other.color[0], other.color[1], other.color[2]))
-                ctx.print(Point(0, cur_y), _('{other_name} is here.').format(other_name=_(other.name)))
+                ctx.print(Point(0, cur_y), _('{other_name} is here.').format(other_name=str(other)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1

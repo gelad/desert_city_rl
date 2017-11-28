@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2017-11-28 17:57+0200\n"
-"PO-Revision-Date: 2017-11-28 21:19+0200\n"
+"PO-Revision-Date: 2017-11-28 22:35+0200\n"
 "Last-Translator: gelad <test@test>\n"
 "Language-Team: test\n"
 "Language: ru\n"
@@ -1672,3 +1672,123 @@ msgstr "Другое:"
 #: game_view.py:1923
 msgid "{other_name} is here."
 msgstr "{other_name} здесь."
+
+msgid "{name} attacks {target} and deals {damage} damage!"
+msgstr "{name} атакует {target} и наносит {damage} урона!"
+
+msgid "bashing"
+msgstr "дробящий"
+
+msgid "slashing"
+msgstr "режущий"
+
+msgid "piercing"
+msgstr "колющий"
+
+msgid "fire"
+msgstr "огонь"
+
+msgid "cold"
+msgstr "холод"
+
+msgid "lightning"
+msgstr "молния"
+
+msgid "poison"
+msgstr "яд"
+
+msgid "acid"
+msgstr "кислота"
+
+msgid "death"
+msgstr "мертвящий"
+
+msgid "mental"
+msgstr "ментальный"
+
+msgid "strange"
+msgstr "странный"
+
+msgid "BLOCK_BASHING"
+msgstr "Блок дробящего"
+
+msgid "BLOCK_SLASHING"
+msgstr "Блок режущего"
+
+msgid "BLOCK_PIERCING"
+msgstr "Блок колющего"
+
+msgid "BLOCK_FIRE"
+msgstr "Блок огня"
+
+msgid "BLOCK_COLD"
+msgstr "Блок холода"
+
+msgid "BLOCK_LIGHTNING"
+msgstr "Блок молнии"
+
+msgid "BLOCK_POISON"
+msgstr "Блок яда"
+
+msgid "BLOCK_ACID"
+msgstr "Блок кислоты"
+
+msgid "BLOCK_DEATH"
+msgstr "Блок мертвящего"
+
+msgid "BLOCK_MENTAL"
+msgstr "Блок ментального"
+
+msgid "BLOCK_STRANGE"
+msgstr "Блок странного"
+
+msgid "RESIST_BASHING"
+msgstr "Сопротивление дробящему"
+
+msgid "RESIST_SLASHING"
+msgstr "Сопротивление режущему"
+
+msgid "RESIST_PIERCING"
+msgstr "Сопротивление колющему"
+
+msgid "RESIST_FIRE"
+msgstr "Сопротивление огню"
+
+msgid "RESIST_COLD"
+msgstr "Сопротивление холоду"
+
+msgid "RESIST_LIGHTNING"
+msgstr "Сопротивление молнии"
+
+msgid "RESIST_POISON"
+msgstr "Сопротивление яду"
+
+msgid "RESIST_ACID"
+msgstr "Сопротивление кислоте"
+
+msgid "RESIST_DEATH"
+msgstr "Сопротивление мертвящему"
+
+msgid "RESIST_MENTAL"
+msgstr "Сопротивление ментальному"
+
+msgid "RESIST_STRANGE"
+msgstr "Сопротивление странному"
+
+msgid "INCREASE_MELEE_DAMAGE"
+msgstr "Увеличение урона в ближнем бою"
+
+msgid "INCREASE_RANGED_DAMAGE"
+msgstr "Увеличение урона в дальнем бою"
+
+msgid "HASTE"
+msgstr "Спешка"
+
+msgid "SLOWED"
+msgstr "Замедление"
+
+msgid "POISONED"
+msgstr "Отравление"
+
+msgid "HEAL"
+msgstr "Лечение"

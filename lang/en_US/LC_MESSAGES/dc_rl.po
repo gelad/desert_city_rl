@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2017-11-28 17:57+0200\n"
-"PO-Revision-Date: 2017-11-28 18:18+0200\n"
+"PO-Revision-Date: 2017-11-28 22:36+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -325,6 +325,10 @@ msgstr ""
 
 #: dataset.py:223
 msgid "ancient ring"
+msgstr ""
+
+#: dataset.py:224
+msgid "Ancient ring."
 msgstr ""
 
 #: dataset.py:229
@@ -1565,4 +1569,124 @@ msgstr ""
 
 #: game_view.py:1923
 msgid "{other_name} is here."
+msgstr ""
+
+msgid "{name} attacks {target} and deals {damage} damage!"
+msgstr ""
+
+msgid "bashing"
+msgstr ""
+
+msgid "slashing"
+msgstr ""
+
+msgid "piercing"
+msgstr ""
+
+msgid "fire"
+msgstr ""
+
+msgid "cold"
+msgstr ""
+
+msgid "lightning"
+msgstr ""
+
+msgid "poison"
+msgstr ""
+
+msgid "acid"
+msgstr ""
+
+msgid "death"
+msgstr ""
+
+msgid "mental"
+msgstr ""
+
+msgid "strange"
+msgstr ""
+
+msgid "BLOCK_BASHING"
+msgstr ""
+
+msgid "BLOCK_SLASHING"
+msgstr ""
+
+msgid "BLOCK_PIERCING"
+msgstr ""
+
+msgid "BLOCK_FIRE"
+msgstr ""
+
+msgid "BLOCK_COLD"
+msgstr ""
+
+msgid "BLOCK_LIGHTNING"
+msgstr ""
+
+msgid "BLOCK_POISON"
+msgstr ""
+
+msgid "BLOCK_ACID"
+msgstr ""
+
+msgid "BLOCK_DEATH"
+msgstr ""
+
+msgid "BLOCK_MENTAL"
+msgstr ""
+
+msgid "BLOCK_STRANGE"
+msgstr ""
+
+msgid "RESIST_BASHING"
+msgstr ""
+
+msgid "RESIST_SLASHING"
+msgstr ""
+
+msgid "RESIST_PIERCING"
+msgstr ""
+
+msgid "RESIST_FIRE"
+msgstr ""
+
+msgid "RESIST_COLD"
+msgstr ""
+
+msgid "RESIST_LIGHTNING"
+msgstr ""
+
+msgid "RESIST_POISON"
+msgstr ""
+
+msgid "RESIST_ACID"
+msgstr ""
+
+msgid "RESIST_DEATH"
+msgstr ""
+
+msgid "RESIST_MENTAL"
+msgstr ""
+
+msgid "RESIST_STRANGE"
+msgstr ""
+
+msgid "INCREASE_MELEE_DAMAGE"
+msgstr ""
+
+msgid "INCREASE_RANGED_DAMAGE"
+msgstr ""
+
+msgid "HASTE"
+msgstr ""
+
+msgid "SLOWED"
+msgstr ""
+
+msgid "POISONED"
+msgstr ""
+
+msgid "HEAL"
 msgstr ""

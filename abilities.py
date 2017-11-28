@@ -220,8 +220,8 @@ class Ability(events.Observer):
         if isinstance(target, game_logic.BattleEntity):  # if target is a damageable BE
             damage_dealt = attacker.land_strike(strike=strike, target=target)  # land strike
             game_logic.Game.add_message(message=
-                _('{ability_name}: {target_name} takes {damage} {dmg_type} damage!').format(ability_name=self.name,
-                                                                                            target_name=target.name,
+                _('{ability_name}: {target_name} takes {damage} {dmg_type} damage!').format(ability_name=_(self.name),
+                                                                                            target_name=str(target),
                                                                                             damage=str(damage_dealt),
                                                                                             dmg_type=
                                                                                             _(reaction['dmg_type'])),
@@ -313,7 +313,7 @@ class Ability(events.Observer):
             game_logic.Game.add_message(message=_('{eff_name}: {eff_descr} for {time} ticks.').format(eff_name=
                                                                  _(reaction['effect'].eff).
                                                                  capitalize().replace('_', ' '),
-                                                                 eff_descr=_(reaction['effect'].description),
+                                                                 eff_descr=reaction['effect'].description,
                                                                  time=str(reaction['time'])),
                                         level='PLAYER', color=self.message_color)
         return {'success': True}  # PLACEHOLDER effect applying is always successiful now
@@ -386,11 +386,9 @@ class Ability(events.Observer):
                                                        reaction['stackable'])
         # doing pickle copy of effect to make every stack separate
         if isinstance(attacker, game_logic.Player):  # if player applies - inform him of effect
-            _('{target_name} is {eff_name}.').format(target_name=_(target.name).capitalize(),
-                                                     eff_name=_(reaction['effect'].eff).lower())
             game_logic.Game.add_message(message=
                 _('{target_name} is {eff_name}.').format(
-                    target_name=_(target.name).capitalize(),
+                    target_name=str(target).capitalize(),
                     eff_name=_(reaction['effect'].eff).lower()),
                 level='PLAYER', color=self.message_color)
         return {'success': True}  # PLACEHOLDER applying periodic damage is always successiful now
