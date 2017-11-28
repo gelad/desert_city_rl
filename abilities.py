@@ -6,6 +6,8 @@ import events
 import actions
 import bool_eval
 
+from messages import _  # translation function
+
 import pickle
 import random
 from math import hypot
@@ -217,8 +219,13 @@ class Ability(events.Observer):
             attacker = self.owner
         if isinstance(target, game_logic.BattleEntity):  # if target is a damageable BE
             damage_dealt = attacker.land_strike(strike=strike, target=target)  # land strike
-            game_logic.Game.add_message(self.name + ': ' + target.name + ' takes ' + str(damage_dealt) +
-                                        ' ' + reaction['dmg_type'] + ' damage!', 'PLAYER', self.message_color)
+            game_logic.Game.add_message(message=
+                _('{ability_name}: {target_name} takes {damage} {dmg_type} damage!').format(ability_name=self.name,
+                                                                                            target_name=target.name,
+                                                                                            damage=str(damage_dealt),
+                                                                                            dmg_type=
+                                                                                            _(reaction['dmg_type'])),
+                level='PLAYER', color=self.message_color)
             reaction_result['damage'] = damage_dealt
             reaction_result['target'] = target
             if damage_dealt > 0:
@@ -303,9 +310,12 @@ class Ability(events.Observer):
         self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
                                                        target, reaction['effect'], self.message_color)
         if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
-            game_logic.Game.add_message(reaction['effect'].eff.capitalize().replace('_', ' ') + ': ' +
-                                        reaction['effect'].description + ' for ' + str(reaction['time']) +
-                                        ' ticks.', 'PLAYER', self.message_color)
+            game_logic.Game.add_message(message=_('{eff_name}: {eff_descr} for {time} ticks.').format(eff_name=
+                                                                 _(reaction['effect'].eff).
+                                                                 capitalize().replace('_', ' '),
+                                                                 eff_descr=_(reaction['effect'].description),
+                                                                 time=str(reaction['time'])),
+                                        level='PLAYER', color=self.message_color)
         return {'success': True}  # PLACEHOLDER effect applying is always successiful now
     
     def react_remove_effect(self, reaction, event_data):
@@ -323,8 +333,11 @@ class Ability(events.Observer):
                 reaction_result['success'] = True
                 reaction_result['removed_effects_count'] = r
             if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
-                game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
-                                            reaction['effect'].eff.upper() + ' effects.', 'PLAYER', self.message_color)
+                game_logic.Game.add_message(message=
+                    _('{ability_name}: removed all {eff_name} effects.').format(
+                        ability_name=_(self.name).capitalize(),
+                        eff_name=_(reaction['effect'].eff).upper()),
+                    level='PLAYER', color=self.message_color)
         else:  # if specific number of effects has to be removed
             # choose needed effects
             needed_effects = [e for e in target.effects if e.eff == reaction['effect'].eff]
