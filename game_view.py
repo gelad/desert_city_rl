@@ -486,9 +486,9 @@ class CampMenuScene(MultiButtonMessageScene):
                 else:
                     count = 1
                 if item.name in treasures:
-                    treasures[item.name][0] += count
+                    treasures[str(item)][0] += count
                 else:
-                    treasures[item.name] = [count, item.properties['value']]
+                    treasures[str(item)] = [count, item.properties['value']]
                 sold.append(item)
         for item in sold:
             player.discard_item(item=item)  # remove sold items from inventory
@@ -496,12 +496,12 @@ class CampMenuScene(MultiButtonMessageScene):
             report_text += _('You sold some treasures:\n\n')
             total = 0
             for tr in treasures.keys():
-                report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}\n').format(tr_name=_(tr),
+                report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}\n').format(tr_name=tr,
                                                                     tr_count=str(treasures[tr][0]),
                                                                     tr_value=str(treasures[tr][1]),
                                                                     tr_total=str(treasures[tr][0] * treasures[tr][1]))
                 total += treasures[tr][0] * treasures[tr][1]
-            report_text += _('\nTotal treasures value: ') + str(total) + _(' coins.\n ')
+            report_text += _('\nTotal treasures value: {total} coins.\n ').format(total=str(total))
             player.properties['money'] += total  # give player the money
         else:
             report_text += _("""All you have to do in the marketplace today is wandering around. You don't have anything to sell right now.\n """)
