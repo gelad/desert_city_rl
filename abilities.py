@@ -350,19 +350,23 @@ class Ability(events.Observer):
                         target.effects.remove(effect)
                         r += 1
                     if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
-                        game_logic.Game.add_message(self.name.capitalize() + ': removed ' +
-                                                    str(len(needed_effects)) + ' ' +
-                                                    reaction['effect'].eff.upper() + ' effects.',
-                                                    'PLAYER', self.message_color)
+                        game_logic.Game.add_message(message=
+                            _('{ability_name}: removed {eff_number} {eff_name} effects.').format(
+                                ability_name=_(self.name).capitalize(),
+                                eff_number=str(len(needed_effects)),
+                                eff_name=_(reaction['effect'].eff).upper()),
+                            level='PLAYER', color=self.message_color)
                 else:  # if not
                     for effect in target.effects[:]:  # remove all such effects
                         if effect.eff == reaction['effect'].eff:
                             target.effects.remove(effect)
                             r += 1
                     if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
-                        game_logic.Game.add_message(self.name.capitalize() + ': removed all ' +
-                                                    reaction['effect'].eff.upper() + ' effects.',
-                                                    'PLAYER', self.message_color)
+                        game_logic.Game.add_message(message=
+                            _('{ability_name}: removed all {eff_name} effects.').format(
+                                ability_name=_(self.name).capitalize(),
+                                eff_name=_(reaction['effect'].eff).upper()),
+                            level='PLAYER', color=self.message_color)
                 if r > 0:  # if at least one effect removed - reaction successiful
                     reaction_result['success'] = True
                     reaction_result['removed_effects_count'] = r
@@ -382,8 +386,13 @@ class Ability(events.Observer):
                                                        reaction['stackable'])
         # doing pickle copy of effect to make every stack separate
         if isinstance(attacker, game_logic.Player):  # if player applies - inform him of effect
-            game_logic.Game.add_message(target.name.capitalize() + ' is ' + reaction['effect'].eff.lower() + '.',
-                                        'PLAYER', self.message_color)
+            _('{target_name} is {eff_name}.').format(target_name=_(target.name).capitalize(),
+                                                     eff_name=_(reaction['effect'].eff).lower())
+            game_logic.Game.add_message(message=
+                _('{target_name} is {eff_name}.').format(
+                    target_name=_(target.name).capitalize(),
+                    eff_name=_(reaction['effect'].eff).lower()),
+                level='PLAYER', color=self.message_color)
         return {'success': True}  # PLACEHOLDER applying periodic damage is always successiful now
 
 # ============================== UTILITY FUNCTIONS ===========================================
