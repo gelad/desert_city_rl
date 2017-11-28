@@ -92,6 +92,10 @@ CAMP_MENU_DESCRIPTIONS = [_("""\n\tGo to the Desert City. It's about it, after a
 FIRST_CAMP_ARRIVAL_MESSAGE = _("""\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
 \tIt's more like a small town, except lots of armed people wandering around, and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
 \tYou can stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage.\n """)
+
+BODYPARTS=[_('RIGHT_HAND'), _('LEFT_HAND'), _('RIGHT_RING'), _('LEFT_RING'), _('ARMS'), _('SHOULDERS'),
+           _('BODY'), _('HEAD'), _('FACE'), _('LEFT_EAR'), _('RIGHT_EAR'), _('NECK'), _('WAIST'), _('LEGS'),
+           _('FEET')]
 #  /temporary shit
 
 

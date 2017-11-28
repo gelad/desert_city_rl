@@ -146,8 +146,8 @@ class Entity:
         return self._weight
 
     def __str__(self):
-        """ Method returns string representation of an entity - it's name """
-        return self.name
+        """ Method returns string representation of an entity - it's name, translated """
+        return _(self.name)
 
     def relocate(self, x, y):
         """ Movement method, just moves entity to (x, y). """
@@ -165,7 +165,7 @@ class Entity:
                     self.location.path_map_update(x, y)
                     self.location.path_map_update(old_x, old_y)  # update path map
                 events.Event('location', {'type': 'entity_moved', 'entity': self})  # fire an event
-                msg = self.name + 'relocated to ' + str(x) + ':' + str(y)
+                msg = self.name + ' relocated to ' + str(x) + ':' + str(y)
                 Game.add_message(msg, 'DEBUG', [255, 255, 255])
                 return True
         else:
@@ -277,8 +277,10 @@ class BattleEntity(Entity):
                             # damage is damage passed through shield
                             damage = shield.block(damage=damage, dmg_type=dmg_type)
                             if damage != dmg_before_block and isinstance(self, Player):
-                                msg = 'Your ' + shield.name + ' blocks ' + str(dmg_before_block - damage) + ' damage.'
-                                Game.add_message(msg, 'PLAYER', [255, 255, 255])
+                                msg = _('Your {shield_name} blocks {blocked_damage} damage.').format(
+                                        shield_name=shield.name,
+                                        blocked_damage=str(dmg_before_block - damage)).capitalize()
+                                Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
             protection = self.get_protection(dmg_type)  # get (armor, block) tuple
             if protection[0] > 0 and 'ignore_protection' in strike.mods:
                 protection = (0, 0)
@@ -313,8 +315,8 @@ class BattleEntity(Entity):
         hp_before = self.hp  # remember hp before heal to calculate actual healed ammount
         self.hp += heal  # add hp
         healed_hp = self.hp - hp_before
-        msg = self.name + ' is healed for ' + str(healed_hp) + ' HP.'
-        Game.add_message(msg, 'PLAYER', [0, 255, 0])
+        msg = _('{name} is healed for {healed} HP.').format(name=str(self), healed=str(healed_hp)).capitalize()
+        Game.add_message(message=msg, level='PLAYER', color=[0, 255, 0])
         # fire an Entity event
         events.Event(self, {'type': 'healed', 'healer': healer, 'heal': healed_hp})
         if self.location:  # fire location event
@@ -340,9 +342,11 @@ class BattleEntity(Entity):
 
     def get_corpse(self):
         """ Method to get corpse Entity """
+        # TODO: potential bugs, corpse named by translated strings
         if self.corpse == '':  # if default corpse
-            corpse = Item(name=self.name + "'s corpse.", data_id=self.name + '_corpse',
-                          description='A dead ' + self.name + '.', char='%', color=self.color, weight=self.weight)
+            corpse = Item(name=_("{name}'s corpse.").format(name=str(self)), data_id=self.name + '_corpse',
+                          description=_('A dead {name}.').format(name=str(self)).capitalize(),
+                          char='%', color=self.color, weight=self.weight)
         elif self.corpse == 'no corpse':  # if no corpse
             return None
         else:  # if corpse entity_id specified
@@ -539,8 +543,8 @@ class Inventory(Entity):
     def drop_item(self, item):
         """ Item dropping method (in a location) """
         if isinstance(self, Player):
-            msg = 'You drop ' + str(item) + ' on the ground.'
-            Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            msg = _('You drop {item} on the ground.').format(item=str(item)).capitalize()
+            Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
         item.owner = None
         item.abilities_set_owner(item)  # if it has abilities - set their owner
         self.location.place_entity(item, self.position[0], self.position[1])  # place it on the map
@@ -1139,8 +1143,8 @@ class ItemCharges(Item):
             return self._weight
 
     def __str__(self):
-        """ Method returns string representation of ItemCharges - it's name with charges """
-        return self.name + '[[' + str(self.charges) + ']]'
+        """ Method returns string representation of ItemCharges - it's translated name with charges """
+        return '{name}[{charges}]'.format(name=super(Item).__str__(), charges=str(self.charges))
 
     def use(self, user, target):
         """ Overrides the use() method, to manage charges and item destruction """
@@ -1150,8 +1154,8 @@ class ItemCharges(Item):
                 self.decrease()
             return result
         else:
-            msg = self.name + ' is depleted!'
-            Game.add_message(msg, 'PLAYER', [255, 255, 255])
+            msg = _('{name} is depleted!').format(name=str(self))
+            Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
             return False
 
     def decrease(self):
@@ -1179,8 +1183,8 @@ class ItemShield(Item):
         self.durability = durability
 
     def __str__(self):
-        """ Method returns string representation of ItemShield - it's name with durability """
-        return self.name + '(' + str(self.durability) + ')'
+        """ Method returns string representation of ItemShield - it's translated name with durability """
+        return '{name}({durability})'.format(name=super(Item).__str__(), durability=str(self.durability))
 
     def block(self, damage, dmg_type):
         """ Method is called when shield blocks damage. Returns damage that passed through shield """
@@ -1245,7 +1249,7 @@ class ItemRangedWeapon(Item):
 
     def __str__(self):
         """ Method returns string representation of ItemRangedWeapon - it's name with number of ammo loaded """
-        return self.name + '[[' + str(len(self.ammo)) + ']]'
+        return '{name}[{ammo}]'.format(name=super(Item).__str__(), ammo=str(len(self.ammo)))
 
     def shoot(self, target):
         """ Method that shoots the weapon """
@@ -1328,8 +1332,11 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 # fire Entity event
                 events.Event(self, {'type': 'hit_basic_attack', 'target': target, 'attacker': self,
                                     'damage': damage_dealt, 'dmg_type': self.dmg_type})
-                msg = self.name + ' attacks ' + target.name + ' and deals ' + str(damage_dealt) + ' damage!'
-                Game.add_message(msg, 'PLAYER', [255, 255, 255])
+                msg = '{name} attacks {target} and deals {damage} damage!'.format(
+                    name=str(self),
+                    target=str(target),
+                    damage=str(damage_dealt)).capitalize()
+                Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
                 msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
                     target.position[0]) + ':' + str(target.position[1])
                 Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -1394,7 +1401,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 msg = _('{name} attacks {target_name} with {weapon_name} and deals {damage_dealt} damage!').format(
                     name=_(self.name), target_name=_(target.name), weapon_name=_(weapon.name),
                     damage_dealt=str(damage_dealt))
-                Game.add_message(msg, 'PLAYER', [255, 255, 255])
+                Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
                 msg = self.name + '/' + target.name + 'for' + str(damage_dealt) + 'dmg@' + str(
                     target.position[0]) + ':' + str(target.position[1])
                 Game.add_message(msg, 'DEBUG', [255, 255, 255])
@@ -1491,7 +1498,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
 
     def death(self):
         """ Death method """
-        Game.add_message(self.name + ' dies!', 'PLAYER', [255, 255, 255])
+        Game.add_message(message=_('{name} dies!').format(name=str(self)).capitalize(),
+                         level='PLAYER', color=[255, 255, 255])
         Game.add_message(self.name + 'die', 'DEBUG', [255, 255, 255])
         events.Event(self.location, {'type': 'entity_died', 'entity': self})  # fire an event
         corpse = self.get_corpse()  # get corpse entity
@@ -1505,6 +1513,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         self.location.remove_entity(self)
         self.ai.close()  # unregister Observer
 
+#  TODO: _() stopped here ================================
 
 class UnguidedProjectile(Actor, Abilities, Entity):
     """ Mixed base class for unguided projectile (thrown, magic, etc) """
