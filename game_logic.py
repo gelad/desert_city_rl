@@ -344,7 +344,7 @@ class BattleEntity(Entity):
         """ Method to get corpse Entity """
         # TODO: potential bugs, corpse named by translated strings
         if self.corpse == '':  # if default corpse
-            corpse = Item(name=_("{name}'s corpse.").format(name=str(self)), data_id=self.name + '_corpse',
+            corpse = Item(name=_("{name}'s corpse").format(name=str(self)), data_id=self.name + '_corpse',
                           description=_('A dead {name}.').format(name=str(self)).capitalize(),
                           char='%', color=self.color, weight=self.weight)
         elif self.corpse == 'no corpse':  # if no corpse
@@ -1144,7 +1144,7 @@ class ItemCharges(Item):
 
     def __str__(self):
         """ Method returns string representation of ItemCharges - it's translated name with charges """
-        return '{name}[{charges}]'.format(name=super(Item).__str__(), charges=str(self.charges))
+        return '{name}[[{charges}]]'.format(name=_(self.name), charges=str(self.charges))
 
     def use(self, user, target):
         """ Overrides the use() method, to manage charges and item destruction """
@@ -1184,7 +1184,7 @@ class ItemShield(Item):
 
     def __str__(self):
         """ Method returns string representation of ItemShield - it's translated name with durability """
-        return '{name}({durability})'.format(name=super(Item).__str__(), durability=str(self.durability))
+        return '{name}({durability})'.format(name=_(self.name), durability=str(self.durability))
 
     def block(self, damage, dmg_type):
         """ Method is called when shield blocks damage. Returns damage that passed through shield """
@@ -1249,7 +1249,7 @@ class ItemRangedWeapon(Item):
 
     def __str__(self):
         """ Method returns string representation of ItemRangedWeapon - it's name with number of ammo loaded """
-        return '{name}[{ammo}]'.format(name=super(Item).__str__(), ammo=str(len(self.ammo)))
+        return '{name}[[{ammo}]]'.format(name=_(self.name), ammo=str(len(self.ammo)))
 
     def shoot(self, target):
         """ Method that shoots the weapon """
@@ -1513,7 +1513,6 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         self.location.remove_entity(self)
         self.ai.close()  # unregister Observer
 
-#  TODO: _() stopped here ================================
 
 class UnguidedProjectile(Actor, Abilities, Entity):
     """ Mixed base class for unguided projectile (thrown, magic, etc) """
@@ -1603,7 +1602,7 @@ class Player(Fighter):
 
     def death(self):
         """ Death method """
-        Game.add_message('You died!', 'PLAYER', [255, 0, 0])
+        Game.add_message(message=_('You died!'), level='PLAYER', color=[255, 0, 0])
         Game.add_message(self.name + 'player died', 'DEBUG', [255, 255, 255])
         self.char = '%'
         self.color = [255, 0, 0]
@@ -1876,7 +1875,7 @@ class Location:
                                 break
                     if match:
                         return x, y
-        return None  # TODO: throw some exception
+        return None
 
 
 class Game:
@@ -1937,7 +1936,7 @@ class Game:
 
     def new_game(self):
         """ Method that starts a new game. """
-        self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
+        self.player = Player(name=_('Player'), data_id='player', description=_('A player character.'), char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23, damage=1,
                              categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
         self.is_waiting_input = True
