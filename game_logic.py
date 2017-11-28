@@ -128,7 +128,7 @@ class Entity:
                  weight=0, pass_cost=1, occupies_tile=False, blocks_los=False, blocks_shots=0):
         self.name = name  # entity name
         self.data_id = data_id  # id in Entity data(base)
-        self.description = description  # entity's description
+        self._description = description  # entity's description
         self.location = location  # Location object, where entity is placed
         self.position = position  # (x, y) tuple, represents position in the location
         self._weight = weight  # weight of an entity, to calculate various things
@@ -139,6 +139,16 @@ class Entity:
         self.char = char  # char that represents entity in graphics ('@')
         self.color = color  # entity char color
         self.effects = []  # entity effects
+
+    @property
+    def description(self):
+        """ Description property - return translated desc """
+        return _(self._description)
+
+    @description.setter
+    def description(self, value):
+        """ Description setter """
+        self._description = value
 
     @property
     def weight(self):

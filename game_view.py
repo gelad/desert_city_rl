@@ -665,10 +665,14 @@ class DescribedListSelectionScene(UIScene):
         self.buttons = []
         letter_index = ord('a')  # start menu item indexing from 'a'
         for option in self.options:
-            if alphabet:
-                button_text = chr(letter_index) + ') ' + _(str(option))
+            if isinstance(option, game_logic.Entity):
+                b_text = str(option)  # entity name already translated
             else:
-                button_text = _(str(option))
+                b_text = _(str(option))
+            if alphabet:
+                button_text = chr(letter_index) + ') ' + b_text
+            else:
+                button_text = b_text
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
                                      layout_options=LayoutOptions(

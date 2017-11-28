@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2017-11-28 17:57+0200\n"
-"PO-Revision-Date: 2017-11-28 18:14+0200\n"
+"PO-Revision-Date: 2017-11-28 21:19+0200\n"
 "Last-Translator: gelad <test@test>\n"
 "Language-Team: test\n"
 "Language: ru\n"
@@ -23,91 +23,91 @@ msgstr "{ability_name}: {target_name} получает {damage} урона ({dmg
 
 #: abilities.py:313
 msgid "{eff_name}: {eff_descr} for {time} ticks."
-msgstr ""
+msgstr "{eff_name}: {eff_descr} на {time} тиков."
 
 #: abilities.py:337 abilities.py:366
 msgid "{ability_name}: removed all {eff_name} effects."
-msgstr ""
+msgstr "{ability_name}: нейтрализованы все эффекты {eff_name}."
 
 #: abilities.py:354
 msgid "{ability_name}: removed {eff_number} {eff_name} effects."
-msgstr ""
+msgstr "{ability_name}: нейтрализовано {eff_number} эффектов {eff_name}."
 
 #: abilities.py:389 abilities.py:392
 msgid "{target_name} is {eff_name}."
-msgstr ""
+msgstr "{target_name} теперь под эффектом {eff_name}."
 
 #: actions.py:139
 msgid "{launcher_name} launches a {projectile_name}!"
-msgstr ""
+msgstr "{launcher_name} запускает {projectile_name}!"
 
 #: actions.py:182
 msgid "{eff_name} effect fades away."
-msgstr ""
+msgstr "эффект {eff_name} пропадает."
 
 #: actions.py:199 actions.py:212
 msgid "{eff_name}!"
-msgstr ""
+msgstr "{eff_name}!"
 
 #: actions.py:222
 msgid "{eff_name}: {damage} damage."
-msgstr ""
+msgstr "{eff_name}: {damage} урона."
 
 #: actions.py:419
 msgid "You pick up {item}."
-msgstr ""
+msgstr "Вы поднимаете {item}."
 
 #: commands.py:86
 msgid "Pick up item:"
-msgstr ""
+msgstr "Поднять предмет:"
 
 #: commands.py:148
 msgid "Throw item:"
-msgstr ""
+msgstr "Бросить предмет:"
 
 #: commands.py:153
 msgid "Take something in hand to throw it."
-msgstr ""
+msgstr "Возьмите что-нибудь в руки, чтобы бросить."
 
 #: commands.py:183
 msgid "Load ammo:"
-msgstr ""
+msgstr "Зарядить боеприпасы:"
 
 #: commands.py:190
 msgid "No {ammo_type} type ammunition."
-msgstr ""
+msgstr "Нет боеприпасов следующего вида: {ammo_type}."
 
 #: commands.py:195
 msgid "{item} is fully loaded."
-msgstr ""
+msgstr "Оружие {item} полностью заряжено."
 
 #: commands.py:220
 msgid "Fire weapon:"
-msgstr ""
+msgstr "Выстрелить из:"
 
 #: commands.py:225
 msgid "Equip ranged weapon to fire."
-msgstr ""
+msgstr "Возьмите в руки оружие дальнего боя"
 
 #: commands.py:240
 msgid "Horrors of the Desert City got you."
-msgstr ""
+msgstr "Ужасы Города в Пустыне настигли вас."
 
 #: commands.py:241
 msgid "You are dead."
-msgstr ""
+msgstr "Вы мертвы."
 
 #: commands.py:242
 msgid "Return to main menu"
-msgstr ""
+msgstr "Вернуться в главное меню"
 
 #: commands.py:271
 msgid "Failed to execute line: {line}"
-msgstr ""
+msgstr "Ошибка при выполнении строки: {line}"
 
 #: commands.py:283
 msgid "Do you really want to leave this location?"
-msgstr ""
+msgstr "Вы правда хотите покинуть это место?"
 
 #: commands.py:290
 msgid ""
@@ -115,40 +115,46 @@ msgid ""
 "[color=red]WARNING: There are enemies nearby! If you choose to leave now, "
 "you will be chased, and probably lose some items while fleeing."
 msgstr ""
+"\n"
+"[color=red]ВНИМАНИЕ: Поблизости есть враги! Если вы решите уйти сейчас, они "
+"будут гнаться за вами, и вы можете потерять предметы в процессе."
 
 #: commands.py:292
 msgid "Yes, head back to the camp."
-msgstr ""
+msgstr "Да, направиться в лагерь."
 
 #: commands.py:294
 msgid "No, stay here."
-msgstr ""
+msgstr "Нет, остаться здесь"
 
 #: commands.py:295
 msgid "Leaving location"
-msgstr ""
+msgstr "Покинуть локацию"
 
 #: commands.py:322
 msgid "You fled from the enemies, but lost some items in the process:\n"
 msgstr ""
+"Вы убежали от врагов, но потеряли некоторые предметы во время бегства:\n"
 
 #: commands.py:324
 msgid "{item}, "
-msgstr ""
+msgstr "{item}, "
 
 #: commands.py:328
 msgid "You fled from the enemies and kept all of your items. Lucky!\n"
-msgstr ""
+msgstr "Вы убежали от врагов и ничего не потеряли! Какая удача!\n"
 
 #: commands.py:342
 msgid ""
 "You obtained some treasures:\n"
 "\n"
 msgstr ""
+"Вы наши сокровища:\n"
+"\n"
 
 #: commands.py:345 game_view.py:510
 msgid "{tr_name} x{tr_count} * {tr_value} = {tr_total}\n"
-msgstr ""
+msgstr "{tr_name} x{tr_count} * {tr_value} = {tr_total}\n"
 
 #: commands.py:351 game_view.py:515
 msgid ""
@@ -156,192 +162,201 @@ msgid ""
 "Total treasures value: {total} coins.\n"
 " "
 msgstr ""
+"\n"
+"Общая ценность: {total} монет.\n"
+" "
 
 #: commands.py:353
 msgid ""
 "You escaped the City with nothing of value in your pockets. At least you "
 "managed to stay alive.\n"
 msgstr ""
+"Вы покинули Город, не найдя ничего ценного. Во всяком случае, вы остались в "
+"живых.\n"
 
 #: commands.py:362
 msgid "Successful raid."
-msgstr ""
+msgstr "Успешная вылазка"
 
 #: dataset.py:27
 msgid "A sandstone wall."
-msgstr ""
+msgstr "Стена из песчаника."
 
 #: dataset.py:27
 msgid "Wall"
-msgstr ""
+msgstr "Стена"
 
 #: dataset.py:35
 msgid "Small window"
-msgstr ""
+msgstr "Маленькое окно"
 
 #: dataset.py:38
 msgid "A hole in sandstone wall."
-msgstr ""
+msgstr "Дыра в стене из песчаника."
 
 #: dataset.py:45
 msgid "Large window"
-msgstr ""
+msgstr "Большое окно"
 
 #: dataset.py:49
 msgid "A large window in sandstone wall."
-msgstr ""
+msgstr "Большой оконный проём в стене из песчаника"
 
 #: dataset.py:56
 msgid "Pile of sandstone blocks"
-msgstr ""
+msgstr "Груда камней (песчаник)"
 
 #: dataset.py:61
 msgid "A collapsed structure, like wall or pillar."
-msgstr ""
+msgstr "Остатки строения"
 
 #: dataset.py:67
 msgid "Pile of wooden debris"
-msgstr ""
+msgstr "Груда деревянного мусора"
 
 #: dataset.py:72
 msgid "Large destroyed wooden furniture."
-msgstr ""
+msgstr "Остатки какой-то мебели"
 
 #: dataset.py:78
 msgid "Wooden board"
-msgstr ""
+msgstr "Деревянная доска"
 
 #: dataset.py:83
 msgid "Wooden wagon board. Provides small cover from projectiles."
-msgstr ""
+msgstr "Доска повозки. Даёт небольшое укрытие от снарядов."
 
 #: dataset.py:89
 msgid "Wooden wheel"
-msgstr ""
+msgstr "Деревянное колесо"
 
 #: dataset.py:94
 msgid "Wooden wagon wheel. Provides small cover from projectiles."
-msgstr ""
+msgstr "Колесо повозки. Даёт небольшое укрытие от снарядов."
 
 #: dataset.py:100
 msgid "Wooden counter"
-msgstr ""
+msgstr "Деревянный прилавок"
 
 #: dataset.py:105
 msgid "Wooden counter. Provides small cover from projectiles."
-msgstr ""
+msgstr "Деревянный прилавок. Даёт небольшое укрытие от снарядов."
 
 #: dataset.py:111
 msgid "Wooden table"
-msgstr ""
+msgstr "Деревянный стол."
 
 #: dataset.py:116
 msgid "Wooden table. Provides small cover from projectiles."
-msgstr ""
+msgstr "Деревянный стол. Даёт небольшое укрытие от снарядов."
 
 #: dataset.py:122
 msgid "Stone table"
-msgstr ""
+msgstr "Каменный стол"
 
 #: dataset.py:127
 msgid "Stone table. Provides small cover from projectiles."
-msgstr ""
+msgstr "Каменный стол. Даёт небольшое укрытие от снарядов."
 
 #: dataset.py:133
 msgid "Rusty anvil"
-msgstr ""
+msgstr "Ржавая наковальня"
 
 #: dataset.py:138
 msgid "An anvil, dirty and covered in rust."
-msgstr ""
+msgstr "Наковальня, покрытая грязью и изъеденная ржавчиной."
 
 #: dataset.py:144
 msgid "Iron grate"
-msgstr ""
+msgstr "Железная решётка"
 
 #: dataset.py:148
 msgid "A grate made of iron, too tight for man to pass through."
-msgstr ""
+msgstr "Решётка из железа, слишком узкая, чтобы сквозь прутья пролез человек"
 
 #: dataset.py:154
 msgid "Furnace"
-msgstr ""
+msgstr "Горн"
 
 #: dataset.py:158
 msgid "Device for heating, made with heavy stone blocks."
-msgstr ""
+msgstr "Устройство для нагревания предметов, сделанное из тяжёлых камней."
 
 #: dataset.py:164
 msgid "Corrosive moss"
-msgstr ""
+msgstr "Кислотный мох"
 
 #: dataset.py:168
 msgid "A large patch of green acid-dripping moss."
-msgstr ""
+msgstr "Большие заросли кислотного мха."
 
 #: dataset.py:176
 msgid "Corrosive acid"
-msgstr ""
+msgstr "Кислота"
 
 #: dataset.py:181
 msgid "A wooden door."
-msgstr ""
+msgstr "Деревянная дверь."
 
 #: dataset.py:181
 msgid "Door"
-msgstr ""
+msgstr "Дверь"
 
 #: dataset.py:190
 msgid "ancient coin"
-msgstr ""
+msgstr "древняя монета"
 
 #: dataset.py:192
 msgid "An ancient coin."
-msgstr ""
+msgstr "Древняя монета."
 
 #: dataset.py:198
 msgid "ancient scroll"
-msgstr ""
+msgstr "древний свиток"
 
 #: dataset.py:200 dataset.py:224
 msgid "Ancient scroll, with some writing in it."
-msgstr ""
+msgstr "Древний свиток с какими-то записями."
 
 #: dataset.py:207
 msgid "clay tablet"
-msgstr ""
+msgstr "глиняная табличка"
 
 #: dataset.py:209
 msgid "Clay tablet, with some writing or picture in it."
-msgstr ""
+msgstr "Глиняная табличка, со следами каких-то надписей и изображений."
 
 #: dataset.py:215
 msgid "ancient pottery"
-msgstr ""
+msgstr "древняя керамика"
 
 #: dataset.py:217
 msgid "Ancient jar, or pot, with some pictures or engravings."
-msgstr ""
+msgstr "Горшок с полустёртой гравировкой и рисунком."
 
 #: dataset.py:223
 msgid "ancient ring"
-msgstr ""
+msgstr "древнее кольцо"
+
+#: dataset.py:224
+msgid "Ancient ring."
+msgstr "Древнее кольцо."
 
 #: dataset.py:229
 msgid "ancient necklace"
-msgstr ""
+msgstr "древнее ожерелье"
 
 #: dataset.py:230
 msgid "Ancient necklace."
-msgstr ""
+msgstr "Древнее ожерелье."
 
 #: dataset.py:235
 msgid "item_boulder"
-msgstr ""
+msgstr "камень"
 
 #: dataset.py:236
 msgid "A stone boulder."
-msgstr ""
+msgstr "Камень."
 
 #: dataset.py:239
 msgid "adventurer's corpse"
@@ -349,761 +364,780 @@ msgstr "труп искателя сокровищ"
 
 #: dataset.py:240
 msgid "A dead body of adventurer, not so lucky as you."
-msgstr ""
+msgstr "Труп искателя сокровищ, по всей видимости менее удачливого."
 
 #: dataset.py:244
 msgid "human skeleton"
-msgstr ""
+msgstr "скелет человека"
 
 #: dataset.py:245
 msgid "Human skeleton."
-msgstr ""
+msgstr "Скелет человека."
 
 #: dataset.py:249
 msgid "horse skeleton"
-msgstr ""
+msgstr "скелет лошади"
 
 #: dataset.py:250
 msgid "Horse skeleton."
-msgstr ""
+msgstr "Скелет лошади."
 
 #: dataset.py:254
 msgid "haste potion"
-msgstr ""
+msgstr "зелье спешки"
 
 #: dataset.py:255
 msgid "A potion that hastens user by 50%."
-msgstr ""
+msgstr "Зелье ускоряет все действия на 50%."
 
 #: dataset.py:262 dataset.py:356
 msgid "Haste"
-msgstr ""
+msgstr "Спешка"
 
 #: dataset.py:267
 msgid "antidote potion"
-msgstr ""
+msgstr "антидот"
 
 #: dataset.py:268
 msgid ""
 "A potion that cures all poison effects, and protects from poison for a short "
 "time."
 msgstr ""
+"Зелье, которое нейтрализует действие ядов, и защищает от них на короткое "
+"время."
 
 #: dataset.py:278
 msgid "Antidote"
-msgstr ""
+msgstr "Антидот"
 
 #: dataset.py:283
 msgid "scroll of Lightning"
-msgstr ""
+msgstr "свиток молнии"
 
 #: dataset.py:284
 msgid "A scroll that calls a lightning strike on enemy."
-msgstr ""
+msgstr "Свиток, который обрушивает удар молнии с небес на противника."
 
 #: dataset.py:291
 msgid "Lightning"
-msgstr ""
+msgstr "Молния"
 
 #: dataset.py:296
 msgid "scroll of Firebolt"
-msgstr ""
+msgstr "свиток огненной стрелы"
 
 #: dataset.py:298
 msgid "A scroll that hurls a firebolt at enemy."
-msgstr ""
+msgstr "Свиток, который запускает огненную стрелу в противника."
 
 #: dataset.py:308 dataset.py:895
 msgid "firebolt"
-msgstr ""
+msgstr "огненная стрела"
 
 #: dataset.py:309 dataset.py:896
 msgid "An arrow of pure flame."
-msgstr ""
+msgstr "Стрела из чистого пламени."
 
 #: dataset.py:312 dataset.py:732 dataset.py:749 dataset.py:899
 msgid "Ignite"
-msgstr ""
+msgstr "Поджог"
 
 #: dataset.py:317 dataset.py:854 dataset.py:906
 msgid "Firebolt"
-msgstr ""
+msgstr "Огненная стрела"
 
 #: dataset.py:322
 msgid "scroll of Frostbolt"
-msgstr ""
+msgstr "свиток морозной стрелы"
 
 #: dataset.py:324
 msgid "A scroll that hurls a frostbolt at enemy."
-msgstr ""
+msgstr "Свиток, который запускает в противника морозную стрелу."
 
 #: dataset.py:334 dataset.py:926
 msgid "frostbolt"
-msgstr ""
+msgstr "морозная стрела"
 
 #: dataset.py:335
 msgid "An arrow of freezing energy."
-msgstr ""
+msgstr "Стрела замораживающей энергии."
 
 #: dataset.py:338 dataset.py:930 dataset.py:932
 msgid "Freeze"
-msgstr ""
+msgstr "Заморозка"
 
 #: dataset.py:343 dataset.py:946
 msgid "Frostbolt"
-msgstr ""
+msgstr "Морозная стрела"
 
 #: dataset.py:348
 msgid "healing potion"
-msgstr ""
+msgstr "зелье лечения"
 
 #: dataset.py:349
 msgid "A potion that heals 5 HP."
-msgstr ""
+msgstr "Зелье, которое излечивает 5 ОЗ."
 
 #: dataset.py:361
 msgid "barbed loincloth"
-msgstr ""
+msgstr "шипастая повязка"
 
 #: dataset.py:362
 msgid "It is covered in spikes. Ouch!"
-msgstr ""
+msgstr "Ой! Она вся покрыта шипами!"
 
 #: dataset.py:368
 msgid "Barbs"
-msgstr ""
+msgstr "Шипы"
 
 #: dataset.py:373
 msgid "ring of poison resistance"
-msgstr ""
+msgstr "кольцо сопротивления яду"
 
 #: dataset.py:374
 msgid "Ring that grants protection from poison."
-msgstr ""
+msgstr "Кольцо, которое защищает от яда."
 
 #: dataset.py:380
 msgid "ring of fire resistance"
-msgstr ""
+msgstr "кольцо сопротивления огню"
 
 #: dataset.py:381
 msgid "Ring that grants protection from fire."
-msgstr ""
+msgstr "Кольцо, которое защищает от огня."
 
 #: dataset.py:387
 msgid "ring of cold resistance"
-msgstr ""
+msgstr "кольцо сопротивления холоду"
 
 #: dataset.py:388
 msgid "Ring that grants protection from cold."
-msgstr ""
+msgstr "Кольцо, которое защищает от холода."
 
 #: dataset.py:394
 msgid "ring of lightning resistance"
-msgstr ""
+msgstr "кольцо защиты от молнии"
 
 #: dataset.py:396
 msgid "Ring that grants protection from lightning."
-msgstr ""
+msgstr "Кольцо, которое защищает от молнии."
 
 #: dataset.py:402
 msgid "wooden buckler"
-msgstr ""
+msgstr "деревянный баклер"
 
 #: dataset.py:403
 msgid "A light wooden shield."
-msgstr ""
+msgstr "Маленький деревянный щит."
 
 #: dataset.py:412
 msgid "misurka"
-msgstr ""
+msgstr "мисюрка"
 
 #: dataset.py:413
 msgid "A light iron helmet with spike on top."
-msgstr ""
+msgstr "Лёгкий железный шлем с остриём на макушке."
 
 #: dataset.py:419
 msgid "mail armor"
-msgstr ""
+msgstr "кольчуга"
 
 #: dataset.py:420
 msgid "An armor made of overlapping layers of metal rings."
-msgstr ""
+msgstr "Броня из нескольких слоёв железных колец."
 
 #: dataset.py:426
 msgid "iron pauldrons"
-msgstr ""
+msgstr "железные наплечники"
 
 #: dataset.py:427
 msgid "A pair of iron pauldrons."
-msgstr ""
+msgstr "Пара железных наплечников."
 
 #: dataset.py:434
 msgid "iron boots"
-msgstr ""
+msgstr "железные ботинки"
 
 #: dataset.py:435
 msgid "A pair of iron greaves."
-msgstr ""
+msgstr "Пара железных сапог."
 
 #: dataset.py:441
 msgid "iron armguards"
-msgstr ""
+msgstr "железные наручи"
 
 #: dataset.py:442
 msgid "A pair of iron armguards."
-msgstr ""
+msgstr "Пара железных наручей."
 
 #: dataset.py:448
 msgid "mail leggings"
-msgstr ""
+msgstr "кольчужные поножи"
 
 #: dataset.py:449
 msgid "A pair of mail leggings."
-msgstr ""
+msgstr "Кольчужные поножи."
 
 #: dataset.py:455
 msgid "leather cap"
-msgstr ""
+msgstr "кожаная шапка"
 
 #: dataset.py:456
 msgid "A leather cap offers light protection."
-msgstr ""
+msgstr "Шапка из кожи, дает слабую защиту."
 
 #: dataset.py:462
 msgid "leather armor"
-msgstr ""
+msgstr "кожаная броня"
 
 #: dataset.py:463
 msgid "A light armor made of leather."
-msgstr ""
+msgstr "Лёгкая броня из варёной кожи."
 
 #: dataset.py:469
 msgid "leather pauldrons"
-msgstr ""
+msgstr "кожаные наплечники"
 
 #: dataset.py:470
 msgid "A pair of leather pauldrons."
-msgstr ""
+msgstr "Пара кожаных наплечников."
 
 #: dataset.py:477
 msgid "leather boots"
-msgstr ""
+msgstr "кожаные сапоги"
 
 #: dataset.py:478
 msgid "A pair of leather boots."
-msgstr ""
+msgstr "Пара кожаных сапог."
 
 #: dataset.py:484
 msgid "leather armguards"
-msgstr ""
+msgstr "кожаные наручи"
 
 #: dataset.py:485
 msgid "A pair of leather armguards."
-msgstr ""
+msgstr "Пара кожаных наручей."
 
 #: dataset.py:491
 msgid "leather leggings"
-msgstr ""
+msgstr "кожаные поножи"
 
 #: dataset.py:492
 msgid "A pair of leather leggings."
-msgstr ""
+msgstr "Кольчужные поножи."
 
 #: dataset.py:498
 msgid "sabre"
-msgstr ""
+msgstr "сабля"
 
 #: dataset.py:499
 msgid "A sharp sabre with pointy tip."
-msgstr ""
+msgstr "Заточенная сабля с острым концом."
 
 #: dataset.py:504
 msgid "khopesh"
-msgstr ""
+msgstr "копеш"
 
 #: dataset.py:505
 msgid "An ancient bronze sickle-sword."
-msgstr ""
+msgstr "Древний бронзовый меч с серповидным лезвием."
 
 #: dataset.py:510
 msgid "longsword"
-msgstr ""
+msgstr "длинный меч"
 
 #: dataset.py:511
 msgid "A double-edged straight sword."
-msgstr ""
+msgstr "Обоюдоострый прямой полуторный меч."
 
 #: dataset.py:516
 msgid "zweihander"
-msgstr ""
+msgstr "цвайхандер"
 
 #: dataset.py:517
 msgid ""
 "A long and heavy two-handed sword. Slow to swing, but extremely heavy-"
 "hitting."
 msgstr ""
+"Длинный и тяжелый двуручный меч. Им долго замахиваться, но если попасть - "
+"пиши пропало."
 
 #: dataset.py:522
 msgid "tabar"
-msgstr ""
+msgstr "табар"
 
 #: dataset.py:523
 msgid "Fighting axe, with metal handle suitable for parrying."
-msgstr ""
+msgstr "Боевой топор с металлической рукоятью для блокирования ударов."
 
 #: dataset.py:528
 msgid "panabas"
-msgstr ""
+msgstr "панаба"
 
 #: dataset.py:529
 msgid "Long sword-like two-handed axe."
-msgstr ""
+msgstr "Двуручный топор с вытянутым лезвием."
 
 #: dataset.py:534
 msgid "dagger"
-msgstr ""
+msgstr "кинжал"
 
 #: dataset.py:535
 msgid "A dagger about 20cm long."
-msgstr ""
+msgstr "Кинжал около 20см в длину."
 
 #: dataset.py:540
 msgid "jambiyah"
-msgstr ""
+msgstr "джамбийя"
 
 #: dataset.py:541
 msgid "A knife with broad blade, suited for slashing."
-msgstr ""
+msgstr "Нож с широким коротким лезвием, приспособленный для режущих ударов."
 
 #: dataset.py:546
 msgid "kris"
-msgstr ""
+msgstr "крис"
 
 #: dataset.py:547
 msgid "A dagger with flame-like blade."
-msgstr ""
+msgstr "Кинжал с волнистым лезвием."
 
 #: dataset.py:552
 msgid "assegai"
-msgstr ""
+msgstr "ассегай"
 
 #: dataset.py:553
 msgid "Short spear, used for melee combat."
-msgstr ""
+msgstr "Короткое копьё для ближнего боя."
 
 #: dataset.py:558
 msgid "mace"
-msgstr ""
+msgstr "булава"
 
 #: dataset.py:559
 msgid "A short club with iron head."
-msgstr ""
+msgstr "Короткая палица с железным навершием."
 
 #: dataset.py:564
 msgid "bronze maul"
-msgstr ""
+msgstr "бронзовый молот"
 
 #: dataset.py:565
 msgid "A huge bronze sphere ot top of wooden pole."
-msgstr ""
+msgstr "Огромная сфера из бронзы на крепкой деревянном древке."
 
 #: dataset.py:570
 msgid "wall smasher"
-msgstr ""
+msgstr "стенолом"
 
 #: dataset.py:571
 msgid "A test weapon with tremendous power to smash walls."
-msgstr ""
+msgstr "Тестовое оружие невероятной силы для проламывания стен."
 
 #: dataset.py:576
 msgid "hunting crossbow"
-msgstr ""
+msgstr "охотничий арбалет"
 
 #: dataset.py:578
 msgid "A small crossbow."
-msgstr ""
+msgstr "Небольшой арбалет."
 
 #: dataset.py:588
 msgid "short bow"
-msgstr ""
+msgstr "короткий лук"
 
 #: dataset.py:590
 msgid "Short bow suited for small game hunt."
-msgstr ""
+msgstr "Короткий лук для охоты на мелкую дичь."
 
 #: dataset.py:600
 msgid "bronze bolt"
-msgstr ""
+msgstr "бронзовый болт"
 
 #: dataset.py:601
 msgid "A simple bronze bolt for crossbows."
-msgstr ""
+msgstr "Простой бронзовый болт для арбалета."
 
 #: dataset.py:608
 msgid "bronze tipped arrow"
-msgstr ""
+msgstr "стрела с бронзовым наконечником"
 
 #: dataset.py:610
 msgid "A simple bronze tipped arrow."
-msgstr ""
+msgstr "Простая деревянная стрела с наконечником из бронзы."
 
 #: dataset.py:617
 msgid "poisoned arrow"
-msgstr ""
+msgstr "отравленная стрела"
 
 #: dataset.py:619
 msgid "A simple bronze tipped arrow, coated in weak poison."
-msgstr ""
+msgstr "Простая стрела с бронзовым наконечником, покрытая слабым ядом."
 
 #: dataset.py:630
 msgid "Poisoned arrow"
-msgstr ""
+msgstr "Отравленая стрела"
 
 #: dataset.py:635
 msgid "frost arrow"
-msgstr ""
+msgstr "морозная стрела"
 
 #: dataset.py:637
 msgid "Magical arrow, that deals cold damage and slows target."
-msgstr ""
+msgstr "Магическая стрела, которая наносит урон холодом и замедляет цель."
 
 #: dataset.py:646
 msgid "Frost arrow"
-msgstr ""
+msgstr "Морозная стрела"
 
 #: dataset.py:651
 msgid "explosive bolt"
-msgstr ""
+msgstr "разрывной болт"
 
 #: dataset.py:653
 msgid "Crossbow bolt with attached alchemical explosive head."
-msgstr ""
+msgstr "Болт для арбалета с взрывающимся алхимическим наконечником."
 
 #: dataset.py:663 dataset.py:769
 msgid "BOOM!"
-msgstr ""
+msgstr "БУМ!"
 
 #: dataset.py:668
 msgid "throwing knife"
-msgstr ""
+msgstr "метательный нож"
 
 #: dataset.py:670
 msgid "A knife, balanced for quick throwing."
-msgstr ""
+msgstr "Нож, сбалансированный для быстрого метания."
 
 #: dataset.py:680
 msgid "Shank"
-msgstr ""
+msgstr "Хрясь"
 
 #: dataset.py:685
 msgid "venom sac"
-msgstr ""
+msgstr "ядовитая железа"
 
 #: dataset.py:687
 msgid ""
 "Small sac, full of scorpion venom. Useful alchemical ingredient. If thrown - "
 "can deal minor poison damage."
 msgstr ""
+"Маленькая железа ядовитого скорпиона. Алхимический ингредиент. Если бросить "
+"её в противника - может нанести некоторый урон ядом."
 
 #: dataset.py:698
 msgid "Splash!"
-msgstr ""
+msgstr "Плюх!"
 
 #: dataset.py:703
 msgid "sparkling dust"
-msgstr ""
+msgstr "искрящаяся пыль"
 
 #: dataset.py:705
 msgid ""
 "Magical dust, sparkling with tiny lightnings. Useful alchemical ingredient. "
 "If thrown - can deal minor lightning damage."
 msgstr ""
+"Магическая пыль, по которой пробегают крошечные разряды молнии. Алхимический "
+"ингредиент. Если бросить её в противника - может нанести небольшой урон "
+"молнией."
 
 #: dataset.py:715
 msgid "Zap!"
-msgstr ""
+msgstr "Бзз!"
 
 #: dataset.py:720
 msgid "hot ash"
-msgstr ""
+msgstr "горячий пепел"
 
 #: dataset.py:722
 msgid ""
 "Magical ash, radiating heat. Useful alchemical ingredient. If thrown - can "
 "deal minor fire damage."
 msgstr ""
+"Магический пепел, горячий. Алхимический ингредиент. Если бросить её в "
+"противника - может нанести небольшой урон огнём."
 
 #: dataset.py:737
 msgid "magic snow"
-msgstr ""
+msgstr "магический снег"
 
 #: dataset.py:739
 msgid ""
 "Magical snow, that doesn't melt. Useful alchemical ingredient. If thrown - "
 "can deal minor frost damage."
 msgstr ""
+"Колдовской снег, который не тает. Алхимический ингредиент. Если бросить её в "
+"противника - может нанести небольшой урон холодом."
 
 #: dataset.py:754
 msgid "explosive potion"
-msgstr ""
+msgstr "разрывное зелье"
 
 #: dataset.py:756
 msgid "Unstable potion, that explodes if breaked."
-msgstr ""
+msgstr "Нестабильное зелье, взрывается если разбить бутылку."
 
 #: dataset.py:774
 msgid "javelin"
-msgstr ""
+msgstr "метательное копьё"
 
 #: dataset.py:776
 msgid "A short spear, made for throwing."
-msgstr ""
+msgstr "Короткое копьё, сделанное для метания."
 
 #: dataset.py:785
 msgid "Pierce"
-msgstr ""
+msgstr "Хрясь"
 
 #: dataset.py:791
 msgid "Mindless body"
-msgstr ""
+msgstr "иссохший зомби"
 
 #: dataset.py:792
 msgid "Shaking, dehydrated human body, raised by strange magic of the City."
 msgstr ""
+"Трясущийся, высушенный солнцем полутруп, поднятый странными чарами Города."
 
 #: dataset.py:801
 msgid "Scorpion"
-msgstr ""
+msgstr "скорпион"
 
 #: dataset.py:802
 msgid "Huge black scorpion, about 1 meter long."
-msgstr ""
+msgstr "Огромный чёрный скорпион в длину около метра."
 
 #: dataset.py:813
 msgid "Poisonous stinger"
-msgstr ""
+msgstr "Ядовитое жало"
 
 #: dataset.py:818
 msgid "Rakshasa"
-msgstr ""
+msgstr "ракшаса"
 
 #: dataset.py:819
 msgid "A bipedal tiger with very sharp claws."
-msgstr ""
+msgstr "Тигрица, ходящая на двух ногах. У неё очень острые когти."
 
 #: dataset.py:826
 msgid "Ifrit"
-msgstr ""
+msgstr "ифрит"
 
 #: dataset.py:827
 msgid "A magical creature with human upper body floating over column of flame."
-msgstr ""
+msgstr "Магическое создание с человеческим торсом, парящим на столбе пламени."
 
 #: dataset.py:836
 msgid "Flaming fists"
-msgstr ""
+msgstr "Огненные кулаки"
 
 #: dataset.py:841
 msgid "fireball"
-msgstr ""
+msgstr "огненный шар"
 
 #: dataset.py:842
 msgid "Explosive ball of pure flame."
-msgstr ""
+msgstr "Взрывающийся шар чистого пламени."
 
 #: dataset.py:846
 msgid "Fireball!"
-msgstr ""
+msgstr "Огненный шар!"
 
 #: dataset.py:859
 msgid "Lightning wisp"
-msgstr ""
+msgstr "искрящийся светляк"
 
 #: dataset.py:860
 msgid "A small hostile magic cloud, that zaps enemies with lightning."
 msgstr ""
+"Маленькое враждебное колдовское облачко, которое поражает недругов разрядами "
+"молнии."
 
 #: dataset.py:875
 msgid "Zap"
-msgstr ""
+msgstr "Бзз"
 
 #: dataset.py:880
 msgid "Flame wisp"
-msgstr ""
+msgstr "огненный светляк"
 
 #: dataset.py:881
 msgid "Hostile ball of flame, burning with hatred to all living beings."
-msgstr ""
+msgstr "Враждебный шарик огня, ненавидящий всё живое."
 
 #: dataset.py:911
 msgid "Frost wisp"
-msgstr ""
+msgstr "морозный светляк"
 
 #: dataset.py:912
 msgid "Hostile ball of cold energy, burning with hatred to all living beings."
-msgstr ""
+msgstr "Враждебный шар морозной энергии, ненавидящий всё живое."
 
 #: dataset.py:927
 msgid "An arrow of pure frost."
-msgstr ""
+msgstr "Стрела чистого холода."
 
 #: dataset.py:937
 msgid "Chill"
-msgstr ""
+msgstr "Мороз"
 
 #: dataset.py:951
 msgid "Sand golem"
-msgstr ""
+msgstr "песчаный голем"
 
 #: dataset.py:952
 msgid "Magic-formed sand, resembling a human figure about 3m high."
 msgstr ""
+"Человеческая фигура из песка около 3м ростом, приведённая в движение магией."
 
 #: dataset.py:962
 msgid "Iron golem"
-msgstr ""
+msgstr "железный голем"
 
 #: dataset.py:963
 msgid ""
 "Fighting mechanism made of iron, brought to life with magic. Armed with "
 "enormous blade."
 msgstr ""
+"Боевой механизм из железа, приведённый в движение магией. Вооружен огромным "
+"клинком."
 
 #: effects.py:13
 msgid "Blocks {magn} bashing damage"
-msgstr ""
+msgstr "Блокирует {magn} дробящего урона."
 
 #: effects.py:14
 msgid "Blocks {magn} slashing damage"
-msgstr ""
+msgstr "Блокирует {magn} режущего  урона."
 
 #: effects.py:15
 msgid "Blocks {magn} piercing damage"
-msgstr ""
+msgstr "Блокирует {magn} колющего урона."
 
 #: effects.py:16
 msgid "Blocks {magn} fire damage"
-msgstr ""
+msgstr "Блокирует {magn} огненного урона."
 
 #: effects.py:17
 msgid "Blocks {magn} cold damage"
-msgstr ""
+msgstr "Блокирует {magn} урона от холода."
 
 #: effects.py:18
 msgid "Blocks {magn} lightning damage"
-msgstr ""
+msgstr "Блокирует {magn} урона от молнии."
 
 #: effects.py:19
 msgid "Blocks {magn} poison damage"
-msgstr ""
+msgstr "Блокирует {magn} ядовитого урона."
 
 #: effects.py:20
 msgid "Blocks {magn} acid damage"
-msgstr ""
+msgstr "Блокирует {magn} разъедающего урона."
 
 #: effects.py:21
 msgid "Blocks {magn} death damage"
-msgstr ""
+msgstr "Блокирует {magn} мертвящего урона."
 
 #: effects.py:22
 msgid "Blocks {magn} mental damage"
-msgstr ""
+msgstr "Блокирует {magn} ментального урона."
 
 #: effects.py:23
 msgid "Blocks {magn} strange damage"
-msgstr ""
+msgstr "Блокирует {magn} странного урона."
 
 #: effects.py:25
 msgid "Resists {magn} bashing"
-msgstr ""
+msgstr "Сопротивляемость дробящему {magn}"
 
 #: effects.py:26
 msgid "Resists {magn} slashing"
-msgstr ""
+msgstr "Сопротивляемость режущему {magn}"
 
 #: effects.py:27
 msgid "Resists {magn} piercing"
-msgstr ""
+msgstr "Сопротивляемость колющему {magn}"
 
 #: effects.py:28
 msgid "Resists {magn} fire"
-msgstr ""
+msgstr "Сопротивляемость огню {magn}"
 
 #: effects.py:29
 msgid "Resists {magn} cold"
-msgstr ""
+msgstr "Сопротивляемость холоду {magn}"
 
 #: effects.py:30
 msgid "Resists {magn} lightning"
-msgstr ""
+msgstr "Сопротивляемость молнии {magn}"
 
 #: effects.py:31
 msgid "Resists {magn} poison"
-msgstr ""
+msgstr "Сопротивляемость яду {magn}"
 
 #: effects.py:32
 msgid "Resists {magn} acid"
-msgstr ""
+msgstr "Сопротивляемость кислоте {magn}"
 
 #: effects.py:33
 msgid "Resists {magn} death"
-msgstr ""
+msgstr "Сопротивляемость мертвящему воздействию {magn}"
 
 #: effects.py:34
 msgid "Resists {magn} mental"
-msgstr ""
+msgstr "Сопротивляемость ментальному воздействию {magn}"
 
 #: effects.py:35
 msgid "Resists {magn} strange"
-msgstr ""
+msgstr "Сопротивляемость странному воздействию {magn}"
 
 #: effects.py:37
 msgid "Increases melee damage by {magn}"
-msgstr ""
+msgstr "Увеличивает урон в ближнем бою на {magn}"
 
 #: effects.py:38
 msgid "Increases ranged damage by {magn}"
-msgstr ""
+msgstr "Увеличивает урон в дальнем бою на {magn}"
 
 #: effects.py:39
 msgid "Quickens all actions by {magn}%"
-msgstr ""
+msgstr "Ускоряет все действия на {magn}%"
 
 #: effects.py:40
 msgid "Slows all actions by {magn}%"
-msgstr ""
+msgstr "Замедляет все действия на {magn}%"
 
 #: effects.py:41
 msgid "Affected by poison"
-msgstr ""
+msgstr "Отравлен"
 
 #: effects.py:42
 msgid "Heals {magn} hitpoints"
-msgstr ""
+msgstr "Лечит {magn} очков здоровья"
 
 #: game_logic.py:280
 msgid "Your {shield_name} blocks {blocked_damage} damage."
-msgstr ""
+msgstr "Ваш {shield_name} заблокировал {blocked_damage} урона."
 
 #: game_logic.py:318
 msgid "{name} is healed for {healed} HP."
-msgstr ""
+msgstr "{name} вылечен на {healed} ОЗ."
 
 #: game_logic.py:347
 msgid "{name}'s corpse"
-msgstr ""
+msgstr "труп {name}"
 
 #: game_logic.py:348
 msgid "A dead {name}."
-msgstr ""
+msgstr "Мертвое тело. {name}."
 
 #: game_logic.py:546
 msgid "You drop {item} on the ground."
-msgstr ""
+msgstr "Вы бросаете {item} на землю."
 
 #: game_logic.py:1157
 msgid "{name} is depleted!"
-msgstr ""
+msgstr "{name} разряжен!"
 
 #: game_logic.py:1401
 msgid ""
@@ -1114,19 +1148,19 @@ msgstr ""
 
 #: game_logic.py:1501
 msgid "{name} dies!"
-msgstr ""
+msgstr "{name} умирает!"
 
 #: game_logic.py:1605
 msgid "You died!"
-msgstr ""
+msgstr "Вы умерли!"
 
 #: game_logic.py:1939
 msgid "A player character."
-msgstr ""
+msgstr "Персонаж игрока."
 
 #: game_logic.py:1939
 msgid "Player"
-msgstr ""
+msgstr "Игрок"
 
 #: game_view.py:59
 msgid ""
@@ -1172,6 +1206,8 @@ msgid ""
 "glory or something else. You are among the others - jack of all trades, "
 "master of nothing."
 msgstr ""
+"Город притягивает толпы авантюристов - ищущих сокровища, силу, славу или что-"
+"то ещё. Вы один из них, ловец удачи."
 
 #: game_view.py:78
 msgid ""
@@ -1179,6 +1215,9 @@ msgid ""
 "horrors, created by dark magic. Treasures are also nice bonus. You are such "
 "warrior, proficient in melee combat and wearing a set of armor."
 msgstr ""
+"Грозные воины приходят в Нет-Никах, чтобы доказать свою силу, сражаясь с "
+"ужасами, сотворёнными тёмным колдовством Города. Сокровища тоже не будут "
+"лишними. Вы такой воин, одетый в доспех, умеющий драться в ближнем бою."
 
 #: game_view.py:79
 msgid ""
@@ -1186,6 +1225,9 @@ msgid ""
 "trustworthy soldiers. One of them - with your sturdy crossbow and shooting "
 "skills - you headed south, to obtain treasures of mysterious City."
 msgstr ""
+"Наёмники из далёкой северной страны Гантры ценятся по всему миру как "
+"надёжные и умелые солдаты. Вы принадлежите к их числу - со своим арбалетом, "
+"пройдя далёкий путь на юг, чтобы заполучить сокровища таинственного Города."
 
 #: game_view.py:80
 msgid ""
@@ -1196,6 +1238,12 @@ msgid ""
 "your spellbooks (useless for non-mage, of course), scrolls (not-so-useless), "
 "and headed South, to finally obtain desired magic gift."
 msgstr ""
+"Талант к магии очень редок среди людей Ваэртола. У вас его нет, но вы "
+"отчаянно хотите стать магом. Один человек сказал, что в песках Великой "
+"Пустыни лежит волшебный город Нет-Никах. В нём, помимо других чудес, обычные "
+"люди становятся могучими чародеями. Так что, вы упаковали свои магические "
+"тома (бесполезные), свитки (не настолько бесполезные), и отправились на юг, "
+"чтобы наконец обрести магический дар."
 
 #: game_view.py:83
 msgid "Adventurer"
@@ -1219,6 +1267,9 @@ msgid ""
 "\tGo to the Desert City. It's about it, after all.\n"
 " "
 msgstr ""
+"\n"
+"\tИдти в Город. Так или иначе, вы здесь ради этого.\n"
+" "
 
 #: game_view.py:87
 msgid ""
@@ -1227,6 +1278,10 @@ msgid ""
 "without being chased by a bunch of hungry Rakshasas is really nice.\n"
 " "
 msgstr ""
+"\n"
+"\tУжасы Города в Пустыне выматывают. Возможность поспать и поесть, не "
+"оглядываясь через плечо - просто подарок.\n"
+" "
 
 #: game_view.py:88
 msgid ""
@@ -1236,6 +1291,11 @@ msgid ""
 "somewhat dangerous place in the camp.\n"
 " "
 msgstr ""
+"\n"
+"\tТорговцы, контрабандисты и прочие подозрительные личности всегда готовы "
+"купить ценности Нет-Никаха. Рынок сокровищ это самое людное, громкое и "
+"слегка опасное место в лагере.\n"
+" "
 
 #: game_view.py:89
 msgid ""
@@ -1245,6 +1305,11 @@ msgid ""
 "bring him empty cans, you know.\n"
 " "
 msgstr ""
+"\n"
+"\tПродавец снаряжения Сидорович приехал сюда из далёкой северной страны "
+"Гантры. Он продаёт снаряжение, необходимое для походов в Город. Просто не "
+"приносите ему консервные банки, и всё будет хорошо.\n"
+" "
 
 #: game_view.py:90
 msgid ""
@@ -1254,6 +1319,11 @@ msgid ""
 "of drinkin' also.\n"
 " "
 msgstr ""
+"\n"
+"\tТаверна 'Гарцующий Скорпион' - сердце общественной жизни лагеря. Миссии, "
+"ценная информация, слухи и сплетни, тысячи их! И возможность выпить, конечно "
+"же.\n"
+" "
 
 #: game_view.py:92
 msgid ""
@@ -1269,134 +1339,149 @@ msgid ""
 "looking more like a mirage.\n"
 " "
 msgstr ""
+"\n"
+"\tВаше долгое путешествие подошло к концу. Последняя его часть, поход с "
+"караваном сквозь пески Великой Пустыни, была тяжелой и полной опасностей. "
+"Наконец, вы стоите перед входом в лагерь охотников за сокровищами.\n"
+"\tОн больше напоминает небольшой город, только по улицам ходит куча "
+"вооружённого народу, и в центре раскинулся гигантских размеров рынок. Ловцы "
+"удачи всех мастей приходят сюда между походами в Нет-Никах.\n"
+"\tМожно остановиться здесь, чтобы осмотреться, или сразу направиться в Город "
+"в Пустыне. Его можно увидеть и отсюда, прямо под нависающей над ним Одинокой "
+"горой. Город похож на мираж, дрожащий в жарком воздухе.\n"
+" "
 
 #: game_view.py:96
 msgid "ARMS"
-msgstr ""
+msgstr "руки"
 
 #: game_view.py:96
 msgid "LEFT_HAND"
-msgstr ""
+msgstr "левая рука"
 
 #: game_view.py:96
 msgid "LEFT_RING"
-msgstr ""
+msgstr "кольцо на левой руке"
 
 #: game_view.py:96
 msgid "RIGHT_HAND"
-msgstr ""
+msgstr "правая рука"
 
 #: game_view.py:96
 msgid "RIGHT_RING"
-msgstr ""
+msgstr "кольцо на правой руке"
 
 #: game_view.py:96
 msgid "SHOULDERS"
-msgstr ""
+msgstr "плечи"
 
 #: game_view.py:97
 msgid "BODY"
-msgstr ""
+msgstr "тело"
 
 #: game_view.py:97
 msgid "FACE"
-msgstr ""
+msgstr "лицо"
 
 #: game_view.py:97
 msgid "HEAD"
-msgstr ""
+msgstr "голова"
 
 #: game_view.py:97
 msgid "LEFT_EAR"
-msgstr ""
+msgstr "левое ухо"
 
 #: game_view.py:97
 msgid "LEGS"
-msgstr ""
+msgstr "ноги"
 
 #: game_view.py:97
 msgid "NECK"
-msgstr ""
+msgstr "шея"
 
 #: game_view.py:97
 msgid "RIGHT_EAR"
-msgstr ""
+msgstr "правое ухо"
 
 #: game_view.py:97
 msgid "WAIST"
-msgstr ""
+msgstr "пояс"
 
 #: game_view.py:98
 msgid "FEET"
-msgstr ""
+msgstr "ступни"
 
 #: game_view.py:253
 msgid "Arrival to treasure hunters camp"
-msgstr ""
+msgstr "Прибытие в лагерь искателей сокровищ"
 
 #: game_view.py:434
 msgid "Delve into Desert City"
-msgstr ""
+msgstr "Войти в Город в Пустыне"
 
 #: game_view.py:435
 msgid "Get some rest."
-msgstr ""
+msgstr "Отдохнуть."
 
 #: game_view.py:436
 msgid "Sell treasures."
-msgstr ""
+msgstr "Продать сокровища."
 
 #: game_view.py:437
 msgid "Go to equipment merchant."
-msgstr ""
+msgstr "Пойти к торговцу снаряжением."
 
 #: game_view.py:438
 msgid "Visit the tavern (closed for now)."
-msgstr ""
+msgstr "Посетить таверну (пока закрыто)"
 
 #: game_view.py:439
 msgid "Treasure hunters camp near Neth-Nikakh"
-msgstr ""
+msgstr "Лагерь искателей сокровищ возле Нет-Никаха"
 
 #: game_view.py:444 game_view.py:1175 game_view.py:1430
 msgid "Do you really want to quit?"
-msgstr ""
+msgstr "Вы правда хотите выйти?"
 
 #: game_view.py:445 game_view.py:1176 game_view.py:1431
 msgid "Yes"
-msgstr ""
+msgstr "Да"
 
 #: game_view.py:446 game_view.py:1177 game_view.py:1432
 msgid "No"
-msgstr ""
+msgstr "Нет"
 
 #: game_view.py:447 game_view.py:1178 game_view.py:1433
 msgid "Confirm exit"
-msgstr ""
+msgstr "Подтвердите выход"
 
 #: game_view.py:472
 msgid ""
 "Outskirts of the Desert City. These particular ruins appear to be unexplored "
 "by other adventurers."
 msgstr ""
+"Предместья Города в Пустыне. Этот конкретный район выглядит нетронутым "
+"другими искателями сокровищ."
 
 #: game_view.py:473
 msgid "Entering ruins."
-msgstr ""
+msgstr "Вход в руины."
 
 #: game_view.py:482
 msgid "Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!"
-msgstr ""
+msgstr "Ах! Сон в постели, свежая и горячая еда. Что может быть лучше?"
 
 #: game_view.py:483
 msgid "Rested."
-msgstr ""
+msgstr "Отдых."
 
 #: game_view.py:507
 msgid ""
 "You sold some treasures:\n"
 "\n"
 msgstr ""
+"Вы продали сокровища:\n"
+"\n"
 
 #: game_view.py:518
 msgid ""
@@ -1404,183 +1489,186 @@ msgid ""
 "have anything to sell right now.\n"
 " "
 msgstr ""
+"Вам ничего не остаётся, как бродить по рынку и глазеть на диковинные товары. "
+"У вас сейчас нет ничего на продажу..\n"
+" "
 
 #: game_view.py:519
 msgid "Marketplace."
-msgstr ""
+msgstr "Рынок."
 
 #: game_view.py:798
 msgid "u) Use"
-msgstr ""
+msgstr "u) Использовать"
 
 #: game_view.py:810
 msgid "d) Drop"
-msgstr ""
+msgstr "d) Бросить"
 
 #: game_view.py:822
 msgid "w) Wield"
-msgstr ""
+msgstr "w) Надеть"
 
 #: game_view.py:836
 msgid "r) Reload"
-msgstr ""
+msgstr "r) Зарядить"
 
 #: game_view.py:849
 msgid "n) uNload"
-msgstr ""
+msgstr "n) Разрядить"
 
 #: game_view.py:925 game_view.py:1104
 msgid "Select slot:"
-msgstr ""
+msgstr "Выберите слот:"
 
 #: game_view.py:945
 msgid " kg.\n"
-msgstr ""
+msgstr " кг.\n"
 
 #: game_view.py:945
 msgid "Weight: "
-msgstr ""
+msgstr "Вес: "
 
 #: game_view.py:948
 msgid "Deals {min_damage}-{max_damage} bashing damage.\n"
-msgstr ""
+msgstr "Наносит {min_damage}-{max_damage} дробящего урона.\n"
 
 #: game_view.py:952
 msgid "Deals {min_damage}-{max_damage} slashing damage.\n"
-msgstr ""
+msgstr "Наносит {min_damage}-{max_damage} режущего урона.\n"
 
 #: game_view.py:956
 msgid "Deals {min_damage}-{max_damage} piercing damage.\n"
-msgstr ""
+msgstr "Наносит {min_damage}-{max_damage} колющего урона.\n"
 
 #: game_view.py:960
 msgid "Deals {min_damage}-{max_damage} fire damage.\n"
-msgstr ""
+msgstr "Наносит {min_damage}-{max_damage} огненного урона.\n"
 
 #: game_view.py:964
 msgid "Deals {min_damage}-{max_damage} cold damage.\n"
-msgstr ""
+msgstr "Наносит {min_damage}-{max_damage} урона холодом.\n"
 
 #: game_view.py:968
 msgid "Deals {min_damage}-{max_damage} lightning damage.\n"
-msgstr ""
+msgstr "Наносит {min_damage}-{max_damage} урона молнией.\n"
 
 #: game_view.py:972
 msgid "Effects: "
-msgstr ""
+msgstr "Эффекты: "
 
 #: game_view.py:976
 msgid "Abilities: "
-msgstr ""
+msgstr "Способности: "
 
 #: game_view.py:981
 msgid "Weight: {current} / {max} kg."
-msgstr ""
+msgstr "Вес: {current} / {max} кг."
 
 #: game_view.py:1036
 msgid "{weapon} isn't loaded!"
-msgstr ""
+msgstr "{weapon} не заряжен!"
 
 #: game_view.py:1142
 msgid "Choose one of the options below:"
-msgstr ""
+msgstr "Выберите одни из вариантов:"
 
 #: game_view.py:1146
 msgid "Continue"
-msgstr ""
+msgstr "Продолжить"
 
 #: game_view.py:1151
 msgid "[color=grey]Continue"
-msgstr ""
+msgstr "[color=grey]Продолжить"
 
 #: game_view.py:1155
 msgid "New Game"
-msgstr ""
+msgstr "Новая игра"
 
 #: game_view.py:1159
 msgid "Quit"
-msgstr ""
+msgstr "Выход"
 
 #: game_view.py:1320
 msgid "TARGETING: {t_object}"
-msgstr ""
+msgstr "ВЫБОР ЦЕЛИ: {t_object}"
 
 #: game_view.py:1356
 msgid "{hp}/{max_hp} HP"
-msgstr ""
+msgstr "{hp}/{max_hp} ОЗ"
 
 #: game_view.py:1368
 msgid "Right: {right}"
-msgstr ""
+msgstr "Правая: {right}"
 
 #: game_view.py:1370
 msgid "Left: {left}"
-msgstr ""
+msgstr "Левая: {left}"
 
 #: game_view.py:1372
 msgid "Money: {money} coins."
-msgstr ""
+msgstr "Деньги: {money} монет."
 
 #: game_view.py:1376
 msgid "OVERBURDENED"
-msgstr ""
+msgstr "ПЕРЕГРУЖЕН"
 
 #: game_view.py:1379
 msgid "BURDENED"
-msgstr ""
+msgstr "НАГРУЖЕН"
 
 #: game_view.py:1484
 msgid "Inventory"
-msgstr ""
+msgstr "Инвентарь"
 
 #: game_view.py:1492
 msgid "Drop item:"
-msgstr ""
+msgstr "Бросить предмет:"
 
 #: game_view.py:1500
 msgid "Use item:"
-msgstr ""
+msgstr "Использовать предмет:"
 
 #: game_view.py:1508
 msgid "Wield item:"
-msgstr ""
+msgstr "Надеть предмет:"
 
 #: game_view.py:1517
 msgid "Take off item:"
-msgstr ""
+msgstr "Снять предмет:"
 
 #: game_view.py:1524
 msgid "Help"
-msgstr ""
+msgstr "Помощь"
 
 #: game_view.py:1532
 msgid "LOOKING:"
-msgstr ""
+msgstr "ОСМОТР:"
 
 #: game_view.py:1539
 msgid "CLOSE WHERE:"
-msgstr ""
+msgstr "ЗАКРЫТЬ ЧТО:"
 
 #: game_view.py:1543
 msgid "SMASH WHERE:"
-msgstr ""
+msgstr "УДАРИТЬ ЧТО:"
 
 #: game_view.py:1906
 msgid "{creature_name} is here."
-msgstr ""
+msgstr "{creature_name} здесь."
 
 #: game_view.py:1912
 msgid "Items:"
-msgstr ""
+msgstr "Предметы:"
 
 #: game_view.py:1916
 msgid "{item_name} is here."
-msgstr ""
+msgstr "{item_name} здесь."
 
 #: game_view.py:1919
 msgid "Other:"
-msgstr ""
+msgstr "Другое:"
 
 #: game_view.py:1923
 msgid "{other_name} is here."
-msgstr ""
+msgstr "{other_name} здесь."
