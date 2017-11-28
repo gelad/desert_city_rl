@@ -1,0 +1,1 @@
+py c:\Python35-32\Tools\i18n\pygettext.py -d dc_rl *.py

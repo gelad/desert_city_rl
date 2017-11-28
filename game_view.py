@@ -34,6 +34,9 @@ import dataset
 import generation
 import commands
 
+from messages import _  # translation function
+from messages import missing_translations
+
 #  temporary shit
 LOGO = """
     ___                    _       ___ _ _         
@@ -53,7 +56,7 @@ LOADING = """
 |______\____/_/    \_\_____/_____|_| \_|\_____|                                     
 """
 
-HELP_TEXT = """Movement: Arrow keys and Keypad 1-9 
+HELP_TEXT = _("""Movement: Arrow keys and Keypad 1-9 
 Keypad 5 - 'wait 1 turn' command
 F1 - display this help message
 i - show player inventory
@@ -69,42 +72,30 @@ o - take Off equipped item
 n - uNload ranged weapon
 c - close door
 s - smash (melee attack inanimate object, i.e. wall)
-Esc - Save and exit"""
+Esc - Save and exit""")
 
-CHARACTER_BG_DESCRIPTIONS = [
-    'Many adventurers are lured to the City - in search of treasures, power,' +
-    ' glory or something else. You are among the others - jack of all trades,' +
-    ' master of nothing.'
-    ,
-    'Mighty warriors visit Neth-Nikakh to prove their strength by fighting' +
-    ' horrors, created by dark magic. Treasures are also nice bonus. You are ' +
-    'such warrior, proficient in melee combat and wearing a set of armor.'
-    ,
-    'Mercenaries from distant Northern country called Gantra are well-known ' +
-    'as trustworthy soldiers. One of them - with your sturdy crossbow' +
-    ' and shooting skills - you headed south, to obtain treasures of mysterious'
-    + ' City.'
-    ,
-    'A talent to use magic is rare among the people of Vaerthol. ' +
-    'You lack one, but unlike others, you desperately crave ' +
-    'for magic. One man told you a rumor, that in the sands lies a magic city' +
-    ' of Neth-Nikakh, where among the other wonders, ordinary people can' +
-    ' become powerful ' +
-    'mages. So, you packed your spellbooks (useless for non-mage, of course)' +
-    ', scrolls (not-so-useless), and headed South, to finally obtain desired' +
-    ' magic gift.']
+CHARACTER_BG_DESCRIPTIONS = [_('Many adventurers are lured to the City - in search of treasures, power, glory or something else. You are among the others - jack of all trades, master of nothing.'),
+    _('Mighty warriors visit Neth-Nikakh to prove their strength by fighting horrors, created by dark magic. Treasures are also nice bonus. You are such warrior, proficient in melee combat and wearing a set of armor.')
+    ,_('Mercenaries from distant Northern country called Gantra are well-known as trustworthy soldiers. One of them - with your sturdy crossbow and shooting skills - you headed south, to obtain treasures of mysterious City.'),
+    _('A talent to use magic is rare among the people of Vaerthol. You lack one, but unlike others, you desperately crave for magic. One man told you a rumor, that in the sands lies a magic city of Neth-Nikakh, where among the other wonders, ordinary people can become powerful mages. So, you packed your spellbooks (useless for non-mage, of course), scrolls (not-so-useless), and headed South, to finally obtain desired magic gift.')]
 
-CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']
+CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']  # they are used as keys
+CHARACTER_BACKGROUNDS_TRAN = [_('Adventurer'), _('Warrior'), _('Gantra mercenary'), _('Magic seeker')]  # translations
+del CHARACTER_BACKGROUNDS_TRAN  # not used (it's a shitty hack to add them to pot file every time)
 
-CAMP_MENU_DESCRIPTIONS = ["""\n\tGo to the Desert City. It's about it, after all.\n """,
-                          """\n\tHorrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.\n """,
-                          """\n\tTraders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.\n """,
-                          """\n\tEquipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.\n """,
-                          """\n\tTavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also.\n """]
+CAMP_MENU_DESCRIPTIONS = [_("""\n\tGo to the Desert City. It's about it, after all.\n """),
+                          _("""\n\tHorrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.\n """),
+                          _("""\n\tTraders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.\n """),
+                          _("""\n\tEquipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.\n """),
+                          _("""\n\tTavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also.\n """)]
 
-FIRST_CAMP_ARRIVAL_MESSAGE = """\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
+FIRST_CAMP_ARRIVAL_MESSAGE = _("""\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
 \tIt's more like a small town, except lots of armed people wandering around, and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
-\tYou can stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage.\n """
+\tYou can stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage.\n """)
+
+BODYPARTS=[_('RIGHT_HAND'), _('LEFT_HAND'), _('RIGHT_RING'), _('LEFT_RING'), _('ARMS'), _('SHOULDERS'),
+           _('BODY'), _('HEAD'), _('FACE'), _('LEFT_EAR'), _('RIGHT_EAR'), _('NECK'), _('WAIST'), _('LEGS'),
+           _('FEET')]
 #  /temporary shit
 
 
@@ -134,6 +125,12 @@ class GameLoop(DirectorLoop):
                 except FileNotFoundError:
                     pass
         GameLoop.active_director = None
+        if len(missing_translations) > 0:
+            print('Some strings missing in translation files. Written to missing_translations.txt.')
+            f = open(file='missing_translations.txt', mode='w')
+            for s in missing_translations:
+                f.write(s+'\n\n')
+            f.close()
         super().quit()
 
     def get_initial_scene(self):
@@ -180,7 +177,7 @@ class CharacterSelectScene(UIScene):
         top_offset = 0
         for option in self.options:
             top_offset += 1
-            views.append(ButtonViewFixed(text=option,
+            views.append(ButtonViewFixed(text=_(option),
                                          callback=self.option_activated,
                                          layout_options=LayoutOptions(
                                              left=2,
@@ -253,7 +250,7 @@ class CharacterSelectScene(UIScene):
         self.director.push_scene(MainGameScene(game))
         self.director.push_scene(CampMenuScene(game))
         self.director.push_scene(SingleButtonMessageScene(message=FIRST_CAMP_ARRIVAL_MESSAGE,
-                                                          title='Arrival to treasure hunters camp',
+                                                          title=_('Arrival to treasure hunters camp'),
                                                           callback=lambda: (self.director.pop_scene(),
                                                                             terminal.clear())))
         self.director.game = game
@@ -434,20 +431,20 @@ class CampMenuScene(MultiButtonMessageScene):
     """ A Scene with camp menu """
     def __init__(self, game, *args, **kwargs):
         self.game = game
-        buttons = [('Delve into Desert City', CAMP_MENU_DESCRIPTIONS[0], self._to_city_start_thread),
-                   ('Get some rest.', CAMP_MENU_DESCRIPTIONS[1], self._take_rest),
-                   ('Sell treasures.', CAMP_MENU_DESCRIPTIONS[2], self._to_market),
-                   ('Go to equipment merchant.', CAMP_MENU_DESCRIPTIONS[3], self._to_equipment_merchant),
-                   ('Visit the tavern (closed for now).', CAMP_MENU_DESCRIPTIONS[4], self._to_tavern)]
-        super().__init__(buttons=buttons, title='Treasure hunters camp near Neth-Nikakh', *args, **kwargs)
+        buttons = [(_('Delve into Desert City'), CAMP_MENU_DESCRIPTIONS[0], self._to_city_start_thread),
+                   (_('Get some rest.'), CAMP_MENU_DESCRIPTIONS[1], self._take_rest),
+                   (_('Sell treasures.'), CAMP_MENU_DESCRIPTIONS[2], self._to_market),
+                   (_('Go to equipment merchant.'), CAMP_MENU_DESCRIPTIONS[3], self._to_equipment_merchant),
+                   (_('Visit the tavern (closed for now).'), CAMP_MENU_DESCRIPTIONS[4], self._to_tavern)]
+        super().__init__(buttons=buttons, title=_('Treasure hunters camp near Neth-Nikakh'), *args, **kwargs)
 
     def terminal_read(self, val):
         """ Handles input (intercept ESC button - exit game) """
         if val == terminal.TK_ESCAPE and self.close_on_esc:
-            text = 'Do you really want to quit?'
-            self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda: self.director.quit()),
-                                                                      ('No', text, None)],
-                                                             title='Confirm exit',
+            text = _('Do you really want to quit?')
+            self.director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda: self.director.quit()),
+                                                                      (_('No'), text, None)],
+                                                             title=_('Confirm exit'),
                                                              layout_options='intrinsic'))
             return True
         return super().terminal_read(val)
@@ -472,17 +469,18 @@ class CampMenuScene(MultiButtonMessageScene):
         director = self.director
         while director.active_scene is not director.main_game_scene:  # pop to main game scene
             director.pop_scene()
-        self.ctx.clear()
-        director.push_scene(SingleButtonMessageScene(message="""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers.""",
-                                                     title='Entering ruins.',
-                                                     layout_options='intrinsic'))
+        message_scene = SingleButtonMessageScene(message=_("""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers."""),
+                                                     title=_('Entering ruins.'),
+                                                     layout_options='intrinsic')
+        message_scene.clear = True
+        director.push_scene(message_scene)
 
     def _take_rest(self):
         """ Method that replenshes player health for now """
         if self.game.player.hp < self.game.player.maxhp:
             self.game.player.heal(heal=self.game.player.maxhp, healer=self.game.player)
-        self.director.push_scene(SingleButtonMessageScene(message="""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!""",
-                                                          title='Rested.',
+        self.director.push_scene(SingleButtonMessageScene(message=_("""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!"""),
+                                                          title=_('Rested.'),
                                                           layout_options='intrinsic'))
 
     def _to_market(self):
@@ -499,25 +497,26 @@ class CampMenuScene(MultiButtonMessageScene):
                 else:
                     count = 1
                 if item.name in treasures:
-                    treasures[item.name][0] += count
+                    treasures[str(item)][0] += count
                 else:
-                    treasures[item.name] = [count, item.properties['value']]
+                    treasures[str(item)] = [count, item.properties['value']]
                 sold.append(item)
         for item in sold:
             player.discard_item(item=item)  # remove sold items from inventory
         if len(treasures) > 0:
-            report_text += 'You sold some treasures:\n\n'
+            report_text += _('You sold some treasures:\n\n')
             total = 0
             for tr in treasures.keys():
-                report_text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
-                                    + str(treasures[tr][0] * treasures[tr][1]) + '\n'
+                report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}\n').format(tr_name=tr,
+                                                                    tr_count=str(treasures[tr][0]),
+                                                                    tr_value=str(treasures[tr][1]),
+                                                                    tr_total=str(treasures[tr][0] * treasures[tr][1]))
                 total += treasures[tr][0] * treasures[tr][1]
-            report_text += '\nTotal treasures value: ' + str(total) + ' coins.\n '
+            report_text += _('\nTotal treasures value: {total} coins.\n ').format(total=str(total))
             player.properties['money'] += total  # give player the money
         else:
-            report_text += 'All you have to do in the marketplace today is wandering around.' + \
-                                """ You don't have anything to sell right now.\n """
-        self.director.push_scene(SingleButtonMessageScene(message=report_text, title='Marketplace.'))
+            report_text += _("""All you have to do in the marketplace today is wandering around. You don't have anything to sell right now.\n """)
+        self.director.push_scene(SingleButtonMessageScene(message=report_text, title=_('Marketplace.')))
 
     def _to_equipment_merchant(self):
         pass
@@ -544,9 +543,9 @@ class ListSelectionScene(UIScene):
         max_option_length = 0  # longest option string - to determine window width
         for option in self.options:
             if alphabet:
-                button_text = chr(letter_index) + ') ' + str(option)
+                button_text = chr(letter_index) + ') ' + _(str(option))
             else:
-                button_text = str(option)
+                button_text = _(str(option))
             max_option_length = max(len(button_text), max_option_length)
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
@@ -666,10 +665,14 @@ class DescribedListSelectionScene(UIScene):
         self.buttons = []
         letter_index = ord('a')  # start menu item indexing from 'a'
         for option in self.options:
-            if alphabet:
-                button_text = chr(letter_index) + ') ' + str(option)
+            if isinstance(option, game_logic.Entity):
+                b_text = str(option)  # entity name already translated
             else:
-                button_text = str(option)
+                b_text = _(str(option))
+            if alphabet:
+                button_text = chr(letter_index) + ') ' + b_text
+            else:
+                button_text = b_text
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
                                      layout_options=LayoutOptions(
@@ -796,7 +799,7 @@ class ItemManipulationSelectionScene(UIScene):
         top_offset = 0
         max_option_length = 0
         if 'usable' in item.properties:  # USE button
-            button = ButtonViewFixed(text='u) Use',
+            button = ButtonViewFixed(text=_('u) Use'),
                                      callback=self._use,
                                      layout_options=LayoutOptions(
                                          left=1,
@@ -808,7 +811,7 @@ class ItemManipulationSelectionScene(UIScene):
             max_option_length = max(len(button.text), max_option_length)
             subviews.append(button)
             top_offset += 1
-        button = ButtonViewFixed(text='d) Drop',  # DROP button
+        button = ButtonViewFixed(text=_('d) Drop'),  # DROP button
                                  callback=self._drop,
                                  layout_options=LayoutOptions(
                                      left=1,
@@ -820,7 +823,7 @@ class ItemManipulationSelectionScene(UIScene):
         max_option_length = max(len(button.text), max_option_length)
         subviews.append(button)
         top_offset += 1
-        button = ButtonViewFixed(text='w) Wield',  # WIELD button
+        button = ButtonViewFixed(text=_('w) Wield'),  # WIELD button
                                  callback=self._wield,
                                  layout_options=LayoutOptions(
                                      left=1,
@@ -834,7 +837,7 @@ class ItemManipulationSelectionScene(UIScene):
         top_offset += 1
         if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
             if len(item.ammo) < item.ammo_max:  # check if it is loaded
-                button = ButtonViewFixed(text='r) Reload',  # RELOAD button
+                button = ButtonViewFixed(text=_('r) Reload'),  # RELOAD button
                                          callback=self._reload,
                                          layout_options=LayoutOptions(
                                              left=1,
@@ -847,7 +850,7 @@ class ItemManipulationSelectionScene(UIScene):
                 subviews.append(button)
                 top_offset += 1
             if len(item.ammo) > 0:
-                button = ButtonViewFixed(text='n) uNload',  # UNLOAD button
+                button = ButtonViewFixed(text=_('n) uNload'),  # UNLOAD button
                                          callback=self._unload,
                                          layout_options=LayoutOptions(
                                              left=1,
@@ -923,7 +926,7 @@ class ItemManipulationSelectionScene(UIScene):
         if len(self.item.equip_slots) > 1:
             director.push_scene(WieldSlotSelectionScene(game=self.game,
                                                         item=self.item,
-                                                        caption='Select slot:',
+                                                        caption=_('Select slot:'),
                                                         layout_options='intrinsic'))
             return  # no need to pop Slot Selection scene
         elif len(self.item.equip_slots) == 1:
@@ -943,38 +946,45 @@ class ItemSelectionScene(DescribedListSelectionScene):
         for item in items:
             text = ''
             text += item.description + '\n'
-            text += 'Weight: ' + str(item.weight) + ' kg.\n'
+            text += _('Weight: ') + str(item.weight) + _(' kg.\n')
             if item.properties:
                 if 'bashing' in item.properties:
-                    text += 'Deals ' + str(item.properties['bashing'][0]) + '-' + str(
-                        item.properties['bashing'][1]) + ' bashing damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} bashing damage.\n').format(
+                        min_damage=str(item.properties['bashing'][0]),
+                        max_damage=str(item.properties['bashing'][1]))
                 if 'slashing' in item.properties:
-                    text += 'Deals ' + str(item.properties['slashing'][0]) + '-' + str(
-                        item.properties['slashing'][1]) + ' slashing damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} slashing damage.\n').format(
+                        min_damage=str(item.properties['slashing'][0]),
+                        max_damage=str(item.properties['slashing'][1]))
                 if 'piercing' in item.properties:
-                    text += 'Deals ' + str(item.properties['piercing'][0]) + '-' + str(
-                        item.properties['piercing'][1]) + ' piercing damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} piercing damage.\n').format(
+                        min_damage=str(item.properties['piercing'][0]),
+                        max_damage=str(item.properties['piercing'][1]))
                 if 'fire' in item.properties:
-                    text += 'Deals ' + str(item.properties['fire'][0]) + '-' + str(
-                        item.properties['fire'][1]) + ' fire damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} fire damage.\n').format(
+                        min_damage=str(item.properties['fire'][0]),
+                        max_damage=str(item.properties['fire'][1]))
                 if 'cold' in item.properties:
-                    text += 'Deals ' + str(item.properties['cold'][0]) + '-' + str(
-                        item.properties['cold'][1]) + ' cold damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} cold damage.\n').format(
+                        min_damage=str(item.properties['cold'][0]),
+                        max_damage=str(item.properties['cold'][1]))
                 if 'lightning' in item.properties:
-                    text += 'Deals ' + str(item.properties['lightning'][0]) + '-' + str(
-                        item.properties['lightning'][1]) + ' lightning damage.\n'
+                    text += _('Deals {min_damage}-{max_damage} lightning damage.\n').format(
+                        min_damage=str(item.properties['lightning'][0]),
+                        max_damage=str(item.properties['lightning'][1]))
             if len(item.effects) > 0:
-                text += 'Effects: '
+                text += _('Effects: ')
                 for effect in item.effects:
-                    text += effect.description + '\n'
+                    text += _(effect.description) + '\n'
             if len(item.abilities) > 0:
-                text += 'Abilities: '
+                text += _('Abilities: ')
                 for ability in item.abilities:
-                    text += ability.name + '\n'
+                    text += _(ability.name) + '\n'
             descriptions.append(text)
         self.game = game
-        self.weight_bar = LabelViewFixed(text='Weight: ' + str(round(self.game.player.carried_weight, 2)) + '/' +
-                                              str(round(self.game.player.properties['max_carry_weight'], 2)) + ' kg.',
+        weight_text = _('Weight: {current} / {max} kg.').format(current=str(round(self.game.player.carried_weight, 2)),
+                                             max=str(round(self.game.player.properties['max_carry_weight'], 2)))
+        self.weight_bar = LabelViewFixed(text=weight_text,
                                          layout_options=LayoutOptions().row_bottom(0).with_updates(width='intrinsic',
                                                                                                    left=None,
                                                                                                    right=0))
@@ -1027,7 +1037,7 @@ class FireItemSelectionScene(ItemSelectionScene):
                                                           player=self.game.player,
                                                           weapon=self.options[self.selected])
         else:
-            game_logic.Game.add_message(self.options[self.selected].name + " isn't loaded!",
+            game_logic.Game.add_message(_("{weapon} isn't loaded!").format(weapon=_(self.options[self.selected].name)),
                                         'PLAYER', [255, 255, 255])
         super().option_activated(*args, **kwargs)
 
@@ -1095,7 +1105,7 @@ class WieldItemSelectionScene(ItemSelectionScene):
             super().option_activated(*args, **kwargs)  # first pop this scene
             director.push_scene(WieldSlotSelectionScene(game=self.game,
                                                         item=self.options[self.selected],
-                                                        caption='Select slot:',
+                                                        caption=_('Select slot:'),
                                                         layout_options='intrinsic'))
             return  # no need to pop Slot Selection scene
         elif len(self.options[self.selected].equip_slots) == 1:
@@ -1123,7 +1133,6 @@ class WieldSlotSelectionScene(ListSelectionScene):
 
 # Other scenes
 
-
 class MainMenuScene(UIScene):
     """ Scene with main menu options """
 
@@ -1134,24 +1143,24 @@ class MainMenuScene(UIScene):
             LOGO[1:].rstrip(),
             layout_options=LayoutOptions.row_top(0.5)))
         views.append(LabelViewFixed(
-            "Choose one of the options below:",
+            _("Choose one of the options below:"),
             layout_options=LayoutOptions.centered('intrinsic', 'intrinsic')))
         if self.game:  # is game succesfully loaded - show Continue button
             views.append(ButtonViewFixed(
-                text="Continue", callback=self.continue_game,
+                text=_("Continue"), callback=self.continue_game,
                 layout_options=LayoutOptions.row_bottom(4).with_updates(
                     left=0.2, width=0.2, right=None)))
         else:  # if no savegame - show option greyed-out
             views.append(LabelViewFixed(
-                text="[color=grey]Continue",
+                text=_("[color=grey]Continue"),
                 layout_options=LayoutOptions.row_bottom(4).with_updates(
                     left=0.2, width=0.2, right=None)))
         views.append(ButtonViewFixed(
-            text="New Game", callback=self.new_game,
+            text=_("New Game"), callback=self.new_game,
             layout_options=LayoutOptions.row_bottom(4).with_updates(
                 left=0.4, width=0.2, right=None)))
         views.append(ButtonViewFixed(
-            text="Quit",
+            text=_("Quit"),
             callback=lambda: self.director.quit(),
             layout_options=LayoutOptions.row_bottom(4).with_updates(
                 left=0.6, width=0.2, right=None)))
@@ -1167,10 +1176,10 @@ class MainMenuScene(UIScene):
             self.view.find_next_responder()
             return True
         elif val == terminal.TK_ESCAPE:  # prompt exit game on esc
-            text = 'Do you really want to quit?'
-            self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda: self.director.quit()),
-                                                                      ('No', text, None)],
-                                                             title='Confirm exit',
+            text = _('Do you really want to quit?')
+            self.director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda: self.director.quit()),
+                                                                      (_('No'), text, None)],
+                                                             title=_('Confirm exit'),
                                                              layout_options='intrinsic'))
         self.ctx.clear()
 
@@ -1312,7 +1321,7 @@ class MainGameScene(UIScene):
                             'args': args,
                             'kwargs': kwargs}
         self.state = 'targeting'
-        self.title = 'TARGETING: ' + str(t_object)
+        self.title = _('TARGETING: {t_object}').format(t_object=str(t_object))
         self.cell_info_view.is_hidden = False
         self.log_view.is_hidden = True
         self.map_view.cam_offset = [0, 0]
@@ -1348,7 +1357,7 @@ class MainGameScene(UIScene):
         """ Update values in bars and tabs before drawing """
         player = self.game.player
         if is_active:
-            self.health_bar.text = str(player.hp) + '/' + str(player.maxhp) + ' HP'
+            self.health_bar.text = _('{hp}/{max_hp} HP').format(hp=str(player.hp), max_hp=str(player.maxhp))
             # hp becomes red when hurt
             hp_percent = player.hp / player.maxhp
             if hp_percent < 0:
@@ -1360,29 +1369,29 @@ class MainGameScene(UIScene):
                                                                 int(255 * hp_percent),
                                                                 0)
             right = player.equipment['RIGHT_HAND']
-            self.player_right_hand.text = 'Right: ' + str(right)
+            self.player_right_hand.text = _('Right: {right}').format(right=str(right))
             left = player.equipment['LEFT_HAND']
-            self.player_left_hand.text = 'Left:  ' + str(left)
+            self.player_left_hand.text = _('Left: {left}').format(left=str(left))
             money = player.properties['money']
-            self.money.text = 'Money: ' + str(money) + ' coins.'
+            self.money.text = _('Money: {money} coins.').format(money=str(money))
             filled_lines = 0
             buffs_line = ''
             if player.carried_weight > player.properties['max_carry_weight'] * 1.5:
-                buffs_line += '[color=red]OVERBURDENED[color=dark white]══[/color]'
+                buffs_line += '[color=red]{eff}[color=dark white]══[/color]'.format(eff=_('OVERBURDENED'))
                 filled_lines += 1
             elif player.carried_weight > player.properties['max_carry_weight']:
-                buffs_line += '[color=yellow]BURDENED[color=dark white]══[/color]'
+                buffs_line += '[color=yellow]{eff}[color=dark white]══[/color]'.format(eff=_('BURDENED'))
                 filled_lines += 1
             for effect in self.game.player.effects:
                 if filled_lines < 6:
                     if effect.eff == 'POISONED':
-                        buffs_line += '[color=green]' + effect.eff + '[color=dark white]══[/color]'
+                        buffs_line += '[color=green]{eff}[color=dark white]══[/color]'.format(eff=_(effect.eff))
                         filled_lines += 1
                     elif effect.eff == 'HASTE':
-                        buffs_line += '[color=yellow]' + effect.eff + '[color=dark white]══[/color]'
+                        buffs_line += '[color=yellow]{eff}[color=dark white]══[/color]'.format(eff=_(effect.eff))
                         filled_lines += 1
                     elif effect.eff == 'SLOWED':
-                        buffs_line += '[color=blue]' + effect.eff + '[color=dark white]══[/color]'
+                        buffs_line += '[color=blue]{eff}[color=dark white]══[/color]'.format(eff=_(effect.eff))
                         filled_lines += 1
             if self._buffs_bar.text != buffs_line:
                 self._buffs_bar.text = buffs_line
@@ -1422,10 +1431,10 @@ class MainGameScene(UIScene):
         handled = False  # input handled flag
         if game.is_waiting_input:
             if player_input == terminal.TK_ESCAPE:  # game quit on ESC
-                text = 'Do you really want to quit?'
-                self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda:self.director.quit()),
-                                                                          ('No', text, None)],
-                                                                 title='Confirm exit',
+                text = _('Do you really want to quit?')
+                self.director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda:self.director.quit()),
+                                                                          (_('No'), text, None)],
+                                                                 title=_('Confirm exit'),
                                                                  layout_options='intrinsic'))
                 handled = True
             # movement commands
@@ -1476,7 +1485,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_I:  # show inventory
                 self.director.push_scene(InventorySelectionScene(items=player.inventory,
                                                                  game=game,
-                                                                 caption='Inventory',
+                                                                 caption=_('Inventory'),
                                                                  layout_options=LayoutOptions(
                                                                      top=0.1, bottom=0.1,
                                                                      left=0.2, right=0.2)))
@@ -1484,7 +1493,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
-                                                                caption='Drop item:',
+                                                                caption=_('Drop item:'),
                                                                 layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
                                                                     left=0.2, right=0.2)))
@@ -1492,7 +1501,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_U:  # use item
                 self.director.push_scene(UseItemSelectionScene(items=player.inventory,
                                                                game=game,
-                                                               caption='Use item:',
+                                                               caption=_('Use item:'),
                                                                layout_options=LayoutOptions(
                                                                    top=0.1, bottom=0.1,
                                                                    left=0.2, right=0.2)))
@@ -1500,7 +1509,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_W:  # wield item
                 self.director.push_scene(WieldItemSelectionScene(items=player.inventory,
                                                                  game=game,
-                                                                 caption='Wield item:',
+                                                                 caption=_('Wield item:'),
                                                                  layout_options=LayoutOptions(
                                                                      top=0.1, bottom=0.1,
                                                                      left=0.2, right=0.2)))
@@ -1509,14 +1518,14 @@ class MainGameScene(UIScene):
                 self.director.push_scene(TakeOffItemSelectionScene(items=[sl for sl in
                                                                           list(player.equipment.values()) if sl],
                                                                    game=game,
-                                                                   caption='Take off item:',
+                                                                   caption=_('Take off item:'),
                                                                    layout_options=LayoutOptions(
                                                                        top=0.1, bottom=0.1,
                                                                        left=0.2, right=0.2)))
                 handled = True
             elif player_input == terminal.TK_F1:  # help message windows
                 self.director.push_scene(SingleButtonMessageScene(message=HELP_TEXT,
-                                                                  title='Help',
+                                                                  title=_('Help'),
                                                                   layout_options='intrinsic'))
                 handled = True
             elif player_input == terminal.TK_F11:  # debug command exec
@@ -1524,18 +1533,18 @@ class MainGameScene(UIScene):
                 handled = True
             elif player_input == terminal.TK_L:  # look
                 self.state = 'looking'
-                self.title = 'LOOKING:'
+                self.title = _('LOOKING:')
                 self.cell_info_view.is_hidden = False
                 self.log_view.is_hidden = True
                 self.map_view.cam_offset = [0, 0]
                 handled = True
             elif player_input == terminal.TK_C:  # close door
                 self.state = 'closing_door'
-                self.title = 'CLOSE WHERE:'
+                self.title = _('CLOSE WHERE:')
                 handled = True
             elif player_input == terminal.TK_S:  # smash
                 self.state = 'smashing'
-                self.title = 'SMASH WHERE:'
+                self.title = _('SMASH WHERE:')
                 handled = True
             elif player_input == terminal.TK_T:  # throw
                 commands.command_throw_choose(game=self.game, main_scene=self)
@@ -1733,7 +1742,7 @@ class DebugLineInputScene(UIScene):
 
     def _execute(self, text):
         director = self.director
-        self.director.pop_scene()
+        director.pop_scene()
         commands.command_execute_debug_line(line=text, game=self.game)
 
 
@@ -1801,8 +1810,6 @@ class MapView(View):
                 for y in range(0, self.bounds.height):
                     rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
                     rel_y = y - player_scr_y + player_y
-                    if self.game.player.position[0] != player_x or self.game.player.position[1] != player_y:
-                        print('Gotcha!')
                     # checks if location coordinates are valid (in boundaries)
                     if self.game.current_loc.is_in_boundaries(rel_x, rel_y):
                         # obtain cell graphics
@@ -1900,23 +1907,23 @@ class LookView(View):
                 else:
                     col = creature.color
                 ctx.color(terminal.color_from_argb(255, col[0], col[1], col[2]))
-                ctx.print(Point(0, cur_y), creature.name + ' is here.')
+                ctx.print(Point(0, cur_y), _('{creature_name} is here.').format(creature_name=_(creature.name)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
-                for ln in textwrap.wrap(creature.description, self.bounds.width):
+                for ln in textwrap.wrap(_(creature.description), self.bounds.width):
                     ctx.print(Point(0, cur_y), ln)
                     cur_y += 1
-            ctx.print(Point(0, cur_y), 'Items:')
+            ctx.print(Point(0, cur_y), _('Items:'))
             cur_y += 1
             for item in items:  # show items if any
                 ctx.color(terminal.color_from_argb(255, item.color[0], item.color[1], item.color[2]))
-                ctx.print(Point(0, cur_y), item.name + ' is here.')
+                ctx.print(Point(0, cur_y), _('{item_name} is here.').format(item_name=_(item.name)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
-            ctx.print(Point(0, cur_y), 'Other:')
+            ctx.print(Point(0, cur_y), _('Other:'))
             cur_y += 1
             for other in other:  # show other objects
                 ctx.color(terminal.color_from_argb(255, other.color[0], other.color[1], other.color[2]))
-                ctx.print(Point(0, cur_y), other.name + ' is here.')
+                ctx.print(Point(0, cur_y), _('{other_name} is here.').format(other_name=_(other.name)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1

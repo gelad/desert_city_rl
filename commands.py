@@ -5,6 +5,8 @@ import game_view
 import generation
 import save_load
 
+from messages import _  # translation function
+
 import random
 import threading
 
@@ -81,7 +83,7 @@ def command_pick_up(game, dx, dy):
             else:  # if there are multiple Items - ask which to pick up?
                 director.push_scene(game_view.PickUpItemSelectionScene(items=items,
                                                                        game=game,
-                                                                       caption='Pick up item:',
+                                                                       caption=_('Pick up item:'),
                                                                        layout_options=LayoutOptions(
                                                                             top=0.25, bottom=0.25,
                                                                             left=0.2, right=0.2)))
@@ -137,17 +139,19 @@ def command_throw_choose(game, main_scene):
                                                player=game.player,
                                                item=items[0])
                 else:
-                    game_logic.Game.add_message(items[0].name.capitalize() + ' is too heavy!',
-                                                'PLAYER', [255, 255, 255])
+                    game_logic.Game.add_message(message=
+                                                _('{item} is too heavy!'.format(item=str(items[0])).capitalize()),
+                                                level='PLAYER', color=[255, 255, 255])
             else:  # if multiple items in hands
                 main_scene.director.push_scene(game_view.ThrowItemSelectionScene(items=items,
                                                                                  game=game,
-                                                                                 caption='Throw item:',
+                                                                                 caption=_('Throw item:'),
                                                                                  layout_options=LayoutOptions(
                                                                                    top=0.30, bottom=0.30,
                                                                                    left=0.30, right=0.30)))
         else:
-            game_logic.Game.add_message('Take something in hand to throw it.', 'PLAYER', [255, 255, 255])
+            game_logic.Game.add_message(message=_('Take something in hand to throw it.'),
+                                        level='PLAYER', color=[255, 255, 255])
 
 
 def command_throw(target, player, item):
@@ -157,7 +161,6 @@ def command_throw(target, player, item):
 
 def command_reload_equipped(game):
     """ Command function for player wants to reload ranged weapon (in hands)  """
-    director = game_view.GameLoop.active_director
     for item in game.player.equipment.values():  # iterate through player equipment
         if isinstance(item, game_logic.ItemRangedWeapon):  # check if there is ranged weapon
             command_reload(game=game, item=item)
@@ -177,16 +180,20 @@ def command_reload(game, item):
                     director.push_scene(game_view.AmmoItemSelectionScene(items=ammos,
                                                                          game=game,
                                                                          ranged_weapon=item,
-                                                                         caption='Load ammo:',
+                                                                         caption=_('Load ammo:'),
                                                                          layout_options=LayoutOptions(
                                                                              top=0.30, bottom=0.30,
                                                                              left=0.30,
                                                                              right=0.30)))
             else:
-                game_logic.Game.add_message('No ' + item.ammo_type + ' type ammunition.', 'PLAYER',
-                                            [255, 255, 255])
+                game_logic.Game.add_message(message=
+                    _('No {ammo_type} type ammunition.').format(ammo_type=_(item.ammo_type)).capitalize(),
+                                            level='PLAYER',
+                                            color=[255, 255, 255])
         else:
-            game_logic.Game.add_message(item.name + ' is fully loaded.', 'PLAYER', [255, 255, 255])
+            game_logic.Game.add_message(message=
+                _('{item} is fully loaded.').format(item=str(item)).capitalize(),
+                                        level='PLAYER', color=[255, 255, 255])
 
 
 def command_fire_choose(game):
@@ -204,17 +211,19 @@ def command_fire_choose(game):
                                                          player=game.player,
                                                          weapon=ranged_weapons[0])
             else:
-                game_logic.Game.add_message(ranged_weapons[0].name + " isn't loaded!",
-                                            'PLAYER', [255, 255, 255])
+                game_logic.Game.add_message(message=
+                                        _("{weapon} isn't loaded!".format(weapon=str(ranged_weapons[0]).capitalize())),
+                                            level='PLAYER', color=[255, 255, 255])
         else:  # if multiple ranged equipped
             director.push_scene(game_view.FireItemSelectionScene(items=ranged_weapons,
                                                                  game=game,
-                                                                 caption='Fire weapon:',
+                                                                 caption=_('Fire weapon:'),
                                                                  layout_options=LayoutOptions(
                                                                      top=0.30, bottom=0.30,
                                                                      left=0.30, right=0.30)))
     else:
-        game_logic.Game.add_message('Equip ranged weapon to fire.', 'PLAYER', [255, 255, 255])
+        game_logic.Game.add_message(message=_('Equip ranged weapon to fire.'),
+                                    level='PLAYER', color=[255, 255, 255])
 
 
 def command_fire(target, player, weapon):
@@ -228,9 +237,9 @@ def command_player_dead(game):
     director = game_view.GameLoop.active_director
     director.game = None
     del game
-    director.push_scene(game_view.SingleButtonMessageScene(message='Horrors of the Desert City got you.',
-                                                           title='You are dead.',
-                                                           button_text='Return to main menu',
+    director.push_scene(game_view.SingleButtonMessageScene(message=_('Horrors of the Desert City got you.'),
+                                                           title=_('You are dead.'),
+                                                           button_text=_('Return to main menu'),
                                                            callback=
                                                            lambda: command_return_to_main_menu(),
                                                            layout_options='intrinsic'))
@@ -259,7 +268,8 @@ def command_execute_debug_line(line, game):
     try:
         eval(line, globals(), locals())
     except:
-        game_logic.Game.add_message('Failed to execute line: ' + line, 'DEBUG', [255, 0, 0])
+        game_logic.Game.add_message(message=_('Failed to execute line: {line}').format(line=line).capitalize(),
+                                    level='DEBUG', color=[255, 0, 0])
         print('WARNING! Failed to execute debug line: ' + line)
 
 
@@ -270,20 +280,19 @@ def command_ask_leave_loc(game):
     """
     director = game_view.GameLoop.active_director
     flee = False
-    text = 'Do you really want to leave this location?'
+    text = _('Do you really want to leave this location?')
     for point in game_logic.circle_points(r=25, include_center=False):  # check for an enemy near player
         x = point[0] + game.player.position[0]
         y = point[1] + game.player.position[1]
         if game.current_loc.is_in_boundaries(x, y):
             if game.current_loc.cells[x][y].is_there_a(game_logic.Fighter):
                 flee = True  # if there are an enemy - set flee flag on
-                text += '\n[color=red]WARNING: There are enemies nearby! If you choose to leave now, you will '
-                text += 'be chased, and probably lose some items while fleeing.'
+                text += _('\n[color=red]WARNING: There are enemies nearby! If you choose to leave now, you will be chased, and probably lose some items while fleeing.')
                 break
-    director.push_scene(game_view.MultiButtonMessageScene(buttons=[('Yes, head back to the camp.', text,
+    director.push_scene(game_view.MultiButtonMessageScene(buttons=[(_('Yes, head back to the camp.'), text,
                                                             lambda g=game, f=flee: command_leave_loc(game=g, flee=f)),
-                                                                   ('No, stay here.', text, None)],
-                                                          title='Leaving location',
+                                                                   (_('No, stay here.'), text, None)],
+                                                          title=_('Leaving location'),
                                                           layout_options='intrinsic'))
 
 
@@ -310,13 +319,13 @@ def command_leave_loc(game, flee=False):
                 player.unequip_item(item=item)
                 player.discard_item(item=item)
         if len(lost_items) > 0:
-            raid_report_text += 'You fled from the enemies, but lost some items in the process:\n'
+            raid_report_text += _('You fled from the enemies, but lost some items in the process:\n')
             for item in lost_items:
-                raid_report_text += str(item) + ', '
+                raid_report_text += _('{item}, ').format(item=str(item))
                 del item
-            raid_report_text = raid_report_text[:-2] + '.\n'
+            raid_report_text = raid_report_text[:-2] + '.\n'  # a hack, replace last , with .\n
         else:
-            raid_report_text += 'You fled from the enemies and kept all of your items. Lucky!\n'
+            raid_report_text += _('You fled from the enemies and kept all of your items. Lucky!\n')
     # treasures report section
     treasures = {}
     for item in player.inventory:
@@ -326,20 +335,22 @@ def command_leave_loc(game, flee=False):
             else:
                 count = 1
             if item.name in treasures:
-                treasures[item.name][0] += count
+                treasures[str(item)][0] += count
             else:
-                treasures[item.name] = [count, item.properties['value']]
+                treasures[str(item)] = [count, item.properties['value']]
     if len(treasures) > 0:
-        raid_report_text += 'You obtained some treasures:\n\n'
+        raid_report_text += _('You obtained some treasures:\n\n')
         total = 0
         for tr in treasures.keys():
-            raid_report_text += tr + ' x' + str(treasures[tr][0]) + ' * ' + str(treasures[tr][1]) + ' = ' \
-                    + str(treasures[tr][0] * treasures[tr][1]) + '\n'
+            raid_report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}\n').format(
+                tr_name=tr,
+                tr_count=str(treasures[tr][0]),
+                tr_value=str(treasures[tr][1]),
+                tr_total=str(treasures[tr][0] * treasures[tr][1]))
             total += treasures[tr][0] * treasures[tr][1]
-        raid_report_text += '\nTotal treasures value: ' + str(total) + ' coins.'
+        raid_report_text += _('\nTotal treasures value: {total} coins.\n ').format(total=str(total))
     else:
-        raid_report_text += 'You escaped the City with nothing of value in your pockets.'+\
-                            ' At least you managed to stay alive.\n'
+        raid_report_text += _('You escaped the City with nothing of value in your pockets. At least you managed to stay alive.\n')
     # actual leaving location section
     # TODO: location transition needs testing (eliminate leftovers, don't lose anything)
     player.location.remove_entity(player)
@@ -348,7 +359,7 @@ def command_leave_loc(game, flee=False):
     game.enter_camp()
     director.pop_scene()
     director.push_scene(game_view.SingleButtonMessageScene(message=raid_report_text + '\n \n ',
-                                                           title='Successful raid.',
+                                                           title=_('Successful raid.'),
                                                            layout_options='intrinsic', close_on_esc=False,
                                                            callback=lambda: (director.pop_scene(),
                                                                              director.push_scene(game_view.CampMenuScene

@@ -1,6 +1,7 @@
 """
     This file contains effects.
 """
+from messages import _  # translation function
 
 
 class Effect:
@@ -9,34 +10,34 @@ class Effect:
         self.eff = eff  # an effect identificator
         self.magnitude = magnitude  # effect magnitude
         # BLOCK effects
-        if eff == 'BLOCK_BASHING': self.description = 'Blocks ' + str(magnitude) + ' bashing damage'
-        elif eff == 'BLOCK_SLASHING': self.description = 'Blocks ' + str(magnitude) + ' slashing damage'
-        elif eff == 'BLOCK_PIERCING': self.description = 'Blocks ' + str(magnitude) + ' piercing damage'
-        elif eff == 'BLOCK_FIRE': self.description = 'Blocks ' + str(magnitude) + ' fire damage'
-        elif eff == 'BLOCK_COLD': self.description = 'Blocks ' + str(magnitude) + ' cold damage'
-        elif eff == 'BLOCK_LIGHTNING': self.description = 'Blocks ' + str(magnitude) + ' lightning damage'
-        elif eff == 'BLOCK_POISON': self.description = 'Blocks ' + str(magnitude) + ' poison damage'
-        elif eff == 'BLOCK_ACID': self.description = 'Blocks ' + str(magnitude) + ' acid damage'
-        elif eff == 'BLOCK_DEATH': self.description = 'Blocks ' + str(magnitude) + ' death damage'
-        elif eff == 'BLOCK_MENTAL': self.description = 'Blocks ' + str(magnitude) + ' mental damage'
-        elif eff == 'BLOCK_STRANGE': self.description = 'Blocks ' + str(magnitude) + ' strange damage'
+        if eff == 'BLOCK_BASHING': self.description = _('Blocks {magn} bashing damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_SLASHING': self.description = _('Blocks {magn} slashing damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_PIERCING': self.description = _('Blocks {magn} piercing damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_FIRE': self.description = _('Blocks {magn} fire damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_COLD': self.description = _('Blocks {magn} cold damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_LIGHTNING': self.description = _('Blocks {magn} lightning damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_POISON': self.description = _('Blocks {magn} poison damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_ACID': self.description = _('Blocks {magn} acid damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_DEATH': self.description = _('Blocks {magn} death damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_MENTAL': self.description = _('Blocks {magn} mental damage').format(magn=str(magnitude))
+        elif eff == 'BLOCK_STRANGE': self.description = _('Blocks {magn} strange damage').format(magn=str(magnitude))
         # resistance effects
-        elif eff == 'RESIST_BASHING': self.description = 'Resists ' + str(magnitude) + ' bashing'
-        elif eff == 'RESIST_SLASHING': self.description = 'Resists ' + str(magnitude) + ' slashing'
-        elif eff == 'RESIST_PIERCING': self.description = 'Resists ' + str(magnitude) + ' piercing'
-        elif eff == 'RESIST_FIRE': self.description = 'Resists ' + str(magnitude) + ' fire'
-        elif eff == 'RESIST_COLD': self.description = 'Resists ' + str(magnitude) + ' cold'
-        elif eff == 'RESIST_LIGHTNING': self.description = 'Resists ' + str(magnitude) + ' lightning'
-        elif eff == 'RESIST_POISON': self.description = 'Resists ' + str(magnitude) + ' poison'
-        elif eff == 'RESIST_ACID': self.description = 'Resists ' + str(magnitude) + ' acid'
-        elif eff == 'RESIST_DEATH': self.description = 'Resists ' + str(magnitude) + ' death'
-        elif eff == 'RESIST_MENTAL': self.description = 'Resists ' + str(magnitude) + ' mental'
-        elif eff == 'RESIST_STRANGE': self.description = 'Resists ' + str(magnitude) + ' strange'
+        elif eff == 'RESIST_BASHING': self.description = _('Resists {magn} bashing').format(magn=str(magnitude))
+        elif eff == 'RESIST_SLASHING': self.description = _('Resists {magn} slashing').format(magn=str(magnitude))
+        elif eff == 'RESIST_PIERCING': self.description = _('Resists {magn} piercing').format(magn=str(magnitude))
+        elif eff == 'RESIST_FIRE': self.description = _('Resists {magn} fire').format(magn=str(magnitude))
+        elif eff == 'RESIST_COLD': self.description = _('Resists {magn} cold').format(magn=str(magnitude))
+        elif eff == 'RESIST_LIGHTNING': self.description = _('Resists {magn} lightning').format(magn=str(magnitude))
+        elif eff == 'RESIST_POISON': self.description = _('Resists {magn} poison').format(magn=str(magnitude))
+        elif eff == 'RESIST_ACID': self.description = _('Resists {magn} acid').format(magn=str(magnitude))
+        elif eff == 'RESIST_DEATH': self.description = _('Resists {magn} death').format(magn=str(magnitude))
+        elif eff == 'RESIST_MENTAL': self.description = _('Resists {magn} mental').format(magn=str(magnitude))
+        elif eff == 'RESIST_STRANGE': self.description = _('Resists {magn} strange').format(magn=str(magnitude))
         # buff/debuff effects
-        elif eff == 'INCREASE_MELEE_DAMAGE': self.description = 'Increases melee damage by '+str(magnitude)
-        elif eff == 'INCREASE_RANGED_DAMAGE': self.description = 'Increases ranged damage by ' + str(magnitude)
-        elif eff == 'HASTE': self.description = 'Quickens all actions by ' + str(magnitude) + '%'
-        elif eff == 'SLOWED': self.description = 'Slows all actions by ' + str(magnitude) + '%'
-        elif eff == 'POISONED': self.description = 'Affected by poison'
-        elif eff == 'HEAL': self.description = 'Heals '+str(magnitude)+' hitpoints'
+        elif eff == 'INCREASE_MELEE_DAMAGE': self.description = _('Increases melee damage by {magn}').format(magn=str(magnitude))
+        elif eff == 'INCREASE_RANGED_DAMAGE': self.description = _('Increases ranged damage by {magn}').format(magn=str(magnitude))
+        elif eff == 'HASTE': self.description = _('Quickens all actions by {magn}%').format(magn=str(magnitude))
+        elif eff == 'SLOWED': self.description = _('Slows all actions by {magn}%').format(magn=str(magnitude))
+        elif eff == 'POISONED': self.description = _('Affected by poison')
+        elif eff == 'HEAL': self.description = _('Heals {magn} hitpoints').format(magn=str(magnitude))
         else: self.description = eff  # if no description - simply set description to effect name
