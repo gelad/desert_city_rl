@@ -744,7 +744,7 @@ def initialize():
                                                       charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 3), 'dmg_type': 'cold'}
-    abil = abilities.Ability(name='Ignite', owner=data_set['item_magic_snow'],
+    abil = abilities.Ability(name='Freeze', owner=data_set['item_magic_snow'],
                              trigger='projectile_hit', conditions=[], reactions=[react],
                              message_color=[100, 100, 205])
     data_set['item_magic_snow'].add_ability(abil)
