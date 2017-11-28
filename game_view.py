@@ -1373,10 +1373,10 @@ class MainGameScene(UIScene):
             filled_lines = 0
             buffs_line = ''
             if player.carried_weight > player.properties['max_carry_weight'] * 1.5:
-                buffs_line += _('[color=red]OVERBURDENED[color=dark white]══[/color]')
+                buffs_line += '[color=red]{eff}[color=dark white]══[/color]'.format(eff=_('OVERBURDENED'))
                 filled_lines += 1
             elif player.carried_weight > player.properties['max_carry_weight']:
-                buffs_line += _('[color=yellow]BURDENED[color=dark white]══[/color]')
+                buffs_line += '[color=yellow]{eff}[color=dark white]══[/color]'.format(eff=_('BURDENED'))
                 filled_lines += 1
             for effect in self.game.player.effects:
                 if filled_lines < 6:
