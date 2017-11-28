@@ -122,6 +122,7 @@ class GameLoop(DirectorLoop):
                     pass
         GameLoop.active_director = None
         if len(missing_translations) > 0:
+            print('Some strings missing in translation files. Written to missing_translations.txt.')
             f = open(file='missing_translations.txt', mode='w')
             for s in missing_translations:
                 f.write(s+'\n\n')
