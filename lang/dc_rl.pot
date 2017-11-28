@@ -326,6 +326,10 @@ msgstr ""
 msgid "ancient ring"
 msgstr ""
 
+#: dataset.py:224
+msgid "Ancient ring."
+msgstr ""
+
 #: dataset.py:229
 msgid "ancient necklace"
 msgstr ""

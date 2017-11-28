@@ -219,7 +219,7 @@ def initialize():
                                                               charges=1, destroyed_after_use=True, weight=1)
 
     data_set['item_ancient_ring'] = game_logic.Item(name='ancient ring', data_id='item_ancient_scroll',
-                                                    description='Ancient scroll, with some writing in it.',
+                                                    description='Ancient ring.',
                                                     categories={'relic', 'ring'},
                                                     properties={'value': 25}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
                                                     char='˚', color=[255, 20, 147], weight=0.1)

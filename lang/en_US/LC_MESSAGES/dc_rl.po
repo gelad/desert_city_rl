@@ -5,25 +5,1129 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2017-11-27 20:37+0200\n"
-"PO-Revision-Date: 2017-11-27 22:20+0200\n"
+"POT-Creation-Date: 2017-11-28 17:57+0200\n"
+"PO-Revision-Date: 2017-11-28 18:18+0200\n"
+"Last-Translator: \n"
 "Language-Team: \n"
+"Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 2.0.4\n"
-"Last-Translator: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: en_US\n"
 
-#: game_logic.py:1394
+#: abilities.py:223
+msgid "{ability_name}: {target_name} takes {damage} {dmg_type} damage!"
+msgstr ""
+
+#: abilities.py:313
+msgid "{eff_name}: {eff_descr} for {time} ticks."
+msgstr ""
+
+#: abilities.py:337 abilities.py:366
+msgid "{ability_name}: removed all {eff_name} effects."
+msgstr ""
+
+#: abilities.py:354
+msgid "{ability_name}: removed {eff_number} {eff_name} effects."
+msgstr ""
+
+#: abilities.py:389 abilities.py:392
+msgid "{target_name} is {eff_name}."
+msgstr ""
+
+#: actions.py:139
+msgid "{launcher_name} launches a {projectile_name}!"
+msgstr ""
+
+#: actions.py:182
+msgid "{eff_name} effect fades away."
+msgstr ""
+
+#: actions.py:199 actions.py:212
+msgid "{eff_name}!"
+msgstr ""
+
+#: actions.py:222
+msgid "{eff_name}: {damage} damage."
+msgstr ""
+
+#: actions.py:419
+msgid "You pick up {item}."
+msgstr ""
+
+#: commands.py:86
+msgid "Pick up item:"
+msgstr ""
+
+#: commands.py:148
+msgid "Throw item:"
+msgstr ""
+
+#: commands.py:153
+msgid "Take something in hand to throw it."
+msgstr ""
+
+#: commands.py:183
+msgid "Load ammo:"
+msgstr ""
+
+#: commands.py:190
+msgid "No {ammo_type} type ammunition."
+msgstr ""
+
+#: commands.py:195
+msgid "{item} is fully loaded."
+msgstr ""
+
+#: commands.py:220
+msgid "Fire weapon:"
+msgstr ""
+
+#: commands.py:225
+msgid "Equip ranged weapon to fire."
+msgstr ""
+
+#: commands.py:240
+msgid "Horrors of the Desert City got you."
+msgstr ""
+
+#: commands.py:241
+msgid "You are dead."
+msgstr ""
+
+#: commands.py:242
+msgid "Return to main menu"
+msgstr ""
+
+#: commands.py:271
+msgid "Failed to execute line: {line}"
+msgstr ""
+
+#: commands.py:283
+msgid "Do you really want to leave this location?"
+msgstr ""
+
+#: commands.py:290
+msgid ""
+"\n"
+"[color=red]WARNING: There are enemies nearby! If you choose to leave now, "
+"you will be chased, and probably lose some items while fleeing."
+msgstr ""
+
+#: commands.py:292
+msgid "Yes, head back to the camp."
+msgstr ""
+
+#: commands.py:294
+msgid "No, stay here."
+msgstr ""
+
+#: commands.py:295
+msgid "Leaving location"
+msgstr ""
+
+#: commands.py:322
+msgid "You fled from the enemies, but lost some items in the process:\n"
+msgstr ""
+
+#: commands.py:324
+msgid "{item}, "
+msgstr ""
+
+#: commands.py:328
+msgid "You fled from the enemies and kept all of your items. Lucky!\n"
+msgstr ""
+
+#: commands.py:342
+msgid ""
+"You obtained some treasures:\n"
+"\n"
+msgstr ""
+
+#: commands.py:345 game_view.py:510
+msgid "{tr_name} x{tr_count} * {tr_value} = {tr_total}\n"
+msgstr ""
+
+#: commands.py:351 game_view.py:515
+msgid ""
+"\n"
+"Total treasures value: {total} coins.\n"
+" "
+msgstr ""
+
+#: commands.py:353
+msgid ""
+"You escaped the City with nothing of value in your pockets. At least you "
+"managed to stay alive.\n"
+msgstr ""
+
+#: commands.py:362
+msgid "Successful raid."
+msgstr ""
+
+#: dataset.py:27
+msgid "A sandstone wall."
+msgstr ""
+
+#: dataset.py:27
+msgid "Wall"
+msgstr ""
+
+#: dataset.py:35
+msgid "Small window"
+msgstr ""
+
+#: dataset.py:38
+msgid "A hole in sandstone wall."
+msgstr ""
+
+#: dataset.py:45
+msgid "Large window"
+msgstr ""
+
+#: dataset.py:49
+msgid "A large window in sandstone wall."
+msgstr ""
+
+#: dataset.py:56
+msgid "Pile of sandstone blocks"
+msgstr ""
+
+#: dataset.py:61
+msgid "A collapsed structure, like wall or pillar."
+msgstr ""
+
+#: dataset.py:67
+msgid "Pile of wooden debris"
+msgstr ""
+
+#: dataset.py:72
+msgid "Large destroyed wooden furniture."
+msgstr ""
+
+#: dataset.py:78
+msgid "Wooden board"
+msgstr ""
+
+#: dataset.py:83
+msgid "Wooden wagon board. Provides small cover from projectiles."
+msgstr ""
+
+#: dataset.py:89
+msgid "Wooden wheel"
+msgstr ""
+
+#: dataset.py:94
+msgid "Wooden wagon wheel. Provides small cover from projectiles."
+msgstr ""
+
+#: dataset.py:100
+msgid "Wooden counter"
+msgstr ""
+
+#: dataset.py:105
+msgid "Wooden counter. Provides small cover from projectiles."
+msgstr ""
+
+#: dataset.py:111
+msgid "Wooden table"
+msgstr ""
+
+#: dataset.py:116
+msgid "Wooden table. Provides small cover from projectiles."
+msgstr ""
+
+#: dataset.py:122
+msgid "Stone table"
+msgstr ""
+
+#: dataset.py:127
+msgid "Stone table. Provides small cover from projectiles."
+msgstr ""
+
+#: dataset.py:133
+msgid "Rusty anvil"
+msgstr ""
+
+#: dataset.py:138
+msgid "An anvil, dirty and covered in rust."
+msgstr ""
+
+#: dataset.py:144
+msgid "Iron grate"
+msgstr ""
+
+#: dataset.py:148
+msgid "A grate made of iron, too tight for man to pass through."
+msgstr ""
+
+#: dataset.py:154
+msgid "Furnace"
+msgstr ""
+
+#: dataset.py:158
+msgid "Device for heating, made with heavy stone blocks."
+msgstr ""
+
+#: dataset.py:164
+msgid "Corrosive moss"
+msgstr ""
+
+#: dataset.py:168
+msgid "A large patch of green acid-dripping moss."
+msgstr ""
+
+#: dataset.py:176
+msgid "Corrosive acid"
+msgstr ""
+
+#: dataset.py:181
+msgid "A wooden door."
+msgstr ""
+
+#: dataset.py:181
+msgid "Door"
+msgstr ""
+
+#: dataset.py:190
+msgid "ancient coin"
+msgstr ""
+
+#: dataset.py:192
+msgid "An ancient coin."
+msgstr ""
+
+#: dataset.py:198
+msgid "ancient scroll"
+msgstr ""
+
+#: dataset.py:200 dataset.py:224
+msgid "Ancient scroll, with some writing in it."
+msgstr ""
+
+#: dataset.py:207
+msgid "clay tablet"
+msgstr ""
+
+#: dataset.py:209
+msgid "Clay tablet, with some writing or picture in it."
+msgstr ""
+
+#: dataset.py:215
+msgid "ancient pottery"
+msgstr ""
+
+#: dataset.py:217
+msgid "Ancient jar, or pot, with some pictures or engravings."
+msgstr ""
+
+#: dataset.py:223
+msgid "ancient ring"
+msgstr ""
+
+#: dataset.py:229
+msgid "ancient necklace"
+msgstr ""
+
+#: dataset.py:230
+msgid "Ancient necklace."
+msgstr ""
+
+#: dataset.py:235
+msgid "item_boulder"
+msgstr ""
+
+#: dataset.py:236
+msgid "A stone boulder."
+msgstr ""
+
+#: dataset.py:239
+msgid "adventurer's corpse"
+msgstr ""
+
+#: dataset.py:240
+msgid "A dead body of adventurer, not so lucky as you."
+msgstr ""
+
+#: dataset.py:244
+msgid "human skeleton"
+msgstr ""
+
+#: dataset.py:245
+msgid "Human skeleton."
+msgstr ""
+
+#: dataset.py:249
+msgid "horse skeleton"
+msgstr ""
+
+#: dataset.py:250
+msgid "Horse skeleton."
+msgstr ""
+
+#: dataset.py:254
+msgid "haste potion"
+msgstr ""
+
+#: dataset.py:255
+msgid "A potion that hastens user by 50%."
+msgstr ""
+
+#: dataset.py:262 dataset.py:356
+msgid "Haste"
+msgstr ""
+
+#: dataset.py:267
+msgid "antidote potion"
+msgstr ""
+
+#: dataset.py:268
+msgid ""
+"A potion that cures all poison effects, and protects from poison for a short "
+"time."
+msgstr ""
+
+#: dataset.py:278
+msgid "Antidote"
+msgstr ""
+
+#: dataset.py:283
+msgid "scroll of Lightning"
+msgstr ""
+
+#: dataset.py:284
+msgid "A scroll that calls a lightning strike on enemy."
+msgstr ""
+
+#: dataset.py:291
+msgid "Lightning"
+msgstr ""
+
+#: dataset.py:296
+msgid "scroll of Firebolt"
+msgstr ""
+
+#: dataset.py:298
+msgid "A scroll that hurls a firebolt at enemy."
+msgstr ""
+
+#: dataset.py:308 dataset.py:895
+msgid "firebolt"
+msgstr ""
+
+#: dataset.py:309 dataset.py:896
+msgid "An arrow of pure flame."
+msgstr ""
+
+#: dataset.py:312 dataset.py:732 dataset.py:749 dataset.py:899
+msgid "Ignite"
+msgstr ""
+
+#: dataset.py:317 dataset.py:854 dataset.py:906
+msgid "Firebolt"
+msgstr ""
+
+#: dataset.py:322
+msgid "scroll of Frostbolt"
+msgstr ""
+
+#: dataset.py:324
+msgid "A scroll that hurls a frostbolt at enemy."
+msgstr ""
+
+#: dataset.py:334 dataset.py:926
+msgid "frostbolt"
+msgstr ""
+
+#: dataset.py:335
+msgid "An arrow of freezing energy."
+msgstr ""
+
+#: dataset.py:338 dataset.py:930 dataset.py:932
+msgid "Freeze"
+msgstr ""
+
+#: dataset.py:343 dataset.py:946
+msgid "Frostbolt"
+msgstr ""
+
+#: dataset.py:348
+msgid "healing potion"
+msgstr ""
+
+#: dataset.py:349
+msgid "A potion that heals 5 HP."
+msgstr ""
+
+#: dataset.py:361
+msgid "barbed loincloth"
+msgstr ""
+
+#: dataset.py:362
+msgid "It is covered in spikes. Ouch!"
+msgstr ""
+
+#: dataset.py:368
+msgid "Barbs"
+msgstr ""
+
+#: dataset.py:373
+msgid "ring of poison resistance"
+msgstr ""
+
+#: dataset.py:374
+msgid "Ring that grants protection from poison."
+msgstr ""
+
+#: dataset.py:380
+msgid "ring of fire resistance"
+msgstr ""
+
+#: dataset.py:381
+msgid "Ring that grants protection from fire."
+msgstr ""
+
+#: dataset.py:387
+msgid "ring of cold resistance"
+msgstr ""
+
+#: dataset.py:388
+msgid "Ring that grants protection from cold."
+msgstr ""
+
+#: dataset.py:394
+msgid "ring of lightning resistance"
+msgstr ""
+
+#: dataset.py:396
+msgid "Ring that grants protection from lightning."
+msgstr ""
+
+#: dataset.py:402
+msgid "wooden buckler"
+msgstr ""
+
+#: dataset.py:403
+msgid "A light wooden shield."
+msgstr ""
+
+#: dataset.py:412
+msgid "misurka"
+msgstr ""
+
+#: dataset.py:413
+msgid "A light iron helmet with spike on top."
+msgstr ""
+
+#: dataset.py:419
+msgid "mail armor"
+msgstr ""
+
+#: dataset.py:420
+msgid "An armor made of overlapping layers of metal rings."
+msgstr ""
+
+#: dataset.py:426
+msgid "iron pauldrons"
+msgstr ""
+
+#: dataset.py:427
+msgid "A pair of iron pauldrons."
+msgstr ""
+
+#: dataset.py:434
+msgid "iron boots"
+msgstr ""
+
+#: dataset.py:435
+msgid "A pair of iron greaves."
+msgstr ""
+
+#: dataset.py:441
+msgid "iron armguards"
+msgstr ""
+
+#: dataset.py:442
+msgid "A pair of iron armguards."
+msgstr ""
+
+#: dataset.py:448
+msgid "mail leggings"
+msgstr ""
+
+#: dataset.py:449
+msgid "A pair of mail leggings."
+msgstr ""
+
+#: dataset.py:455
+msgid "leather cap"
+msgstr ""
+
+#: dataset.py:456
+msgid "A leather cap offers light protection."
+msgstr ""
+
+#: dataset.py:462
+msgid "leather armor"
+msgstr ""
+
+#: dataset.py:463
+msgid "A light armor made of leather."
+msgstr ""
+
+#: dataset.py:469
+msgid "leather pauldrons"
+msgstr ""
+
+#: dataset.py:470
+msgid "A pair of leather pauldrons."
+msgstr ""
+
+#: dataset.py:477
+msgid "leather boots"
+msgstr ""
+
+#: dataset.py:478
+msgid "A pair of leather boots."
+msgstr ""
+
+#: dataset.py:484
+msgid "leather armguards"
+msgstr ""
+
+#: dataset.py:485
+msgid "A pair of leather armguards."
+msgstr ""
+
+#: dataset.py:491
+msgid "leather leggings"
+msgstr ""
+
+#: dataset.py:492
+msgid "A pair of leather leggings."
+msgstr ""
+
+#: dataset.py:498
+msgid "sabre"
+msgstr ""
+
+#: dataset.py:499
+msgid "A sharp sabre with pointy tip."
+msgstr ""
+
+#: dataset.py:504
+msgid "khopesh"
+msgstr ""
+
+#: dataset.py:505
+msgid "An ancient bronze sickle-sword."
+msgstr ""
+
+#: dataset.py:510
+msgid "longsword"
+msgstr ""
+
+#: dataset.py:511
+msgid "A double-edged straight sword."
+msgstr ""
+
+#: dataset.py:516
+msgid "zweihander"
+msgstr ""
+
+#: dataset.py:517
+msgid ""
+"A long and heavy two-handed sword. Slow to swing, but extremely heavy-"
+"hitting."
+msgstr ""
+
+#: dataset.py:522
+msgid "tabar"
+msgstr ""
+
+#: dataset.py:523
+msgid "Fighting axe, with metal handle suitable for parrying."
+msgstr ""
+
+#: dataset.py:528
+msgid "panabas"
+msgstr ""
+
+#: dataset.py:529
+msgid "Long sword-like two-handed axe."
+msgstr ""
+
+#: dataset.py:534
+msgid "dagger"
+msgstr ""
+
+#: dataset.py:535
+msgid "A dagger about 20cm long."
+msgstr ""
+
+#: dataset.py:540
+msgid "jambiyah"
+msgstr ""
+
+#: dataset.py:541
+msgid "A knife with broad blade, suited for slashing."
+msgstr ""
+
+#: dataset.py:546
+msgid "kris"
+msgstr ""
+
+#: dataset.py:547
+msgid "A dagger with flame-like blade."
+msgstr ""
+
+#: dataset.py:552
+msgid "assegai"
+msgstr ""
+
+#: dataset.py:553
+msgid "Short spear, used for melee combat."
+msgstr ""
+
+#: dataset.py:558
+msgid "mace"
+msgstr ""
+
+#: dataset.py:559
+msgid "A short club with iron head."
+msgstr ""
+
+#: dataset.py:564
+msgid "bronze maul"
+msgstr ""
+
+#: dataset.py:565
+msgid "A huge bronze sphere ot top of wooden pole."
+msgstr ""
+
+#: dataset.py:570
+msgid "wall smasher"
+msgstr ""
+
+#: dataset.py:571
+msgid "A test weapon with tremendous power to smash walls."
+msgstr ""
+
+#: dataset.py:576
+msgid "hunting crossbow"
+msgstr ""
+
+#: dataset.py:578
+msgid "A small crossbow."
+msgstr ""
+
+#: dataset.py:588
+msgid "short bow"
+msgstr ""
+
+#: dataset.py:590
+msgid "Short bow suited for small game hunt."
+msgstr ""
+
+#: dataset.py:600
+msgid "bronze bolt"
+msgstr ""
+
+#: dataset.py:601
+msgid "A simple bronze bolt for crossbows."
+msgstr ""
+
+#: dataset.py:608
+msgid "bronze tipped arrow"
+msgstr ""
+
+#: dataset.py:610
+msgid "A simple bronze tipped arrow."
+msgstr ""
+
+#: dataset.py:617
+msgid "poisoned arrow"
+msgstr ""
+
+#: dataset.py:619
+msgid "A simple bronze tipped arrow, coated in weak poison."
+msgstr ""
+
+#: dataset.py:630
+msgid "Poisoned arrow"
+msgstr ""
+
+#: dataset.py:635
+msgid "frost arrow"
+msgstr ""
+
+#: dataset.py:637
+msgid "Magical arrow, that deals cold damage and slows target."
+msgstr ""
+
+#: dataset.py:646
+msgid "Frost arrow"
+msgstr ""
+
+#: dataset.py:651
+msgid "explosive bolt"
+msgstr ""
+
+#: dataset.py:653
+msgid "Crossbow bolt with attached alchemical explosive head."
+msgstr ""
+
+#: dataset.py:663 dataset.py:769
+msgid "BOOM!"
+msgstr ""
+
+#: dataset.py:668
+msgid "throwing knife"
+msgstr ""
+
+#: dataset.py:670
+msgid "A knife, balanced for quick throwing."
+msgstr ""
+
+#: dataset.py:680
+msgid "Shank"
+msgstr ""
+
+#: dataset.py:685
+msgid "venom sac"
+msgstr ""
+
+#: dataset.py:687
+msgid ""
+"Small sac, full of scorpion venom. Useful alchemical ingredient. If thrown - "
+"can deal minor poison damage."
+msgstr ""
+
+#: dataset.py:698
+msgid "Splash!"
+msgstr ""
+
+#: dataset.py:703
+msgid "sparkling dust"
+msgstr ""
+
+#: dataset.py:705
+msgid ""
+"Magical dust, sparkling with tiny lightnings. Useful alchemical ingredient. "
+"If thrown - can deal minor lightning damage."
+msgstr ""
+
+#: dataset.py:715
+msgid "Zap!"
+msgstr ""
+
+#: dataset.py:720
+msgid "hot ash"
+msgstr ""
+
+#: dataset.py:722
+msgid ""
+"Magical ash, radiating heat. Useful alchemical ingredient. If thrown - can "
+"deal minor fire damage."
+msgstr ""
+
+#: dataset.py:737
+msgid "magic snow"
+msgstr ""
+
+#: dataset.py:739
+msgid ""
+"Magical snow, that doesn't melt. Useful alchemical ingredient. If thrown - "
+"can deal minor frost damage."
+msgstr ""
+
+#: dataset.py:754
+msgid "explosive potion"
+msgstr ""
+
+#: dataset.py:756
+msgid "Unstable potion, that explodes if breaked."
+msgstr ""
+
+#: dataset.py:774
+msgid "javelin"
+msgstr ""
+
+#: dataset.py:776
+msgid "A short spear, made for throwing."
+msgstr ""
+
+#: dataset.py:785
+msgid "Pierce"
+msgstr ""
+
+#: dataset.py:791
+msgid "Mindless body"
+msgstr ""
+
+#: dataset.py:792
+msgid "Shaking, dehydrated human body, raised by strange magic of the City."
+msgstr ""
+
+#: dataset.py:801
+msgid "Scorpion"
+msgstr ""
+
+#: dataset.py:802
+msgid "Huge black scorpion, about 1 meter long."
+msgstr ""
+
+#: dataset.py:813
+msgid "Poisonous stinger"
+msgstr ""
+
+#: dataset.py:818
+msgid "Rakshasa"
+msgstr ""
+
+#: dataset.py:819
+msgid "A bipedal tiger with very sharp claws."
+msgstr ""
+
+#: dataset.py:826
+msgid "Ifrit"
+msgstr ""
+
+#: dataset.py:827
+msgid "A magical creature with human upper body floating over column of flame."
+msgstr ""
+
+#: dataset.py:836
+msgid "Flaming fists"
+msgstr ""
+
+#: dataset.py:841
+msgid "fireball"
+msgstr ""
+
+#: dataset.py:842
+msgid "Explosive ball of pure flame."
+msgstr ""
+
+#: dataset.py:846
+msgid "Fireball!"
+msgstr ""
+
+#: dataset.py:859
+msgid "Lightning wisp"
+msgstr ""
+
+#: dataset.py:860
+msgid "A small hostile magic cloud, that zaps enemies with lightning."
+msgstr ""
+
+#: dataset.py:875
+msgid "Zap"
+msgstr ""
+
+#: dataset.py:880
+msgid "Flame wisp"
+msgstr ""
+
+#: dataset.py:881
+msgid "Hostile ball of flame, burning with hatred to all living beings."
+msgstr ""
+
+#: dataset.py:911
+msgid "Frost wisp"
+msgstr ""
+
+#: dataset.py:912
+msgid "Hostile ball of cold energy, burning with hatred to all living beings."
+msgstr ""
+
+#: dataset.py:927
+msgid "An arrow of pure frost."
+msgstr ""
+
+#: dataset.py:937
+msgid "Chill"
+msgstr ""
+
+#: dataset.py:951
+msgid "Sand golem"
+msgstr ""
+
+#: dataset.py:952
+msgid "Magic-formed sand, resembling a human figure about 3m high."
+msgstr ""
+
+#: dataset.py:962
+msgid "Iron golem"
+msgstr ""
+
+#: dataset.py:963
+msgid ""
+"Fighting mechanism made of iron, brought to life with magic. Armed with "
+"enormous blade."
+msgstr ""
+
+#: effects.py:13
+msgid "Blocks {magn} bashing damage"
+msgstr ""
+
+#: effects.py:14
+msgid "Blocks {magn} slashing damage"
+msgstr ""
+
+#: effects.py:15
+msgid "Blocks {magn} piercing damage"
+msgstr ""
+
+#: effects.py:16
+msgid "Blocks {magn} fire damage"
+msgstr ""
+
+#: effects.py:17
+msgid "Blocks {magn} cold damage"
+msgstr ""
+
+#: effects.py:18
+msgid "Blocks {magn} lightning damage"
+msgstr ""
+
+#: effects.py:19
+msgid "Blocks {magn} poison damage"
+msgstr ""
+
+#: effects.py:20
+msgid "Blocks {magn} acid damage"
+msgstr ""
+
+#: effects.py:21
+msgid "Blocks {magn} death damage"
+msgstr ""
+
+#: effects.py:22
+msgid "Blocks {magn} mental damage"
+msgstr ""
+
+#: effects.py:23
+msgid "Blocks {magn} strange damage"
+msgstr ""
+
+#: effects.py:25
+msgid "Resists {magn} bashing"
+msgstr ""
+
+#: effects.py:26
+msgid "Resists {magn} slashing"
+msgstr ""
+
+#: effects.py:27
+msgid "Resists {magn} piercing"
+msgstr ""
+
+#: effects.py:28
+msgid "Resists {magn} fire"
+msgstr ""
+
+#: effects.py:29
+msgid "Resists {magn} cold"
+msgstr ""
+
+#: effects.py:30
+msgid "Resists {magn} lightning"
+msgstr ""
+
+#: effects.py:31
+msgid "Resists {magn} poison"
+msgstr ""
+
+#: effects.py:32
+msgid "Resists {magn} acid"
+msgstr ""
+
+#: effects.py:33
+msgid "Resists {magn} death"
+msgstr ""
+
+#: effects.py:34
+msgid "Resists {magn} mental"
+msgstr ""
+
+#: effects.py:35
+msgid "Resists {magn} strange"
+msgstr ""
+
+#: effects.py:37
+msgid "Increases melee damage by {magn}"
+msgstr ""
+
+#: effects.py:38
+msgid "Increases ranged damage by {magn}"
+msgstr ""
+
+#: effects.py:39
+msgid "Quickens all actions by {magn}%"
+msgstr ""
+
+#: effects.py:40
+msgid "Slows all actions by {magn}%"
+msgstr ""
+
+#: effects.py:41
+msgid "Affected by poison"
+msgstr ""
+
+#: effects.py:42
+msgid "Heals {magn} hitpoints"
+msgstr ""
+
+#: game_logic.py:280
+msgid "Your {shield_name} blocks {blocked_damage} damage."
+msgstr ""
+
+#: game_logic.py:318
+msgid "{name} is healed for {healed} HP."
+msgstr ""
+
+#: game_logic.py:347
+msgid "{name}'s corpse"
+msgstr ""
+
+#: game_logic.py:348
+msgid "A dead {name}."
+msgstr ""
+
+#: game_logic.py:546
+msgid "You drop {item} on the ground."
+msgstr ""
+
+#: game_logic.py:1157
+msgid "{name} is depleted!"
+msgstr ""
+
+#: game_logic.py:1401
 msgid ""
 "{name} attacks {target_name} with {weapon_name} and deals {damage_dealt} "
 "damage!"
 msgstr ""
 
-#: game_view.py:58
+#: game_logic.py:1501
+msgid "{name} dies!"
+msgstr ""
+
+#: game_logic.py:1605
+msgid "You died!"
+msgstr ""
+
+#: game_logic.py:1939
+msgid "A player character."
+msgstr ""
+
+#: game_logic.py:1939
+msgid "Player"
+msgstr ""
+
+#: game_view.py:59
 msgid ""
 "Movement: Arrow keys and Keypad 1-9 \n"
 "Keypad 5 - 'wait 1 turn' command\n"
@@ -44,18 +1148,421 @@ msgid ""
 "Esc - Save and exit"
 msgstr ""
 
-#: game_view.py:99
+#: game_view.py:77
+msgid ""
+"Many adventurers are lured to the City - in search of treasures, power, "
+"glory or something else. You are among the others - jack of all trades, "
+"master of nothing."
+msgstr ""
+
+#: game_view.py:78
+msgid ""
+"Mighty warriors visit Neth-Nikakh to prove their strength by fighting "
+"horrors, created by dark magic. Treasures are also nice bonus. You are such "
+"warrior, proficient in melee combat and wearing a set of armor."
+msgstr ""
+
+#: game_view.py:79
+msgid ""
+"Mercenaries from distant Northern country called Gantra are well-known as "
+"trustworthy soldiers. One of them - with your sturdy crossbow and shooting "
+"skills - you headed south, to obtain treasures of mysterious City."
+msgstr ""
+
+#: game_view.py:80
+msgid ""
+"A talent to use magic is rare among the people of Vaerthol. You lack one, "
+"but unlike others, you desperately crave for magic. One man told you a "
+"rumor, that in the sands lies a magic city of Neth-Nikakh, where among the "
+"other wonders, ordinary people can become powerful mages. So, you packed "
+"your spellbooks (useless for non-mage, of course), scrolls (not-so-useless), "
+"and headed South, to finally obtain desired magic gift."
+msgstr ""
+
+#: game_view.py:83
 msgid "Adventurer"
 msgstr ""
 
-#: game_view.py:99
+#: game_view.py:83
 msgid "Gantra mercenary"
 msgstr ""
 
-#: game_view.py:99
+#: game_view.py:83
 msgid "Magic seeker"
 msgstr ""
 
-#: game_view.py:99
+#: game_view.py:83
 msgid "Warrior"
+msgstr ""
+
+#: game_view.py:86
+msgid ""
+"\n"
+"\tGo to the Desert City. It's about it, after all.\n"
+" "
+msgstr ""
+
+#: game_view.py:87
+msgid ""
+"\n"
+"\tHorrors of Desert City are exhausting. Opportunity to sleep and eat "
+"without being chased by a bunch of hungry Rakshasas is really nice.\n"
+" "
+msgstr ""
+
+#: game_view.py:88
+msgid ""
+"\n"
+"\tTraders, smugglers and other suspicious persons are always eager to buy "
+"treasures from Neth-Nikakh. Treasure Market is most populated, loud and "
+"somewhat dangerous place in the camp.\n"
+" "
+msgstr ""
+
+#: game_view.py:89
+msgid ""
+"\n"
+"\tEquipment merchant Sidorovich from northern country called Gantra is "
+"selling various equipment, needed by fellow treasure-hunters. Just don't "
+"bring him empty cans, you know.\n"
+" "
+msgstr ""
+
+#: game_view.py:90
+msgid ""
+"\n"
+"\tTavern 'Galloping Scorpion' is the heart of social life in the camp. "
+"Missions, valuable info, rumors and gossips, thousands of them! And plenty "
+"of drinkin' also.\n"
+" "
+msgstr ""
+
+#: game_view.py:92
+msgid ""
+"\n"
+"\tFinally, your long journey came to an end. The last part, traveling with "
+"the caravan through the Great Desert, was hard and full of dangers. Now you "
+"stand by the entrance of the treasure hunters camp.\n"
+"\tIt's more like a small town, except lots of armed people wandering around, "
+"and enormous marketplace at the center. Adventurers of all sorts stay here "
+"between raids to the City.\n"
+"\tYou can stop here to look around for a while, or head immediately to the "
+"Desert City. It can be seen from here, below the towering Lone Mountain, "
+"looking more like a mirage.\n"
+" "
+msgstr ""
+
+#: game_view.py:96
+msgid "ARMS"
+msgstr "arms"
+
+#: game_view.py:96
+msgid "LEFT_HAND"
+msgstr "left hand"
+
+#: game_view.py:96
+msgid "LEFT_RING"
+msgstr "left hand ring"
+
+#: game_view.py:96
+msgid "RIGHT_HAND"
+msgstr "right hand"
+
+#: game_view.py:96
+msgid "RIGHT_RING"
+msgstr "right hand ring"
+
+#: game_view.py:96
+msgid "SHOULDERS"
+msgstr "shoulders"
+
+#: game_view.py:97
+msgid "BODY"
+msgstr "body"
+
+#: game_view.py:97
+msgid "FACE"
+msgstr "face"
+
+#: game_view.py:97
+msgid "HEAD"
+msgstr "head"
+
+#: game_view.py:97
+msgid "LEFT_EAR"
+msgstr "left ear"
+
+#: game_view.py:97
+msgid "LEGS"
+msgstr "legs"
+
+#: game_view.py:97
+msgid "NECK"
+msgstr "necks"
+
+#: game_view.py:97
+msgid "RIGHT_EAR"
+msgstr "right ear"
+
+#: game_view.py:97
+msgid "WAIST"
+msgstr "waist"
+
+#: game_view.py:98
+msgid "FEET"
+msgstr "feet"
+
+#: game_view.py:253
+msgid "Arrival to treasure hunters camp"
+msgstr ""
+
+#: game_view.py:434
+msgid "Delve into Desert City"
+msgstr ""
+
+#: game_view.py:435
+msgid "Get some rest."
+msgstr ""
+
+#: game_view.py:436
+msgid "Sell treasures."
+msgstr ""
+
+#: game_view.py:437
+msgid "Go to equipment merchant."
+msgstr ""
+
+#: game_view.py:438
+msgid "Visit the tavern (closed for now)."
+msgstr ""
+
+#: game_view.py:439
+msgid "Treasure hunters camp near Neth-Nikakh"
+msgstr ""
+
+#: game_view.py:444 game_view.py:1175 game_view.py:1430
+msgid "Do you really want to quit?"
+msgstr ""
+
+#: game_view.py:445 game_view.py:1176 game_view.py:1431
+msgid "Yes"
+msgstr ""
+
+#: game_view.py:446 game_view.py:1177 game_view.py:1432
+msgid "No"
+msgstr ""
+
+#: game_view.py:447 game_view.py:1178 game_view.py:1433
+msgid "Confirm exit"
+msgstr ""
+
+#: game_view.py:472
+msgid ""
+"Outskirts of the Desert City. These particular ruins appear to be unexplored "
+"by other adventurers."
+msgstr ""
+
+#: game_view.py:473
+msgid "Entering ruins."
+msgstr ""
+
+#: game_view.py:482
+msgid "Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!"
+msgstr ""
+
+#: game_view.py:483
+msgid "Rested."
+msgstr ""
+
+#: game_view.py:507
+msgid ""
+"You sold some treasures:\n"
+"\n"
+msgstr ""
+
+#: game_view.py:518
+msgid ""
+"All you have to do in the marketplace today is wandering around. You don't "
+"have anything to sell right now.\n"
+" "
+msgstr ""
+
+#: game_view.py:519
+msgid "Marketplace."
+msgstr ""
+
+#: game_view.py:798
+msgid "u) Use"
+msgstr ""
+
+#: game_view.py:810
+msgid "d) Drop"
+msgstr ""
+
+#: game_view.py:822
+msgid "w) Wield"
+msgstr ""
+
+#: game_view.py:836
+msgid "r) Reload"
+msgstr ""
+
+#: game_view.py:849
+msgid "n) uNload"
+msgstr ""
+
+#: game_view.py:925 game_view.py:1104
+msgid "Select slot:"
+msgstr ""
+
+#: game_view.py:945
+msgid " kg.\n"
+msgstr ""
+
+#: game_view.py:945
+msgid "Weight: "
+msgstr ""
+
+#: game_view.py:948
+msgid "Deals {min_damage}-{max_damage} bashing damage.\n"
+msgstr ""
+
+#: game_view.py:952
+msgid "Deals {min_damage}-{max_damage} slashing damage.\n"
+msgstr ""
+
+#: game_view.py:956
+msgid "Deals {min_damage}-{max_damage} piercing damage.\n"
+msgstr ""
+
+#: game_view.py:960
+msgid "Deals {min_damage}-{max_damage} fire damage.\n"
+msgstr ""
+
+#: game_view.py:964
+msgid "Deals {min_damage}-{max_damage} cold damage.\n"
+msgstr ""
+
+#: game_view.py:968
+msgid "Deals {min_damage}-{max_damage} lightning damage.\n"
+msgstr ""
+
+#: game_view.py:972
+msgid "Effects: "
+msgstr ""
+
+#: game_view.py:976
+msgid "Abilities: "
+msgstr ""
+
+#: game_view.py:981
+msgid "Weight: {current} / {max} kg."
+msgstr ""
+
+#: game_view.py:1036
+msgid "{weapon} isn't loaded!"
+msgstr ""
+
+#: game_view.py:1142
+msgid "Choose one of the options below:"
+msgstr ""
+
+#: game_view.py:1146
+msgid "Continue"
+msgstr ""
+
+#: game_view.py:1151
+msgid "[color=grey]Continue"
+msgstr ""
+
+#: game_view.py:1155
+msgid "New Game"
+msgstr ""
+
+#: game_view.py:1159
+msgid "Quit"
+msgstr ""
+
+#: game_view.py:1320
+msgid "TARGETING: {t_object}"
+msgstr ""
+
+#: game_view.py:1356
+msgid "{hp}/{max_hp} HP"
+msgstr ""
+
+#: game_view.py:1368
+msgid "Right: {right}"
+msgstr ""
+
+#: game_view.py:1370
+msgid "Left: {left}"
+msgstr ""
+
+#: game_view.py:1372
+msgid "Money: {money} coins."
+msgstr ""
+
+#: game_view.py:1376
+msgid "OVERBURDENED"
+msgstr ""
+
+#: game_view.py:1379
+msgid "BURDENED"
+msgstr ""
+
+#: game_view.py:1484
+msgid "Inventory"
+msgstr ""
+
+#: game_view.py:1492
+msgid "Drop item:"
+msgstr ""
+
+#: game_view.py:1500
+msgid "Use item:"
+msgstr ""
+
+#: game_view.py:1508
+msgid "Wield item:"
+msgstr ""
+
+#: game_view.py:1517
+msgid "Take off item:"
+msgstr ""
+
+#: game_view.py:1524
+msgid "Help"
+msgstr ""
+
+#: game_view.py:1532
+msgid "LOOKING:"
+msgstr ""
+
+#: game_view.py:1539
+msgid "CLOSE WHERE:"
+msgstr ""
+
+#: game_view.py:1543
+msgid "SMASH WHERE:"
+msgstr ""
+
+#: game_view.py:1906
+msgid "{creature_name} is here."
+msgstr ""
+
+#: game_view.py:1912
+msgid "Items:"
+msgstr ""
+
+#: game_view.py:1916
+msgid "{item_name} is here."
+msgstr ""
+
+#: game_view.py:1919
+msgid "Other:"
+msgstr ""
+
+#: game_view.py:1923
+msgid "{other_name} is here."
 msgstr ""
