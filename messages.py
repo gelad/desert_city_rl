@@ -5,10 +5,12 @@ import sys
 import locale
 import configparser
 
+missing_translations = set()
+
 
 class MyFallback(gettext.NullTranslations):
     def gettext(self, msg):
-        print('Translation not found for: {msg}'.format(msg=msg))
+        missing_translations.add('Translation not found for: {msg}'.format(msg=msg))
         return msg
 
 

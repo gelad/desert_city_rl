@@ -35,6 +35,7 @@ import generation
 import commands
 
 from messages import _  # translation function
+from messages import missing_translations
 
 #  temporary shit
 LOGO = """
@@ -120,6 +121,11 @@ class GameLoop(DirectorLoop):
                 except FileNotFoundError:
                     pass
         GameLoop.active_director = None
+        if len(missing_translations) > 0:
+            f = open(file='missing_translations.txt', mode='w')
+            for s in missing_translations:
+                f.write(s+'\n\n')
+            f.close()
         super().quit()
 
     def get_initial_scene(self):
@@ -1356,7 +1362,7 @@ class MainGameScene(UIScene):
             right = player.equipment['RIGHT_HAND']
             self.player_right_hand.text = _('Right: {right}').format(right=str(right))
             left = player.equipment['LEFT_HAND']
-            self.player_left_hand.text = _('Left: {left}').format(right=str(left))
+            self.player_left_hand.text = _('Left: {left}').format(left=str(left))
             money = player.properties['money']
             self.money.text = _('Money: {money} coins.').format(money=str(money))
             filled_lines = 0
