@@ -1118,7 +1118,6 @@ class WieldSlotSelectionScene(ListSelectionScene):
 
 # Other scenes
 
-# TODO: continue _() here ==============================================
 class MainMenuScene(UIScene):
     """ Scene with main menu options """
 
@@ -1129,24 +1128,24 @@ class MainMenuScene(UIScene):
             LOGO[1:].rstrip(),
             layout_options=LayoutOptions.row_top(0.5)))
         views.append(LabelViewFixed(
-            "Choose one of the options below:",
+            _("Choose one of the options below:"),
             layout_options=LayoutOptions.centered('intrinsic', 'intrinsic')))
         if self.game:  # is game succesfully loaded - show Continue button
             views.append(ButtonViewFixed(
-                text="Continue", callback=self.continue_game,
+                text=_("Continue"), callback=self.continue_game,
                 layout_options=LayoutOptions.row_bottom(4).with_updates(
                     left=0.2, width=0.2, right=None)))
         else:  # if no savegame - show option greyed-out
             views.append(LabelViewFixed(
-                text="[color=grey]Continue",
+                text=_("[color=grey]Continue"),
                 layout_options=LayoutOptions.row_bottom(4).with_updates(
                     left=0.2, width=0.2, right=None)))
         views.append(ButtonViewFixed(
-            text="New Game", callback=self.new_game,
+            text=_("New Game"), callback=self.new_game,
             layout_options=LayoutOptions.row_bottom(4).with_updates(
                 left=0.4, width=0.2, right=None)))
         views.append(ButtonViewFixed(
-            text="Quit",
+            text=_("Quit"),
             callback=lambda: self.director.quit(),
             layout_options=LayoutOptions.row_bottom(4).with_updates(
                 left=0.6, width=0.2, right=None)))
@@ -1162,10 +1161,10 @@ class MainMenuScene(UIScene):
             self.view.find_next_responder()
             return True
         elif val == terminal.TK_ESCAPE:  # prompt exit game on esc
-            text = 'Do you really want to quit?'
-            self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda: self.director.quit()),
-                                                                      ('No', text, None)],
-                                                             title='Confirm exit',
+            text = _('Do you really want to quit?')
+            self.director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda: self.director.quit()),
+                                                                      (_('No'), text, None)],
+                                                             title=_('Confirm exit'),
                                                              layout_options='intrinsic'))
         self.ctx.clear()
 
@@ -1307,7 +1306,7 @@ class MainGameScene(UIScene):
                             'args': args,
                             'kwargs': kwargs}
         self.state = 'targeting'
-        self.title = 'TARGETING: ' + str(t_object)
+        self.title = _('TARGETING: {t_object}').format(t_object=str(t_object))
         self.cell_info_view.is_hidden = False
         self.log_view.is_hidden = True
         self.map_view.cam_offset = [0, 0]
@@ -1343,7 +1342,7 @@ class MainGameScene(UIScene):
         """ Update values in bars and tabs before drawing """
         player = self.game.player
         if is_active:
-            self.health_bar.text = str(player.hp) + '/' + str(player.maxhp) + ' HP'
+            self.health_bar.text = _('{hp}/{max_hp} HP').format(hp=str(player.hp), max_hp=str(player.maxhp))
             # hp becomes red when hurt
             hp_percent = player.hp / player.maxhp
             if hp_percent < 0:
@@ -1355,29 +1354,29 @@ class MainGameScene(UIScene):
                                                                 int(255 * hp_percent),
                                                                 0)
             right = player.equipment['RIGHT_HAND']
-            self.player_right_hand.text = 'Right: ' + str(right)
+            self.player_right_hand.text = _('Right: {right}').format(right=str(right))
             left = player.equipment['LEFT_HAND']
-            self.player_left_hand.text = 'Left:  ' + str(left)
+            self.player_left_hand.text = _('Left: {left}').format(right=str(left))
             money = player.properties['money']
-            self.money.text = 'Money: ' + str(money) + ' coins.'
+            self.money.text = _('Money: {money} coins.').format(money=str(money))
             filled_lines = 0
             buffs_line = ''
             if player.carried_weight > player.properties['max_carry_weight'] * 1.5:
-                buffs_line += '[color=red]OVERBURDENED[color=dark white]══[/color]'
+                buffs_line += _('[color=red]OVERBURDENED[color=dark white]══[/color]')
                 filled_lines += 1
             elif player.carried_weight > player.properties['max_carry_weight']:
-                buffs_line += '[color=yellow]BURDENED[color=dark white]══[/color]'
+                buffs_line += _('[color=yellow]BURDENED[color=dark white]══[/color]')
                 filled_lines += 1
             for effect in self.game.player.effects:
                 if filled_lines < 6:
                     if effect.eff == 'POISONED':
-                        buffs_line += '[color=green]' + effect.eff + '[color=dark white]══[/color]'
+                        buffs_line += '[color=green]{eff}[color=dark white]══[/color]'.format(eff=_(effect.eff))
                         filled_lines += 1
                     elif effect.eff == 'HASTE':
-                        buffs_line += '[color=yellow]' + effect.eff + '[color=dark white]══[/color]'
+                        buffs_line += '[color=yellow]{eff}[color=dark white]══[/color]'.format(eff=_(effect.eff))
                         filled_lines += 1
                     elif effect.eff == 'SLOWED':
-                        buffs_line += '[color=blue]' + effect.eff + '[color=dark white]══[/color]'
+                        buffs_line += '[color=blue]{eff}[color=dark white]══[/color]'.format(eff=_(effect.eff))
                         filled_lines += 1
             if self._buffs_bar.text != buffs_line:
                 self._buffs_bar.text = buffs_line
@@ -1417,10 +1416,10 @@ class MainGameScene(UIScene):
         handled = False  # input handled flag
         if game.is_waiting_input:
             if player_input == terminal.TK_ESCAPE:  # game quit on ESC
-                text = 'Do you really want to quit?'
-                self.director.push_scene(MultiButtonMessageScene(buttons=[('Yes', text, lambda:self.director.quit()),
-                                                                          ('No', text, None)],
-                                                                 title='Confirm exit',
+                text = _('Do you really want to quit?')
+                self.director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda:self.director.quit()),
+                                                                          (_('No'), text, None)],
+                                                                 title=_('Confirm exit'),
                                                                  layout_options='intrinsic'))
                 handled = True
             # movement commands
@@ -1471,7 +1470,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_I:  # show inventory
                 self.director.push_scene(InventorySelectionScene(items=player.inventory,
                                                                  game=game,
-                                                                 caption='Inventory',
+                                                                 caption=_('Inventory'),
                                                                  layout_options=LayoutOptions(
                                                                      top=0.1, bottom=0.1,
                                                                      left=0.2, right=0.2)))
@@ -1479,7 +1478,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_D:  # drop item
                 self.director.push_scene(DropItemSelectionScene(items=player.inventory,
                                                                 game=game,
-                                                                caption='Drop item:',
+                                                                caption=_('Drop item:'),
                                                                 layout_options=LayoutOptions(
                                                                     top=0.1, bottom=0.1,
                                                                     left=0.2, right=0.2)))
@@ -1487,7 +1486,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_U:  # use item
                 self.director.push_scene(UseItemSelectionScene(items=player.inventory,
                                                                game=game,
-                                                               caption='Use item:',
+                                                               caption=_('Use item:'),
                                                                layout_options=LayoutOptions(
                                                                    top=0.1, bottom=0.1,
                                                                    left=0.2, right=0.2)))
@@ -1495,7 +1494,7 @@ class MainGameScene(UIScene):
             elif player_input == terminal.TK_W:  # wield item
                 self.director.push_scene(WieldItemSelectionScene(items=player.inventory,
                                                                  game=game,
-                                                                 caption='Wield item:',
+                                                                 caption=_('Wield item:'),
                                                                  layout_options=LayoutOptions(
                                                                      top=0.1, bottom=0.1,
                                                                      left=0.2, right=0.2)))
@@ -1504,14 +1503,14 @@ class MainGameScene(UIScene):
                 self.director.push_scene(TakeOffItemSelectionScene(items=[sl for sl in
                                                                           list(player.equipment.values()) if sl],
                                                                    game=game,
-                                                                   caption='Take off item:',
+                                                                   caption=_('Take off item:'),
                                                                    layout_options=LayoutOptions(
                                                                        top=0.1, bottom=0.1,
                                                                        left=0.2, right=0.2)))
                 handled = True
             elif player_input == terminal.TK_F1:  # help message windows
                 self.director.push_scene(SingleButtonMessageScene(message=HELP_TEXT,
-                                                                  title='Help',
+                                                                  title=_('Help'),
                                                                   layout_options='intrinsic'))
                 handled = True
             elif player_input == terminal.TK_F11:  # debug command exec
@@ -1519,18 +1518,18 @@ class MainGameScene(UIScene):
                 handled = True
             elif player_input == terminal.TK_L:  # look
                 self.state = 'looking'
-                self.title = 'LOOKING:'
+                self.title = _('LOOKING:')
                 self.cell_info_view.is_hidden = False
                 self.log_view.is_hidden = True
                 self.map_view.cam_offset = [0, 0]
                 handled = True
             elif player_input == terminal.TK_C:  # close door
                 self.state = 'closing_door'
-                self.title = 'CLOSE WHERE:'
+                self.title = _('CLOSE WHERE:')
                 handled = True
             elif player_input == terminal.TK_S:  # smash
                 self.state = 'smashing'
-                self.title = 'SMASH WHERE:'
+                self.title = _('SMASH WHERE:')
                 handled = True
             elif player_input == terminal.TK_T:  # throw
                 commands.command_throw_choose(game=self.game, main_scene=self)
@@ -1728,7 +1727,7 @@ class DebugLineInputScene(UIScene):
 
     def _execute(self, text):
         director = self.director
-        self.director.pop_scene()
+        director.pop_scene()
         commands.command_execute_debug_line(line=text, game=self.game)
 
 
@@ -1796,8 +1795,6 @@ class MapView(View):
                 for y in range(0, self.bounds.height):
                     rel_x = x - player_scr_x + player_x  # game location coordinates in accordance to screen coordinates
                     rel_y = y - player_scr_y + player_y
-                    if self.game.player.position[0] != player_x or self.game.player.position[1] != player_y:
-                        print('Gotcha!')
                     # checks if location coordinates are valid (in boundaries)
                     if self.game.current_loc.is_in_boundaries(rel_x, rel_y):
                         # obtain cell graphics
@@ -1895,23 +1892,23 @@ class LookView(View):
                 else:
                     col = creature.color
                 ctx.color(terminal.color_from_argb(255, col[0], col[1], col[2]))
-                ctx.print(Point(0, cur_y), creature.name + ' is here.')
+                ctx.print(Point(0, cur_y), _('{creature_name} is here.').format(creature_name=_(creature.name)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
-                for ln in textwrap.wrap(creature.description, self.bounds.width):
+                for ln in textwrap.wrap(_(creature.description), self.bounds.width):
                     ctx.print(Point(0, cur_y), ln)
                     cur_y += 1
-            ctx.print(Point(0, cur_y), 'Items:')
+            ctx.print(Point(0, cur_y), _('Items:'))
             cur_y += 1
             for item in items:  # show items if any
                 ctx.color(terminal.color_from_argb(255, item.color[0], item.color[1], item.color[2]))
-                ctx.print(Point(0, cur_y), item.name + ' is here.')
+                ctx.print(Point(0, cur_y), _('{item_name} is here.').format(item_name=_(item.name)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
-            ctx.print(Point(0, cur_y), 'Other:')
+            ctx.print(Point(0, cur_y), _('Other:'))
             cur_y += 1
             for other in other:  # show other objects
                 ctx.color(terminal.color_from_argb(255, other.color[0], other.color[1], other.color[2]))
-                ctx.print(Point(0, cur_y), other.name + ' is here.')
+                ctx.print(Point(0, cur_y), _('{other_name} is here.').format(other_name=_(other.name)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
