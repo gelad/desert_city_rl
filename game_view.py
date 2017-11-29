@@ -74,28 +74,38 @@ c - close door
 s - smash (melee attack inanimate object, i.e. wall)
 Esc - Save and exit""")
 
-CHARACTER_BG_DESCRIPTIONS = [_('Many adventurers are lured to the City - in search of treasures, power, glory or something else. You are among the others - jack of all trades, master of nothing.'),
-    _('Mighty warriors visit Neth-Nikakh to prove their strength by fighting horrors, created by dark magic. Treasures are also nice bonus. You are such warrior, proficient in melee combat and wearing a set of armor.')
-    ,_('Mercenaries from distant Northern country called Gantra are well-known as trustworthy soldiers. One of them - with your sturdy crossbow and shooting skills - you headed south, to obtain treasures of mysterious City.'),
-    _('A talent to use magic is rare among the people of Vaerthol. You lack one, but unlike others, you desperately crave for magic. One man told you a rumor, that in the sands lies a magic city of Neth-Nikakh, where among the other wonders, ordinary people can become powerful mages. So, you packed your spellbooks (useless for non-mage, of course), scrolls (not-so-useless), and headed South, to finally obtain desired magic gift.')]
+CHARACTER_BG_DESCRIPTIONS = [_(
+    'Many adventurers are lured to the City - in search of treasures, power, glory or something else. You are among the others - jack of all trades, master of nothing.'),
+                             _(
+                                 'Mighty warriors visit Neth-Nikakh to prove their strength by fighting horrors, created by dark magic. Treasures are also nice bonus. You are such warrior, proficient in melee combat and wearing a set of armor.')
+    , _(
+        'Mercenaries from distant Northern country called Gantra are well-known as trustworthy soldiers. One of them - with your sturdy crossbow and shooting skills - you headed south, to obtain treasures of mysterious City.'),
+                             _(
+                                 'A talent to use magic is rare among the people of Vaerthol. You lack one, but unlike others, you desperately crave for magic. One man told you a rumor, that in the sands lies a magic city of Neth-Nikakh, where among the other wonders, ordinary people can become powerful mages. So, you packed your spellbooks (useless for non-mage, of course), scrolls (not-so-useless), and headed South, to finally obtain desired magic gift.')]
 
 CHARACTER_BACKGROUNDS = ['Adventurer', 'Warrior', 'Gantra mercenary', 'Magic seeker']  # they are used as keys
 CHARACTER_BACKGROUNDS_TRAN = [_('Adventurer'), _('Warrior'), _('Gantra mercenary'), _('Magic seeker')]  # translations
 del CHARACTER_BACKGROUNDS_TRAN  # not used (it's a shitty hack to add them to pot file every time)
 
 CAMP_MENU_DESCRIPTIONS = [_("""\n\tGo to the Desert City. It's about it, after all.\n """),
-                          _("""\n\tHorrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.\n """),
-                          _("""\n\tTraders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.\n """),
-                          _("""\n\tEquipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.\n """),
-                          _("""\n\tTavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also.\n """)]
+                          _(
+                              """\n\tHorrors of Desert City are exhausting. Opportunity to sleep and eat without being chased by a bunch of hungry Rakshasas is really nice.\n """),
+                          _(
+                              """\n\tTraders, smugglers and other suspicious persons are always eager to buy treasures from Neth-Nikakh. Treasure Market is most populated, loud and somewhat dangerous place in the camp.\n """),
+                          _(
+                              """\n\tEquipment merchant Sidorovich from northern country called Gantra is selling various equipment, needed by fellow treasure-hunters. Just don't bring him empty cans, you know.\n """),
+                          _(
+                              """\n\tTavern 'Galloping Scorpion' is the heart of social life in the camp. Missions, valuable info, rumors and gossips, thousands of them! And plenty of drinkin' also.\n """)]
 
 FIRST_CAMP_ARRIVAL_MESSAGE = _("""\n\tFinally, your long journey came to an end. The last part, traveling with the caravan through the Great Desert, was hard and full of dangers. Now you stand by the entrance of the treasure hunters camp.
 \tIt's more like a small town, except lots of armed people wandering around, and enormous marketplace at the center. Adventurers of all sorts stay here between raids to the City.
 \tYou can stop here to look around for a while, or head immediately to the Desert City. It can be seen from here, below the towering Lone Mountain, looking more like a mirage.\n """)
 
-BODYPARTS=[_('RIGHT_HAND'), _('LEFT_HAND'), _('RIGHT_RING'), _('LEFT_RING'), _('ARMS'), _('SHOULDERS'),
-           _('BODY'), _('HEAD'), _('FACE'), _('LEFT_EAR'), _('RIGHT_EAR'), _('NECK'), _('WAIST'), _('LEGS'),
-           _('FEET')]
+BODYPARTS = [_('RIGHT_HAND'), _('LEFT_HAND'), _('RIGHT_RING'), _('LEFT_RING'), _('ARMS'), _('SHOULDERS'),
+             _('BODY'), _('HEAD'), _('FACE'), _('LEFT_EAR'), _('RIGHT_EAR'), _('NECK'), _('WAIST'), _('LEGS'),
+             _('FEET')]
+
+
 #  /temporary shit
 
 
@@ -129,7 +139,7 @@ class GameLoop(DirectorLoop):
             print('Some strings missing in translation files. Written to missing_translations.txt.')
             f = open(file='missing_translations.txt', mode='w')
             for s in missing_translations:
-                f.write(s+'\n\n')
+                f.write(s + '\n\n')
             f.close()
         super().quit()
 
@@ -255,11 +265,13 @@ class CharacterSelectScene(UIScene):
                                                                             terminal.clear())))
         self.director.game = game
 
+
 # Dialogue and message scenes
 
 
 class SingleButtonMessageScene(UIScene):
     """ A simple message with single button that closes it """
+
     def __init__(self, message, title='', button_text='OK.', close_on_esc=True,
                  callback=None, layout_options='intrinsic', *args, **kwargs):
         self.message = message
@@ -274,16 +286,16 @@ class SingleButtonMessageScene(UIScene):
                                            top=None, bottom=None,
                                            left=None, right=None)
         self.window_view = WindowView(title=title, layout_options=layout_options, subviews=
-                                      [LabelViewFixed(text=message, align_vert='left', align_horz='top',
-                                                      layout_options=LayoutOptions(top=0,
-                                                                                   left=0)),
-                                       ButtonViewFixed(text=button_text, callback=callback,
-                                                       layout_options=LayoutOptions(bottom=0,
-                                                                                    left=0,
-                                                                                    width='intrinsic',
-                                                                                    height='intrinsic',
-                                                                                    right=None,
-                                                                                    top=None))])
+        [LabelViewFixed(text=message, align_vert='left', align_horz='top',
+                        layout_options=LayoutOptions(top=0,
+                                                     left=0)),
+         ButtonViewFixed(text=button_text, callback=callback,
+                         layout_options=LayoutOptions(bottom=0,
+                                                      left=0,
+                                                      width='intrinsic',
+                                                      height='intrinsic',
+                                                      right=None,
+                                                      top=None))])
         views = [self.window_view]
         super().__init__(views, *args, **kwargs)
 
@@ -330,6 +342,7 @@ class SingleButtonMessageScene(UIScene):
 
 class MultiButtonMessageScene(UIScene):
     """ A message with multiple buttons """
+
     def __init__(self, buttons, title='', close_on_esc=True, layout_options='intrinsic', *args, **kwargs):
         """
         :param buttons: a list of tuples (caption, text, callback)
@@ -429,6 +442,7 @@ class MultiButtonMessageScene(UIScene):
 
 class CampMenuScene(MultiButtonMessageScene):
     """ A Scene with camp menu """
+
     def __init__(self, game, *args, **kwargs):
         self.game = game
         buttons = [(_('Delve into Desert City'), CAMP_MENU_DESCRIPTIONS[0], self._to_city_start_thread),
@@ -469,9 +483,10 @@ class CampMenuScene(MultiButtonMessageScene):
         director = self.director
         while director.active_scene is not director.main_game_scene:  # pop to main game scene
             director.pop_scene()
-        message_scene = SingleButtonMessageScene(message=_("""Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers."""),
-                                                     title=_('Entering ruins.'),
-                                                     layout_options='intrinsic')
+        message_scene = SingleButtonMessageScene(message=_(
+            """Outskirts of the Desert City. These particular ruins appear to be unexplored by other adventurers."""),
+                                                 title=_('Entering ruins.'),
+                                                 layout_options='intrinsic')
         message_scene.clear = True
         director.push_scene(message_scene)
 
@@ -479,9 +494,10 @@ class CampMenuScene(MultiButtonMessageScene):
         """ Method that replenshes player health for now """
         if self.game.player.hp < self.game.player.maxhp:
             self.game.player.heal(heal=self.game.player.maxhp, healer=self.game.player)
-        self.director.push_scene(SingleButtonMessageScene(message=_("""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!"""),
-                                                          title=_('Rested.'),
-                                                          layout_options='intrinsic'))
+        self.director.push_scene(SingleButtonMessageScene(
+            message=_("""Ahhh. Sleeping in the bed, eating fresh hot food. Feels wonderful!"""),
+            title=_('Rested.'),
+            layout_options='intrinsic'))
 
     def _to_market(self):
         """ Method that sells treasure items to market and shows a report """
@@ -508,14 +524,19 @@ class CampMenuScene(MultiButtonMessageScene):
             total = 0
             for tr in treasures.keys():
                 report_text += _('{tr_name} x{tr_count} * {tr_value} = {tr_total}\n').format(tr_name=tr,
-                                                                    tr_count=str(treasures[tr][0]),
-                                                                    tr_value=str(treasures[tr][1]),
-                                                                    tr_total=str(treasures[tr][0] * treasures[tr][1]))
+                                                                                             tr_count=str(
+                                                                                                 treasures[tr][0]),
+                                                                                             tr_value=str(
+                                                                                                 treasures[tr][1]),
+                                                                                             tr_total=str(
+                                                                                                 treasures[tr][0] *
+                                                                                                 treasures[tr][1]))
                 total += treasures[tr][0] * treasures[tr][1]
             report_text += _('\nTotal treasures value: {total} coins.\n ').format(total=str(total))
             player.properties['money'] += total  # give player the money
         else:
-            report_text += _("""All you have to do in the marketplace today is wandering around. You don't have anything to sell right now.\n """)
+            report_text += _(
+                """All you have to do in the marketplace today is wandering around. You don't have anything to sell right now.\n """)
         self.director.push_scene(SingleButtonMessageScene(message=report_text, title=_('Marketplace.')))
 
     def _to_equipment_merchant(self):
@@ -523,6 +544,7 @@ class CampMenuScene(MultiButtonMessageScene):
 
     def _to_tavern(self):
         pass
+
 
 # List menu scenes
 
@@ -983,7 +1005,9 @@ class ItemSelectionScene(DescribedListSelectionScene):
             descriptions.append(text)
         self.game = game
         weight_text = _('Weight: {current} / {max} kg.').format(current=str(round(self.game.player.carried_weight, 2)),
-                                             max=str(round(self.game.player.properties['max_carry_weight'], 2)))
+                                                                max=str(round(
+                                                                    self.game.player.properties['max_carry_weight'],
+                                                                    2)))
         self.weight_bar = LabelViewFixed(text=weight_text,
                                          layout_options=LayoutOptions().row_bottom(0).with_updates(width='intrinsic',
                                                                                                    left=None,
@@ -1432,10 +1456,11 @@ class MainGameScene(UIScene):
         if game.is_waiting_input:
             if player_input == terminal.TK_ESCAPE:  # game quit on ESC
                 text = _('Do you really want to quit?')
-                self.director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda:self.director.quit()),
-                                                                          (_('No'), text, None)],
-                                                                 title=_('Confirm exit'),
-                                                                 layout_options='intrinsic'))
+                self.director.push_scene(
+                    MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda: self.director.quit()),
+                                                     (_('No'), text, None)],
+                                            title=_('Confirm exit'),
+                                            layout_options='intrinsic'))
                 handled = True
             # movement commands
             elif player_input in (terminal.TK_KP_4, terminal.TK_LEFT):
@@ -1743,11 +1768,40 @@ class DebugLineInputScene(UIScene):
     def _execute(self, text):
         director = self.director
         director.pop_scene()
+        if text == 'testscene':
+            director.push_scene(TestingViewsScene())
+            return
         commands.command_execute_debug_line(line=text, game=self.game)
 
 
-# Views
+class TestingViewsScene(UIScene):
+    """ Scene to test Views """
+    def __init__(self, *args, **kwargs):
+        self.scroll_list = VerticalScrollingLabelList(strings=[i for i in range(50)])
+        views = [self.scroll_list]
+        super().__init__(views, *args, **kwargs)
 
+    def terminal_read(self, val):
+        super().terminal_read(val)
+        # cycle descriptions with selected options
+        if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
+            # allow traverse with arrows and numpad
+            if val == terminal.TK_TAB:
+                self.scroll_list.select_next()
+            elif val in (terminal.TK_KP_8, terminal.TK_UP):
+                self.scroll_list.select_prev()
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+                self.scroll_list.select_next()
+            return True
+        elif val == terminal.TK_ESCAPE:
+            self.director.pop_scene()
+            return True
+        elif val == terminal.TK_RESIZED:
+            self.scroll_list._scrolling_mode_check()
+        return False
+
+
+# Views
 
 class MapView(View):
     """ View with game map """
@@ -1927,3 +1981,133 @@ class LookView(View):
                 ctx.print(Point(0, cur_y), _('{other_name} is here.').format(other_name=str(other)))
                 ctx.color(terminal.color_from_name('white'))
                 cur_y += 1
+
+
+class VerticalScrollingLabelList(View):
+    """ View with list of labels, scrolling """
+
+    def __init__(self, strings, *args, **kwargs):
+        """
+        :param strings: strings to be placed
+        :param args: arguments to pass to View constructor
+        :param kwargs: keywords of arguments to pass to View constructor
+        """
+        self.strings = list(strings)
+        self.labels = []
+        top_offset = 0
+        # labels creation
+        for string in self.strings:
+            if isinstance(string, game_logic.Entity):
+                l_text = str(string)  # entity name already translated
+            else:
+                l_text = _(str(string))
+            label = LabelViewFixed(text=l_text,
+                                   layout_options=LayoutOptions(
+                                       left=0,
+                                       top=top_offset,
+                                       width='intrinsic',
+                                       height=1,
+                                       bottom=None,
+                                       right=None))
+            label.is_hidden = True
+            self.labels.append(label)
+            top_offset += 1
+        self._selected = None
+        # scrolling initialization
+        self.scrolling_mode = False
+        self.scroll_pos = 0
+        super().__init__(subviews=self.labels, clear=True, *args, **kwargs)
+
+    @property
+    def intrinsic_size(self):
+        return Size(self.bounds.width, self.bounds.height)
+
+    @property
+    def selected(self):
+        """
+        :return: index of currently selected label 
+        """
+        return self._selected
+
+    @selected.setter
+    def selected(self, index):
+        """
+        :param index: of the label that must be selected, or None
+        :return: None
+        """
+        if index is None:  # if none selected - unselect current
+            fg = self.labels[self._selected].color_fg
+            bg = self.labels[self._selected].color_bg
+            self.labels[self._selected].color_fg = bg
+            self.labels[self._selected].color_bg = fg
+            self._selected = index
+        elif self._selected != index and 0 <= index < len(self.labels):
+            # revert colors of unselected label back
+            if self._selected is not None:
+                fg = self.labels[self._selected].color_fg
+                bg = self.labels[self._selected].color_bg
+                self.labels[self._selected].color_fg = bg
+                self.labels[self._selected].color_bg = fg
+            self._selected = index
+            # invert colors of the new selected label
+            fg = self.labels[self._selected].color_fg
+            bg = self.labels[self._selected].color_bg
+            self.labels[self._selected].color_fg = bg
+            self.labels[self._selected].color_bg = fg
+            if self.scrolling_mode:
+                self._scroll()
+
+    def select_next(self):
+        if self.selected is None:
+            self.selected = 0
+        elif self.selected < len(self.labels) - 1:
+            self.selected += 1
+        else:
+            self.selected = 0
+
+    def select_prev(self):
+        if self.selected is None:
+            self.selected = 0
+        elif self.selected > 0:
+            self.selected -= 1
+        else:
+            self.selected = len(self.labels) - 1
+
+    def draw(self, ctx):
+        """ Cannot determine view bounds in __init__, doing scroll check here """
+        super().draw(ctx=ctx)
+        self._scrolling_mode_check()
+        if not self.scrolling_mode:
+            for label in self.labels:
+                label.is_hidden = False
+
+    def _scrolling_mode_check(self):
+        """ Checks for height and enables/disables scrolling """
+        list_height = self.bounds.height
+        if list_height < len(self.labels):
+            self.scrolling_mode = True
+            self._scroll()
+        else:
+            self.scrolling_mode = False
+
+    def _scroll(self):
+        """ Method for scrolling the options list """
+        list_height = self.bounds.height
+        if self.selected is None:
+            sel = 0
+        else:
+            sel = self.selected
+        if sel < self.scroll_pos:
+            self.scroll_pos = sel
+        elif sel > self.scroll_pos + list_height - 1:
+            self.scroll_pos = sel - list_height + 1
+        label_y = 0
+        for i in range(len(self.labels)):
+            if self.scroll_pos <= i < (self.scroll_pos + list_height):
+                self.labels[i].is_hidden = False
+                self.labels[i].layout_options = self.labels[i].layout_options.with_updates(top=label_y)
+                label_y += 1
+            else:
+                self.labels[i].is_hidden = True
+            self.labels[i].superview.set_needs_layout()
+        self.needs_layout = True
