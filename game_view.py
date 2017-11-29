@@ -540,7 +540,7 @@ class CampMenuScene(MultiButtonMessageScene):
         self.director.push_scene(SingleButtonMessageScene(message=report_text, title=_('Marketplace.')))
 
     def _to_equipment_merchant(self):
-        pass
+        self.director.push_scene(MerchantScene(game=self.game, merchant=self.game.equipment_merchant))
 
     def _to_tavern(self):
         pass
@@ -1156,6 +1156,60 @@ class WieldSlotSelectionScene(ListSelectionScene):
 
 
 # Other scenes
+
+class MerchantScene(UIScene):
+    """ Scene that displays buy/sell menu """
+    def __init__(self, game, merchant, layout_options=None, *args, **kwargs):
+        """
+        :param game: Game object 
+        :param merchant: Merchant object
+        :param args: arguments for UIScene
+        :param kwargs: keywords arguments for UIScene
+        """
+        self.game = game
+        self.merchant = merchant
+        self.focus = 'player_items'  # scene area focus, cycled by TAB
+        self.selling = set()
+        self.buying = set()
+        # pick only buyable by this merchant
+        self.player_items = [i for i in self.game.player.inventory if self.merchant.check_buyable(i)]
+        self.merchant_items = [i for i in merchant.inventory]
+        self.player_items_view = VerticalScrollingLabelList(strings=self.player_items,
+                                                            layout_options=LayoutOptions(left=0, right=0.7))
+        self.merchant_items_view = VerticalScrollingLabelList(strings=self.merchant_items,
+                                                              layout_options=LayoutOptions(left=0.7, right=0))
+        self.middle_window = WindowView(title='', style='double',
+                                        layout_options=LayoutOptions(left=0.3, right=0.3))
+        subviews = [self.player_items_view, self.merchant_items_view, self.middle_window]
+        self.window_view = WindowView(title=str(merchant),
+                                      style='double',
+                                      layout_options=layout_options or LayoutOptions(left=0, top=0),
+                                      subviews=subviews)
+        self.active_tab = self.merchant_items_view
+        self.merchant_items_view.selected = 0  # select first merchant item
+        super().__init__(views=[self.window_view], *args, **kwargs)
+
+    def terminal_read(self, val):
+        super().terminal_read(val)
+        if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
+            # allow traverse with arrows and numpad
+            if val == terminal.TK_TAB:
+                if self.active_tab == self.merchant_items_view:
+                    self.active_tab = self.player_items_view
+                else:
+                    self.active_tab = self.merchant_items_view
+            elif val in (terminal.TK_KP_8, terminal.TK_UP):
+                self.active_tab.select_prev()
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
+                self.active_tab.select_next()
+        elif val == terminal.TK_ESCAPE:
+            self.director.pop_scene()
+            return True
+        elif val == terminal.TK_RESIZED:
+            self.player_items_view.scrolling_mode_check()
+            self.merchant_items_view.scrolling_mode_check()
+        return False
+
 
 class MainMenuScene(UIScene):
     """ Scene with main menu options """
@@ -1797,7 +1851,7 @@ class TestingViewsScene(UIScene):
             self.director.pop_scene()
             return True
         elif val == terminal.TK_RESIZED:
-            self.scroll_list._scrolling_mode_check()
+            self.scroll_list.scrolling_mode_check()
         return False
 
 
@@ -2076,12 +2130,12 @@ class VerticalScrollingLabelList(View):
     def draw(self, ctx):
         """ Cannot determine view bounds in __init__, doing scroll check here """
         super().draw(ctx=ctx)
-        self._scrolling_mode_check()
+        self.scrolling_mode_check()
         if not self.scrolling_mode:
             for label in self.labels:
                 label.is_hidden = False
 
-    def _scrolling_mode_check(self):
+    def scrolling_mode_check(self):
         """ Checks for height and enables/disables scrolling """
         list_height = self.bounds.height
         if list_height < len(self.labels):

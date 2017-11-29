@@ -68,6 +68,8 @@ class LabelViewFixed(View):
         else:
             w = 0
         ctx.print(Point(x, y).floored, self.text, w)
+        ctx.color('#ffffff')
+        ctx.bkcolor('#000000')  # because sometimes bkcolor i used to draw something else...
 
     def debug_string(self):
         return super().debug_string() + ' ' + repr(self.text)
