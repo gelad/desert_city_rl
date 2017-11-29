@@ -1714,6 +1714,51 @@ class Door(BattleEntity, Entity):
         self.location.remove_entity(self)
 
 
+class Merchant(Inventory, Entity):
+    """ Class, representing item trader """
+    def __init__(self, name='', sell_ratio=1.0, buy_ratio=1.0, stock=None, buy_categories=None):
+        """
+        :param sell_ratio: coefficient, applied to sell prices 
+        :param buy_ratio: coefficient, applied to buy prices
+        :param stock: list with possible sold items and their probability
+        :param buy_categories: set of categories of items, that this merchant can buy
+        """
+        Entity.__init__(self=self, name=name)
+        Inventory.__init__(self=self)
+        self.sell_ratio = sell_ratio
+        self.buy_ratio = buy_ratio
+        self.stock = list(stock)
+        self.buy_categories = set(buy_categories)
+
+    def restock(self):
+        """
+        Method that restocks merchant, according to stock dict 
+        :return: None 
+        """
+        for item in self.inventory:  # empty current merchant inventory
+            self.discard_item(item)
+            del item
+        for elem in self.stock:
+            item_id, quantity, chance = elem
+            if random.random() <= float(chance):
+                for i in range(quantity):
+                    self.add_item(item_id)
+
+    def check_buyable(self, item):
+        """
+        Method that checks, if merchant can buy an Item
+        :param item: Item object
+        :return: True if merchant can buy it, False if not  
+        """
+        try:
+            for category in item.categories:
+                if category in self.buy_categories:
+                    return True
+        except AttributeError:
+            pass
+        return False
+
+
 class Location:
     """
         Represents a location, has a grid (nested list) of Cells
@@ -1918,6 +1963,7 @@ class Game:
         self.locations = []  # list of locations
         self.time_system = actions.TimeSystem()  # time system object
         self.show_debug_log = False  # show debug log to player
+        self.equipment_merchant = None  # an equipment merchant in camp
 
         if game_type == 'new':  # constructor option for new game start
             self.new_game()
@@ -1960,6 +2006,16 @@ class Game:
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23, damage=1,
                              categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
+        self.equipment_merchant = Merchant(name='Sidor', sell_ratio=4.0, buy_ratio=0.25,
+                                           stock=[('item_sabre', 1, 0.75),
+                                                  ('item_healing_potion', 3, 1),
+                                                  ('item_antidote_potion', 1, 1),
+                                                  ('item_wooden_buckler', 1, 0.5),
+                                                  ('item_bronze_tipped_arrow', 1, 0.90),
+                                                  ('item_bronze_bolt',1, 0.90),
+                                                  ('item_haste_potion', 1, 0.25)],
+                                           buy_categories={'weapon', 'armor', 'ring', 'alchemy'})
+        self.equipment_merchant.restock()  # restock newly created merchant
         self.is_waiting_input = True
         self.state = 'camp'
 
