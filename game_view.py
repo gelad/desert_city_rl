@@ -1185,23 +1185,55 @@ class MerchantScene(UIScene):
                                       style='double',
                                       layout_options=layout_options or LayoutOptions(left=0, top=0),
                                       subviews=subviews)
-        self.active_tab = self.merchant_items_view
+        self.active_tab = self.player_items_view
+        self.active_tab.color_fg = '#888888'  # make inactive tab darker
+        self.active_tab.hl_color_fg = '#008800'
+        self.active_tab.recolor()
+        self.active_tab = self.merchant_items_view  # set merchant tab to active
         self.merchant_items_view.selected = 0  # select first merchant item
         super().__init__(views=[self.window_view], *args, **kwargs)
 
     def terminal_read(self, val):
         super().terminal_read(val)
         if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
-            # allow traverse with arrows and numpad
-            if val == terminal.TK_TAB:
+            if val == terminal.TK_TAB:  # change active tab
                 if self.active_tab == self.merchant_items_view:
+                    self.active_tab.color_fg = '#888888'  # make inactive tab darker
+                    self.active_tab.hl_color_fg = '#008800'
+                    self.active_tab.recolor()
                     self.active_tab = self.player_items_view
+                    self.active_tab.color_fg = '#ffffff'  # and active - brighter
+                    self.active_tab.hl_color_fg = '#00ff00'
+                    self.active_tab.recolor()
                 else:
+                    self.active_tab.color_fg = '#888888'  # make inactive tab darker
+                    self.active_tab.hl_color_fg = '#008800'
+                    self.active_tab.recolor()
                     self.active_tab = self.merchant_items_view
+                    self.active_tab.color_fg = '#ffffff'  # and active - brighter
+                    self.active_tab.hl_color_fg = '#00ff00'
+                    self.active_tab.recolor()
+                if self.active_tab.selected is None:  # if tab became active - there has to be cursor
+                    self.active_tab.select_next()
             elif val in (terminal.TK_KP_8, terminal.TK_UP):
                 self.active_tab.select_prev()
             elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
                 self.active_tab.select_next()
+        elif val == terminal.TK_SPACE:  # select/unselect item for selling or buyng
+            if self.active_tab == self.merchant_items_view:
+                if self.merchant_items[self.active_tab.selected] in self.selling:
+                    self.merchant_items_view.unhighlight(self.active_tab.selected)
+                    self.selling.remove(self.merchant_items[self.active_tab.selected])
+                else:
+                    self.merchant_items_view.highlight(self.active_tab.selected)
+                    self.selling.add(self.merchant_items[self.active_tab.selected])
+            elif self.active_tab == self.player_items_view:
+                if self.player_items[self.active_tab.selected] in self.buying:
+                    self.player_items_view.unhighlight(self.active_tab.selected)
+                    self.buying.remove(self.player_items[self.active_tab.selected])
+                else:
+                    self.player_items_view.highlight(self.active_tab.selected)
+                    self.buying.add(self.player_items[self.active_tab.selected])
         elif val == terminal.TK_ESCAPE:
             self.director.pop_scene()
             return True
@@ -2040,15 +2072,25 @@ class LookView(View):
 class VerticalScrollingLabelList(View):
     """ View with list of labels, scrolling """
 
-    def __init__(self, strings, *args, **kwargs):
+    def __init__(self, strings, color_fg='#ffffff', color_bg='#000000', hl_color_fg='#00ff00', hl_color_bg='#000000',
+                 *args, **kwargs):
         """
         :param strings: strings to be placed
+        :param color_fg: string text color
+        :param color_bg: string background color
+        :param hl_color_fg: highlighted string color
+        :param hl_color_bg: highlighted string background color
         :param args: arguments to pass to View constructor
         :param kwargs: keywords of arguments to pass to View constructor
         """
         self.strings = list(strings)
         self.labels = []
+        self.highlighted = set()
         top_offset = 0
+        self.color_fg = color_fg
+        self.color_bg = color_bg
+        self.hl_color_fg = hl_color_fg
+        self.hl_color_bg = hl_color_bg
         # labels creation
         for string in self.strings:
             if isinstance(string, game_logic.Entity):
@@ -2110,6 +2152,46 @@ class VerticalScrollingLabelList(View):
             self.labels[self._selected].color_bg = fg
             if self.scrolling_mode:
                 self._scroll()
+
+    def highlight(self, index):
+        """ Highlight string by index (change color) """
+        if index == self.selected:
+            self.labels[index].color_fg = self.hl_color_bg
+            self.labels[index].color_bg = self.hl_color_fg
+        else:
+            self.labels[index].color_fg = self.hl_color_fg
+            self.labels[index].color_bg = self.hl_color_bg
+        self.highlighted.add(index)
+
+    def unhighlight(self, index):
+        """ Remove highlighting string by index (change color) """
+        if index == self.selected:
+            self.labels[index].color_fg = self.color_bg
+            self.labels[index].color_bg = self.color_fg
+        else:
+            self.labels[index].color_fg = self.color_fg
+            self.labels[index].color_bg = self.color_bg
+        self.highlighted.remove(index)
+
+    def recolor(self):
+        """ Method to call when some of the View colors changes """
+        i = 0
+        for label in self.labels:
+            if i in self.highlighted:
+                if i == self.selected:
+                    label.color_fg = self.hl_color_bg
+                    label.color_bg = self.hl_color_fg
+                else:
+                    label.color_fg = self.hl_color_fg
+                    label.color_bg = self.hl_color_bg
+            else:
+                if i == self.selected:
+                    label.color_fg = self.color_bg
+                    label.color_bg = self.color_fg
+                else:
+                    label.color_fg = self.color_fg
+                    label.color_bg = self.color_bg
+            i += 1
 
     def select_next(self):
         if self.selected is None:

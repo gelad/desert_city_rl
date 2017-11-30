@@ -2006,7 +2006,7 @@ class Game:
         self.player = Player(name='Player', data_id='player', description='A player character.', char='@',
                              color=[255, 255, 255], hp=20, speed=100, sight_radius=23, damage=1,
                              categories={'living'}, properties={'money': 0, 'max_carry_weight': 30}, weight=70)
-        self.equipment_merchant = Merchant(name='Sidor', sell_ratio=4.0, buy_ratio=0.25,
+        self.equipment_merchant = Merchant(name='William McSidor', sell_ratio=4.0, buy_ratio=0.25,
                                            stock=[('item_sabre', 1, 0.75),
                                                   ('item_healing_potion', 3, 1),
                                                   ('item_antidote_potion', 1, 1),

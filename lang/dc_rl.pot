@@ -1649,3 +1649,6 @@ msgstr ""
 
 msgid "HEAL"
 msgstr ""
+
+msgid "William McSidor"
+msgstr ""
