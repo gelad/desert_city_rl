@@ -252,7 +252,8 @@ def initialize():
     data_set['item_haste_potion'] = game_logic.ItemCharges(name='haste potion', data_id='item_haste_potion',
                                                            description='A potion that hastens user by 50%.',
                                                            categories={'consumable', 'potion'},
-                                                           properties={'usable': 'self'},
+                                                           properties={'value': 120,
+                                                                       'usable': 'self'},
                                                            char='!', color=[255, 215, 0],
                                                            charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
@@ -265,7 +266,8 @@ def initialize():
     data_set['item_antidote_potion'] = game_logic.ItemCharges(name='antidote potion', data_id='item_antidote_potion',
                     description='A potion that cures all poison effects, and protects from poison for a short time.',
                                                               categories={'consumable', 'potion'},
-                                                              properties={'usable': 'self'},
+                                                              properties={'value': 40,
+                                                                          'usable': 'self'},
                                                               char='!', color=[0, 150, 0],
                                                               charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
@@ -346,12 +348,13 @@ def initialize():
     data_set['item_healing_potion'] = game_logic.ItemCharges(name='healing potion', data_id='item_healing_potion',
                                                              description='A potion that heals 5 HP.',
                                                              categories={'consumable', 'potion'},
-                                                             properties={'usable': 'self'},
+                                                             properties={'value': 30,
+                                                                         'usable': 'self'},
                                                              char='!', color=[255, 0, 0],
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
     react = {'type': 'heal', 'target': 'default', 'heal': 5}
-    abil = abilities.Ability(name='Haste', owner=data_set['item_healing_potion'],
+    abil = abilities.Ability(name='Heal', owner=data_set['item_healing_potion'],
                              trigger='used_on_self', conditions=[cond], reactions=[react],
                              message_color=[0, 255, 0])
     data_set['item_healing_potion'].add_ability(abil)
@@ -400,7 +403,8 @@ def initialize():
     data_set['item_wooden_buckler'] = game_logic.ItemShield(name='wooden buckler', data_id='item_wooden_buckler',
                                                             description='A light wooden shield.', durability=10,
                                                             categories={'shield'},
-                                                            properties={'armor_bashing': 50, 'armor_slashing': 100,
+                                                            properties={'value': 150,
+                                                                        'armor_bashing': 50, 'armor_slashing': 100,
                                                                         'armor_piercing': 150,
                                                                         'block_bashing': 3, 'block_slashing': 6,
                                                                         'block_piercing': 10},
@@ -496,7 +500,7 @@ def initialize():
     data_set['item_sabre'] = game_logic.Item(name='sabre', data_id='item_sabre',
                                              description='A sharp sabre with pointy tip.',
                                              categories={'weapon', 'sword'},
-                                             properties={'slashing': (4, 6), 'attack_speed_mod': 1},
+                                             properties={'value': 100, 'slashing': (4, 6), 'attack_speed_mod': 1},
                                              char='ϯ', color=[200, 200, 255], weight=2)
 
     data_set['item_khopesh'] = game_logic.Item(name='khopesh', data_id='item_khopesh',
@@ -599,7 +603,8 @@ def initialize():
                                                           description='A simple bronze bolt for crossbows.',
                                                           categories={'bolt', 'stackable', 'weight_per_charge',
                                                                       'sticks_to_target'},
-                                                          properties={'piercing': (1, 4), 'break_chance': 0.5},
+                                                          properties={'value': 10,
+                                                                      'piercing': (1, 4), 'break_chance': 0.5},
                                                           char='=', color=[80, 50, 20],
                                                           charges=5, destroyed_after_use=True, weight=0.2)
 
@@ -608,7 +613,8 @@ def initialize():
                                                                   description='A simple bronze tipped arrow.',
                                                                   categories={'arrow', 'stackable', 'weight_per_charge',
                                                                               'sticks_to_target'},
-                                                                  properties={'piercing': (1, 3), 'break_chance': 0.5},
+                                                                  properties={'value': 5,
+                                                                              'piercing': (1, 3), 'break_chance': 0.5},
                                                                   char='=', color=[128, 20, 20],
                                                                   charges=5, destroyed_after_use=True, weight=0.1)
 

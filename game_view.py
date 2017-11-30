@@ -934,12 +934,15 @@ class ItemManipulationSelectionScene(UIScene):
         self.game.start_update_thread()
 
     def _reload(self):
-        director = self.director
         self.option_activated()
         commands.command_reload(game=self.game, item=self.item)
 
     def _unload(self):
-        pass
+        self.option_activated()
+        for item in self.game.player.equipment.values():  # unload every equipped item
+            if isinstance(item, game_logic.ItemRangedWeapon):
+                self.game.player.perform(actions.act_unload, self.game.player, item)
+                self.game.start_update_thread()
 
     def _wield(self):
         director = self.director
@@ -956,6 +959,7 @@ class ItemManipulationSelectionScene(UIScene):
         if slot:  # if selected - equip item
             self.game.player.perform(actions.act_equip_item, self.game.player, self.item, slot)
             self.option_activated()
+            self.game.start_update_thread()
 
 
 class ItemSelectionScene(DescribedListSelectionScene):
@@ -964,45 +968,7 @@ class ItemSelectionScene(DescribedListSelectionScene):
     """
 
     def __init__(self, items, game, *args, **kwargs):
-        descriptions = []
-        for item in items:
-            text = ''
-            text += item.description + '\n'
-            text += _('Weight: ') + str(item.weight) + _(' kg.\n')
-            if item.properties:
-                if 'bashing' in item.properties:
-                    text += _('Deals {min_damage}-{max_damage} bashing damage.\n').format(
-                        min_damage=str(item.properties['bashing'][0]),
-                        max_damage=str(item.properties['bashing'][1]))
-                if 'slashing' in item.properties:
-                    text += _('Deals {min_damage}-{max_damage} slashing damage.\n').format(
-                        min_damage=str(item.properties['slashing'][0]),
-                        max_damage=str(item.properties['slashing'][1]))
-                if 'piercing' in item.properties:
-                    text += _('Deals {min_damage}-{max_damage} piercing damage.\n').format(
-                        min_damage=str(item.properties['piercing'][0]),
-                        max_damage=str(item.properties['piercing'][1]))
-                if 'fire' in item.properties:
-                    text += _('Deals {min_damage}-{max_damage} fire damage.\n').format(
-                        min_damage=str(item.properties['fire'][0]),
-                        max_damage=str(item.properties['fire'][1]))
-                if 'cold' in item.properties:
-                    text += _('Deals {min_damage}-{max_damage} cold damage.\n').format(
-                        min_damage=str(item.properties['cold'][0]),
-                        max_damage=str(item.properties['cold'][1]))
-                if 'lightning' in item.properties:
-                    text += _('Deals {min_damage}-{max_damage} lightning damage.\n').format(
-                        min_damage=str(item.properties['lightning'][0]),
-                        max_damage=str(item.properties['lightning'][1]))
-            if len(item.effects) > 0:
-                text += _('Effects: ')
-                for effect in item.effects:
-                    text += effect.description + '\n'
-            if len(item.abilities) > 0:
-                text += _('Abilities: ')
-                for ability in item.abilities:
-                    text += _(ability.name) + '\n'
-            descriptions.append(text)
+        descriptions = [item.get_full_description() for item in items]
         self.game = game
         weight_text = _('Weight: {current} / {max} kg.').format(current=str(round(self.game.player.carried_weight, 2)),
                                                                 max=str(round(
@@ -1076,6 +1042,7 @@ class AmmoItemSelectionScene(ItemSelectionScene):
     def option_activated(self, *args, **kwargs):
         """ Method to load ammo when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_reload, self.game.player, self.ranged_weapon, self.options[self.selected])
+        self.game.start_update_thread()
         super().option_activated(*args, **kwargs)
 
 
@@ -1178,8 +1145,13 @@ class MerchantScene(UIScene):
                                                             layout_options=LayoutOptions(left=0, right=0.7))
         self.merchant_items_view = VerticalScrollingLabelList(strings=self.merchant_items,
                                                               layout_options=LayoutOptions(left=0.7, right=0))
+        self.descr_view = LabelViewFixed(text='', align_horz='left', align_vert='top',
+                                         layout_options=LayoutOptions(top=0, left=0))
+        self.trade_view = LabelViewFixed(text='', align_vert='top',
+                                         layout_options=LayoutOptions.row_bottom(height=8))
         self.middle_window = WindowView(title='', style='double',
-                                        layout_options=LayoutOptions(left=0.3, right=0.3))
+                                        layout_options=LayoutOptions(left=0.3, right=0.3), clear=True,
+                                        subviews=[self.trade_view, self.descr_view])
         subviews = [self.player_items_view, self.merchant_items_view, self.middle_window]
         self.window_view = WindowView(title=str(merchant),
                                       style='double',
@@ -1191,6 +1163,7 @@ class MerchantScene(UIScene):
         self.active_tab.recolor()
         self.active_tab = self.merchant_items_view  # set merchant tab to active
         self.merchant_items_view.selected = 0  # select first merchant item
+        self._update_middle_view()
         super().__init__(views=[self.window_view], *args, **kwargs)
 
     def terminal_read(self, val):
@@ -1225,8 +1198,14 @@ class MerchantScene(UIScene):
                     self.merchant_items_view.unhighlight(self.active_tab.selected)
                     self.selling.remove(self.merchant_items[self.active_tab.selected])
                 else:
-                    self.merchant_items_view.highlight(self.active_tab.selected)
-                    self.selling.add(self.merchant_items[self.active_tab.selected])
+                    if self._get_buying_value() + self.game.player.properties['money'] >=\
+                                            self._get_selling_value() + self.merchant_items[
+                                                self.active_tab.selected].get_value() * self.merchant.sell_ratio :
+                        self.merchant_items_view.highlight(self.active_tab.selected)
+                        self.selling.add(self.merchant_items[self.active_tab.selected])
+                    else:
+                        self.director.push_scene(SingleButtonMessageScene(
+                            message=_('You cannot afford that. Sell more items, or go get some cash.'), title=''))
             elif self.active_tab == self.player_items_view:
                 if self.player_items[self.active_tab.selected] in self.buying:
                     self.player_items_view.unhighlight(self.active_tab.selected)
@@ -1237,10 +1216,67 @@ class MerchantScene(UIScene):
         elif val == terminal.TK_ESCAPE:
             self.director.pop_scene()
             return True
+        elif val == terminal.TK_ENTER:
+            self._enter_pressed()
+            return True
         elif val == terminal.TK_RESIZED:
             self.player_items_view.scrolling_mode_check()
             self.merchant_items_view.scrolling_mode_check()
+        self._update_middle_view()
         return False
+
+    def _enter_pressed(self):
+        """ Ask player before making a deal """
+        director = self.director
+        total = self._get_buying_value() - self._get_selling_value()
+        if total + self.game.player.properties['money'] >= 0:
+            text = _('Confirm a deal?\nTOTAL: {total} coins.').format(total=total)
+            director.push_scene(MultiButtonMessageScene(buttons=[(_('Yes'), text, lambda: (director.pop_scene(),
+                                                                                           director.pop_scene(),
+                                                                                           self._make_deal())),
+                                                                 (_('No'), text, None)],
+                                                        title=_('Deal'),
+                                                        layout_options='intrinsic'))
+        else:
+            self.director.push_scene(SingleButtonMessageScene(
+                message=_('You cannot afford that. Sell more items, or go get some cash.'), title=''))
+
+    def _make_deal(self):
+        """ Actually make a deal - interact with inventories and money """
+        total = self._get_buying_value() - self._get_selling_value()
+        for item in self.buying:
+            self.game.player.discard_item(item)
+        for item in self.selling:
+            self.merchant.discard_item(item)
+        self.game.player.properties['money'] += total
+
+    def _update_middle_view(self):
+        """ Update middle view - item description and prices """
+        if self.active_tab == self.merchant_items_view:
+            self.descr_view.set_text(text=
+                _('{descr}\n\tBuy price: {price}').format(
+                    descr=self.merchant_items[self.merchant_items_view.selected].get_full_description(),
+                    price=int(self.merchant_items[self.merchant_items_view.selected].get_value() *
+                              self.merchant.sell_ratio)))
+        else:
+            self.descr_view.set_text(
+                _('{descr}\n\tSell price: {price}').format(
+                    descr=self.player_items[self.player_items_view.selected].get_full_description(),
+                    price=int(self.player_items[self.player_items_view.selected].get_value() *
+                              self.merchant.buy_ratio)))
+        self.trade_view.set_text(text=
+        _("""\t<-- TAB -->\n[[SPACE - select item]]\n[[ENTER - make a deal]]\nMoney: {money}\nSell items price: {sell_price}\nBuy items price: {buy_price}\n\n\tTOTAL: {total} coins.""").
+                                 format(money=self.game.player.properties['money'],
+                                        sell_price=self._get_buying_value(), buy_price=self._get_selling_value(),
+                                        total=self._get_buying_value() - self._get_selling_value()))
+
+    def _get_selling_value(self):
+        """ Calculate selling items sum """
+        return floor(sum(item.get_value() for item in self.selling) * self.merchant.sell_ratio)
+
+    def _get_buying_value(self):
+        """ Calculate buying items sum """
+        return floor(sum(item.get_value() for item in self.buying) * self.merchant.buy_ratio)
 
 
 class MainMenuScene(UIScene):

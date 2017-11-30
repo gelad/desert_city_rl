@@ -176,6 +176,7 @@ def command_reload(game, item):
             if ammos:
                 if len(ammos) == 1:
                     game.player.perform(actions.act_reload, game.player, item, ammos[0])
+                    game.start_update_thread()
                 else:
                     director.push_scene(game_view.AmmoItemSelectionScene(items=ammos,
                                                                          game=game,

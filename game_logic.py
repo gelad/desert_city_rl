@@ -19,7 +19,7 @@ import pickle
 import copy
 import threading
 from math import hypot
-from math import ceil
+from math import ceil, floor
 
 # profiling code
 
@@ -1132,6 +1132,67 @@ class Item(Abilities, Entity):
         else:  # by default - can be taken to hands
             self.equip_slots = dict.fromkeys(['RIGHT_HAND', 'LEFT_HAND'])
         Abilities.__init__(self)
+
+    def get_value(self):
+        """ Method to get value of an item """
+        if 'value' not in self.properties:
+            print(str(self) + ' has no value!')
+            return 0  # temporary, all items must have value
+        if isinstance(self, ItemCharges):
+            return self.properties['value'] * self.charges
+        if isinstance(self, ItemRangedWeapon):
+            ammo_value = 0
+            for ammo in self.ammo:
+                ammo_value += ammo.get_value()
+            return self.properties['value'] + ammo_value
+        if isinstance(self, ItemShield):
+            if self.durability == 0:
+                return 0
+            return floor(self.properties['value'] * (self.durability / self.max_durability))
+        return self.properties['value']
+    
+    def get_full_description(self):
+        """
+        Method to get full description of an item to show in various windows
+        :return: full description text
+        """
+        text = ''
+        text += self.description + '\n'
+        text += _('Weight: ') + str(self.weight) + _(' kg.\n')
+        if self.properties:
+            if 'bashing' in self.properties:
+                text += _('Deals {min_damage}-{max_damage} bashing damage.\n').format(
+                    min_damage=str(self.properties['bashing'][0]),
+                    max_damage=str(self.properties['bashing'][1]))
+            if 'slashing' in self.properties:
+                text += _('Deals {min_damage}-{max_damage} slashing damage.\n').format(
+                    min_damage=str(self.properties['slashing'][0]),
+                    max_damage=str(self.properties['slashing'][1]))
+            if 'piercing' in self.properties:
+                text += _('Deals {min_damage}-{max_damage} piercing damage.\n').format(
+                    min_damage=str(self.properties['piercing'][0]),
+                    max_damage=str(self.properties['piercing'][1]))
+            if 'fire' in self.properties:
+                text += _('Deals {min_damage}-{max_damage} fire damage.\n').format(
+                    min_damage=str(self.properties['fire'][0]),
+                    max_damage=str(self.properties['fire'][1]))
+            if 'cold' in self.properties:
+                text += _('Deals {min_damage}-{max_damage} cold damage.\n').format(
+                    min_damage=str(self.properties['cold'][0]),
+                    max_damage=str(self.properties['cold'][1]))
+            if 'lightning' in self.properties:
+                text += _('Deals {min_damage}-{max_damage} lightning damage.\n').format(
+                    min_damage=str(self.properties['lightning'][0]),
+                    max_damage=str(self.properties['lightning'][1]))
+        if len(self.effects) > 0:
+            text += _('Effects: ')
+            for effect in self.effects:
+                text += effect.description + '\n'
+        if len(self.abilities) > 0:
+            text += _('Abilities: ')
+            for ability in self.abilities:
+                text += _(ability.name) + '\n'
+        return text
 
     def use(self, user, target):
         """ Call this method when item is used - return True if successiful """
