@@ -925,24 +925,22 @@ class ItemManipulationSelectionScene(UIScene):
 
     def _use(self):
         director = self.director
-        self.option_activated()
         commands.command_use_item(game=self.game, item=self.item, main_scene=director.main_game_scene)
+        self.option_activated()
 
     def _drop(self):
-        self.option_activated()
         self.game.player.perform(actions.act_drop_item, self.game.player, self.item)
-        self.game.start_update_thread()
+        self.option_activated()
 
     def _reload(self):
-        self.option_activated()
         commands.command_reload(game=self.game, item=self.item)
+        self.option_activated()
 
     def _unload(self):
         self.option_activated()
         for item in self.game.player.equipment.values():  # unload every equipped item
             if isinstance(item, game_logic.ItemRangedWeapon):
                 self.game.player.perform(actions.act_unload, self.game.player, item)
-                self.game.start_update_thread()
 
     def _wield(self):
         director = self.director
@@ -959,7 +957,6 @@ class ItemManipulationSelectionScene(UIScene):
         if slot:  # if selected - equip item
             self.game.player.perform(actions.act_equip_item, self.game.player, self.item, slot)
             self.option_activated()
-            self.game.start_update_thread()
 
 
 class ItemSelectionScene(DescribedListSelectionScene):
@@ -1118,7 +1115,6 @@ class WieldSlotSelectionScene(ListSelectionScene):
     def option_activated(self):
         """ Method to wield item when option is activated (ENTER key pressed) """
         self.game.player.perform(actions.act_equip_item, self.game.player, self.item, self.options[self.selected])
-        self.game.start_update_thread()
         super().option_activated()
 
 
@@ -1493,7 +1489,10 @@ class MainGameScene(UIScene):
         if not self.director.main_game_scene:
             self.director.main_game_scene = self
         elif self.director.main_game_scene == self:
-            pass
+            # TODO: to avoid hangs must be a mechanism to run update if needed
+            # (now if scene is already active, but thread is not started - game hangs)
+            # it must run on it's own, because kicking update method here and there - BAD
+            self.game.start_update_thread()  # if it's not the first run - attempt to update game logic
         else:
             raise (RuntimeError('More than one main game scene!'))
         self.ctx.clear()
