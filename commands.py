@@ -213,7 +213,7 @@ def command_fire_choose(game):
                                                          weapon=ranged_weapons[0])
             else:
                 game_logic.Game.add_message(message=
-                                        _("{weapon} isn't loaded!".format(weapon=str(ranged_weapons[0]).capitalize())),
+                                        _("{weapon} isn't loaded!").format(weapon=str(ranged_weapons[0]).capitalize()),
                                             level='PLAYER', color=[255, 255, 255])
         else:  # if multiple ranged equipped
             director.push_scene(game_view.FireItemSelectionScene(items=ranged_weapons,
