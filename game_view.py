@@ -1144,7 +1144,7 @@ class MerchantScene(UIScene):
         self.descr_view = LabelViewFixed(text='', align_horz='left', align_vert='top',
                                          layout_options=LayoutOptions(top=0, left=0))
         self.trade_view = LabelViewFixed(text='', align_vert='top',
-                                         layout_options=LayoutOptions.row_bottom(height=8))
+                                         layout_options=LayoutOptions.row_bottom(height=9))
         self.middle_window = WindowView(title='', style='double',
                                         layout_options=LayoutOptions(left=0.3, right=0.3), clear=True,
                                         subviews=[self.trade_view, self.descr_view])
@@ -1250,18 +1250,18 @@ class MerchantScene(UIScene):
         """ Update middle view - item description and prices """
         if self.active_tab == self.merchant_items_view:
             self.descr_view.set_text(text=
-                _('{descr}\n\tBuy price: {price}').format(
+                _('{descr}\n\tBuy price: {price} coins.').format(
                     descr=self.merchant_items[self.merchant_items_view.selected].get_full_description(),
                     price=int(self.merchant_items[self.merchant_items_view.selected].get_value() *
                               self.merchant.sell_ratio)))
         else:
             self.descr_view.set_text(
-                _('{descr}\n\tSell price: {price}').format(
+                _('{descr}\n\tSell price: {price} coins.').format(
                     descr=self.player_items[self.player_items_view.selected].get_full_description(),
                     price=int(self.player_items[self.player_items_view.selected].get_value() *
                               self.merchant.buy_ratio)))
         self.trade_view.set_text(text=
-        _("""\t<-- TAB -->\n[[SPACE - select item]]\n[[ENTER - make a deal]]\nMoney: {money}\nSell items price: {sell_price}\nBuy items price: {buy_price}\n\n\tTOTAL: {total} coins.""").
+        _("""\t<-- TAB -->\n[[SPACE - select item]]\n[[ENTER - make a deal]]\n\nMoney: {money} coins.\nSell items price: {sell_price}\nBuy items price: {buy_price}\n\n\tTOTAL: {total} coins.""").
                                  format(money=self.game.player.properties['money'],
                                         sell_price=self._get_buying_value(), buy_price=self._get_selling_value(),
                                         total=self._get_buying_value() - self._get_selling_value()))
@@ -1492,7 +1492,8 @@ class MainGameScene(UIScene):
             # TODO: to avoid hangs must be a mechanism to run update if needed
             # (now if scene is already active, but thread is not started - game hangs)
             # it must run on it's own, because kicking update method here and there - BAD
-            self.game.start_update_thread()  # if it's not the first run - attempt to update game logic
+            if self.game.player.state != 'dead':  # thread hangs if player is dead
+                self.game.start_update_thread()  # if it's not the first run - attempt to update game logic
         else:
             raise (RuntimeError('More than one main game scene!'))
         self.ctx.clear()
@@ -1513,9 +1514,9 @@ class MainGameScene(UIScene):
                                                                 int(255 * (1 - hp_percent)),
                                                                 int(255 * hp_percent),
                                                                 0)
-            right = player.equipment['RIGHT_HAND']
+            right = player.equipment['RIGHT_HAND'] or _('none')
             self.player_right_hand.text = _('Right: {right}').format(right=str(right))
-            left = player.equipment['LEFT_HAND']
+            left = player.equipment['LEFT_HAND'] or _('none')
             self.player_left_hand.text = _('Left: {left}').format(left=str(left))
             money = player.properties['money']
             self.money.text = _('Money: {money} coins.').format(money=str(money))

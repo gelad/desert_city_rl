@@ -1653,6 +1653,35 @@ msgstr ""
 msgid "Heal"
 msgstr ""
 
+msgid "arrow"
+msgstr ""
+
+msgid "bolt"
+msgstr ""
+
+msgid "none"
+msgstr ""
 
 msgid "William McSidor"
+msgstr ""
+
+msgid "{projectile} hits {entity} for {dmg} damage!"
+msgstr ""
+
+msgid "You cannot afford that. Sell more items, or go get some cash."
+msgstr ""
+
+msgid "Confirm a deal?\nTOTAL: {total} coins."
+msgstr ""
+
+msgid "Deal"
+msgstr ""
+
+msgid "{descr}\n\tBuy price: {price} coins."
+msgstr ""
+
+msgid "{descr}\n\tSell price: {price} coins."
+msgstr ""
+
+msgid "\t<-- TAB -->\n[[SPACE - select item]]\n[[ENTER - make a deal]]\n\nMoney: {money} coins.\nSell items price: {sell_price}\nBuy items price: {buy_price}\n\n\tTOTAL: {total} coins."
 msgstr ""

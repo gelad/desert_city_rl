@@ -1068,8 +1068,8 @@ class UnguidedShotAI(UnguidedProjectileAI):
             res_dmg = self.owner.launcher.land_strike(strike=strike, target=something)  # land strike
             events.Event(self.owner, {'type': 'shot_hit', 'target': something, 'strike': strike,
                                       'attacker': self.owner.launcher, 'damage': res_dmg})
-            Game.add_message(self.owner.name + ' hits ' + something.name + ' for ' + str(res_dmg) + ' damage!',
-                             'PLAYER', [255, 255, 255])
+            Game.add_message(_('{projectile} hits {entity} for {dmg} damage!').format(
+                projectile=_(self.owner.name), entity=str(something), dmg=str(res_dmg)), 'PLAYER', [255, 255, 255])
         super(UnguidedShotAI, self)._hit(something)  # call parent _hit function
 
 
