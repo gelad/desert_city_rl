@@ -176,6 +176,7 @@ def command_reload(game, item):
             if ammos:
                 if len(ammos) == 1:
                     game.player.perform(actions.act_reload, game.player, item, ammos[0])
+                    game.start_update_thread()
                 else:
                     director.push_scene(game_view.AmmoItemSelectionScene(items=ammos,
                                                                          game=game,
@@ -357,6 +358,7 @@ def command_leave_loc(game, flee=False):
     player.effects.clear()  # simply clear list for now. Needs testing
     game.remove_location(old_loc)
     game.enter_camp()
+    game.equipment_merchant.restock()
     director.pop_scene()
     director.push_scene(game_view.SingleButtonMessageScene(message=raid_report_text + '\n \n ',
                                                            title=_('Successful raid.'),

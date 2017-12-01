@@ -283,7 +283,8 @@ def initialize():
     data_set['item_lightning_scroll'] = game_logic.ItemCharges(name='scroll of Lightning', data_id='item_lightning_scroll',
                                                     description='A scroll that calls a lightning strike on enemy.',
                                                                categories={'consumable', 'scroll'},
-                                                               properties={'usable': 'battle_entity', 'range': 15},
+                                                               properties={'usable': 'battle_entity', 'range': 15,
+                                                                           'value': 175},
                                                                char='?', color=[255, 215, 0],
                                                                charges=1, destroyed_after_use=True, weight=0.1)
     cond = abilities.Condition('USED')
@@ -300,7 +301,8 @@ def initialize():
                                                               properties={'usable': 'battle_entity_or_point',
                                                                           'range': 15,
                                                                           'use_time_coef': 1,
-                                                                          'use_time_offset': 0.7},
+                                                                          'use_time_offset': 0.7,
+                                                                          'value': 125},
                                                               char='?', color=[255, 0, 0],
                                                               charges=1, destroyed_after_use=True, weight=0.1)
     cond = abilities.Condition('USED')
@@ -326,7 +328,8 @@ def initialize():
                                                                properties={'usable': 'battle_entity_or_point',
                                                                            'range': 15,
                                                                            'use_time_coef': 1,
-                                                                           'use_time_offset': 0.7},
+                                                                           'use_time_offset': 0.7,
+                                                                           'value': 135},
                                                                char='?', color=[100, 100, 255],
                                                                charges=1, destroyed_after_use=True, weight=0.1)
     cond = abilities.Condition('USED')
@@ -374,6 +377,7 @@ def initialize():
     data_set['item_ring_poison_res'] = game_logic.Item(name='ring of poison resistance', data_id='item_ring_poison_res',
                                                        description='Ring that grants protection from poison.',
                                                        categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                       properties={'value': 350},
                                                        char='˚', color=[0, 100, 0],
                                                        weight=0.1)
     data_set['item_ring_poison_res'].effects.append(effects.Effect('RESIST_POISON', 100))
@@ -381,6 +385,7 @@ def initialize():
     data_set['item_ring_fire_res'] = game_logic.Item(name='ring of fire resistance', data_id='item_ring_fire_res',
                                                      description='Ring that grants protection from fire.',
                                                      categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                     properties={'value': 400},
                                                      char='˚', color=[180, 0, 0],
                                                      weight=0.1)
     data_set['item_ring_fire_res'].effects.append(effects.Effect('RESIST_FIRE', 100))
@@ -388,6 +393,7 @@ def initialize():
     data_set['item_ring_cold_res'] = game_logic.Item(name='ring of cold resistance', data_id='item_ring_cold_res',
                                                      description='Ring that grants protection from cold.',
                                                      categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                     properties={'value': 400},
                                                      char='˚', color=[0, 0, 150],
                                                      weight=0.1)
     data_set['item_ring_cold_res'].effects.append(effects.Effect('RESIST_COLD', 100))
@@ -396,6 +402,7 @@ def initialize():
                                                           data_id='item_ring_lightning_res',
                                                           description='Ring that grants protection from lightning.',
                                                           categories={'ring'}, equip_slots={'RIGHT_RING', 'LEFT_RING'},
+                                                          properties={'value': 400},
                                                           char='˚', color=[255, 215, 0],
                                                           weight=0.1)
     data_set['item_ring_lightning_res'].effects.append(effects.Effect('RESIST_LIGHTNING', 100))
@@ -403,7 +410,7 @@ def initialize():
     data_set['item_wooden_buckler'] = game_logic.ItemShield(name='wooden buckler', data_id='item_wooden_buckler',
                                                             description='A light wooden shield.', durability=10,
                                                             categories={'shield'},
-                                                            properties={'value': 150,
+                                                            properties={'value': 75,
                                                                         'armor_bashing': 50, 'armor_slashing': 100,
                                                                         'armor_piercing': 150,
                                                                         'block_bashing': 3, 'block_slashing': 6,
@@ -415,21 +422,21 @@ def initialize():
                                                description='A light iron helmet with spike on top.',
                                                categories={'armor'},
                                                properties={'armor_bashing': 100, 'armor_slashing': 80,
-                                                           'armor_piercing': 60},
+                                                           'armor_piercing': 60, 'value': 300},
                                                char='ˀ', color=[50, 50, 200], equip_slots={'HEAD'}, weight=1)
 
     data_set['item_mail_armor'] = game_logic.Item(name='mail armor', data_id='item_mail_armor',
                                                   description='An armor made of overlapping layers of metal rings.',
                                                   categories={'armor'},
                                                   properties={'armor_bashing': 60, 'armor_slashing': 120,
-                                                              'armor_piercing': 60},
+                                                              'armor_piercing': 60, 'value': 500},
                                                   char=']]', color=[50, 50, 200], equip_slots={'BODY'}, weight=5)
 
     data_set['item_iron_pauldrons'] = game_logic.Item(name='iron pauldrons', data_id='item_iron_pauldrons',
                                                       description='A pair of iron pauldrons.',
                                                       categories={'armor'},
                                                       properties={'armor_bashing': 100, 'armor_slashing': 120,
-                                                                  'armor_piercing': 100},
+                                                                  'armor_piercing': 100, 'value': 350},
                                                       char=']]', color=[50, 50, 200], equip_slots={'SHOULDERS'},
                                                       weight=2)
 
@@ -437,42 +444,42 @@ def initialize():
                                                   description='A pair of iron greaves.',
                                                   categories={'armor'},
                                                   properties={'armor_bashing': 100, 'armor_slashing': 120,
-                                                              'armor_piercing': 100},
+                                                              'armor_piercing': 100, 'value': 300},
                                                   char=']]', color=[50, 50, 200], equip_slots={'FEET'}, weight=2.5)
 
     data_set['item_iron_armguards'] = game_logic.Item(name='iron armguards', data_id='item_iron_armguards',
                                                       description='A pair of iron armguards.',
                                                       categories={'armor'},
                                                       properties={'armor_bashing': 100, 'armor_slashing': 120,
-                                                                  'armor_piercing': 100},
+                                                                  'armor_piercing': 100, 'value': 350},
                                                       char=']]', color=[50, 50, 200], equip_slots={'ARMS'}, weight=2)
 
     data_set['item_mail_leggings'] = game_logic.Item(name='mail leggings', data_id='item_mail_leggings',
                                                      description='A pair of mail leggings.',
                                                      categories={'armor'},
                                                      properties={'armor_bashing': 60, 'armor_slashing': 120,
-                                                                 'armor_piercing': 60},
+                                                                 'armor_piercing': 60, 'value': 400},
                                                      char=']]', color=[50, 50, 200], equip_slots={'LEGS'}, weight=4)
     # set of leather armor =========================================================
     data_set['item_leather_cap'] = game_logic.Item(name='leather cap', data_id='item_leather_cap',
                                                    description='A leather cap offers light protection.',
                                                    categories={'armor'},
                                                    properties={'armor_bashing': 50, 'armor_slashing': 50,
-                                                               'armor_piercing': 40},
+                                                               'armor_piercing': 40, 'value': 90},
                                                    char='ˀ', color=[160, 82, 45], equip_slots={'HEAD'}, weight=0.5)
 
     data_set['item_leather_armor'] = game_logic.Item(name='leather armor', data_id='item_leather_armor',
                                                      description='A light armor made of leather.',
                                                      categories={'armor'},
                                                      properties={'armor_bashing': 50, 'armor_slashing': 50,
-                                                                 'armor_piercing': 40},
+                                                                 'armor_piercing': 40, 'value': 150},
                                                      char=']]', color=[160, 82, 45], equip_slots={'BODY'}, weight=3)
 
     data_set['item_leather_pauldrons'] = game_logic.Item(name='leather pauldrons', data_id='item_leather_pauldrons',
                                                          description='A pair of leather pauldrons.',
                                                          categories={'armor'},
                                                          properties={'armor_bashing': 50, 'armor_slashing': 50,
-                                                                     'armor_piercing': 40},
+                                                                     'armor_piercing': 40, 'value': 100},
                                                          char=']]', color=[160, 82, 45], equip_slots={'SHOULDERS'},
                                                          weight=1.5)
 
@@ -480,21 +487,21 @@ def initialize():
                                                      description='A pair of leather boots.',
                                                      categories={'armor'},
                                                      properties={'armor_bashing': 50, 'armor_slashing': 50,
-                                                                 'armor_piercing': 40},
+                                                                 'armor_piercing': 40, 'value': 80},
                                                      char=']]', color=[160, 82, 45], equip_slots={'FEET'}, weight=2.5)
 
     data_set['item_leather_armguards'] = game_logic.Item(name='leather armguards', data_id='item_leather_armguards',
                                                          description='A pair of leather armguards.',
                                                          categories={'armor'},
                                                          properties={'armor_bashing': 50, 'armor_slashing': 50,
-                                                                     'armor_piercing': 40},
+                                                                     'armor_piercing': 40, 'value': 110},
                                                          char=']]', color=[160, 82, 45], equip_slots={'ARMS'}, weight=1)
 
     data_set['item_leather_leggings'] = game_logic.Item(name='leather leggings', data_id='item_leather_leggings',
                                                         description='A pair of leather leggings.',
                                                         categories={'armor'},
                                                         properties={'armor_bashing': 50, 'armor_slashing': 50,
-                                                                    'armor_piercing': 40},
+                                                                    'armor_piercing': 40, 'value': 120},
                                                         char=']]', color=[160, 82, 45], equip_slots={'LEGS'}, weight=2)
     # WEAPONS
     data_set['item_sabre'] = game_logic.Item(name='sabre', data_id='item_sabre',
@@ -506,67 +513,69 @@ def initialize():
     data_set['item_khopesh'] = game_logic.Item(name='khopesh', data_id='item_khopesh',
                                                description='An ancient bronze sickle-sword.',
                                                categories={'weapon', 'sword'},
-                                               properties={'slashing': (4, 7), 'attack_speed_mod': 1.05},
+                                               properties={'slashing': (4, 7), 'attack_speed_mod': 1.05, 'value': 275},
                                                char='ϯ', color=[80, 50, 20], weight=2.5)
 
     data_set['item_longsword'] = game_logic.Item(name='longsword', data_id='item_longsword',
                                                  description='A double-edged straight sword.',
                                                  categories={'weapon', 'sword'},
-                                                 properties={'slashing': (5, 9), 'attack_speed_mod': 1.2},
+                                                 properties={'slashing': (5, 9), 'attack_speed_mod': 1.2, 'value': 450},
                                                  char='ϯ', color=[150, 150, 255], weight=4)
 
     data_set['item_zweihander'] = game_logic.Item(name='zweihander', data_id='item_zweihander',
                         description='A long and heavy two-handed sword. Slow to swing, but extremely heavy-hitting.',
                                                   categories={'weapon', 'sword'},
-                                                  properties={'slashing': (6, 14), 'attack_speed_mod': 1.8},
+                                                  properties={'slashing': (6, 14), 'attack_speed_mod': 1.8,
+                                                              'value': 850},
                                                   char='ϯ', color=[150, 150, 175], weight=8)
 
     data_set['item_tabar'] = game_logic.Item(name='tabar', data_id='item_tabar',
                                              description='Fighting axe, with metal handle suitable for parrying.',
                                              categories={'weapon', 'axe'},
-                                             properties={'slashing': (3, 7), 'attack_speed_mod': 1},
+                                             properties={'slashing': (3, 7), 'attack_speed_mod': 1, 'value': 150},
                                              char='г', color=[150, 150, 255], weight=3)
 
     data_set['item_panabas'] = game_logic.Item(name='panabas', data_id='item_panabas',
                                                description='Long sword-like two-handed axe.',
                                                categories={'weapon', 'axe'},
-                                               properties={'slashing': (4, 12), 'attack_speed_mod': 1.5},
+                                               properties={'slashing': (4, 12), 'attack_speed_mod': 1.5, 'value': 550},
                                                char='Г', color=[150, 150, 255], weight=6)
 
     data_set['item_dagger'] = game_logic.Item(name='dagger', data_id='item_dagger',
                                               description='A dagger about 20cm long.',
                                               categories={'weapon', 'dagger'},
-                                              properties={'piercing': (1, 4), 'attack_speed_mod': 0.75},
+                                              properties={'piercing': (1, 4), 'attack_speed_mod': 0.75, 'value': 25},
                                               char=',', color=[200, 200, 255], weight=0.5)
 
     data_set['item_jambiyah'] = game_logic.Item(name='jambiyah', data_id='item_jambiyah',
                                                 description='A knife with broad blade, suited for slashing.',
                                                 categories={'weapon', 'dagger'},
-                                                properties={'slashing': (1, 4), 'attack_speed_mod': 0.75},
+                                                properties={'slashing': (1, 4), 'attack_speed_mod': 0.75, 'value': 30},
                                                 char=',', color=[150, 150, 255], weight=0.5)
 
     data_set['item_kris'] = game_logic.Item(name='kris', data_id='item_kris',
                                             description='A dagger with flame-like blade.',
                                             categories={'weapon', 'dagger'},
-                                            properties={'piercing': (2, 5), 'attack_speed_mod': 0.85},
+                                            properties={'piercing': (2, 5), 'attack_speed_mod': 0.85, 'value': 90},
                                             char=',', color=[80, 50, 2], weight=0.7)
 
     data_set['item_assegai'] = game_logic.Item(name='assegai', data_id='item_assegai',
                                                description='Short spear, used for melee combat.',
                                                categories={'weapon', 'spear'},
-                                               properties={'piercing': (2, 8), 'attack_speed_mod': 1},
+                                               properties={'piercing': (2, 8), 'attack_speed_mod': 1, 'value': 80},
                                                char=chr(92), color=[128, 0, 0], weight=4)
 
     data_set['item_mace'] = game_logic.Item(name='mace', data_id='item_mace',
                                             description='A short club with iron head.',
                                             categories={'weapon', 'blunt'},
-                                            properties={'bashing': (3, 5), 'attack_speed_mod': 1},
+                                            properties={'bashing': (3, 5), 'attack_speed_mod': 1, 'value': 110},
                                             char='/', color=[128, 0, 0], weight=3)
 
     data_set['item_bronze_maul'] = game_logic.Item(name='bronze maul', data_id='item_bronze_maul',
                                                    description='A huge bronze sphere ot top of wooden pole.',
                                                    categories={'weapon', 'blunt'},
-                                                   properties={'bashing': (8, 12), 'attack_speed_mod': 1.8},
+                                                   properties={'bashing': (8, 12), 'attack_speed_mod': 1.8,
+                                                               'value': 420},
                                                    char='/', color=[80, 50, 20], weight=10)
 
     data_set['item_wall_smasher'] = game_logic.Item(name='wall smasher', data_id='item_wall_smasher',
@@ -583,7 +592,8 @@ def initialize():
                                                                     properties={'bashing': (1, 3),
                                                                                 'attack_speed_mod': 1.5,
                                                                                 'accuracy_ranged': 1,
-                                                                                'shot_speed': 2},
+                                                                                'shot_speed': 2,
+                                                                                'value': 600},
                                                                     char=')', color=[200, 200, 200], weight=3)
     data_set['item_hunting_crossbow'].effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 4))
 
@@ -595,7 +605,8 @@ def initialize():
                                                              properties={'bashing': (1, 2),
                                                                          'attack_speed_mod': 1.1,
                                                                          'accuracy_ranged': 0.9,
-                                                                         'shot_speed': 3},
+                                                                         'shot_speed': 3,
+                                                                         'value': 175},
                                                              char='ϡ', color=[128, 0, 0], weight=1.5)
     data_set['item_short_bow'].effects.append(effects.Effect('INCREASE_RANGED_DAMAGE', 1))
 
@@ -608,7 +619,7 @@ def initialize():
                                                           char='=', color=[80, 50, 20],
                                                           charges=5, destroyed_after_use=True, weight=0.2)
 
-    data_set['item_bronze_tipped_arrow'] = game_logic.ItemCharges(name='bronze tipped arrow',
+    data_set['item_bronze_tipped_arrow'] = game_logic.ItemCharges(name='arrow',
                                                                   data_id='item_bronze_tipped_arrow',
                                                                   description='A simple bronze tipped arrow.',
                                                                   categories={'arrow', 'stackable', 'weight_per_charge',
@@ -623,7 +634,8 @@ def initialize():
                                                     description='A simple bronze tipped arrow, coated in weak poison.',
                                                                   categories={'arrow', 'stackable', 'weight_per_charge',
                                                                               'sticks_to_target'},
-                                                                  properties={'piercing': (1, 3), 'break_chance': 0.5},
+                                                                  properties={'piercing': (1, 3), 'break_chance': 0.5,
+                                                                              'value': 50},
                                                                   char='=', color=[0, 150, 0],
                                                                   charges=3, destroyed_after_use=True, weight=0.1)
     cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
@@ -641,7 +653,8 @@ def initialize():
                                                           description='Magical arrow, that deals cold damage and slows target.',
                                                           categories={'arrow', 'stackable', 'weight_per_charge',
                                                                       'sticks_to_target'},
-                                                          properties={'cold': (2, 5), 'break_chance': 0.7},
+                                                          properties={'cold': (2, 5), 'break_chance': 0.7,
+                                                                      'value': 90},
                                                           char='=', color=[100, 100, 255],
                                                           charges=1, destroyed_after_use=True, weight=0.1)
     cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
@@ -657,7 +670,8 @@ def initialize():
                     description='Crossbow bolt with attached alchemical explosive head.',
                                                              categories={'bolt', 'stackable', 'weight_per_charge',
                                                                          'sticks_to_target'},
-                                                             properties={'bashing': (0, 3), 'break_chance': 1},
+                                                             properties={'bashing': (0, 3), 'break_chance': 1,
+                                                                         'value': 110},
                                                              char='=', color=[255, 127, 80],
                                                              charges=1, destroyed_after_use=True, weight=0.1)
     react1 = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 2.5, 'include_center': True,
@@ -676,7 +690,8 @@ def initialize():
                                                                          'sticks_to_target'},
                                                              properties={'break_chance': 0.3,
                                                                          'throw_speed': 0.75,
-                                                                         'accuracy_thrown': 1},
+                                                                         'accuracy_thrown': 1,
+                                                                         'value': 20},
                                                              char="'", color=[110, 110, 110],
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
@@ -693,7 +708,8 @@ def initialize():
                                                                     'alchemy'},
                                                         properties={'break_chance': 1,
                                                                     'throw_speed': 0.75,
-                                                                    'accuracy_thrown': 0.8},
+                                                                    'accuracy_thrown': 0.8,
+                                                                    'value': 60},
                                                         char="`", color=[0, 230, 0],
                                                         charges=1, destroyed_after_use=True, weight=0.5)
     cond = abilities.Condition('TARGET_IS_CATEGORY', category='living')
@@ -711,7 +727,8 @@ def initialize():
                                                                     'alchemy'},
                                                         properties={'break_chance': 1,
                                                                     'throw_speed': 0.75,
-                                                                    'accuracy_thrown': 0.6},
+                                                                    'accuracy_thrown': 0.6,
+                                                                    'value': 120},
                                                         char="`", color=[255, 215, 0],
                                                         charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
@@ -728,7 +745,8 @@ def initialize():
                                                                   'alchemy'},
                                                       properties={'break_chance': 1,
                                                                   'throw_speed': 0.75,
-                                                                  'accuracy_thrown': 0.6},
+                                                                  'accuracy_thrown': 0.6,
+                                                                  'value': 120},
                                                       char="`", color=[160, 0, 0],
                                                       charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
@@ -745,7 +763,8 @@ def initialize():
                                                                   'alchemy'},
                                                       properties={'break_chance': 1,
                                                                   'throw_speed': 0.75,
-                                                                  'accuracy_thrown': 0.6},
+                                                                  'accuracy_thrown': 0.6,
+                                                                  'value': 120},
                                                       char="`", color=[0, 0, 255],
                                                       charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
@@ -762,7 +781,8 @@ def initialize():
                                                                            'sticks_to_target'},
                                                                properties={'break_chance': 1,
                                                                            'throw_speed': 0.75,
-                                                                           'accuracy_thrown': 1},
+                                                                           'accuracy_thrown': 1,
+                                                                           'value': 160},
                                                                char="!", color=[255, 127, 80],
                                                                charges=1, destroyed_after_use=True, weight=0.5)
     # cond_aoe = abilities.Condition('TARGET_IS_CATEGORY', category='living')  if needed add 'aoe_conditions': [cond_aoe],
@@ -781,7 +801,8 @@ def initialize():
                                                       categories={'throwing', 'stackable', 'weight_per_charge',
                                                                   'sticks_to_target'},
                                                       properties={'break_chance': 0.3,
-                                                                  'accuracy_thrown': 1},
+                                                                  'accuracy_thrown': 1,
+                                                                  'value': 60},
                                                       char=chr(92), color=[160, 50, 50],
                                                       charges=1, destroyed_after_use=True, weight=1.5)
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',

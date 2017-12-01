@@ -933,14 +933,13 @@ class ItemManipulationSelectionScene(UIScene):
         self.option_activated()
 
     def _reload(self):
-        commands.command_reload(game=self.game, item=self.item)
         self.option_activated()
+        commands.command_reload(game=self.game, item=self.item)
 
     def _unload(self):
-        self.option_activated()
-        for item in self.game.player.equipment.values():  # unload every equipped item
-            if isinstance(item, game_logic.ItemRangedWeapon):
-                self.game.player.perform(actions.act_unload, self.game.player, item)
+        if isinstance(self.item, game_logic.ItemRangedWeapon):
+            self.game.player.perform(actions.act_unload, self.game.player, self.item)
+            self.option_activated()
 
     def _wield(self):
         director = self.director
