@@ -264,8 +264,9 @@ def command_execute_debug_line(line, game):
     director = game_view.GameLoop.active_director
     player = game.player
     loc = game.current_loc
-    x = game.player.position[0]
-    y = game.player.position[1]
+    if game.player.position:
+        x = game.player.position[0]
+        y = game.player.position[1]
     try:
         eval(line, globals(), locals())
     except:

@@ -461,6 +461,9 @@ class CampMenuScene(MultiButtonMessageScene):
                                                              title=_('Confirm exit'),
                                                              layout_options='intrinsic'))
             return True
+        elif val == terminal.TK_F11:  # debug command exec
+            self.director.push_scene(DebugLineInputScene(game=self.game))
+            return True
         return super().terminal_read(val)
 
     def become_active(self):
@@ -1892,7 +1895,84 @@ class DebugLineInputScene(UIScene):
         if text == 'testscene':
             director.push_scene(TestingViewsScene())
             return
+        elif text == 'numscene':
+            director.push_scene(NumberInputScene(num_range=(0, 10), num_start=1, title='Num', callback=lambda n: print(n)))
+            return
         commands.command_execute_debug_line(line=text, game=self.game)
+
+
+class NumberInputScene(UIScene):
+    """ Scene to enter a number """
+
+    def __init__(self, num_range=None, num_start=0, title='', callback=None, layout_options='intrinsic',
+                 *args, **kwargs):
+        """
+        :param num_range: if specified, must be a tuple (min, max)
+        :param num_start: if specified must be int
+        :param title: title of the window
+        :param callback: function that accepts one 'text' parameter
+        :param layout_options: layout options of the window. 'intrinsic' for autosize
+        :param args: UIScene args
+        :param kwargs: UIScene kwargs
+        """
+        self.min_n = None
+        self.max_n = None
+        self.start_n = 0
+        if num_range:
+            self.min_n, self.max_n = num_range
+            if num_start in range(self.min_n, self.max_n):
+                self.start_n = num_start
+            else:
+                self.start_n = self.min_n
+        else:
+            self.start_n = num_start
+        if layout_options == 'intrinsic':
+            layout_options = LayoutOptions(width=max(len(str(self.max_n)), len(title)) + 2, height=3,
+                                           left=None, right=None, top=None, bottom=None)
+        self.input_view = SingleLineTextInputView(callback=callback)
+        self.input_view.text = str(self.start_n)
+        self.window = WindowView(title=title, layout_options=layout_options or LayoutOptions(),
+                                 subviews=[self.input_view])
+        super().__init__([self.window], *args, **kwargs)
+
+    def terminal_read(self, val):
+        # number can be changed by ^v arrows, numpad arrows or +/-
+        if val in (terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN, terminal.TK_KP_PLUS,
+                   terminal.TK_KP_MINUS, terminal.TK_EQUALS, terminal.TK_MINUS):
+            if val in (terminal.TK_KP_8, terminal.TK_UP, terminal.TK_KP_PLUS, terminal.TK_EQUALS):
+                try:  # checking not to exceed expected range
+                    if self.max_n is not None:
+                        if int(self.input_view.text) + 1 <= self.max_n:
+                            self.input_view.text = str(int(self.input_view.text) + 1)
+                except ValueError:
+                    self.input_view.text = str(self.start_n)
+            elif val in (terminal.TK_KP_2, terminal.TK_DOWN, terminal.TK_KP_MINUS, terminal.TK_MINUS):
+                try:  # checking not to exceed expected range
+                    if self.min_n is not None:
+                        if int(self.input_view.text) - 1 >= self.min_n:
+                            self.input_view.text = str(int(self.input_view.text) - 1)
+                except ValueError:
+                    self.input_view.text = str(self.start_n)
+            return True
+        elif val == terminal.TK_ESCAPE:
+            self.director.pop_scene()
+            return True
+        handled = super().terminal_read(val)  # now allow text input
+        # then check it
+        if self.input_view.text != '':
+            try:
+                if self.max_n is not None:
+                    if int(self.input_view.text) > self.max_n:
+                        self.input_view.text = str(self.max_n)
+            except ValueError:
+                self.input_view.text = str(self.start_n)
+            try:
+                if self.min_n is not None:
+                    if int(self.input_view.text) < self.min_n:
+                        self.input_view.text = str(self.min_n)
+            except ValueError:
+                self.input_view.text = str(self.start_n)
+        return handled
 
 
 class TestingViewsScene(UIScene):
