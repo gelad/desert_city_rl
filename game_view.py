@@ -1123,6 +1123,7 @@ class WieldSlotSelectionScene(ListSelectionScene):
 # Other scenes
 
 class MerchantScene(UIScene):
+    # TODO: Refactor this shit
     """ Scene that displays buy/sell menu """
     def __init__(self, game, merchant, layout_options=None, *args, **kwargs):
         """
@@ -1166,7 +1167,8 @@ class MerchantScene(UIScene):
 
     def terminal_read(self, val):
         super().terminal_read(val)
-        if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN):
+        if val in (terminal.TK_TAB, terminal.TK_KP_8, terminal.TK_KP_2, terminal.TK_UP, terminal.TK_DOWN,
+                   terminal.TK_LEFT, terminal.TK_KP_4, terminal.TK_RIGHT, terminal.TK_KP_6):
             if val == terminal.TK_TAB:  # change active tab
                 if self.active_tab == self.merchant_items_view:
                     self.active_tab.color_fg = '#888888'  # make inactive tab darker
@@ -1190,6 +1192,28 @@ class MerchantScene(UIScene):
                 self.active_tab.select_prev()
             elif val in (terminal.TK_KP_2, terminal.TK_DOWN):
                 self.active_tab.select_next()
+            elif val in (terminal.TK_LEFT, terminal.TK_KP_4):
+                if self.active_tab == self.merchant_items_view:
+                    self.active_tab.color_fg = '#888888'  # make inactive tab darker
+                    self.active_tab.hl_color_fg = '#008800'
+                    self.active_tab.recolor()
+                    self.active_tab = self.player_items_view
+                    self.active_tab.color_fg = '#ffffff'  # and active - brighter
+                    self.active_tab.hl_color_fg = '#00ff00'
+                    self.active_tab.recolor()
+                    if self.active_tab.selected is None:  # if tab became active - there has to be cursor
+                        self.active_tab.select_next()
+            elif val in (terminal.TK_RIGHT, terminal.TK_KP_6):
+                if self.active_tab == self.player_items_view:
+                    self.active_tab.color_fg = '#888888'  # make inactive tab darker
+                    self.active_tab.hl_color_fg = '#008800'
+                    self.active_tab.recolor()
+                    self.active_tab = self.merchant_items_view
+                    self.active_tab.color_fg = '#ffffff'  # and active - brighter
+                    self.active_tab.hl_color_fg = '#00ff00'
+                    self.active_tab.recolor()
+                    if self.active_tab.selected is None:  # if tab became active - there has to be cursor
+                        self.active_tab.select_next()
         elif val == terminal.TK_SPACE:  # select/unselect item for selling or buyng
             if self.active_tab == self.merchant_items_view:
                 if self.merchant_items[self.active_tab.selected] in self.selling:
