@@ -529,14 +529,19 @@ class Inventory(Entity):
             w += item.weight
         return w
 
-    def add_item(self, item):
-        """ Item adding method """
+    def add_item(self, item, stack=True):
+        """
+        Item adding method
+        :param item: an item (or string for template) to add
+        :param stack: to stack it with others similar 'stackable' or not
+        :return: None
+        """
         if isinstance(item, str):  # if item ID instead of item
             if self.location:
                 item = self.location.reg_entity(item)
             else:
                 item = dataset.get_entity(item)
-        if isinstance(item, ItemCharges):  # if item is stackable
+        if isinstance(item, ItemCharges) and stack:  # if item is stackable, and stacking is needed
             if 'stackable' in item.categories:
                 if isinstance(self, Equipment):  # first try add to equipment
                     for i in self.equipment.values():
@@ -1239,6 +1244,24 @@ class ItemCharges(Item):
             msg = _('{name} is depleted!').format(name=str(self))
             Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
             return False
+
+    def split(self, count):
+        """
+        A method to split stack
+        :param count: how many to detach?
+        :return: if split successful - return new Item object, if not - return None
+        """
+        new_item = None
+        if 'stackable' in self.categories:  # for now - only for stackable items
+            if count == self.charges:  # if 'split' contains all items - simply return self
+                new_item = self
+            elif 0 < count < self.charges:
+                new_item = pickle.loads(pickle.dumps(self))
+                new_item.charges = count
+                self.charges -= count
+                if isinstance(self.owner, Inventory):
+                    self.owner.add_item(item=new_item, stack=False)
+        return new_item
 
     def decrease(self):
         """ Decrease charges by 1 """

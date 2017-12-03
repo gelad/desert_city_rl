@@ -1196,7 +1196,15 @@ class MerchantScene(UIScene):
                     self.merchant_items_view.unhighlight(self.active_tab.selected)
                     self.selling.remove(self.merchant_items[self.active_tab.selected])
                 else:
-                    if self._get_buying_value() + self.game.player.properties['money'] >=\
+                    if isinstance(self.merchant_items[self.active_tab.selected],
+                                  game_logic.ItemCharges) and 'stackable' in self.merchant_items[
+                                        self.active_tab.selected].categories:
+                        self.director.push_scene(NumberInputScene(
+                            num_range=(1, self.merchant_items[self.active_tab.selected].charges),
+                            num_start=self.merchant_items[self.active_tab.selected].charges,
+                            title=str(self.merchant_items[self.active_tab.selected]),
+                            callback=lambda t: (self.director.pop_scene(), self._split_stack(t))))
+                    elif self._get_buying_value() + self.game.player.properties['money'] >=\
                                             self._get_selling_value() + self.merchant_items[
                                                 self.active_tab.selected].get_value() * self.merchant.sell_ratio :
                         self.merchant_items_view.highlight(self.active_tab.selected)
@@ -1209,8 +1217,17 @@ class MerchantScene(UIScene):
                     self.player_items_view.unhighlight(self.active_tab.selected)
                     self.buying.remove(self.player_items[self.active_tab.selected])
                 else:
-                    self.player_items_view.highlight(self.active_tab.selected)
-                    self.buying.add(self.player_items[self.active_tab.selected])
+                    if isinstance(self.player_items[self.active_tab.selected],
+                                  game_logic.ItemCharges) and 'stackable' in self.player_items[
+                                        self.active_tab.selected].categories:
+                        self.director.push_scene(NumberInputScene(
+                            num_range=(1, self.player_items[self.active_tab.selected].charges),
+                            num_start=self.player_items[self.active_tab.selected].charges,
+                            title=str(self.player_items[self.active_tab.selected]),
+                            callback=lambda t: (self.director.pop_scene(), self._split_stack(t))))
+                    else:
+                        self.player_items_view.highlight(self.active_tab.selected)
+                        self.buying.add(self.player_items[self.active_tab.selected])
         elif val == terminal.TK_ESCAPE:
             self.director.pop_scene()
             return True
@@ -1222,6 +1239,46 @@ class MerchantScene(UIScene):
             self.merchant_items_view.scrolling_mode_check()
         self._update_middle_view()
         return False
+
+    def _split_stack(self, text):
+        """
+        Splits stackable items
+        :param text: accepts text, because InputScene returns text
+        :return: None
+        """
+        try:  # check if text can be converted to int
+            split_num = int(text)
+        except ValueError:
+            return
+        # determine currently selected item to split
+        if self.active_tab == self.merchant_items_view:
+            current_selected_item = self.merchant_items[self.active_tab.selected]
+            active_inventory = self.merchant_items
+        elif self.active_tab == self.player_items_view:
+            current_selected_item = self.player_items[self.active_tab.selected]
+            active_inventory = self.player_items
+        else:
+            assert RuntimeError('Active tab must be one of two: merchant or player.')
+            return
+        new_item = current_selected_item.split(count=split_num)  # try to split items
+        if new_item is not current_selected_item:  # if split was successful - new item is created
+            active_inventory.append(new_item)
+            self.active_tab.add_label(new_item)  # add label with new item to tab
+            self.active_tab.labels[self.active_tab.selected].set_text(str(current_selected_item))  # update old item N
+            self.active_tab.selected = len(self.active_tab.labels) - 1  # make it selected
+        # do stuff with new item (or old one, if no item was created)
+        if self.active_tab == self.merchant_items_view:
+            if self._get_buying_value() + self.game.player.properties['money'] >= \
+                            self._get_selling_value() + self.merchant_items[
+                        self.active_tab.selected].get_value() * self.merchant.sell_ratio:
+                self.merchant_items_view.highlight(self.active_tab.selected)
+                self.selling.add(self.merchant_items[self.active_tab.selected])
+            else:
+                self.director.push_scene(SingleButtonMessageScene(
+                    message=_('You cannot afford that. Sell more items, or go get some cash.'), title=''))
+        elif self.active_tab == self.player_items_view:
+            self.player_items_view.highlight(self.active_tab.selected)
+            self.buying.add(self.player_items[self.active_tab.selected])
 
     def _enter_pressed(self):
         """ Ask player before making a deal """
@@ -1243,9 +1300,11 @@ class MerchantScene(UIScene):
         """ Actually make a deal - interact with inventories and money """
         total = self._get_buying_value() - self._get_selling_value()
         for item in self.buying:
-            self.game.player.discard_item(item)
+            self.game.player.discard_item(item=item)
+            self.merchant.add_item(item=item)
         for item in self.selling:
-            self.merchant.discard_item(item)
+            self.merchant.discard_item(item=item)
+            self.game.player.add_item(item=item)
         self.game.player.properties['money'] += total
 
     def _update_middle_view(self):
@@ -1920,7 +1979,7 @@ class NumberInputScene(UIScene):
         self.start_n = 0
         if num_range:
             self.min_n, self.max_n = num_range
-            if num_start in range(self.min_n, self.max_n):
+            if num_start in range(self.min_n, self.max_n + 1):
                 self.start_n = num_start
             else:
                 self.start_n = self.min_n
@@ -2267,6 +2326,31 @@ class VerticalScrollingLabelList(View):
             self.labels[self._selected].color_bg = fg
             if self.scrolling_mode:
                 self._scroll()
+
+    def add_label(self, label_text):
+        """
+        Adds a label to the end of list
+        :param label_text: new label text
+        :return: None
+        """
+        if isinstance(label_text, game_logic.Entity):
+            l_text = str(label_text)  # entity name already translated
+        else:
+            l_text = _(str(label_text))
+        top_offset = len(self.labels)
+        label = LabelViewFixed(text=l_text,
+                               layout_options=LayoutOptions(
+                                   left=0,
+                                   top=top_offset,
+                                   width='intrinsic',
+                                   height=1,
+                                   bottom=None,
+                                   right=None))
+        label.is_hidden = True
+        self.labels.append(label)
+        self.add_subview(label)
+        self.scrolling_mode_check()
+        self._scroll()
 
     def highlight(self, index):
         """ Highlight string by index (change color) """
