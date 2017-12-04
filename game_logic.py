@@ -645,10 +645,10 @@ class Equipment(Entity):
     def unequip_item(self, item):
         """ Method for unequipping items """
         if item in self.equipment.values():
-            self.add_item(item)  # add item to inventory
             for sl, it in self.equipment.items():  # remove item from all slots occupied
                 if it == item:
                     self.equipment[sl] = None
+            self.add_item(item)  # add item to inventory
 
     def drop_equipped_item(self, item):
         """ Method for dropping equipped items """

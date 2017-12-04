@@ -69,11 +69,11 @@ Moving to Clubsandwich (BearLibTerminal) (DONE)
 Make some fences, paths and roads on map. (DONE)
 Make simple trading/sleeping base between raids. (DONE)
 Make 'give item' debug command. (DONE - actually made sort of debug console)
+BUG: explosive potion vanishes if taken off after throw (FIXED, item was stacked with itself before adding to inventory)
 
 BUG: russian letters in path prevent INI file from loading.
 Make entity in range/rect search method in location.
 Add prefab_info store variant-specific layer numbers, to place additional entities for variant. ?? 9 layers max
-BUG: explosive potion vanishes if taken off after throw (when has > 1 charge)
 BUG: poison stops working if move to another location.
 BUG: too long delay before throwing item.
 Make 2-handed weapons, especially ranged.
