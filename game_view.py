@@ -1000,7 +1000,7 @@ class DropItemSelectionScene(ItemSelectionScene):
                 num_range=(1, self.options[self.selected].charges),
                 num_start=self.options[self.selected].charges,
                 title=str(self.options[self.selected]),
-                callback=lambda t: (self.director.pop_scene(), self._split_stack_and_drop(t))))
+                callback=lambda t: self._split_stack_and_drop(t)))
         else:
             self.game.player.perform(actions.act_drop_item, self.game.player, self.options[self.selected])
             super().option_activated(*args, **kwargs)
@@ -1018,6 +1018,7 @@ class DropItemSelectionScene(ItemSelectionScene):
             return
         split_item = self.options[self.selected].split(split_num)
         self.game.player.drop_item(split_item)
+        self.director.pop_scene()
         self.director.pop_scene()
 
 
