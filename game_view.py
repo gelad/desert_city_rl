@@ -1007,7 +1007,7 @@ class DropItemSelectionScene(ItemSelectionScene):
 
     def _split_stack_and_drop(self, text):
         """
-        Methd to split items stack and drop
+        Method to split items stack and drop
         :param text: accepts string, because NumberInput returns string 
         :return: None
         """
@@ -1017,7 +1017,7 @@ class DropItemSelectionScene(ItemSelectionScene):
             self.director.pop_scene()
             return
         split_item = self.options[self.selected].split(split_num)
-        self.game.player.drop_item(split_item)
+        self.game.player.perform(actions.act_drop_item, self.game.player, split_item)
         self.director.pop_scene()
         self.director.pop_scene()
 
@@ -1105,8 +1105,33 @@ class PickUpItemSelectionScene(ItemSelectionScene):
 
     def option_activated(self, *args, **kwargs):
         """ Method to pick up item when option is activated (ENTER key pressed) """
-        self.game.player.perform(actions.act_pick_up_item, self.game.player, self.options[self.selected])
-        super().option_activated(*args, **kwargs)
+        if isinstance(self.options[self.selected], game_logic.ItemCharges) and\
+                        'stackable' in self.options[self.selected].categories and\
+                            self.options[self.selected].charges > 1:
+            self.director.push_scene(NumberInputScene(
+                num_range=(1, self.options[self.selected].charges),
+                num_start=self.options[self.selected].charges,
+                title=str(self.options[self.selected]),
+                callback=lambda t: self._split_stack_and_pick(t)))
+        else:
+            self.game.player.perform(actions.act_pick_up_item, self.game.player, self.options[self.selected])
+            super().option_activated(*args, **kwargs)
+
+    def _split_stack_and_pick(self, text):
+        """
+        Method to split items stack and pick up
+        :param text: accepts string, because NumberInput returns string 
+        :return: None
+        """
+        try:  # check if text can be converted to int
+            split_num = int(text)
+        except ValueError:
+            self.director.pop_scene()
+            return
+        split_item = self.options[self.selected].split(split_num)
+        self.game.player.perform(actions.act_pick_up_item, self.game.player, split_item)
+        self.director.pop_scene()
+        self.director.pop_scene()
 
 
 class WieldItemSelectionScene(ItemSelectionScene):

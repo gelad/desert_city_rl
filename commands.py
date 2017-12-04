@@ -79,7 +79,15 @@ def command_pick_up(game, dx, dy):
         items = [i for i in loc.cells[x][y].entities if isinstance(i, game_logic.Item)]  # select items in cell
         if items:  # check if there is an item
             if len(items) == 1:
-                player.perform(actions.act_pick_up_item, player, items[0])
+                if isinstance(items[0], game_logic.ItemCharges) and\
+                        'stackable' in items[0].categories and items[0].charges > 1:
+                    director.push_scene(game_view.NumberInputScene(
+                        num_range=(1, items[0].charges),
+                        num_start=items[0].charges,
+                        title=str(items[0]),
+                        callback=lambda text, item=items[0], game=game: _split_stack_and_pick(text, item, game)))
+                else:
+                    player.perform(actions.act_pick_up_item, player, items[0])
             else:  # if there are multiple Items - ask which to pick up?
                 director.push_scene(game_view.PickUpItemSelectionScene(items=items,
                                                                        game=game,
@@ -87,6 +95,23 @@ def command_pick_up(game, dx, dy):
                                                                        layout_options=LayoutOptions(
                                                                             top=0.25, bottom=0.25,
                                                                             left=0.2, right=0.2)))
+
+
+def _split_stack_and_pick(text, item, game):
+    """
+    Method to split items stack and pick up
+    :param text: accepts string, because NumberInput returns string 
+    :return: None
+    """
+    director = game_view.GameLoop.active_director
+    try:  # check if text can be converted to int
+        split_num = int(text)
+    except ValueError:
+        director.pop_scene()
+        return
+    split_item = item.split(split_num)
+    game.player.perform(actions.act_pick_up_item, game.player, split_item)
+    director.pop_scene()
 
 
 def command_use_item(game, item, main_scene):
