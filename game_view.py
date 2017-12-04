@@ -555,7 +555,8 @@ class CampMenuScene(MultiButtonMessageScene):
 class ListSelectionScene(UIScene):
     """ Scene displays a list with selectable options """
 
-    def __init__(self, options, caption='', layout_options=None, alphabet=True, *args, **kwargs):
+    def __init__(self, options, caption='', opt_need_translation=True,
+                 layout_options=None, alphabet=True, *args, **kwargs):
         self.options = options
         self.alphabet = alphabet  # flag that allows option selection by A..Z keys
         self.selected = 0  # currently selected option index
@@ -567,10 +568,14 @@ class ListSelectionScene(UIScene):
         letter_index = ord('a')  # start menu item indexing from 'a'
         max_option_length = 0  # longest option string - to determine window width
         for option in self.options:
-            if alphabet:
-                button_text = chr(letter_index) + ') ' + _(str(option))
+            if opt_need_translation:
+                opt_str = _(str(option))
             else:
-                button_text = _(str(option))
+                opt_str = str(option)
+            if alphabet:
+                button_text = chr(letter_index) + ') ' + opt_str
+            else:
+                button_text = opt_str
             max_option_length = max(len(button_text), max_option_length)
             button = ButtonViewFixed(text=button_text,
                                      callback=self.option_activated,
@@ -677,7 +682,8 @@ class ListSelectionScene(UIScene):
 class DescribedListSelectionScene(UIScene):
     """ Scene displays a list with selectable options and their descriptions to the left """
 
-    def __init__(self, options, descriptions, caption='', layout_options=None, alphabet=True, views=None,
+    def __init__(self, options, descriptions, caption='', opt_need_translation=True,
+                 layout_options=None, alphabet=True, views=None,
                  *args, **kwargs):
         self.options = options
         self.descriptions = descriptions
@@ -690,8 +696,8 @@ class DescribedListSelectionScene(UIScene):
         self.buttons = []
         letter_index = ord('a')  # start menu item indexing from 'a'
         for option in self.options:
-            if isinstance(option, game_logic.Entity):
-                b_text = str(option)  # entity name already translated
+            if isinstance(option, game_logic.Entity) or not opt_need_translation:
+                b_text = str(option)  # entity name already translated, or no translation needed
             else:
                 b_text = _(str(option))
             if alphabet:
@@ -1161,12 +1167,16 @@ class WieldSlotSelectionScene(ListSelectionScene):
     def __init__(self, game, item, *args, **kwargs):
         self.game = game
         self.item = item
-        options = list(item.equip_slots)
-        super().__init__(options=options, *args, **kwargs)
+        self.slots = list(item.equip_slots)
+        options = []
+        for sl in self.slots:
+            option = '{slot} ({item})'.format(slot=_(sl), item=self.game.player.equipment[sl] or _('none'))
+            options.append(option)
+        super().__init__(options=options, opt_need_translation=False, *args, **kwargs)
 
     def option_activated(self):
         """ Method to wield item when option is activated (ENTER key pressed) """
-        self.game.player.perform(actions.act_equip_item, self.game.player, self.item, self.options[self.selected])
+        self.game.player.perform(actions.act_equip_item, self.game.player, self.item, self.slots[self.selected])
         super().option_activated()
 
 
