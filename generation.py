@@ -157,6 +157,7 @@ def generate_loc(loc_type, settings, width, height):
                                                    'destruct': {'passes': (1, 5),
                                                                 'destroy_tiles': 'SAND'},
                                                    'placing': {'passable'}})
+    wall_transform(loc=loc)  # transform # to box symbols
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 
@@ -448,6 +449,61 @@ def destruct(loc, start_x, start_y, width, height, settings=None):
                             break  # one entity destroyed at a time
                 if 'destroy_tiles' in settings and not destroyed:
                     loc.cells[x][y].tile = settings['destroy_tiles']  # set tile to specified destroyed tile
+
+
+def wall_transform(loc):
+    """
+    Algorithm to transform # to box characters, according to their neighbors
+    :param loc: Location object
+    :return: None 
+    """
+    for wall in [w for w in loc.entities if isinstance(w, game_logic.Prop)]:
+        # each element represents if wall is present in numpad direction 1-9
+        neighbors = [False, False, False, False, False, False, False, False, False, False]
+        if wall.char == '#':  # simple char check for now, need to make categories for props
+            x, y = wall.position
+            neighbors[5] = 1  # center is a wall
+            char = wall.char  # default
+            # determine neighbors in 2486 directions - all is needed for now
+            if loc.is_in_boundaries(x, y + 1):
+                if loc.cells[x][y + 1].is_there_a(game_logic.Prop) or\
+                        loc.cells[x][y + 1].is_there_a(game_logic.Door):
+                    neighbors[2] = True
+            if loc.is_in_boundaries(x - 1, y):
+                if loc.cells[x - 1][y].is_there_a(game_logic.Prop) or \
+                        loc.cells[x - 1][y].is_there_a(game_logic.Door):
+                    neighbors[4] = True
+            if loc.is_in_boundaries(x + 1, y):
+                if loc.cells[x + 1][y].is_there_a(game_logic.Prop) or \
+                        loc.cells[x + 1][y].is_there_a(game_logic.Door):
+                    neighbors[6] = True
+            if loc.is_in_boundaries(x, y - 1):
+                if loc.cells[x][y - 1].is_there_a(game_logic.Prop) or \
+                        loc.cells[x][y - 1].is_there_a(game_logic.Door):
+                    neighbors[8] = True
+            if neighbors[4] or neighbors[6]:
+                char = '━'
+            if neighbors[2] or neighbors[8]:
+                char = '┃'
+            if neighbors[2] and neighbors[4]:
+                char = '┓'
+            if neighbors[8] and neighbors[4]:
+                char = '┛'
+            if neighbors[8] and neighbors[6]:
+                char = '┗'
+            if neighbors[2] and neighbors[6]:
+                char = '┏'
+            if neighbors[2] and neighbors[4] and neighbors[6]:
+                char = '┳'
+            if neighbors[8] and neighbors[4] and neighbors[6]:
+                char = '┻'
+            if neighbors[8] and neighbors[6] and neighbors[2]:
+                char = '┣'
+            if neighbors[2] and neighbors[4] and neighbors[8]:
+                char = '┫'
+            if neighbors[2] and neighbors[4] and neighbors[8] and neighbors[6]:
+                char = '╋'
+            wall.char = char
 
 
 # =================================== PREFAB SECTION =======================================================
