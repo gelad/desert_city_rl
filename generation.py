@@ -157,7 +157,11 @@ def generate_loc(loc_type, settings, width, height):
                                                    'destruct': {'passes': (1, 5),
                                                                 'destroy_tiles': 'SAND'},
                                                    'placing': {'passable'}})
-    wall_transform(loc=loc)  # transform # to box symbols
+    # transform # to box symbols
+    wall_transform(loc=loc, wall_types={'wall_sandstone'},
+                   connected_types={'wall_sandstone', 'window_small_sandstone',
+                                    'window_large_sandstone', 'debris_large_sandstone',
+                                    'door_wooden'})
     loc.path_map_recompute()  # generate pathfinding map for location
     return loc  # return generated location
 
@@ -451,13 +455,17 @@ def destruct(loc, start_x, start_y, width, height, settings=None):
                     loc.cells[x][y].tile = settings['destroy_tiles']  # set tile to specified destroyed tile
 
 
-def wall_transform(loc):
+def wall_transform(loc, wall_types, connected_types=None):
     """
     Algorithm to transform # to box characters, according to their neighbors
+    :param wall_types: data_IDs of wall object, to apply transformation
+    :param connected_types: data_IDs of objects, that walls are connected to
     :param loc: Location object
     :return: None 
     """
-    for wall in [w for w in loc.entities if isinstance(w, game_logic.Prop)]:
+    if connected_types is None:
+        connected_types = wall_types
+    for wall in [w for w in loc.entities if w.data_id in wall_types]:
         # each element represents if wall is present in numpad direction 1-9
         neighbors = [False, False, False, False, False, False, False, False, False, False]
         # simple char check for now, need to make categories for props
@@ -467,21 +475,21 @@ def wall_transform(loc):
             char = wall.char  # default
             # determine neighbors in 2486 directions - all is needed for now
             if loc.is_in_boundaries(x, y + 1):
-                if loc.cells[x][y + 1].is_there_a(game_logic.Prop) or\
-                        loc.cells[x][y + 1].is_there_a(game_logic.Door):
-                    neighbors[2] = True
+                for ent in loc.cells[x][y + 1].entities:
+                    if ent.data_id in connected_types:
+                        neighbors[2] = True
             if loc.is_in_boundaries(x - 1, y):
-                if loc.cells[x - 1][y].is_there_a(game_logic.Prop) or \
-                        loc.cells[x - 1][y].is_there_a(game_logic.Door):
-                    neighbors[4] = True
+                for ent in loc.cells[x - 1][y].entities:
+                    if ent.data_id in connected_types:
+                        neighbors[4] = True
             if loc.is_in_boundaries(x + 1, y):
-                if loc.cells[x + 1][y].is_there_a(game_logic.Prop) or \
-                        loc.cells[x + 1][y].is_there_a(game_logic.Door):
-                    neighbors[6] = True
+                for ent in loc.cells[x + 1][y].entities:
+                    if ent.data_id in connected_types:
+                        neighbors[6] = True
             if loc.is_in_boundaries(x, y - 1):
-                if loc.cells[x][y - 1].is_there_a(game_logic.Prop) or \
-                        loc.cells[x][y - 1].is_there_a(game_logic.Door):
-                    neighbors[8] = True
+                for ent in loc.cells[x][y - 1].entities:
+                    if ent.data_id in connected_types:
+                        neighbors[8] = True
             if neighbors[4] or neighbors[6]:
                 char = '━'
             if neighbors[2] or neighbors[8]:
