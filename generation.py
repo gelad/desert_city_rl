@@ -460,9 +460,10 @@ def wall_transform(loc):
     for wall in [w for w in loc.entities if isinstance(w, game_logic.Prop)]:
         # each element represents if wall is present in numpad direction 1-9
         neighbors = [False, False, False, False, False, False, False, False, False, False]
-        if wall.char == '#':  # simple char check for now, need to make categories for props
+        # simple char check for now, need to make categories for props
+        if wall.char in {'#', '━', '┃', '┓', '┛', '┗', '┏', '┳', chr(9527), '┣', '┫', '╋'}:
             x, y = wall.position
-            neighbors[5] = 1  # center is a wall
+            neighbors[5] = True  # center is a wall
             char = wall.char  # default
             # determine neighbors in 2486 directions - all is needed for now
             if loc.is_in_boundaries(x, y + 1):
@@ -496,7 +497,7 @@ def wall_transform(loc):
             if neighbors[2] and neighbors[4] and neighbors[6]:
                 char = '┳'
             if neighbors[8] and neighbors[4] and neighbors[6]:
-                char = '┻'
+                char = chr(9527)  # some kind of weird bug, maybe in font.
             if neighbors[8] and neighbors[6] and neighbors[2]:
                 char = '┣'
             if neighbors[2] and neighbors[4] and neighbors[8]:

@@ -2041,6 +2041,10 @@ class DebugLineInputScene(UIScene):
         elif text == 'numscene':
             director.push_scene(NumberInputScene(num_range=(0, 10), num_start=1, title='Num', callback=lambda n: print(n)))
             return
+        elif 'player_char=' in text:
+            print(str(int(text[12:])))
+            self.game.player.char = chr(int(text[12:]))
+            return
         commands.command_execute_debug_line(line=text, game=self.game)
 
 
