@@ -111,7 +111,8 @@ class Ability(events.Observer):
             self.message_color = [255, 255, 255]
         else:
             self.message_color = message_color  # if ability shows any messages - they use this color
-        self.reobserve()
+        if self.owner:
+            self.reobserve()
 
     def reobserve(self):
         """ Method that registers Ability to observe events """
@@ -123,7 +124,8 @@ class Ability(events.Observer):
 
     def set_owner(self, owner):
         """ Method to set owner and refresh observer """
-        self.close()  # unregister observing old owner
+        if self.owner:
+            self.close()  # unregister observing old owner
         try:  # if ability belongs to an item - check owner of item
             if owner.owner:  # if item is equipped or in inventory - set owning Entity
                 self.owner = owner.owner
@@ -392,6 +394,32 @@ class Ability(events.Observer):
                     eff_name=_(reaction['effect'].eff).lower()),
                 level='PLAYER', color=self.message_color)
         return {'success': True}  # PLACEHOLDER applying periodic damage is always successiful now
+
+
+class AbilityTemplate:
+    """ A class intended to be stored in JSON and generate an Ability object """
+    def __init__(self, stored_class_name, init_kwargs=None):
+        """
+        :param stored_class_name: a name of class stored in this template
+        :param init_kwargs: a dict with arguments to pass to __init__ method of newly created class
+        """
+        self.stored_class_name = stored_class_name
+        if init_kwargs:
+            self.init_kwargs = init_kwargs
+        else:
+            self.init_kwargs = {}
+
+    def get_stored_object(self):
+        """
+        Method to get new object of stored class
+        :return: object of stored class 
+        """
+        if self.stored_class_name in globals():
+            new_ability = globals()[self.stored_class_name](**self.init_kwargs)
+            return new_ability
+        else:
+            raise RuntimeError('There are no such class in abilities module: ' + self.stored_class_name)
+
 
 # ============================== UTILITY FUNCTIONS ===========================================
 

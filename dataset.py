@@ -172,9 +172,17 @@ def initialize():
     cond1 = abilities.Condition('MOVED_ON')
     cond2 = abilities.Condition('MOVER_IS_A_BE')
     react = {'type': 'deal_damage', 'target': 'mover', 'damage': (1, 3), 'dmg_type': 'acid'}
-    abil = abilities.Ability(name='Corrosive acid', owner=data_set['trap_corrosive_moss'],
-                             trigger='entity_moved', conditions=[cond1, ' and ', cond2], reactions=[react],
-                             message_color=[100, 220, 100])
+    a_t = abilities.AbilityTemplate(stored_class_name='Ability',
+                                    init_kwargs={'name': 'Corrosive acid',
+                                                 'owner': None,
+                                                 'trigger': 'entity_moved',
+                                                 'conditions': [cond1, ' and ', cond2],
+                                                 'reactions': [react],
+                                                 'message_color': [100, 220, 100]})
+    f = open("data/test_ability.json", 'w')
+    f.write(jsonpickle.dumps(a_t))
+    f.close()
+    abil = a_t.get_stored_object()
     data_set['trap_corrosive_moss'].add_ability(abil)
 
     data_set['door_wooden'] = game_logic.Door(name='Door', data_id='door_wooden', description='A wooden door.',
@@ -997,9 +1005,6 @@ def initialize():
     data_set['mob_iron_golem'].effects.append(effects.Effect('BLOCK_PIERCING', 10))
 
     events.Observer.clear()  # remove events made during init of Entities - A HACK
-    f = open("data/test_entity.json", 'w')
-    f.write(jsonpickle.dumps(data_set['mob_sand_golem']))
-    f.close()
 
 
 def get_entity(data_id):
