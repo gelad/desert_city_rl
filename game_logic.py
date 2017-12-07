@@ -125,7 +125,8 @@ class Entity:
     """
 
     def __init__(self, name='', data_id='', description='', char=' ', color=None, location=None, position=None,
-                 weight=0, pass_cost=1, occupies_tile=False, blocks_los=False, blocks_shots=0):
+                 weight=0, pass_cost=1, occupies_tile=False, blocks_los=False, blocks_shots=0, categories=None,
+                 properties=None):
         self.name = name  # entity name
         self.data_id = data_id  # id in Entity data(base)
         self._description = description  # entity's description
@@ -139,6 +140,30 @@ class Entity:
         self.char = char  # char that represents entity in graphics ('@')
         self.color = color  # entity char color
         self.effects = []  # entity effects
+        if categories:
+            self.categories = categories  # categories - a potion, a sword, etc
+        else:
+            self.categories = set()
+        if properties:
+            self.properties = properties  # properties - armor values, accuracy for weapons, etc
+        else:
+            self.properties = {}
+
+    def __getattr__(self, item):
+        """ Search for missing attributes in properties """
+        if item == 'properties':  # to prevent recursion
+            return super().__getattribute__(item)
+        if item in self.properties:
+            return self.properties[item]
+        raise AttributeError()
+
+    def __setattr__(self, key, value):
+        """ Search for missing attributes in properties """
+        if 'properties' in self.__dict__:
+            if key in self.properties:
+                self.properties[key] = value
+                return
+        return super().__setattr__(key, value)
 
     @property
     def description(self):
@@ -1122,16 +1147,9 @@ class Item(Abilities, Entity):
                  equip_slots=None, categories=None, properties=None):
         # calling constructors
         Entity.__init__(self, name=name, data_id=data_id, description=description, weight=weight, pass_cost=pass_cost,
-                        char=char, color=color, occupies_tile=False, blocks_shots=0)
+                        char=char, color=color, occupies_tile=False, blocks_shots=0, categories=categories,
+                        properties=properties)
         self.owner = None  # owner of item - entity with inventory
-        if categories:
-            self.categories = categories  # item categories - a potion, a sword, etc
-        else:
-            self.categories = set()
-        if properties:
-            self.properties = properties  # item properties - armor values, accuracy for weapons, etc
-        else:
-            self.properties = {}
         if equip_slots:  # equipment slots, in which item can be placed
             self.equip_slots = equip_slots
         else:  # by default - can be taken to hands
@@ -1384,7 +1402,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                  armor=None, resist=None, corpse='', equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
-                        weight=weight, pass_cost=1, occupies_tile=True, blocks_shots=1)
+                        weight=weight, pass_cost=1, occupies_tile=True, blocks_shots=1, properties=properties,
+                        categories=categories)
         BattleEntity.__init__(self, hp=hp, armor=armor, resist=resist, corpse=corpse)
         if ai:  # set AI owner
             ai.owner = self
@@ -1395,14 +1414,6 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         Abilities.__init__(self)
         self.damage = damage  # damage from basic melee 'punch in da face' attack
         self.dmg_type = dmg_type  # damage type of basic attack
-        if categories:
-            self.categories = categories  # monster categories - living, undead, magical etc
-        else:
-            self.categories = set()
-        if properties:
-            self.properties = properties  # monster properties - stats, etc
-        else:
-            self.properties = {}
 
     @property
     def weight(self):
@@ -1720,10 +1731,10 @@ class Prop(BattleEntity, Abilities, Entity):
     """
 
     def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0, blocks_shots=1,
-                 occupies_tile=True, pass_cost=1, armor=None, corpse='no corpse'):
+                 occupies_tile=True, pass_cost=1, armor=None, corpse='no corpse', categories=None, properties=None):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
                         occupies_tile=occupies_tile, blocks_los=blocks_los, blocks_shots=blocks_shots,
-                        weight=weight, pass_cost=pass_cost)
+                        weight=weight, pass_cost=pass_cost, categories=categories, properties=properties)
         BattleEntity.__init__(self, hp, armor=armor, corpse=corpse)
         Abilities.__init__(self)
 
@@ -1742,7 +1753,7 @@ class Door(BattleEntity, Entity):
     """
 
     def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, armor=None, pass_cost=1,
-                 is_closed=True, corpse='no corpse'):
+                 is_closed=True, corpse='no corpse', categories=None, properties=None):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open
@@ -1755,7 +1766,7 @@ class Door(BattleEntity, Entity):
         self.__set_char()  # set current char for drawing purposes
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=self.char, color=color,
                         occupies_tile=self.is_closed, blocks_los=blocks_los, blocks_shots=blocks_shots,
-                        weight=weight, pass_cost=pass_cost)
+                        weight=weight, pass_cost=pass_cost, categories=categories, properties=properties)
         BattleEntity.__init__(self, hp, armor=armor, corpse=corpse)
 
     def __set_char(self):

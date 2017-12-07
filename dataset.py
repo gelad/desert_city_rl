@@ -14,6 +14,7 @@ import jsonpickle
 
 data_set = {}  # a dict containing all entity templates by string ID's
 tile_set = {}  # a dict that contains tile info
+ability_set = {}  # a dict containing Abilities
 
 
 def initialize():
@@ -996,6 +997,9 @@ def initialize():
     data_set['mob_iron_golem'].effects.append(effects.Effect('BLOCK_PIERCING', 10))
 
     events.Observer.clear()  # remove events made during init of Entities - A HACK
+    f = open("data/test_entity.json", 'w')
+    f.write(jsonpickle.dumps(data_set['mob_sand_golem']))
+    f.close()
 
 
 def get_entity(data_id):

@@ -9,6 +9,7 @@ from messages import _  # translation function
 
 import random
 import threading
+import sys
 
 from clubsandwich.ui import LayoutOptions
 from bearlibterminal import terminal
@@ -293,11 +294,12 @@ def command_execute_debug_line(line, game):
         x = game.player.position[0]
         y = game.player.position[1]
     try:
-        eval(line, globals(), locals())
+        exec(line, globals(), locals())
     except:
         game_logic.Game.add_message(message=_('Failed to execute line: {line}').format(line=line).capitalize(),
                                     level='DEBUG', color=[255, 0, 0])
-        print('WARNING! Failed to execute debug line: ' + line)
+        e = sys.exc_info()[0]
+        print('WARNING! Failed to execute debug line: ' + line + '\n' + str(e))
 
 
 def command_ask_leave_loc(game):
