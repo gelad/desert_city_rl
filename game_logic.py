@@ -527,6 +527,12 @@ class Abilities(Entity):
         ability.set_owner(self)  # set owner of ability
         self.abilities.append(ability)  # add it to list
 
+    def abilities_owner_update(self):
+        """ Updates abilities owner """
+        for abil in self.abilities:
+            if abil.owner != self:
+                abil.set_owner(self)
+
     def abilities_reobserve(self):
         """ A method that reobserves abilities """
         for abil in self.abilities:
@@ -614,6 +620,8 @@ class Inventory(Entity):
                 orig_item = item
                 item = copy.copy(item)  # create a copy of item with quantity 1
                 item.charges = 1
+                item.abilities_owner_update()
+                item.abilities_reobserve()
                 orig_item.decrease()
         else:
             if isinstance(self, Equipment):
@@ -623,7 +631,6 @@ class Inventory(Entity):
             thrown_speed = item.properties['thrown_speed']
         else:
             thrown_speed = 5  # 5 - default thrown speed
-        # TODO: may need further refactoring - entity reobserves 2 times
         throw = UnguidedThrown(thrower=self, thrown=item, power=power, speed=thrown_speed, target=target)
         self.location.reg_entity(throw)  # register throw entity to location
         throw.launch(self.position[0], self.position[1])  # launch thrown from thrower position
@@ -655,7 +662,7 @@ class Equipment(Entity):
     def equip_item(self, item, slot):
         """ Method for equipping items """
         if self.equipment[slot]:
-            self.add_item(self.equipment[slot])  # add old item to inventory
+            self.unequip_item(self.equipment[slot])
         if item in self.inventory:  # if item is in inventory - remove it
             self.discard_item(item)
         item.owner = self  # set item owner
@@ -1010,7 +1017,17 @@ class UnguidedProjectileAI(AI):
 
     def _hit(self, something):
         """ Method called when projectile hit something """
-        events.Event(self.owner, {'type': 'projectile_hit', 'target': something, 'attacker': self.owner.launcher})
+        own = self.owner
+        try:
+            own = self.owner.thrown
+        except AttributeError:
+            pass
+        try:
+            own = self.owner.ammo
+        except AttributeError:
+            pass
+        events.Event(own, {'type': 'projectile_hit', 'target': something,
+                           'attacker': self.owner.launcher})
         self.state = 'stopped'
         self.owner.dead = True
         self.owner.location.dead.append(self.owner)  # add to dead list, waiting for removal
@@ -1680,6 +1697,7 @@ class UnguidedThrown(UnguidedProjectile):
     def launch(self, origin_x, origin_y):
         """ Method that launches a projectile from (origin_x, origin_y) to target """
         self.abilities = pickle.loads(pickle.dumps(self.thrown.abilities))  # copy abilities from thrown to projectile
+
         super(UnguidedThrown, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
 
 

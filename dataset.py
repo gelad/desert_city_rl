@@ -175,14 +175,10 @@ def initialize():
     a_t = abilities.AbilityTemplate(data_id='corrosive_acid',
                                     stored_class_name='Ability',
                                     init_kwargs={'name': 'Corrosive acid',
-                                                 'owner': None,
                                                  'trigger': 'entity_moved',
                                                  'conditions': [cond1, ' and ', cond2],
                                                  'reactions': [react],
                                                  'message_color': [100, 220, 100]})
-    f = open("data/test_ability.json", 'w')
-    f.write(jsonpickle.dumps(a_t))
-    f.close()
     ability_set[a_t.data_id] = a_t
     abil = a_t.get_stored_object()
     data_set['trap_corrosive_moss'].add_ability(abil)
@@ -271,9 +267,9 @@ def initialize():
     react = {'type': 'apply_timed_effect', 'target': 'default', 'time': 1000, 'effect': effects.Effect('HASTE', 50)}
     a_t = abilities.AbilityTemplate(data_id='haste',
                                     stored_class_name='Ability',
-                                    init_kwargs={'name': 'Haste', 'owner': None,
-                                        'trigger': 'used_on_self', 'conditions': [cond], 'reactions': [react],
-                                        'message_color': [255, 215, 0]})
+                                    init_kwargs={'name': 'Haste', 'trigger': 'used_on_self',
+                                                 'conditions': [cond], 'reactions': [react],
+                                                    'message_color': [255, 215, 0]})
     ability_set[a_t.data_id] = a_t
     abil = a_t.get_stored_object()
     data_set['item_haste_potion'].add_ability(abil)
@@ -292,9 +288,9 @@ def initialize():
               'effect': effects.Effect('RESIST_POISON', 500)}
     a_t = abilities.AbilityTemplate(data_id='antidote',
                                     stored_class_name='Ability',
-                                    init_kwargs={'name': 'Antidote', 'owner': None,
-                                        'trigger': 'used_on_self', 'conditions': [cond], 'reactions': [react1, react2],
-                                        'message_color': [0, 150, 0]})
+                                    init_kwargs={'name': 'Antidote', 'trigger': 'used_on_self',
+                                                 'conditions': [cond], 'reactions': [react1, react2],
+                                                    'message_color': [0, 150, 0]})
     ability_set[a_t.data_id] = a_t
     abil = a_t.get_stored_object()
     data_set['item_antidote_potion'].add_ability(abil)
@@ -308,9 +304,13 @@ def initialize():
                                                                charges=1, destroyed_after_use=True, weight=0.1)
     cond = abilities.Condition('USED')
     react = {'type': 'deal_damage', 'target': 'default', 'damage': (10, 30), 'dmg_type': 'lightning'}
-    abil = abilities.Ability(name='Lightning', owner=data_set['item_lightning_scroll'],
-                             trigger='used_on_target', conditions=[cond], reactions=[react],
-                             message_color=[255, 215, 0])
+    a_t = abilities.AbilityTemplate(data_id='lightning',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Lightning',
+                                            'trigger': 'used_on_target', 'conditions': [cond], 'reactions': [react],
+                                            'message_color': [255, 215, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_lightning_scroll'].add_ability(abil)
 
     data_set['item_firebolt_scroll'] = game_logic.ItemCharges(name='scroll of Firebolt',
@@ -330,14 +330,24 @@ def initialize():
                                          description='An arrow of pure flame.', char='*', color=[255, 0, 0])
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (3, 6), 'dmg_type': 'fire'}
-    abil = abilities.Ability(name='Ignite', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 0, 0])
+    a_t = abilities.AbilityTemplate(data_id='ignite',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Ignite', 'trigger': 'projectile_hit',
+                                    'conditions': [], 'reactions': [react],
+                                        'message_color': [255, 0, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     proj.add_ability(abil)
+    data_set['proj_firebolt'] = proj
     # === end of projectile
-    react = {'type': 'launch_projectile', 'target': 'default',  'projectile': proj}
-    abil = abilities.Ability(name='Firebolt', owner=data_set['item_firebolt_scroll'],
-                             trigger='used_on_target', conditions=[cond], reactions=[react],
-                             message_color=[255, 0, 0])
+    react = {'type': 'launch_projectile', 'target': 'default',  'projectile': 'proj_firebolt'}
+    a_t = abilities.AbilityTemplate(data_id='firebolt',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Firebolt',
+                                                'trigger': 'used_on_target', 'conditions': [cond], 'reactions': [react],
+                                                'message_color': [255, 0, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_firebolt_scroll'].add_ability(abil)
 
     data_set['item_frostbolt_scroll'] = game_logic.ItemCharges(name='scroll of Frostbolt',
@@ -357,14 +367,25 @@ def initialize():
                                          description='An arrow of freezing energy.', char='*', color=[100, 100, 255])
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (3, 6), 'dmg_type': 'cold'}
-    abil = abilities.Ability(name='Freeze', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[100, 100, 255])
+    a_t = abilities.AbilityTemplate(data_id='freeze',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Freeze', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [100, 100, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     proj.add_ability(abil)
+    data_set['proj_frostbolt'] = proj
     # === end of projectile
-    react = {'type': 'launch_projectile', 'target': 'default', 'projectile': proj}
-    abil = abilities.Ability(name='Frostbolt', owner=data_set['item_frostbolt_scroll'],
-                             trigger='used_on_target', conditions=[cond], reactions=[react],
-                             message_color=[100, 100, 255])
+    react = {'type': 'launch_projectile', 'target': 'default', 'projectile': 'proj_frostbolt'}
+    a_t = abilities.AbilityTemplate(data_id='frostbolt',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Frostbolt',
+                                                 'trigger': 'used_on_target', 'conditions': [cond],
+                                                 'reactions': [react],
+                                                 'message_color': [100, 100, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_frostbolt_scroll'].add_ability(abil)
 
     data_set['item_healing_potion'] = game_logic.ItemCharges(name='healing potion', data_id='item_healing_potion',
@@ -376,9 +397,13 @@ def initialize():
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
     react = {'type': 'heal', 'target': 'default', 'heal': 5}
-    abil = abilities.Ability(name='Heal', owner=data_set['item_healing_potion'],
-                             trigger='used_on_self', conditions=[cond], reactions=[react],
-                             message_color=[0, 255, 0])
+    a_t = abilities.AbilityTemplate(data_id='heal_potion',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Heal', 'trigger': 'used_on_self',
+                                                 'conditions': [cond], 'reactions': [react],
+                                                    'message_color': [0, 255, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_healing_potion'].add_ability(abil)
 
     data_set['item_barbed_loincloth'] = game_logic.Item(name='barbed loincloth', data_id='item_barbed_loincloth',
@@ -388,9 +413,13 @@ def initialize():
     cond = abilities.Condition('EQUIPPED')
     react = {'type': 'deal_damage', 'target': 'default', 'strike_type': 'melee',
              'damage': 1, 'dmg_type': 'piercing'}
-    abil = abilities.Ability(name='Barbs', owner=data_set['item_barbed_loincloth'],
-                             trigger='damaged', conditions=[cond], reactions=[react],
-                             message_color=[200, 0, 100])
+    a_t = abilities.AbilityTemplate(data_id='barbs',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Barbs', 'trigger': 'damaged',
+                                                 'conditions': [cond], 'reactions': [react],
+                                                    'message_color': [200, 0, 100]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_barbed_loincloth'].add_ability(abil)
 
     data_set['item_ring_poison_res'] = game_logic.Item(name='ring of poison resistance', data_id='item_ring_poison_res',
@@ -662,9 +691,13 @@ def initialize():
     react = {'type': 'deal_periodic_damage', 'target': 'default', 'damage': (0, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 5000,
              'stackable': False}
-    abil = abilities.Ability(name='Poisoned arrow', owner=data_set['item_poisoned_arrow'],
-                             trigger='shot_hit', conditions=[cond1, ' and ', cond2], reactions=[react],
-                             message_color=[0, 150, 0])
+    a_t = abilities.AbilityTemplate(data_id='poison_arrow',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Poisoned arrow', 'trigger': 'shot_hit',
+                                                 'conditions': [cond1, ' and ', cond2], 'reactions': [react],
+                                                 'message_color': [0, 150, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_poisoned_arrow'].add_ability(abil)
 
     data_set['item_frost_arrow'] = game_logic.ItemCharges(name='frost arrow',
@@ -679,9 +712,13 @@ def initialize():
     cond1 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
     react = {'type': 'apply_timed_effect', 'target': 'projectile_hit_entity', 'time': 1000,
              'effect': effects.Effect('SLOWED', 200)}
-    abil = abilities.Ability(name='Frost arrow', owner=data_set['item_frost_arrow'],
-                             trigger='shot_hit', conditions=[cond1], reactions=[react],
-                             message_color=[100, 100, 255])
+    a_t = abilities.AbilityTemplate(data_id='frost_arrow',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Frost arrow', 'trigger': 'shot_hit',
+                                                 'conditions': [cond1], 'reactions': [react],
+                                                 'message_color': [100, 100, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_frost_arrow'].add_ability(abil)
 
     data_set['item_explosive_bolt'] = game_logic.ItemCharges(name='explosive bolt',
@@ -697,9 +734,12 @@ def initialize():
               'target': 'projectile_hit_entity', 'strike_type': 'projectile',
               'damage': (7, 15), 'dmg_type': 'bashing'}
     react2 = {'type': 'kill_entity', 'target': 'ammo'}
-    abil = abilities.Ability(name='BOOM!', owner=data_set['item_explosive_bolt'],
-                             trigger='projectile_hit', conditions=[], reactions=[react1, react2],
-                             message_color=[255, 127, 80])
+    a_t = abilities.AbilityTemplate(data_id='bolt_explosion',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'BOOM!', 'trigger': 'projectile_hit', 'conditions': [],
+                                                 'reactions': [react1, react2], 'message_color': [255, 127, 80]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_explosive_bolt'].add_ability(abil)
 
     data_set['item_throwing_knife'] = game_logic.ItemCharges(name='throwing knife',
@@ -715,9 +755,13 @@ def initialize():
                                                              charges=1, destroyed_after_use=True, weight=0.2)
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 3), 'dmg_type': 'piercing'}
-    abil = abilities.Ability(name='Shank', owner=data_set['item_throwing_knife'],
-                             trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 255, 255])
+    a_t = abilities.AbilityTemplate(data_id='throwing_knife_hit',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Shank', 'trigger': 'projectile_hit', 'conditions': [],
+                                                 'reactions': [react],
+                                                 'message_color': [255, 255, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_throwing_knife'].add_ability(abil)
 
     data_set['item_venom_sac'] = game_logic.ItemCharges(name='venom sac',
@@ -734,9 +778,13 @@ def initialize():
     cond = abilities.Condition('TARGET_IS_CATEGORY', category='living')
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 3), 'dmg_type': 'poison'}
-    abil = abilities.Ability(name='Splash!', owner=data_set['item_venom_sac'],
-                             trigger='projectile_hit', conditions=[cond], reactions=[react],
-                             message_color=[0, 150, 0])
+    a_t = abilities.AbilityTemplate(data_id='venom_sac_hit',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Splash!', 'trigger': 'projectile_hit',
+                                                 'conditions': [cond], 'reactions': [react],
+                                                 'message_color': [0, 150, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_venom_sac'].add_ability(abil)
 
     data_set['item_sparkling_dust'] = game_logic.ItemCharges(name='sparkling dust',
@@ -752,9 +800,13 @@ def initialize():
                                                         charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 3), 'dmg_type': 'lightning'}
-    abil = abilities.Ability(name='Zap!', owner=data_set['item_sparkling_dust'],
-                             trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 215, 0])
+    a_t = abilities.AbilityTemplate(data_id='sparkling_dust_hit',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Zap!', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [255, 215, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_sparkling_dust'].add_ability(abil)
 
     data_set['item_hot_ash'] = game_logic.ItemCharges(name='hot ash',
@@ -770,9 +822,13 @@ def initialize():
                                                       charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 3), 'dmg_type': 'fire'}
-    abil = abilities.Ability(name='Ignite', owner=data_set['item_hot_ash'],
-                             trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 215, 0])
+    a_t = abilities.AbilityTemplate(data_id='hot_ash_hit',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Ignite', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [255, 215, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_hot_ash'].add_ability(abil)
 
     data_set['item_magic_snow'] = game_logic.ItemCharges(name='magic snow',
@@ -788,9 +844,13 @@ def initialize():
                                                       charges=1, destroyed_after_use=True, weight=0.1)
     react = {'type': 'deal_damage', 'chance': 70, 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 3), 'dmg_type': 'cold'}
-    abil = abilities.Ability(name='Freeze', owner=data_set['item_magic_snow'],
-                             trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[100, 100, 205])
+    a_t = abilities.AbilityTemplate(data_id='magic_snow_hit',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Freeze', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [100, 100, 205]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_magic_snow'].add_ability(abil)
 
     data_set['item_explosive_potion'] = game_logic.ItemCharges(name='explosive potion',
@@ -804,14 +864,17 @@ def initialize():
                                                                            'value': 160},
                                                                char="!", color=[255, 127, 80],
                                                                charges=1, destroyed_after_use=True, weight=0.5)
-    # cond_aoe = abilities.Condition('TARGET_IS_CATEGORY', category='living')  if needed add 'aoe_conditions': [cond_aoe],
     react1 = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 2.5, 'include_center': True,
               'target': 'projectile_hit_entity', 'strike_type': 'projectile',
               'damage': (7, 15), 'dmg_type': 'bashing'}
     react2 = {'type': 'kill_entity', 'target': 'thrown'}
-    abil = abilities.Ability(name='BOOM!', owner=data_set['item_explosive_potion'],
-                             trigger='projectile_hit', conditions=[], reactions=[react1, react2],
-                             message_color=[255, 127, 80])
+    a_t = abilities.AbilityTemplate(data_id='potion_explosion',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'BOOM!', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react1, react2],
+                                                 'message_color': [255, 127, 80]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_explosive_potion'].add_ability(abil)
 
     data_set['item_javelin'] = game_logic.ItemCharges(name='javelin',
@@ -826,9 +889,13 @@ def initialize():
                                                       charges=1, destroyed_after_use=True, weight=1.5)
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (2, 8), 'dmg_type': 'piercing'}
-    abil = abilities.Ability(name='Pierce', owner=data_set['item_javelin'],
-                             trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 255, 255])
+    a_t = abilities.AbilityTemplate(data_id='javelin_hit',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Pierce', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [255, 255, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_javelin'].add_ability(abil)
 
     # ==================================== MONSTERS ============================================================
@@ -854,9 +921,13 @@ def initialize():
     react = {'type': 'deal_periodic_damage', 'chance': 50, 'target': 'default', 'damage': (1, 2),
              'dmg_type': 'poison', 'effect': effects.Effect('POISONED', 1), 'period': 1000, 'whole_time': 10000,
              'stackable': False}
-    abil = abilities.Ability(name='Poisonous stinger', owner=data_set['mob_scorpion'],
-                             trigger='hit_basic_attack', conditions=[cond1, ' and ', cond2], reactions=[react],
-                             message_color=[0, 150, 0])
+    a_t = abilities.AbilityTemplate(data_id='scorpion_sting',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Poisonous stinger', 'trigger': 'hit_basic_attack',
+                                                 'conditions': [cond1, ' and ', cond2], 'reactions': [react],
+                                                 'message_color': [0, 150, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['mob_scorpion'].add_ability(abil)
 
     data_set['mob_rakshasa'] = game_logic.Fighter(name='Rakshasa', data_id='mob_rakshasa',
@@ -877,9 +948,13 @@ def initialize():
     data_set['mob_ifrit'].effects.append(effects.Effect('BLOCK_FIRE', 100))
     react = {'type': 'deal_damage', 'target': 'default', 'strike_type': 'melee',
              'damage': (3, 6), 'dmg_type': 'fire'}
-    abil = abilities.Ability(name='Flaming fists', owner=data_set['mob_ifrit'], cooldown=500,
-                             trigger='hit_basic_attack', conditions=[], reactions=[react],
-                             message_color=[255, 50, 0])
+    a_t = abilities.AbilityTemplate(data_id='flaming_fists',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Flaming fists', 'cooldown': 500,
+                                                 'trigger': 'hit_basic_attack', 'conditions': [], 'reactions': [react],
+                                                 'message_color': [255, 50, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['mob_ifrit'].add_ability(abil)
     # === projectile
     proj = game_logic.UnguidedProjectile(launcher=None, speed=20, power=15, target=None, name='fireball',
@@ -887,17 +962,26 @@ def initialize():
     react = {'type': 'deal_damage_aoe', 'aoe': 'circle', 'radius': 2, 'include_center': True,
              'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (1, 5), 'dmg_type': 'fire'}
-    abil = abilities.Ability(name='Fireball!', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 0, 0])
+    a_t = abilities.AbilityTemplate(data_id='fireball_hit',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Fireball!', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [255, 0, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     proj.add_ability(abil)
+    data_set['proj_fireball'] = proj
     # === end of projectile
-
-    react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile', 'projectile': proj}
+    react = {'type': 'launch_projectile', 'target': 'default', 'projectile': 'proj_firebolt'}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
-    abil = abilities.Ability(name='Firebolt', owner=data_set['mob_ifrit'], cooldown=1000,
-                             trigger='ability_used', conditions=[], reactions=[react], ai_info=ai_info,
-                             message_color=[255, 50, 0])
+    a_t = abilities.AbilityTemplate(data_id='fireball',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Firebolt', 'cooldown': 1000, 'trigger': 'ability_used',
+                                                 'conditions': [], 'reactions': [react], 'ai_info': ai_info,
+                                                 'message_color': [255, 50, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['mob_ifrit'].add_ability(abil)
 
     data_set['mob_lightning_wisp'] = game_logic.Fighter(name='Lightning wisp', data_id='mob_lightning_wisp',
@@ -916,9 +1000,13 @@ def initialize():
     react = {'type': 'deal_damage', 'target': 'default', 'damage': (2, 4), 'dmg_type': 'lightning'}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '8', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
-    abil = abilities.Ability(name='Zap', owner=data_set['mob_lightning_wisp'], cooldown=300,
-                             trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
-                             message_color=[255, 215, 0])
+    a_t = abilities.AbilityTemplate(data_id='wisp_zap',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Zap', 'cooldown': 300, 'trigger': 'ability_used',
+                                                 'conditions': [cond], 'reactions': [react], 'ai_info': ai_info,
+                                                 'message_color': [255, 215, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['mob_lightning_wisp'].add_ability(abil)
 
     data_set['mob_flame_wisp'] = game_logic.Fighter(name='Flame wisp', data_id='mob_flame_wisp',
@@ -940,16 +1028,28 @@ def initialize():
                                          description='An arrow of pure flame.', char='*', color=[255, 0, 0])
     react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
              'damage': (2, 5), 'dmg_type': 'fire'}
-    abil = abilities.Ability(name='Ignite', owner=proj, trigger='projectile_hit', conditions=[], reactions=[react],
-                             message_color=[255, 0, 0])
+    a_t = abilities.AbilityTemplate(data_id='wisp_ignite',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Ignite', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [255, 0, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     proj.add_ability(abil)
+    data_set['proj_wisp_firebolt'] = proj
     # === end of projectile
-    react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile', 'projectile': proj}
+    react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile',
+             'projectile': 'proj_wisp_firebolt'}
     ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
                'whole_time': 100, 'use_offset': 0.5}
-    abil = abilities.Ability(name='Firebolt', owner=data_set['mob_flame_wisp'], cooldown=300,
-                             trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
-                             message_color=[255, 0, 0])
+    a_t = abilities.AbilityTemplate(data_id='wisp_firebolt',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Firebolt', 'cooldown': 300, 'trigger': 'ability_used',
+                                                 'conditions': [cond], 'reactions': [react], 'ai_info': ai_info,
+                                                 'message_color': [255, 0, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
+    proj.add_ability(abil)
     data_set['mob_flame_wisp'].add_ability(abil)
 
     data_set['mob_frost_wisp'] = game_logic.Fighter(name='Frost wisp', data_id='mob_frost_wisp',
@@ -990,6 +1090,49 @@ def initialize():
     abil = abilities.Ability(name='Frostbolt', owner=data_set['mob_frost_wisp'], cooldown=300,
                              trigger='ability_used', conditions=[cond], reactions=[react], ai_info=ai_info,
                              message_color=[100, 100, 255])
+    #########################################################
+    cond = abilities.Condition('TARGET_IN_RANGE')
+    # === projectile
+    proj = game_logic.UnguidedProjectile(launcher=None, speed=30, power=15, target=None, name='frostbolt',
+                                         description='An arrow of pure frost.', char='*', color=[0, 0, 255])
+    react = {'type': 'deal_damage', 'target': 'projectile_hit_entity', 'strike_type': 'projectile',
+             'damage': (2, 5), 'dmg_type': 'cold'}
+    a_t = abilities.AbilityTemplate(data_id='wisp_freeze',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Freeze', 'trigger': 'projectile_hit',
+                                                 'conditions': [], 'reactions': [react],
+                                                 'message_color': [0, 0, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil1 = a_t.get_stored_object()
+    cond_chill1 = abilities.Condition('ABILITY_NAME_IS', name='Freeze')
+    cond_chill2 = abilities.Condition('DEALT_DAMAGE', sign='>', number='0')
+
+    react2 = {'type': 'apply_timed_effect', 'target': 'projectile_hit_entity', 'time': 500,
+              'effect': effects.Effect('SLOWED', 150)}
+    a_t = abilities.AbilityTemplate(data_id='wisp_chill',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Chill', 'trigger': 'ability_fired',
+                                                 'conditions': [cond_chill1, ' and ', cond_chill2],
+                                                 'reactions': [react2], 'message_color': [100, 100, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil2 = a_t.get_stored_object()
+    proj.add_ability(abil1)
+    proj.add_ability(abil2)
+    data_set['proj_wisp_frostbolt'] = proj
+    # === end of projectile
+    react = {'type': 'launch_projectile', 'target': 'default', 'strike_type': 'projectile',
+             'projectile': 'proj_wisp_frostbolt'}
+    ai_info = {'type': 'ranged_attack', 'target': 'player', 'range': '10', 'priority': '1',
+               'whole_time': 100, 'use_offset': 0.5}
+    a_t = abilities.AbilityTemplate(data_id='wisp_frostbolt',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Frostbolt', 'cooldown': 300, 'trigger': 'ability_used',
+                                                 'conditions': [cond], 'reactions': [react], 'ai_info': ai_info,
+                                                 'message_color': [0, 0, 255]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
+    proj.add_ability(abil)
+    #########################################################
     data_set['mob_frost_wisp'].add_ability(abil)
 
     data_set['mob_sand_golem'] = game_logic.Fighter(name='Sand golem', data_id='mob_sand_golem', char='G',

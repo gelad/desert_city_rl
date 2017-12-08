@@ -3,6 +3,7 @@
 """
 import game_logic
 import events
+import dataset
 
 from messages import _  # translation function
 
@@ -128,7 +129,7 @@ def act_launch_projectile(action, register_call, projectile_type, launcher, targ
         pass  # nothing to do on action registration
     else:  # part that is executed when action fires
         if launcher and projectile_type:  # if all participants still exist
-            projectile = pickle.loads(pickle.dumps(projectile_type))  # pickle create new projectile copy
+            projectile = dataset.get_entity(projectile_type)  # create new projectile copy
             projectile.launcher = launcher  # set launcher
             projectile.ai.owner = projectile  # set projectile ai component owner
             projectile.target = target  # set projectile target

@@ -89,7 +89,7 @@ class Condition:
 class Ability(events.Observer):
     """ Base class for Ability object """
 
-    def __init__(self, owner, trigger, reactions, conditions=None, enabled=True, cooldown=0, name='', ability_id='',
+    def __init__(self, trigger, reactions, owner=None, conditions=None, enabled=True, cooldown=0, name='', ability_id='',
                  description='', message_color=None, ai_info=None):
         self._owner = owner
         self.enabled = enabled  # is ability enabled or not
@@ -125,6 +125,8 @@ class Ability(events.Observer):
         """ Method that registers Ability to observe events """
         events.Observer.__init__(self)  # register self as observer
         self.observe(self.owner, self.on_event)
+        if self.owner != self._owner:
+            self.observe(self._owner, self.on_event)
         if self.owner.location:
             self.observe(self.owner.location, self.on_event)
         self.observe('time', self.on_event)
@@ -296,9 +298,9 @@ class Ability(events.Observer):
         # if there will be different reaction targets - specify here
         target = self.owner  # default
         if reaction['target'] == 'thrown':
-            target = self.owner.thrown  # set target to thrown item
+            target = self._owner  # set target to thrown item
         if reaction['target'] == 'ammo':
-            target = self.owner.ammo  # set target to ammo item
+            target = self._owner  # set target to ammo item
         if target:
             target.location.dead.append(target)
             reaction_result['success'] = True
