@@ -91,11 +91,7 @@ class Ability(events.Observer):
 
     def __init__(self, owner, trigger, reactions, conditions=None, enabled=True, cooldown=0, name='', ability_id='',
                  description='', message_color=None, ai_info=None):
-        self.owner = owner
-        if isinstance(owner, game_logic.Item):  # if it's an item - set owner to owning Entity
-            self.owner_item = owner  # if Item - Item object
-        else:
-            self.owner_item = None  # if Item - Item object
+        self._owner = owner
         self.enabled = enabled  # is ability enabled or not
         self.trigger = trigger  # ability trigger
         self.conditions = conditions  # ability condition
@@ -114,6 +110,17 @@ class Ability(events.Observer):
         if self.owner:
             self.reobserve()
 
+    @property
+    def owner(self):
+        try:  # if ability belongs to an item - check owner of item
+            if self._owner.owner:  # if item is equipped or in inventory - get owning Entity
+                o = self._owner.owner
+            else:
+                o = self._owner
+        except AttributeError:
+            o = self._owner
+        return o
+
     def reobserve(self):
         """ Method that registers Ability to observe events """
         events.Observer.__init__(self)  # register self as observer
@@ -124,15 +131,9 @@ class Ability(events.Observer):
 
     def set_owner(self, owner):
         """ Method to set owner and refresh observer """
-        if self.owner:
+        if self._owner:
             self.close()  # unregister observing old owner
-        try:  # if ability belongs to an item - check owner of item
-            if owner.owner:  # if item is equipped or in inventory - set owning Entity
-                self.owner = owner.owner
-            else:
-                self.owner = owner  # set owner
-        except AttributeError:
-            self.owner = owner  # set owner
+        self._owner = owner  # set owner
         self.reobserve()  # register observers
 
     def on_event(self, data):
@@ -161,7 +162,7 @@ class Ability(events.Observer):
             if isinstance(cond, Condition):
                 # event data is passed to condition as is
                 # if other kwargs needed - add here
-                data.update({'owner': self.owner, 'owner_item': self.owner_item})
+                data.update({'owner': self.owner, 'owner_item': self._owner})
                 if self.ai_info:  # if ai_info exists - pass some additional arguments
                     if self.ai_info['type'] == 'ranged_attack':
                         data.update({'range': self.ai_info['range']})

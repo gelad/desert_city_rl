@@ -527,11 +527,6 @@ class Abilities(Entity):
         ability.set_owner(self)  # set owner of ability
         self.abilities.append(ability)  # add it to list
 
-    def abilities_set_owner(self, owner):
-        """ Set owner of all abilities - used in Item equip/take """
-        for ability in self.abilities:
-            ability.set_owner(owner)
-
     def abilities_reobserve(self):
         """ A method that reobserves abilities """
         for abil in self.abilities:
@@ -586,7 +581,7 @@ class Inventory(Entity):
                         return
         self.inventory.append(item)  # add item to inventory
         item.owner = self  # set item's owner
-        item.abilities_set_owner(self)  # if it has abilities - set their owner
+        item.abilities_reobserve()  # if it has abilities - set their owner
         if item.position:  # if it's placed somewhere in location
             item.location.cells[item.position[0]][item.position[1]].entities.remove(item)
             item.position = None
@@ -597,7 +592,7 @@ class Inventory(Entity):
             msg = _('You drop {item} on the ground.').format(item=str(item)).capitalize()
             Game.add_message(message=msg, level='PLAYER', color=[255, 255, 255])
         item.owner = None
-        item.abilities_set_owner(item)  # if it has abilities - set their owner
+        item.abilities_reobserve()  # if it has abilities - reobserve
         self.location.place_entity(item, self.position[0], self.position[1])  # place it on the map
         self.inventory.remove(item)
 
@@ -605,7 +600,7 @@ class Inventory(Entity):
         """ Method that removes item from inventory, without placing it anywhere """
         if item in self.inventory:
             item.owner = None
-            item.abilities_set_owner(item)  # if it has abilities - set their owner to item
+            item.abilities_reobserve()  # if it has abilities - reobserve
             self.inventory.remove(item)
 
     def use_item(self, item, target=None):
@@ -664,7 +659,7 @@ class Equipment(Entity):
         if item in self.inventory:  # if item is in inventory - remove it
             self.discard_item(item)
         item.owner = self  # set item owner
-        item.abilities_set_owner(self)  # if it has abilities - set their owner
+        item.abilities_reobserve()  # if it has abilities - reobserve
         self.equipment[slot] = item  # fill equipment slot with item
 
     def unequip_item(self, item):
@@ -683,7 +678,7 @@ class Equipment(Entity):
                 if it == item:
                     self.equipment[sl] = None
             item.owner = None
-            item.abilities_set_owner(None)  # if it has abilities - set their owner
+            item.abilities_reobserve()  # if it has abilities - reobserve
 
 
 class AI(events.Observer):
@@ -1644,7 +1639,6 @@ class UnguidedProjectile(Actor, Abilities, Entity):
         """ Method that launches a projectile from (origin_x, origin_y) to target """
         self.location.place_entity(self, origin_x, origin_y)
         self.ai.reobserve()
-        self.abilities_set_owner(self)  # refresh abilities owner at launch (in case if projectile was loaded or copied)
         self.abilities_reobserve()  # refresh abilities as observer at launch
         self.ai.enroute()
 
