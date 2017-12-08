@@ -398,11 +398,13 @@ class Ability(events.Observer):
 
 class AbilityTemplate:
     """ A class intended to be stored in JSON and generate an Ability object """
-    def __init__(self, stored_class_name, init_kwargs=None):
+    def __init__(self, data_id, stored_class_name, init_kwargs=None):
         """
+        :param data_id: and ID string 
         :param stored_class_name: a name of class stored in this template
         :param init_kwargs: a dict with arguments to pass to __init__ method of newly created class
         """
+        self.data_id = data_id
         self.stored_class_name = stored_class_name
         if init_kwargs:
             self.init_kwargs = init_kwargs

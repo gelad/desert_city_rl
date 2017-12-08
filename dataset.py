@@ -14,7 +14,7 @@ import jsonpickle
 
 data_set = {}  # a dict containing all entity templates by string ID's
 tile_set = {}  # a dict that contains tile info
-ability_set = {}  # a dict containing Abilities
+ability_set = {}  # a dict containing ability templates
 
 
 def initialize():
@@ -172,7 +172,8 @@ def initialize():
     cond1 = abilities.Condition('MOVED_ON')
     cond2 = abilities.Condition('MOVER_IS_A_BE')
     react = {'type': 'deal_damage', 'target': 'mover', 'damage': (1, 3), 'dmg_type': 'acid'}
-    a_t = abilities.AbilityTemplate(stored_class_name='Ability',
+    a_t = abilities.AbilityTemplate(data_id='corrosive_acid',
+                                    stored_class_name='Ability',
                                     init_kwargs={'name': 'Corrosive acid',
                                                  'owner': None,
                                                  'trigger': 'entity_moved',
@@ -182,6 +183,7 @@ def initialize():
     f = open("data/test_ability.json", 'w')
     f.write(jsonpickle.dumps(a_t))
     f.close()
+    ability_set[a_t.data_id] = a_t
     abil = a_t.get_stored_object()
     data_set['trap_corrosive_moss'].add_ability(abil)
 
@@ -267,9 +269,13 @@ def initialize():
                                                            charges=1, destroyed_after_use=True, weight=0.2)
     cond = abilities.Condition('USED')
     react = {'type': 'apply_timed_effect', 'target': 'default', 'time': 1000, 'effect': effects.Effect('HASTE', 50)}
-    abil = abilities.Ability(name='Haste', owner=data_set['item_haste_potion'],
-                             trigger='used_on_self', conditions=[cond], reactions=[react],
-                             message_color=[255, 215, 0])
+    a_t = abilities.AbilityTemplate(data_id='haste',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Haste', 'owner': None,
+                                        'trigger': 'used_on_self', 'conditions': [cond], 'reactions': [react],
+                                        'message_color': [255, 215, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_haste_potion'].add_ability(abil)
 
     data_set['item_antidote_potion'] = game_logic.ItemCharges(name='antidote potion', data_id='item_antidote_potion',
@@ -284,9 +290,13 @@ def initialize():
               'effects_number': 'all'}
     react2 = {'type': 'apply_timed_effect', 'target': 'default', 'time': 500,
               'effect': effects.Effect('RESIST_POISON', 500)}
-    abil = abilities.Ability(name='Antidote', owner=data_set['item_antidote_potion'],
-                             trigger='used_on_self', conditions=[cond], reactions=[react1, react2],
-                             message_color=[0, 150, 0])
+    a_t = abilities.AbilityTemplate(data_id='antidote',
+                                    stored_class_name='Ability',
+                                    init_kwargs={'name': 'Antidote', 'owner': None,
+                                        'trigger': 'used_on_self', 'conditions': [cond], 'reactions': [react1, react2],
+                                        'message_color': [0, 150, 0]})
+    ability_set[a_t.data_id] = a_t
+    abil = a_t.get_stored_object()
     data_set['item_antidote_potion'].add_ability(abil)
 
     data_set['item_lightning_scroll'] = game_logic.ItemCharges(name='scroll of Lightning', data_id='item_lightning_scroll',
