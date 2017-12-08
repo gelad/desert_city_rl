@@ -1685,3 +1685,6 @@ msgstr ""
 
 msgid "\t<-- TAB -->\n[[SPACE - select item]]\n[[ENTER - make a deal]]\n\nMoney: {money} coins.\nSell items price: {sell_price}\nBuy items price: {buy_price}\n\n\tTOTAL: {total} coins."
 msgstr ""
+
+msgid "{ent_name} is now {eff_name}: {eff_descr} for {time} ticks."
+msgstr ""

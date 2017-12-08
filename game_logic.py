@@ -1108,7 +1108,7 @@ class UnguidedShotAI(UnguidedProjectileAI):
             strike = Strike(strike_type='projectile', damage=dmg,
                             dmg_type=dmg_type)
             res_dmg = self.owner.launcher.land_strike(strike=strike, target=something)  # land strike
-            events.Event(self.owner, {'type': 'shot_hit', 'target': something, 'strike': strike,
+            events.Event(self.owner.ammo, {'type': 'shot_hit', 'target': something, 'strike': strike,
                                       'attacker': self.owner.launcher, 'damage': res_dmg})
             Game.add_message(_('{projectile} hits {entity} for {dmg} damage!').format(
                 projectile=_(self.owner.name), entity=str(something), dmg=str(res_dmg)), 'PLAYER', [255, 255, 255])
@@ -1614,6 +1614,7 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
                 # ammo_copy = pickle.loads(pickle.dumps(ammo, -1))
                 ammo_copy = copy.copy(ammo)  # make a copy of ammo object
                 ammo_copy.charges = 1  # with one charge
+                ammo_copy.abilities_owner_update()
                 ammo.decrease()  # decrease ammount of ammo left
                 weapon.ammo.append(ammo_copy)  # add copy to weapon.ammo
 
@@ -1677,11 +1678,6 @@ class UnguidedShot(UnguidedProjectile):
         self.weapon = weapon  # weapon that fired projectile
         self.ammo = ammo  # ammo piece
 
-    def launch(self, origin_x, origin_y):
-        """ Method that launches a projectile from (origin_x, origin_y) to target """
-        self.abilities = pickle.loads(pickle.dumps(self.ammo.abilities))  # copy abilities from ammo to projectile
-        super(UnguidedShot, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
-
 
 class UnguidedThrown(UnguidedProjectile):
     """ Child class for unguided thrown (weapon or entity) """
@@ -1692,13 +1688,7 @@ class UnguidedThrown(UnguidedProjectile):
                                              color=thrown.color)
         self.ai.close()  # replace AI with Shot AI
         self.ai = UnguidedThrownAI(power=power, target=target, owner=self)
-        self.thrown = thrown  # ammo piece
-
-    def launch(self, origin_x, origin_y):
-        """ Method that launches a projectile from (origin_x, origin_y) to target """
-        self.abilities = pickle.loads(pickle.dumps(self.thrown.abilities))  # copy abilities from thrown to projectile
-
-        super(UnguidedThrown, self).launch(origin_x=origin_x, origin_y=origin_y)  # call parent class method
+        self.thrown = thrown  # thrown item
 
 
 class Player(Fighter):
