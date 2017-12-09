@@ -600,9 +600,9 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                             found_tile = True
                             break
             if not found_tile:  # if not found in legend - search for matching tile in dataset
-                for tile in dataset.tile_set:
-                    if char_tile == dataset.tile_set[tile][0] and char_tile_color == tuple(dataset.tile_set[tile][1]) \
-                            and char_tile_bgcolor == tuple(dataset.tile_set[tile][2]):
+                for tile in dataset.tile_dict:
+                    if char_tile == dataset.tile_dict[tile][0] and char_tile_color == tuple(dataset.tile_dict[tile][1]) \
+                            and char_tile_bgcolor == tuple(dataset.tile_dict[tile][2]):
                         loc.cells[loc_cell_x][loc_cell_y].tile = tile
                         found_tile = True
                         break

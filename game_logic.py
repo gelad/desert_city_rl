@@ -226,6 +226,44 @@ class Entity:
         return magn
 
 
+class EntityTemplate:
+    """ A class intended to be stored in JSON and generate an Entity object """
+    def __init__(self, data_id, stored_class_name, effs=None, abils=None, init_kwargs=None):
+        """
+        :param data_id: and ID string 
+        :param stored_class_name: a name of class stored in this template
+        :param effs: effects list
+        :param abils: list of ability templates IDs 
+        :param init_kwargs: a dict with arguments to pass to __init__ method of newly created class
+        """
+        self.data_id = data_id
+        self.stored_class_name = stored_class_name
+        self.effs = effs
+        self.abils = abils
+        if init_kwargs:
+            self.init_kwargs = init_kwargs
+        else:
+            self.init_kwargs = {}
+
+    def get_stored_object(self):
+        """
+        Method to get new object of stored class
+        :return: object of stored class 
+        """
+        if self.stored_class_name in globals():
+            new_entity = globals()[self.stored_class_name](**self.init_kwargs)
+            if self.effs:
+                for eff in self.effs:
+                    new_entity.effects.append(pickle.loads(pickle.dumps(eff, -1)))  # make a copy of Effect
+            if self.abils:
+                for abil in self.abils:
+                    new_entity.add_ability(dataset.get_ability(abil))
+            new_entity.data_id = self.data_id
+            return new_entity
+        else:
+            raise RuntimeError('There are no such class in game_logic module: ' + self.stored_class_name)
+
+
 class Strike:
     """ Class for strike - damage, dmg_type, strike type, modificators """
     def __init__(self, strike_type, damage=0, dmg_type='pure', mods=None):

@@ -89,8 +89,8 @@ class Condition:
 class Ability(events.Observer):
     """ Base class for Ability object """
 
-    def __init__(self, trigger, reactions, owner=None, conditions=None, enabled=True, cooldown=0, name='', ability_id='',
-                 description='', message_color=None, ai_info=None):
+    def __init__(self, trigger, reactions, owner=None, conditions=None, enabled=True, cooldown=0, name='',
+                 description='', data_id='', message_color=None, ai_info=None):
         self._owner = owner
         self.enabled = enabled  # is ability enabled or not
         self.trigger = trigger  # ability trigger
@@ -100,7 +100,7 @@ class Ability(events.Observer):
         self.ticks_to_cd = 0  # ticks to cooldown
         self.ability_on_cd = False  # is ability on cd
         self.name = name  # name of the ability
-        self.ability_id = ability_id  # ability ID in dataset
+        self.data_id = data_id  # ability ID in dataset
         self.description = description  # description of ability
         self.ai_info = ai_info  # info for AI how and when to use the ability
         if message_color is None:
@@ -429,6 +429,7 @@ class AbilityTemplate:
         """
         if self.stored_class_name in globals():
             new_ability = globals()[self.stored_class_name](**self.init_kwargs)
+            new_ability.data_id = self.data_id
             return new_ability
         else:
             raise RuntimeError('There are no such class in abilities module: ' + self.stored_class_name)
