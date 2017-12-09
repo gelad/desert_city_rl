@@ -35,6 +35,9 @@ from math import ceil, floor
 #         finally:
 #             profiler.dump_stats('myprofile-%d.profile' % (self.ident,))
 
+temp_ent_dict = {}
+
+
 class Cell:
     """
         Class represents a single cell in location grid
@@ -127,6 +130,7 @@ class Entity:
     def __init__(self, name='', data_id='', description='', char=' ', color=None, location=None, position=None,
                  weight=0, pass_cost=1, occupies_tile=False, blocks_los=False, blocks_shots=0, categories=None,
                  properties=None):
+        kwargs = locals()
         self.name = name  # entity name
         self.data_id = data_id  # id in Entity data(base)
         self._description = description  # entity's description
@@ -148,6 +152,14 @@ class Entity:
             self.properties = properties  # properties - armor values, accuracy for weapons, etc
         else:
             self.properties = {}
+        self.temp_dict_update(kwargs)
+
+    def temp_dict_update(self, kwargs):
+        if self.data_id != '':
+            if self.data_id not in temp_ent_dict:
+                temp_ent_dict[self.data_id] = EntityTemplate(self.data_id,
+                                                             stored_class_name=str(self.__class__.__name__),
+                                                             init_kwargs=kwargs)
 
     def __getattr__(self, item):
         """ Search for missing attributes in properties """
