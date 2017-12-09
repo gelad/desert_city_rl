@@ -1193,7 +1193,7 @@ class Item(Abilities, Entity):
         Mixed class, simple Item.
     """
 
-    def __init__(self, name, data_id, description, char, color, weight=0, pass_cost=1,
+    def __init__(self, name, description, char, color, data_id='', weight=0, pass_cost=1,
                  equip_slots=None, categories=None, properties=None):
         # calling constructors
         Entity.__init__(self, name=name, data_id=data_id, description=description, weight=weight, pass_cost=pass_cost,
@@ -1281,7 +1281,7 @@ class ItemCharges(Item):
         Child class of item that has charges
     """
 
-    def __init__(self, name, data_id, description, char, color, charges, weight=0, pass_cost=1,
+    def __init__(self, name, description, char, color, charges, data_id='', weight=0, pass_cost=1,
                  categories=None, properties=None, destroyed_after_use=True, equip_slots=None):
         super(ItemCharges, self).__init__(name=name, data_id=data_id, description=description, categories=categories,
                                           properties=properties, weight=weight, pass_cost=pass_cost,
@@ -1347,7 +1347,7 @@ class ItemShield(Item):
         Child class of shield item. Has durability and armor
     """
 
-    def __init__(self, name, data_id, description, char, color, weight=0, pass_cost=1, durability=1,
+    def __init__(self, name, description, char, color, data_id='', weight=0, pass_cost=1, durability=1,
                  categories=None, properties=None, equip_slots=None):
         super(ItemShield, self).__init__(name=name, data_id=data_id, description=description, categories=categories,
                                          properties=properties, weight=weight, pass_cost=pass_cost,
@@ -1398,7 +1398,7 @@ class ItemRangedWeapon(Item):
         Child class for a ranged weapon.
     """
 
-    def __init__(self, name, data_id, description, char, color, range, weight=0, pass_cost=1, ammo_max=1,
+    def __init__(self, name, description, char, color, range, data_id='', weight=0, pass_cost=1, ammo_max=1,
                  ammo_type=None, ammo=None, categories=None, properties=None, equip_slots=None):
         super(ItemRangedWeapon, self).__init__(name=name, data_id=data_id,
                                                description=description, categories=categories, weight=weight,
@@ -1447,8 +1447,8 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
         Mixed class, basic monster, that can participate in combat and perform actions.
     """
 
-    def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius,
-                 damage, weight=0, dmg_type='bashing', categories=None, properties=None,
+    def __init__(self, name, description, char, color, hp, speed, sight_radius,
+                 damage, data_id='', weight=0, dmg_type='bashing', categories=None, properties=None,
                  armor=None, resist=None, corpse='', equip_layout='humanoid', ai=None):
         # calling constructors of mixins
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
@@ -1684,10 +1684,10 @@ class Fighter(BattleEntity, Equipment, Inventory, Abilities, Actor, Seer, Entity
 class UnguidedProjectile(Actor, Abilities, Entity):
     """ Mixed base class for unguided projectile (thrown, magic, etc) """
 
-    def __init__(self, launcher, speed, power, target, name='', description='', char=' ', color=None):
+    def __init__(self, launcher, speed, power, target, name='', data_id='', description='', char=' ', color=None):
         self.launcher = launcher  # Entity, that launched projectile
         self.target = target  # target (x, y) tuple
-        Entity.__init__(self, name=name, description=description, char=char, color=color)
+        Entity.__init__(self, name=name, description=description, char=char, color=color, data_id=data_id)
         Abilities.__init__(self)
         Actor.__init__(self, speed=speed, ai=UnguidedProjectileAI(power=power, target=target, owner=self))
 
@@ -1734,8 +1734,8 @@ class Player(Fighter):
         Child class, adds player-specific functionality to Fighter.
     """
 
-    def __init__(self, name, data_id, description, char, color, hp, speed, sight_radius, damage, categories,
-                 properties, weight):
+    def __init__(self, name, description, char, color, hp, speed, sight_radius, damage, categories,
+                 properties, weight, data_id=''):
         # calling constructor of parent class
         Fighter.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color, hp=hp,
                          speed=speed, sight_radius=sight_radius, damage=damage, categories=categories,
@@ -1770,7 +1770,7 @@ class Prop(BattleEntity, Abilities, Entity):
         Mixed class of a prop (wall, window, pillar, etc), that has HP and can be destroyed, but lacks acting ability.
     """
 
-    def __init__(self, name, data_id, char, hp, description='', color=None, blocks_los=True, weight=0, blocks_shots=1,
+    def __init__(self, name, char, hp, data_id='', description='', color=None, blocks_los=True, weight=0, blocks_shots=1,
                  occupies_tile=True, pass_cost=1, armor=None, corpse='no corpse', categories=None, properties=None):
         Entity.__init__(self, name=name, data_id=data_id, description=description, char=char, color=color,
                         occupies_tile=occupies_tile, blocks_los=blocks_los, blocks_shots=blocks_shots,
@@ -1792,7 +1792,7 @@ class Door(BattleEntity, Entity):
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
 
-    def __init__(self, name, data_id, description, char_closed, char_open, color, hp, weight=0, armor=None, pass_cost=1,
+    def __init__(self, name, description, char_closed, char_open, color, hp, data_id='', weight=0, armor=None, pass_cost=1,
                  is_closed=True, corpse='no corpse', categories=None, properties=None):
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
