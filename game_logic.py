@@ -14,6 +14,7 @@ import generation
 
 from messages import _  # translation function
 
+import inspect
 import random
 import pickle
 import copy

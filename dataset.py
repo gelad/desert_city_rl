@@ -1156,6 +1156,31 @@ def initialize():
 
     events.Observer.clear()  # remove events made during init of Entities - A HACK
 
+    # for a_id in ability_dict:
+    #     abil = ability_dict[a_id]
+    #     f = open('data/abilities/' + abil.data_id + '.json', 'w')
+    #     f.write(jsonpickle.dumps(abil))
+    #     f.close()
+
+    for e_id in game_logic.temp_ent_dict:
+        ent = game_logic.temp_ent_dict[e_id]
+        del ent.init_kwargs['data_id']
+        effs = []
+        for eff in data_set[e_id].effects:
+            effs.append(pickle.loads(pickle.dumps(eff)))
+        ent.init_kwargs['effs'] = effs
+        try:
+            abils = []
+            for ab in data_set[e_id].abilities:
+                abils.append(ab.data_id)
+            if len(abils) > 0:
+                ent.init_kwargs['abils'] = abils
+        except AttributeError:
+            pass
+        f = open('data/entities/' + ent.data_id + '.json', 'w')
+        f.write(jsonpickle.dumps(ent))
+        f.close()
+
 
 def get_entity(data_id):
     """ Function that returns entity template by ID """
