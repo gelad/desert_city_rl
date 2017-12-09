@@ -49,82 +49,98 @@ def initialize():
     entity_dict[ent_template.data_id] = ent_template
     data_set[ent_template.data_id] = ent_template.get_stored_object()
 
-    data_set['window_large_sandstone'] = game_logic.Prop(name='Large window', data_id='window_large_sandstone',
-                                                         occupies_tile=False, blocks_los=False, blocks_shots=0,
-                                                         armor={'bashing': 100, 'slashing': 500, 'piercing': 300},
-                                                         pass_cost=2,
-                                                         description='A large window in sandstone wall.',
-                                                         char='_', color=[255, 250, 205], hp=100, weight=800,
-                                                         corpse='debris_large_sandstone')
-    data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_BASHING', 10))
-    data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
-    data_set['window_large_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+    ent_template = game_logic.EntityTemplate(data_id='window_large_sandstone', stored_class_name='Prop',
+                                             effs=[effects.Effect('BLOCK_BASHING', 10),
+                                                   effects.Effect('BLOCK_SLASHING', 30),
+                                                   effects.Effect('BLOCK_PIERCING', 30)],
+                                             init_kwargs={'name': 'Large window',
+                                                          'occupies_tile': False, 'blocks_los': False, 'blocks_shots': 0,
+                                                          'armor': {'bashing': 100, 'slashing': 500, 'piercing': 300},
+                                                          'pass_cost': 2,
+                                                          'description': 'A large window in sandstone wall.',
+                                                          'char': '_', 'color': [255, 250, 205], 'hp': 100, 'weight': 800,
+                                                          'corpse': 'debris_large_sandstone'})
+    entity_dict[ent_template.data_id] = ent_template
+    data_set[ent_template.data_id] = ent_template.get_stored_object()
 
-    data_set['debris_large_sandstone'] = game_logic.Prop(name='Pile of sandstone blocks',
-                                                         data_id='debris_large_sandstone',
-                                                         occupies_tile=False, blocks_los=False, blocks_shots=0,
-                                                         armor={'bashing': 300, 'slashing': 500, 'piercing': 300},
-                                                         pass_cost=2,
-                                                         description='A collapsed structure, like wall or pillar.',
-                                                         char='&', color=[255, 250, 205], hp=200, weight=800)
-    data_set['debris_large_sandstone'].effects.append(effects.Effect('BLOCK_BASHING', 30))
-    data_set['debris_large_sandstone'].effects.append(effects.Effect('BLOCK_SLASHING', 30))
-    data_set['debris_large_sandstone'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+    ent_template = game_logic.EntityTemplate(data_id='debris_large_sandstone', stored_class_name='Prop',
+                                             effs=[effects.Effect('BLOCK_BASHING', 30),
+                                                   effects.Effect('BLOCK_SLASHING', 30),
+                                                   effects.Effect('BLOCK_PIERCING', 30)],
+                                             init_kwargs={'name': 'Pile of sandstone blocks',
+                                                          'occupies_tile': False, 'blocks_los': False, 'blocks_shots': 0,
+                                                          'armor': {'bashing': 300, 'slashing': 500, 'piercing': 300},
+                                                          'pass_cost': 2,
+                                                          'description': 'A collapsed structure, like wall or pillar.',
+                                                          'char': '&', 'color': [255, 250, 205], 'hp': 200, 'weight': 800})
+    entity_dict[ent_template.data_id] = ent_template
+    data_set[ent_template.data_id] = ent_template.get_stored_object()
 
-    data_set['debris_large_wooden'] = game_logic.Prop(name='Pile of wooden debris',
-                                                      data_id='debris_large_wooden',
-                                                      occupies_tile=False, blocks_los=False, blocks_shots=0,
-                                                      armor={'bashing': 200, 'slashing': 200, 'piercing': 200},
-                                                      pass_cost=2,
-                                                      description='Large destroyed wooden furniture.',
-                                                      char='&', color=[128, 0, 0], hp=200, weight=50)
-    data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_BASHING', 20))
-    data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_SLASHING', 20))
-    data_set['debris_large_wooden'].effects.append(effects.Effect('BLOCK_PIERCING', 20))
+    ent_template = game_logic.EntityTemplate(data_id='debris_large_wooden', stored_class_name='Prop',
+                                             effs=[effects.Effect('BLOCK_BASHING', 20),
+                                                   effects.Effect('BLOCK_SLASHING', 20),
+                                                   effects.Effect('BLOCK_PIERCING', 20)],
+                                             init_kwargs={'name': 'Pile of wooden debris',
+                                                      'occupies_tile': False,'blocks_los': False, 'blocks_shots': 0,
+                                                      'armor': {'bashing': 200, 'slashing': 200, 'piercing': 200},
+                                                      'pass_cost': 2,
+                                                      'description': 'Large destroyed wooden furniture.',
+                                                      'char': '&', 'color': [128, 0, 0], 'hp': 200, 'weight': 50})
+    entity_dict[ent_template.data_id] = ent_template
+    data_set[ent_template.data_id] = ent_template.get_stored_object()
 
-    data_set['furn_wooden_board'] = game_logic.Prop(name='Wooden board',
-                                                    data_id='furn_wooden_board',
-                                                    occupies_tile=False, blocks_los=False, blocks_shots=0.25,
-                                                    armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
-                                                    pass_cost=2,
-                                            description='Wooden wagon board. Provides small cover from projectiles.',
-                                                    char='▧', color=[128, 0, 0], hp=100, weight=100)
-    data_set['furn_wooden_board'].effects.append(effects.Effect('BLOCK_BASHING', 10))
-    data_set['furn_wooden_board'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
-    data_set['furn_wooden_board'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+    ent_template = game_logic.EntityTemplate(data_id='furn_wooden_board', stored_class_name='Prop',
+                                             effs=[effects.Effect('BLOCK_BASHING', 10),
+                                                   effects.Effect('BLOCK_SLASHING', 10),
+                                                   effects.Effect('BLOCK_PIERCING', 30)],
+                                             init_kwargs={'name': 'Wooden board',
+                                                          'occupies_tile': False, 'blocks_los': False, 'blocks_shots': 0.25,
+                                                          'armor': {'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                          'pass_cost': 2,
+                                            'description': 'Wooden wagon board. Provides small cover from projectiles.',
+                                                    'char': '▧', 'color': [128, 0, 0], 'hp': 100, 'weight': 100})
+    entity_dict[ent_template.data_id] = ent_template
+    data_set[ent_template.data_id] = ent_template.get_stored_object()
 
-    data_set['furn_wooden_wheel'] = game_logic.Prop(name='Wooden wheel',
-                                                    data_id='furn_wooden_wheel',
-                                                    occupies_tile=False, blocks_los=False, blocks_shots=0.15,
-                                                    armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
-                                                    pass_cost=2,
-                                            description='Wooden wagon wheel. Provides small cover from projectiles.',
-                                                    char='o', color=[128, 0, 0], hp=100, weight=70)
-    data_set['furn_wooden_wheel'].effects.append(effects.Effect('BLOCK_BASHING', 10))
-    data_set['furn_wooden_wheel'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
-    data_set['furn_wooden_wheel'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+    ent_template = game_logic.EntityTemplate(data_id='furn_wooden_wheel', stored_class_name='Prop',
+                                             effs=[effects.Effect('BLOCK_BASHING', 10),
+                                                   effects.Effect('BLOCK_SLASHING', 10),
+                                                   effects.Effect('BLOCK_PIERCING', 30)],
+                                             init_kwargs={'name': 'Wooden wheel',
+                                                    'occupies_tile': False, 'blocks_los': False, 'blocks_shots': 0.15,
+                                                    'armor': {'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                    'pass_cost': 2,
+                                            'description': 'Wooden wagon wheel. Provides small cover from projectiles.',
+                                                    'char': 'o', 'color': [128, 0, 0], 'hp': 100, 'weight': 70})
+    entity_dict[ent_template.data_id] = ent_template
+    data_set[ent_template.data_id] = ent_template.get_stored_object()
 
-    data_set['furn_wooden_counter'] = game_logic.Prop(name='Wooden counter',
-                                                      data_id='furn_wooden_counter',
-                                                      occupies_tile=False, blocks_los=False, blocks_shots=0.25,
-                                                      armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
-                                                      pass_cost=2,
-                                            description='Wooden counter. Provides small cover from projectiles.',
-                                                      char='ʭ', color=[128, 0, 0], hp=50, weight=50)
-    data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_BASHING', 10))
-    data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
-    data_set['furn_wooden_counter'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+    ent_template = game_logic.EntityTemplate(data_id='furn_wooden_counter', stored_class_name='Prop',
+                                             effs=[effects.Effect('BLOCK_BASHING', 10),
+                                                   effects.Effect('BLOCK_SLASHING', 10),
+                                                   effects.Effect('BLOCK_PIERCING', 30)],
+                                             init_kwargs={'name': 'Wooden counter',
+                                                      'occupies_tile': False, 'blocks_los': False, 'blocks_shots': 0.25,
+                                                      'armor': {'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                      'pass_cost': 2,
+                                            'description': 'Wooden counter. Provides small cover from projectiles.',
+                                                      'char': 'ʭ', 'color': [128, 0, 0], 'hp': 50, 'weight': 50})
+    entity_dict[ent_template.data_id] = ent_template
+    data_set[ent_template.data_id] = ent_template.get_stored_object()
 
-    data_set['furn_wooden_table'] = game_logic.Prop(name='Wooden table',
-                                                    data_id='furn_wooden_table',
-                                                    occupies_tile=False, blocks_los=False, blocks_shots=0.25,
-                                                    armor={'bashing': 200, 'slashing': 100, 'piercing': 300},
-                                                    pass_cost=2,
-                                                    description='Wooden table. Provides small cover from projectiles.',
-                                                    char='■', color=[128, 0, 0], hp=50, weight=50)
-    data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_BASHING', 10))
-    data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_SLASHING', 10))
-    data_set['furn_wooden_table'].effects.append(effects.Effect('BLOCK_PIERCING', 30))
+    ent_template = game_logic.EntityTemplate(data_id='furn_wooden_table', stored_class_name='Prop',
+                                             effs=[effects.Effect('BLOCK_BASHING', 10),
+                                                   effects.Effect('BLOCK_SLASHING', 10),
+                                                   effects.Effect('BLOCK_PIERCING', 30)],
+                                             init_kwargs={'name': 'Wooden table',
+                                                    'data_id': 'furn_wooden_table',
+                                                    'occupies_tile': False, 'blocks_los': False, 'blocks_shots': 0.25,
+                                                    'armor': {'bashing': 200, 'slashing': 100, 'piercing': 300},
+                                                    'pass_cost': 2,
+                                                    'description': 'Wooden table. Provides small cover from projectiles.',
+                                                    'char': '■', 'color': [128, 0, 0], 'hp': 50, 'weight': 50})
+    entity_dict[ent_template.data_id] = ent_template
+    data_set[ent_template.data_id] = ent_template.get_stored_object()
 
     data_set['furn_stone_table'] = game_logic.Prop(name='Stone table',
                                                    data_id='furn_stone_table',
