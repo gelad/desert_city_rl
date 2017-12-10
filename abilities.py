@@ -79,7 +79,7 @@ class Condition:
             else:
                 return False
         elif self.condition == 'ABILITY_NAME_IS':  # ABILITY NAME IS condition
-            if kwargs['ability'].name == kwargs['name']:
+            if kwargs['ability'].data_id == kwargs['name']:
                 return True
             else:
                 return False

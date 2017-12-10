@@ -3,7 +3,8 @@
   "data_id": "proj_frostbolt",
   "stored_class_name": "UnguidedProjectile",
   "abils": [
-    "freeze"
+    "freeze",
+    "chill"
   ],
   "py/object": "game_logic.EntityTemplate",
   "init_kwargs": {

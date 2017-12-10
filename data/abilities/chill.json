@@ -1,5 +1,5 @@
 {
-  "data_id": "wisp_chill",
+  "data_id": "chill",
   "stored_class_name": "Ability",
   "init_kwargs": {
     "message_color": [
@@ -28,7 +28,7 @@
     "conditions": [
       {
         "kwargs": {
-          "name": "wisp_freeze"
+          "name": "freeze"
         },
         "condition": "ABILITY_NAME_IS",
         "py/object": "abilities.Condition"
