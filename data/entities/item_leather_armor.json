@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A light armor made of leather.",
+    "name": "leather armor",
+    "categories": {
+      "py/set": [
+        "armor"
+      ]
+    },
+    "char": "]]",
+    "pass_cost": 1,
+    "color": [
+      160,
+      82,
+      45
+    ],
+    "weight": 3,
+    "properties": {
+      "armor_bashing": 50,
+      "armor_slashing": 50,
+      "value": 150,
+      "armor_piercing": 40
+    },
+    "equip_slots": {
+      "py/set": [
+        "BODY"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_leather_armor",
+  "abils": null
+}

@@ -1,0 +1,34 @@
+{
+  "init_kwargs": {
+    "description": "Ancient ring.",
+    "name": "ancient ring",
+    "categories": {
+      "py/set": [
+        "ring",
+        "relic"
+      ]
+    },
+    "char": "\u02e0",
+    "pass_cost": 1,
+    "color": [
+      255,
+      20,
+      147
+    ],
+    "weight": 0.1,
+    "properties": {
+      "value": 30
+    },
+    "equip_slots": {
+      "py/set": [
+        "RIGHT_RING",
+        "LEFT_RING"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_ancient_ring",
+  "abils": null
+}

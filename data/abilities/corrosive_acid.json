@@ -1,0 +1,40 @@
+{
+  "data_id": "corrosive_acid",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      100,
+      220,
+      100
+    ],
+    "reactions": [
+      {
+        "type": "deal_damage",
+        "target": "mover",
+        "dmg_type": "acid",
+        "damage": {
+          "py/tuple": [
+            1,
+            3
+          ]
+        }
+      }
+    ],
+    "name": "Corrosive acid",
+    "trigger": "entity_moved",
+    "conditions": [
+      {
+        "kwargs": {},
+        "condition": "MOVED_ON",
+        "py/object": "abilities.Condition"
+      },
+      " and ",
+      {
+        "kwargs": {},
+        "condition": "MOVER_IS_A_BE",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

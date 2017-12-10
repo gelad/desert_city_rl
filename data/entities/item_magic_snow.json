@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "Magical snow, that doesn't melt. Useful alchemical ingredient. If thrown - can deal minor frost damage.",
+    "name": "magic snow",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "alchemy",
+        "throwing",
+        "stackable"
+      ]
+    },
+    "char": "`",
+    "pass_cost": 1,
+    "color": [
+      0,
+      0,
+      255
+    ],
+    "weight": 0.1,
+    "properties": {
+      "break_chance": 1,
+      "accuracy_thrown": 0.6,
+      "throw_speed": 0.75,
+      "value": 120
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_magic_snow",
+  "abils": [
+    "magic_snow_hit"
+  ]
+}

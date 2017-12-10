@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "Fighting axe, with metal handle suitable for parrying.",
+    "name": "tabar",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "axe"
+      ]
+    },
+    "char": "\u0433",
+    "pass_cost": 1,
+    "color": [
+      150,
+      150,
+      255
+    ],
+    "weight": 3,
+    "properties": {
+      "slashing": {
+        "py/tuple": [
+          3,
+          7
+        ]
+      },
+      "attack_speed_mod": 1,
+      "value": 150
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_tabar",
+  "abils": null
+}

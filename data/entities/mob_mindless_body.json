@@ -1,0 +1,30 @@
+{
+  "effs": [],
+  "data_id": "mob_mindless_body",
+  "stored_class_name": "Fighter",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 60,
+    "char": "b",
+    "properties": {
+      "loot_list": "mob_mindless_body"
+    },
+    "description": "Shaking, dehydrated human body, raised by strange magic of the City.",
+    "color": [
+      109,
+      49,
+      9
+    ],
+    "categories": {
+      "py/set": [
+        "living"
+      ]
+    },
+    "name": "Mindless body",
+    "armor": {"bashing": 0, "slashing": 0, "piercing": 0},
+    "hp": 5, "speed": 100, "sight_radius": 14,
+    "damage": {"py/tuple": [1, 2]}, "dmg_type": "bashing",
+    "ai": "SimpleMeleeChaserAI"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "effs": [],
+  "data_id": "proj_wisp_frostbolt",
+  "stored_class_name": "UnguidedProjectile",
+  "abils": [
+    "wisp_freeze",
+    "wisp_chill",
+    "wisp_frostbolt"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "char": "*",
+    "description": "An arrow of pure frost.",
+    "color": [
+      0,
+      0,
+      255
+    ],
+    "name": "frostbolt",
+    "speed": 30,
+    "power": 15
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A knife, balanced for quick throwing.",
+    "name": "throwing knife",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "sticks_to_target",
+        "throwing",
+        "stackable"
+      ]
+    },
+    "char": "'",
+    "pass_cost": 1,
+    "color": [
+      110,
+      110,
+      110
+    ],
+    "weight": 0.2,
+    "properties": {
+      "break_chance": 0.3,
+      "accuracy_thrown": 1,
+      "throw_speed": 0.75,
+      "value": 20
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_throwing_knife",
+  "abils": [
+    "throwing_knife_hit"
+  ]
+}

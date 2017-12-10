@@ -1,0 +1,60 @@
+{
+  "effs": [
+    {
+      "magnitude": 2,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 5,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "mob_iron_golem",
+  "stored_class_name": "Fighter",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 300,
+    "char": "G",
+    "properties": {
+      "loot_list": "mob_iron_golem"
+    },
+    "description": "Fighting mechanism made of iron, brought to life with magic. Armed with enormous blade.",
+    "color": [
+      200,
+      200,
+      255
+    ],
+    "categories": {
+      "py/set": [
+        "magical",
+        "golem",
+        "iron"
+      ]
+    },
+    "name": "Iron golem",
+    "armor": {"bashing": 50, "slashing": 200, "piercing": 300, "acid": -50},
+    "hp": 20, "speed": 150, "sight_radius": 9,
+    "damage": {"py/tuple": [6, 12]}, "dmg_type": "slashing",
+    "ai": "SimpleMeleeChaserAI"
+  }
+}

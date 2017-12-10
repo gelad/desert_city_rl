@@ -1,0 +1,31 @@
+{
+  "init_kwargs": {
+    "description": "A potion that hastens user by 50%.",
+    "name": "haste potion",
+    "categories": {
+      "py/set": [
+        "consumable",
+        "potion"
+      ]
+    },
+    "char": "!",
+    "pass_cost": 1,
+    "color": [
+      255,
+      215,
+      0
+    ],
+    "weight": 0.2,
+    "properties": {
+      "value": 120,
+      "usable": "self"
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_haste_potion",
+  "abils": [
+    "haste"
+  ]
+}

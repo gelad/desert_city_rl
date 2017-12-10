@@ -1,0 +1,34 @@
+{
+  "init_kwargs": {
+    "description": "A light wooden shield.",
+    "name": "wooden buckler",
+    "categories": {
+      "py/set": [
+        "shield"
+      ]
+    },
+    "char": "(",
+    "pass_cost": 1,
+    "color": [
+      128,
+      0,
+      0
+    ],
+    "weight": 4,
+    "properties": {
+      "block_bashing": 3,
+      "armor_slashing": 100,
+      "block_piercing": 10,
+      "value": 75,
+      "armor_bashing": 50,
+      "block_slashing": 6,
+      "armor_piercing": 150
+    },
+    "durability": 10
+  },
+  "stored_class_name": "ItemShield",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_wooden_buckler",
+  "abils": null
+}

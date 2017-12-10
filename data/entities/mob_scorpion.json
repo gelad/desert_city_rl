@@ -1,0 +1,37 @@
+{
+  "effs": [],
+  "data_id": "mob_scorpion",
+  "stored_class_name": "Fighter",
+  "abils": [
+    "scorpion_sting"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 15,
+    "char": "s",
+    "properties": {
+      "loot_list": {
+        "py/tuple": [
+          "mob_scorpion",
+          "mob_scorpion_ingredients"
+        ]
+      }
+    },
+    "description": "Huge black scorpion, about 1 meter long.",
+    "color": [
+      5,
+      5,
+      5
+    ],
+    "categories": {
+      "py/set": [
+        "living"
+      ]
+    },
+    "name": "Scorpion",
+    "armor": {"bashing": -50, "slashing": 50, "piercing": 50},
+    "hp": 3, "speed": 100, "sight_radius": 14,
+    "damage": {"py/tuple": [1, 4]}, "dmg_type": "piercing",
+    "ai": "SimpleMeleeChaserAI"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "init_kwargs": {
+    "description": "Ancient necklace.",
+    "name": "ancient necklace",
+    "categories": {
+      "py/set": [
+        "necklace",
+        "relic"
+      ]
+    },
+    "char": "\u02e0",
+    "pass_cost": 1,
+    "color": [
+      255,
+      20,
+      147
+    ],
+    "weight": 0.1,
+    "properties": {
+      "value": 30
+    },
+    "equip_slots": {
+      "py/set": [
+        "NECK"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_ancient_necklace",
+  "abils": null
+}

@@ -1,0 +1,55 @@
+{
+  "effs": [
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "window_large_sandstone",
+  "stored_class_name": "Prop",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 800,
+    "char": "_",
+    "pass_cost": 2,
+    "properties": null,
+    "blocks_shots": 0,
+    "description": "A large window in sandstone wall.",
+    "occupies_tile": false,
+    "color": [
+      255,
+      250,
+      205
+    ],
+    "blocks_los": false,
+    "categories": null,
+    "name": "Large window",
+    "armor": {"bashing": 100, "slashing": 500, "piercing": 300},
+    "hp": 80,
+    "corpse": "debris_large_sandstone"
+  }
+}

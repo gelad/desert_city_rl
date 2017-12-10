@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "Small sac, full of scorpion venom. Useful alchemical ingredient. If thrown - can deal minor poison damage.",
+    "name": "venom sac",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "alchemy",
+        "throwing",
+        "stackable"
+      ]
+    },
+    "char": "`",
+    "pass_cost": 1,
+    "color": [
+      0,
+      230,
+      0
+    ],
+    "weight": 0.5,
+    "properties": {
+      "break_chance": 1,
+      "accuracy_thrown": 0.8,
+      "throw_speed": 0.75,
+      "value": 60
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_venom_sac",
+  "abils": [
+    "venom_sac_hit"
+  ]
+}

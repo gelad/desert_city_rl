@@ -1,0 +1,31 @@
+{
+  "init_kwargs": {
+    "description": "A potion that heals 5 HP.",
+    "name": "healing potion",
+    "categories": {
+      "py/set": [
+        "consumable",
+        "potion"
+      ]
+    },
+    "char": "!",
+    "pass_cost": 1,
+    "color": [
+      255,
+      0,
+      0
+    ],
+    "weight": 0.2,
+    "properties": {
+      "value": 30,
+      "usable": "self"
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_healing_potion",
+  "abils": [
+    "heal_potion"
+  ]
+}

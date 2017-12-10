@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 20,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "furn_iron_grate",
+  "stored_class_name": "Prop",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 100,
+    "char": "\u2021",
+    "pass_cost": 1,
+    "properties": null,
+    "blocks_shots": 0.25,
+    "description": "A grate made of iron, too tight for man to pass through.",
+    "occupies_tile": true,
+    "color": [
+      200,
+      200,
+      225
+    ],
+    "blocks_los": false,
+    "categories": null,
+    "name": "Iron grate",
+    "armor": {"bashing": 100, "slashing": 200, "piercing": 300},
+    "hp": 50
+  }
+}

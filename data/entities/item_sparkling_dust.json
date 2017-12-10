@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "Magical dust, sparkling with tiny lightnings. Useful alchemical ingredient. If thrown - can deal minor lightning damage.",
+    "name": "sparkling dust",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "alchemy",
+        "throwing",
+        "stackable"
+      ]
+    },
+    "char": "`",
+    "pass_cost": 1,
+    "color": [
+      255,
+      215,
+      0
+    ],
+    "weight": 0.1,
+    "properties": {
+      "break_chance": 1,
+      "accuracy_thrown": 0.6,
+      "throw_speed": 0.75,
+      "value": 120
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_sparkling_dust",
+  "abils": [
+    "sparkling_dust_hit"
+  ]
+}

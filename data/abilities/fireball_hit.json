@@ -1,0 +1,32 @@
+{
+  "data_id": "fireball_hit",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      0,
+      0
+    ],
+    "reactions": [
+      {
+        "dmg_type": "fire",
+        "type": "deal_damage_aoe",
+        "damage": {
+          "py/tuple": [
+            1,
+            5
+          ]
+        },
+        "aoe": "circle",
+        "radius": 2,
+        "include_center": true,
+        "target": "projectile_hit_entity",
+        "strike_type": "projectile"
+      }
+    ],
+    "name": "Fireball!",
+    "trigger": "projectile_hit",
+    "conditions": []
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

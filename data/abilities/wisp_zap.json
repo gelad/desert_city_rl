@@ -1,0 +1,43 @@
+{
+  "data_id": "wisp_zap",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      215,
+      0
+    ],
+    "reactions": [
+      {
+        "type": "deal_damage",
+        "target": "default",
+        "dmg_type": "lightning",
+        "damage": {
+          "py/tuple": [
+            2,
+            4
+          ]
+        }
+      }
+    ],
+    "trigger": "ability_used",
+    "name": "Zap",
+    "ai_info": {
+      "use_offset": 0.5,
+      "whole_time": 100,
+      "priority": "1",
+      "range": "8",
+      "type": "ranged_attack",
+      "target": "player"
+    },
+    "cooldown": 300,
+    "conditions": [
+      {
+        "kwargs": {},
+        "condition": "TARGET_IN_RANGE",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

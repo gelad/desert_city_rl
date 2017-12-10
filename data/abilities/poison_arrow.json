@@ -1,0 +1,57 @@
+{
+  "data_id": "poison_arrow",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      0,
+      150,
+      0
+    ],
+    "reactions": [
+      {
+        "effect": {
+          "magnitude": 1,
+          "eff": "POISONED",
+          "categories": {
+            "py/set": []
+          },
+          "properties": {},
+          "py/object": "effects.Effect"
+        },
+        "whole_time": 5000,
+        "stackable": false,
+        "damage": {
+          "py/tuple": [
+            0,
+            2
+          ]
+        },
+        "type": "deal_periodic_damage",
+        "period": 1000,
+        "dmg_type": "poison",
+        "target": "default"
+      }
+    ],
+    "name": "Poisoned arrow",
+    "trigger": "shot_hit",
+    "conditions": [
+      {
+        "kwargs": {
+          "number": "0",
+          "sign": ">"
+        },
+        "condition": "DEALT_DAMAGE",
+        "py/object": "abilities.Condition"
+      },
+      " and ",
+      {
+        "kwargs": {
+          "category": "living"
+        },
+        "condition": "TARGET_IS_CATEGORY",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

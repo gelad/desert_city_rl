@@ -131,7 +131,6 @@ class Entity:
     def __init__(self, name='', data_id='', description='', char=' ', color=None, location=None, position=None,
                  weight=0, pass_cost=1, occupies_tile=False, blocks_los=False, blocks_shots=0, categories=None,
                  properties=None):
-        kwargs = locals()
         self.name = name  # entity name
         self.data_id = data_id  # id in Entity data(base)
         self._description = description  # entity's description
@@ -153,14 +152,6 @@ class Entity:
             self.properties = properties  # properties - armor values, accuracy for weapons, etc
         else:
             self.properties = {}
-        self.temp_dict_update(kwargs)
-
-    def temp_dict_update(self, kwargs):
-        if self.data_id != '':
-            if self.data_id not in temp_ent_dict:
-                temp_ent_dict[self.data_id] = EntityTemplate(self.data_id,
-                                                             stored_class_name=str(self.__class__.__name__),
-                                                             init_kwargs=kwargs)
 
     def __getattr__(self, item):
         """ Search for missing attributes in properties """
@@ -258,13 +249,24 @@ class EntityTemplate:
         else:
             self.init_kwargs = {}
 
-    def get_stored_object(self):
+    def get_stored_object(self, add_kwargs=None):
         """
         Method to get new object of stored class
+        :add_kwargs: additional kwargs if needed
         :return: object of stored class 
         """
         if self.stored_class_name in globals():
-            new_entity = globals()[self.stored_class_name](**self.init_kwargs)
+            kwargs_copy = pickle.loads(pickle.dumps(self.init_kwargs))  # copy kwargs object, it needs to be changed
+            if add_kwargs:
+                kwargs_copy.update(add_kwargs)
+            if 'ai' in kwargs_copy:
+                if 'ai_kwargs' in kwargs_copy:
+                    new_ai = globals()[kwargs_copy['ai']](**kwargs_copy['ai_kwargs'])
+                    del kwargs_copy['ai_kwargs']
+                else:
+                    new_ai = globals()[kwargs_copy['ai']]()
+                kwargs_copy['ai'] = new_ai
+            new_entity = globals()[self.stored_class_name](**kwargs_copy)
             if self.effs:
                 for eff in self.effs:
                     new_entity.effects.append(pickle.loads(pickle.dumps(eff, -1)))  # make a copy of Effect
@@ -272,6 +274,7 @@ class EntityTemplate:
                 for abil in self.abils:
                     new_entity.add_ability(dataset.get_ability(abil))
             new_entity.data_id = self.data_id
+            del kwargs_copy
             return new_entity
         else:
             raise RuntimeError('There are no such class in game_logic module: ' + self.stored_class_name)
@@ -1294,7 +1297,7 @@ class ItemCharges(Item):
         Child class of item that has charges
     """
 
-    def __init__(self, name, description, char, color, charges, data_id='', weight=0, pass_cost=1,
+    def __init__(self, name, description, char, color, charges=1, data_id='', weight=0, pass_cost=1,
                  categories=None, properties=None, destroyed_after_use=True, equip_slots=None):
         super(ItemCharges, self).__init__(name=name, data_id=data_id, description=description, categories=categories,
                                           properties=properties, weight=weight, pass_cost=pass_cost,
@@ -1805,8 +1808,9 @@ class Door(BattleEntity, Entity):
         Mixed class of a door, that has HP and can be destroyed, has open/closed state, blocks los when closed.
     """
 
-    def __init__(self, name, description, char_closed, char_open, color, hp, data_id='', weight=0, armor=None, pass_cost=1,
+    def __init__(self, name, description, char, char_closed, char_open, color, hp, data_id='', weight=0, armor=None, pass_cost=1,
                  is_closed=True, corpse='no corpse', categories=None, properties=None):
+        self.char = char
         self.char_closed = char_closed  # char representing closed door
         self.char_open = char_open  # char representing open door
         self.is_closed = is_closed  # is door closed or open

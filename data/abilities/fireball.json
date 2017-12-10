@@ -1,0 +1,31 @@
+{
+  "data_id": "fireball",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      50,
+      0
+    ],
+    "reactions": [
+      {
+        "projectile": "proj_firebolt",
+        "target": "default",
+        "type": "launch_projectile"
+      }
+    ],
+    "trigger": "ability_used",
+    "name": "Firebolt",
+    "ai_info": {
+      "use_offset": 0.5,
+      "whole_time": 100,
+      "priority": "1",
+      "range": "10",
+      "type": "ranged_attack",
+      "target": "player"
+    },
+    "cooldown": 1000,
+    "conditions": []
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

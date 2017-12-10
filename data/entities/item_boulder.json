@@ -1,0 +1,25 @@
+{
+  "init_kwargs": {
+    "description": "A stone boulder.",
+    "name": "item_boulder",
+    "categories": {
+      "py/set": [
+        "rubbish"
+      ]
+    },
+    "char": "*",
+    "pass_cost": 1,
+    "color": [
+      200,
+      200,
+      200
+    ],
+    "weight": 10,
+    "properties": null
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_boulder",
+  "abils": null
+}

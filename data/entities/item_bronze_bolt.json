@@ -1,0 +1,37 @@
+{
+  "init_kwargs": {
+    "description": "A simple bronze bolt for crossbows.",
+    "name": "bronze bolt",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "sticks_to_target",
+        "stackable",
+        "bolt"
+      ]
+    },
+    "char": "=",
+    "pass_cost": 1,
+    "color": [
+      80,
+      50,
+      20
+    ],
+    "weight": 0.2,
+    "properties": {
+      "break_chance": 0.5,
+      "value": 10,
+      "piercing": {
+        "py/tuple": [
+          1,
+          4
+        ]
+      }
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_bronze_bolt",
+  "abils": null
+}

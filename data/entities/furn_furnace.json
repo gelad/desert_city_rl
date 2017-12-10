@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 20,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 20,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "furn_furnace",
+  "stored_class_name": "Prop",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 500,
+    "char": "\u25d8",
+    "pass_cost": 1,
+    "properties": null,
+    "blocks_shots": 1,
+    "description": "Device for heating, made with heavy stone blocks.",
+    "occupies_tile": true,
+    "color": [
+      150,
+      150,
+      150
+    ],
+    "blocks_los": true,
+    "categories": null,
+    "name": "Furnace",
+    "armor": {"bashing": 200, "slashing": 200, "piercing": 300},
+    "hp": 200
+  }
+}

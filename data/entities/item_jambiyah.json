@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A knife with broad blade, suited for slashing.",
+    "name": "jambiyah",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "dagger"
+      ]
+    },
+    "char": ",",
+    "pass_cost": 1,
+    "color": [
+      150,
+      150,
+      255
+    ],
+    "weight": 0.5,
+    "properties": {
+      "slashing": {
+        "py/tuple": [
+          1,
+          4
+        ]
+      },
+      "attack_speed_mod": 0.75,
+      "value": 30
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_jambiyah",
+  "abils": null
+}

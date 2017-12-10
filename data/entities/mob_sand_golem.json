@@ -1,0 +1,59 @@
+{
+  "effs": [
+    {
+      "magnitude": 2,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 1,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "mob_sand_golem",
+  "stored_class_name": "Fighter",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 300,
+    "char": "G",
+    "properties": {
+      "loot_list": "mob_sand_golem"
+    },
+    "description": "Magic-formed sand, resembling a human figure about 3m high.",
+    "color": [
+      255,
+      215,
+      0
+    ],
+    "categories": {
+      "py/set": [
+        "magical",
+        "golem"
+      ]
+    },
+    "name": "Sand golem",
+    "armor": {"bashing": 100, "slashing": 75, "piercing": 300},
+    "hp": 20, "speed": 200, "sight_radius": 9,
+    "damage": {"py/tuple": [6, 10]}, "dmg_type": "bashing",
+    "ai": "SimpleMeleeChaserAI"
+  }
+}

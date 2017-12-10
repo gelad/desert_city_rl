@@ -1,0 +1,55 @@
+{
+  "effs": [
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "door_wooden",
+  "stored_class_name": "Door",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "char_closed": "+",
+    "char_open": ".",
+    "char": "+",
+    "weight": 50,
+    "pass_cost": 1,
+    "properties": null,
+    "description": "A wooden door.",
+    "color": [
+      128,
+      0,
+      0
+    ],
+    "categories": null,
+    "name": "Door",
+    "armor": {"bashing": 200, "slashing": 100, "piercing": 200},
+    "hp": 100,
+    "corpse": "debris_large_wooden",
+    "is_closed": true
+  }
+}

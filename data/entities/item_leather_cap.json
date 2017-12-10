@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A leather cap offers light protection.",
+    "name": "leather cap",
+    "categories": {
+      "py/set": [
+        "armor"
+      ]
+    },
+    "char": "\u02c0",
+    "pass_cost": 1,
+    "color": [
+      160,
+      82,
+      45
+    ],
+    "weight": 0.5,
+    "properties": {
+      "armor_bashing": 50,
+      "armor_slashing": 50,
+      "value": 90,
+      "armor_piercing": 40
+    },
+    "equip_slots": {
+      "py/set": [
+        "HEAD"
+      ]
+  }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_leather_cap",
+  "abils": null
+}

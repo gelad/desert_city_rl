@@ -1,0 +1,21 @@
+{
+  "effs": [],
+  "data_id": "proj_fireball",
+  "stored_class_name": "UnguidedProjectile",
+  "abils": [
+    "fireball_hit"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "char": "*",
+    "description": "Explosive ball of pure flame.",
+    "color": [
+      255,
+      0,
+      0
+    ],
+    "name": "fireball",
+    "speed": 20,
+    "power": 15
+  }
+}

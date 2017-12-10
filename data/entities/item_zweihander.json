@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A long and heavy two-handed sword. Slow to swing, but extremely heavy-hitting.",
+    "name": "zweihander",
+    "categories": {
+      "py/set": [
+        "sword",
+        "weapon"
+      ]
+    },
+    "char": "\u03ef",
+    "pass_cost": 1,
+    "color": [
+      150,
+      150,
+      175
+    ],
+    "weight": 8,
+    "properties": {
+      "slashing": {
+        "py/tuple": [
+          6,
+          14
+        ]
+      },
+      "attack_speed_mod": 1.8,
+      "value": 850
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_zweihander",
+  "abils": null
+}

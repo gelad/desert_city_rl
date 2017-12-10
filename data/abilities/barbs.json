@@ -1,0 +1,30 @@
+{
+  "data_id": "barbs",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      200,
+      0,
+      100
+    ],
+    "reactions": [
+      {
+        "strike_type": "melee",
+        "target": "default",
+        "dmg_type": "piercing",
+        "type": "deal_damage",
+        "damage": 1
+      }
+    ],
+    "name": "Barbs",
+    "trigger": "damaged",
+    "conditions": [
+      {
+        "kwargs": {},
+        "condition": "EQUIPPED",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

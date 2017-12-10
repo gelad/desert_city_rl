@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A huge bronze sphere ot top of wooden pole.",
+    "name": "bronze maul",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "blunt"
+      ]
+    },
+    "char": "/",
+    "pass_cost": 1,
+    "color": [
+      80,
+      50,
+      20
+    ],
+    "weight": 10,
+    "properties": {
+      "attack_speed_mod": 1.8,
+      "value": 420,
+      "bashing": {
+        "py/tuple": [
+          8,
+          12
+        ]
+      }
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_bronze_maul",
+  "abils": null
+}

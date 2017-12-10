@@ -1,0 +1,29 @@
+{
+  "init_kwargs": {
+    "description": "An ancient coin.",
+    "name": "ancient coin",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "stackable",
+        "relic"
+      ]
+    },
+    "char": "$",
+    "pass_cost": 1,
+    "color": [
+      255,
+      20,
+      147
+    ],
+    "weight": 0.01,
+    "properties": {
+      "value": 1
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_ancient_coin",
+  "abils": null
+}

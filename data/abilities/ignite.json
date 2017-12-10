@@ -1,0 +1,29 @@
+{
+  "data_id": "ignite",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      0,
+      0
+    ],
+    "reactions": [
+      {
+        "strike_type": "projectile",
+        "target": "projectile_hit_entity",
+        "dmg_type": "fire",
+        "type": "deal_damage",
+        "damage": {
+          "py/tuple": [
+            3,
+            6
+          ]
+        }
+      }
+    ],
+    "name": "Ignite",
+    "trigger": "projectile_hit",
+    "conditions": []
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

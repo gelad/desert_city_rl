@@ -1,0 +1,43 @@
+{
+  "init_kwargs": {
+    "description": "Ring that grants protection from lightning.",
+    "name": "ring of lightning resistance",
+    "categories": {
+      "py/set": [
+        "ring"
+      ]
+    },
+    "char": "\u02da",
+    "pass_cost": 1,
+    "color": [
+      255,
+      215,
+      0
+    ],
+    "weight": 0.1,
+    "properties": {
+      "value": 400
+    },
+    "equip_slots": {
+      "py/set": [
+        "RIGHT_RING",
+        "LEFT_RING"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [
+    {
+      "magnitude": 100,
+      "eff": "RESIST_LIGHTNING",
+      "properties": {},
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect"
+    }
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_ring_lightning_res",
+  "abils": null
+}

@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "Long sword-like two-handed axe.",
+    "name": "panabas",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "axe"
+      ]
+    },
+    "char": "\u0413",
+    "pass_cost": 1,
+    "color": [
+      150,
+      150,
+      255
+    ],
+    "weight": 6,
+    "properties": {
+      "slashing": {
+        "py/tuple": [
+          4,
+          12
+        ]
+      },
+      "attack_speed_mod": 1.5,
+      "value": 550
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_panabas",
+  "abils": null
+}

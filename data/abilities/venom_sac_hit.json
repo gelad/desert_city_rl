@@ -1,0 +1,38 @@
+{
+  "data_id": "venom_sac_hit",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      0,
+      150,
+      0
+    ],
+    "reactions": [
+      {
+        "type": "deal_damage",
+        "damage": {
+          "py/tuple": [
+            1,
+            3
+          ]
+        },
+        "strike_type": "projectile",
+        "target": "projectile_hit_entity",
+        "chance": 70,
+        "dmg_type": "poison"
+      }
+    ],
+    "name": "Splash!",
+    "trigger": "projectile_hit",
+    "conditions": [
+      {
+        "kwargs": {
+          "category": "living"
+        },
+        "condition": "TARGET_IS_CATEGORY",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

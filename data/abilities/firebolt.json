@@ -1,0 +1,28 @@
+{
+  "data_id": "firebolt",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      0,
+      0
+    ],
+    "reactions": [
+      {
+        "projectile": "proj_firebolt",
+        "target": "default",
+        "type": "launch_projectile"
+      }
+    ],
+    "name": "Firebolt",
+    "trigger": "used_on_target",
+    "conditions": [
+      {
+        "kwargs": {},
+        "condition": "USED",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

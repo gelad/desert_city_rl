@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 20,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 20,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "furn_stone_table",
+  "stored_class_name": "Prop",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 150,
+    "char": "\u25a0",
+    "pass_cost": 2,
+    "properties": null,
+    "blocks_shots": 0.25,
+    "description": "Stone table. Provides small cover from projectiles.",
+    "occupies_tile": false,
+    "color": [
+      150,
+      150,
+      150
+    ],
+    "blocks_los": false,
+    "categories": null,
+    "name": "Stone table",
+    "armor": {"bashing": 200, "slashing": 200, "piercing": 300},
+    "hp": 100
+  }
+}

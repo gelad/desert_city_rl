@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A short club with iron head.",
+    "name": "mace",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "blunt"
+      ]
+    },
+    "char": "/",
+    "pass_cost": 1,
+    "color": [
+      128,
+      0,
+      0
+    ],
+    "weight": 3,
+    "properties": {
+      "attack_speed_mod": 1,
+      "value": 110,
+      "bashing": {
+        "py/tuple": [
+          3,
+          5
+        ]
+      }
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_mace",
+  "abils": null
+}

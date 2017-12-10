@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A dagger about 20cm long.",
+    "name": "dagger",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "dagger"
+      ]
+    },
+    "char": ",",
+    "pass_cost": 1,
+    "color": [
+      200,
+      200,
+      255
+    ],
+    "weight": 0.5,
+    "properties": {
+      "attack_speed_mod": 0.75,
+      "value": 25,
+      "piercing": {
+        "py/tuple": [
+          1,
+          4
+        ]
+      }
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_dagger",
+  "abils": null
+}

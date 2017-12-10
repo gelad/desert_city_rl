@@ -1,0 +1,38 @@
+{
+  "data_id": "wisp_firebolt",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      0,
+      0
+    ],
+    "reactions": [
+      {
+        "projectile": "proj_wisp_firebolt",
+        "strike_type": "projectile",
+        "target": "default",
+        "type": "launch_projectile"
+      }
+    ],
+    "trigger": "ability_used",
+    "name": "Firebolt",
+    "ai_info": {
+      "use_offset": 0.5,
+      "whole_time": 100,
+      "priority": "1",
+      "range": "10",
+      "type": "ranged_attack",
+      "target": "player"
+    },
+    "cooldown": 300,
+    "conditions": [
+      {
+        "kwargs": {},
+        "condition": "TARGET_IN_RANGE",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

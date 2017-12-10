@@ -1,0 +1,30 @@
+{
+  "effs": [],
+  "data_id": "mob_rakshasa",
+  "stored_class_name": "Fighter",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 70,
+    "char": "R",
+    "properties": {
+      "loot_list": "mob_rakshasa"
+    },
+    "description": "A bipedal tiger with very sharp claws.",
+    "color": [
+      255,
+      127,
+      80
+    ],
+    "categories": {
+      "py/set": [
+        "living"
+      ]
+    },
+    "name": "Rakshasa",
+    "armor": {"bashing": 0, "slashing": 0, "piercing": 0},
+    "hp": 8, "speed": 80, "sight_radius": 18,
+    "damage": {"py/tuple": [3, 7]}, "dmg_type": "slashing",
+    "ai": "SimpleMeleeChaserAI"
+  }
+}

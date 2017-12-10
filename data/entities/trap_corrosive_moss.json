@@ -1,0 +1,56 @@
+{
+  "effs": [
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 2,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "trap_corrosive_moss",
+  "stored_class_name": "Prop",
+  "abils": [
+    "corrosive_acid"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 10,
+    "char": "_",
+    "pass_cost": 1,
+    "properties": null,
+    "blocks_shots": 0,
+    "description": "A large patch of green acid-dripping moss.",
+    "occupies_tile": false,
+    "color": [
+      100,
+      220,
+      100
+    ],
+    "blocks_los": false,
+    "categories": null,
+    "name": "Corrosive moss",
+    "armor": {"bashing": 100, "slashing": 50, "piercing": 200},
+    "hp": 30
+  }
+}

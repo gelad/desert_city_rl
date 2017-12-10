@@ -1,0 +1,22 @@
+{
+  "effs": [],
+  "data_id": "proj_wisp_firebolt",
+  "stored_class_name": "UnguidedProjectile",
+  "abils": [
+    "wisp_ignite",
+    "wisp_firebolt"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "char": "*",
+    "description": "An arrow of pure flame.",
+    "color": [
+      255,
+      0,
+      0
+    ],
+    "name": "firebolt",
+    "speed": 30,
+    "power": 15
+  }
+}

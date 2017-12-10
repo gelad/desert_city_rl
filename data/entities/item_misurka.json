@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A light iron helmet with spike on top.",
+    "name": "misurka",
+    "categories": {
+      "py/set": [
+        "armor"
+      ]
+    },
+    "char": "\u02c0",
+    "pass_cost": 1,
+    "color": [
+      50,
+      50,
+      200
+    ],
+    "weight": 1,
+    "properties": {
+      "armor_bashing": 100,
+      "armor_slashing": 80,
+      "value": 300,
+      "armor_piercing": 60
+    },
+    "equip_slots": {
+      "py/set": [
+        "HEAD"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_misurka",
+  "abils": null
+}

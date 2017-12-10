@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A pair of mail leggings.",
+    "name": "mail leggings",
+    "categories": {
+      "py/set": [
+        "armor"
+      ]
+    },
+    "char": "]]",
+    "pass_cost": 1,
+    "color": [
+      50,
+      50,
+      200
+    ],
+    "weight": 4,
+    "properties": {
+      "armor_bashing": 60,
+      "armor_slashing": 120,
+      "value": 400,
+      "armor_piercing": 60
+    },
+    "equip_slots": {
+      "py/set": [
+        "LEGS"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_mail_leggings",
+  "abils": null
+}

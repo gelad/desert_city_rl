@@ -1,0 +1,39 @@
+{
+  "init_kwargs": {
+    "description": "Magical arrow, that deals cold damage and slows target.",
+    "name": "frost arrow",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "sticks_to_target",
+        "stackable",
+        "arrow"
+      ]
+    },
+    "char": "=",
+    "pass_cost": 1,
+    "color": [
+      100,
+      100,
+      255
+    ],
+    "weight": 0.1,
+    "properties": {
+      "cold": {
+        "py/tuple": [
+          2,
+          5
+        ]
+      },
+      "break_chance": 0.7,
+      "value": 90
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_frost_arrow",
+  "abils": [
+    "frost_arrow"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "init_kwargs": {
+    "description": "Human skeleton.",
+    "name": "human skeleton",
+    "categories": {
+      "py/set": [
+        "corpse"
+      ]
+    },
+    "char": "%",
+    "pass_cost": 1,
+    "color": [
+      255,
+      255,
+      255
+    ],
+    "weight": 10,
+    "properties": null
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_skeleton",
+  "abils": null
+}

@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A dagger with flame-like blade.",
+    "name": "kris",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "dagger"
+      ]
+    },
+    "char": ",",
+    "pass_cost": 1,
+    "color": [
+      80,
+      50,
+      2
+    ],
+    "weight": 0.7,
+    "properties": {
+      "attack_speed_mod": 0.85,
+      "value": 90,
+      "piercing": {
+        "py/tuple": [
+          2,
+          5
+        ]
+      }
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_kris",
+  "abils": null
+}

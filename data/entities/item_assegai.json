@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "Short spear, used for melee combat.",
+    "name": "assegai",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "spear"
+      ]
+    },
+    "char": "\\",
+    "pass_cost": 1,
+    "color": [
+      128,
+      0,
+      0
+    ],
+    "weight": 4,
+    "properties": {
+      "attack_speed_mod": 1,
+      "value": 80,
+      "piercing": {
+        "py/tuple": [
+          2,
+          8
+        ]
+      }
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_assegai",
+  "abils": null
+}

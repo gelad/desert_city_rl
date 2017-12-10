@@ -1,0 +1,32 @@
+{
+  "init_kwargs": {
+    "description": "A scroll that calls a lightning strike on enemy.",
+    "name": "scroll of Lightning",
+    "categories": {
+      "py/set": [
+        "consumable",
+        "scroll"
+      ]
+    },
+    "char": "?",
+    "pass_cost": 1,
+    "color": [
+      255,
+      215,
+      0
+    ],
+    "weight": 0.1,
+    "properties": {
+      "value": 175,
+      "range": 15,
+      "usable": "battle_entity"
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_lightning_scroll",
+  "abils": [
+    "lightning"
+  ]
+}

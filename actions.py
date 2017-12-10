@@ -129,10 +129,10 @@ def act_launch_projectile(action, register_call, projectile_type, launcher, targ
         pass  # nothing to do on action registration
     else:  # part that is executed when action fires
         if launcher and projectile_type:  # if all participants still exist
-            projectile = dataset.get_entity(projectile_type)  # create new projectile copy
-            projectile.launcher = launcher  # set launcher
+            # create new projectile copy
+            projectile = dataset.get_entity(projectile_type, {'launcher': launcher,
+                                                              'target': target})
             projectile.ai.owner = projectile  # set projectile ai component owner
-            projectile.target = target  # set projectile target
             projectile.ai.target = target
             launcher.location.reg_entity(projectile)  # register projectile to location
             projectile.launch(launcher.position[0], launcher.position[1])

@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A pair of leather armguards.",
+    "name": "leather armguards",
+    "categories": {
+      "py/set": [
+        "armor"
+      ]
+    },
+    "char": "]]",
+    "pass_cost": 1,
+    "color": [
+      160,
+      82,
+      45
+    ],
+    "weight": 1,
+    "properties": {
+      "armor_bashing": 50,
+      "armor_slashing": 50,
+      "value": 110,
+      "armor_piercing": 40
+    },
+    "equip_slots": {
+      "py/set": [
+        "ARMS"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_leather_armguards",
+  "abils": null
+}

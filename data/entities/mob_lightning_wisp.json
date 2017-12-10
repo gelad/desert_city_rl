@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 100,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 100,
+      "eff": "BLOCK_LIGHTNING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "mob_lightning_wisp",
+  "stored_class_name": "Fighter",
+  "abils": [
+    "wisp_zap"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 1,
+    "char": "w",
+    "properties": {
+      "loot_list": "mob_lightning_wisp_ingredients"
+    },
+    "description": "A small hostile magic cloud, that zaps enemies with lightning.",
+    "color": [
+      255,
+      215,
+      0
+    ],
+    "categories": {
+      "py/set": [
+        "magical"
+      ]
+    },
+    "name": "Lightning wisp",
+    "armor": {"bashing": 100, "slashing": 100, "piercing": 1000},
+    "resist": {"cold": -100, "lightning": 1000},
+    "hp": 2, "speed": 100, "sight_radius": 15,
+    "damage": {"py/tuple": [1, 2]}, "dmg_type": "lightning",
+    "corpse": "no corpse",
+    "ai": "AbilityUserAI",
+    "ai_kwargs": {"behavior": "ranged", "properties": {"preferred_range": 6}}
+  }
+}

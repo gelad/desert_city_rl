@@ -1,0 +1,43 @@
+{
+  "init_kwargs": {
+    "description": "Ring that grants protection from fire.",
+    "name": "ring of fire resistance",
+    "categories": {
+      "py/set": [
+        "ring"
+      ]
+    },
+    "char": "\u02da",
+    "pass_cost": 1,
+    "color": [
+      180,
+      0,
+      0
+    ],
+    "weight": 0.1,
+    "properties": {
+      "value": 400
+    },
+    "equip_slots": {
+      "py/set": [
+        "RIGHT_RING",
+        "LEFT_RING"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [
+    {
+      "magnitude": 100,
+      "eff": "RESIST_FIRE",
+      "properties": {},
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect"
+    }
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_ring_fire_res",
+  "abils": null
+}

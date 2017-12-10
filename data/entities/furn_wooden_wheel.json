@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 10,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 30,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "furn_wooden_wheel",
+  "stored_class_name": "Prop",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 70,
+    "char": "o",
+    "pass_cost": 2,
+    "properties": null,
+    "blocks_shots": 0.15,
+    "description": "Wooden wagon wheel. Provides small cover from projectiles.",
+    "occupies_tile": false,
+    "color": [
+      128,
+      0,
+      0
+    ],
+    "blocks_los": false,
+    "categories": null,
+    "name": "Wooden wheel",
+    "armor": {"bashing": 200, "slashing": 100, "piercing": 200},
+    "hp": 30
+  }
+}

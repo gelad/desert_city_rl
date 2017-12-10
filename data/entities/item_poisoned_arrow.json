@@ -1,0 +1,39 @@
+{
+  "init_kwargs": {
+    "description": "A simple bronze tipped arrow, coated in weak poison.",
+    "name": "poisoned arrow",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "sticks_to_target",
+        "stackable",
+        "arrow"
+      ]
+    },
+    "char": "=",
+    "pass_cost": 1,
+    "color": [
+      0,
+      150,
+      0
+    ],
+    "weight": 0.1,
+    "properties": {
+      "break_chance": 0.5,
+      "value": 50,
+      "piercing": {
+        "py/tuple": [
+          1,
+          3
+        ]
+      }
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_poisoned_arrow",
+  "abils": [
+    "poison_arrow"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "An ancient bronze sickle-sword.",
+    "name": "khopesh",
+    "categories": {
+      "py/set": [
+        "sword",
+        "weapon"
+      ]
+    },
+    "char": "\u03ef",
+    "pass_cost": 1,
+    "color": [
+      80,
+      50,
+      20
+    ],
+    "weight": 2.5,
+    "properties": {
+      "slashing": {
+        "py/tuple": [
+          4,
+          7
+        ]
+      },
+      "attack_speed_mod": 1.05,
+      "value": 275
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_khopesh",
+  "abils": null
+}

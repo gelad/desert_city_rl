@@ -1,0 +1,50 @@
+{
+  "init_kwargs": {
+    "description": "Short bow suited for small game hunt.",
+    "name": "short bow",
+    "range": 10,
+    "ammo_type": "arrow",
+    "categories": {
+      "py/set": [
+        "bow",
+        "blunt",
+        "weapon"
+      ]
+    },
+    "char": "\u03e1",
+    "pass_cost": 1,
+    "color": [
+      128,
+      0,
+      0
+    ],
+    "weight": 1.5,
+    "properties": {
+      "accuracy_ranged": 0.9,
+      "attack_speed_mod": 1.1,
+      "shot_speed": 3,
+      "value": 175,
+      "bashing": {
+        "py/tuple": [
+          1,
+          2
+        ]
+      }
+    }
+  },
+  "stored_class_name": "ItemRangedWeapon",
+  "effs": [
+    {
+      "magnitude": 1,
+      "eff": "INCREASE_RANGED_DAMAGE",
+      "properties": {},
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect"
+    }
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_short_bow",
+  "abils": null
+}

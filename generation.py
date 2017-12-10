@@ -634,10 +634,10 @@ def fill_prefab(loc, prefab, prefab_info, prefab_variant, build_x, build_y, buil
                             found_ent = True
                             break
             if not found_ent:  # if not found in legend - search for matching entity in dataset
-                for entity in dataset.data_set:
-                    if char_ent == dataset.data_set[entity].char and \
-                                    char_ent_color == tuple(dataset.data_set[entity].color):
-                        loc.place_entity(entity, loc_cell_x, loc_cell_y)
+                for data_id in dataset.entity_dict:
+                    if char_ent == dataset.entity_dict[data_id].init_kwargs['char'] and \
+                                    char_ent_color == tuple(dataset.entity_dict[data_id].init_kwargs['color']):
+                        loc.place_entity(data_id, loc_cell_x, loc_cell_y)
                         found_ent = True
                         break
             if not found_ent:

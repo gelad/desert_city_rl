@@ -312,7 +312,7 @@ class Ability(events.Observer):
         target = self.owner  # default
         if reaction['target'] == 'projectile_hit_entity':
             target = event_data['target']
-            if isinstance(event_data['attacker'], game_logic.Player):  # if player attacks - inform him of effect
+            if isinstance(event_data['owner'].launcher, game_logic.Player):  # if player attacks - inform him of effect
                 game_logic.Game.add_message(message=_('{ent_name} is now {eff_name}: {eff_descr} for {time} ticks.').
                                                                     format(ent_name=str(target), eff_name=
                                                                         _(reaction['effect'].eff).

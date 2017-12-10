@@ -1,0 +1,21 @@
+{
+  "effs": [],
+  "data_id": "proj_frostbolt",
+  "stored_class_name": "UnguidedProjectile",
+  "abils": [
+    "freeze"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "char": "*",
+    "description": "An arrow of freezing energy.",
+    "color": [
+      100,
+      100,
+      255
+    ],
+    "name": "frostbolt",
+    "speed": 20,
+    "power": 15
+  }
+}

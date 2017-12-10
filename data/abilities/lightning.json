@@ -1,0 +1,34 @@
+{
+  "data_id": "lightning",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      215,
+      0
+    ],
+    "reactions": [
+      {
+        "type": "deal_damage",
+        "target": "default",
+        "dmg_type": "lightning",
+        "damage": {
+          "py/tuple": [
+            10,
+            30
+          ]
+        }
+      }
+    ],
+    "name": "Lightning",
+    "trigger": "used_on_target",
+    "conditions": [
+      {
+        "kwargs": {},
+        "condition": "USED",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

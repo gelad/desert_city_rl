@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A pair of iron pauldrons.",
+    "name": "iron pauldrons",
+    "categories": {
+      "py/set": [
+        "armor"
+      ]
+    },
+    "char": "]]",
+    "pass_cost": 1,
+    "color": [
+      50,
+      50,
+      200
+    ],
+    "weight": 2,
+    "properties": {
+      "armor_bashing": 100,
+      "armor_slashing": 120,
+      "value": 350,
+      "armor_piercing": 100
+    },
+    "equip_slots": {
+      "py/set": [
+        "SHOULDERS"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_iron_pauldrons",
+  "abils": null
+}

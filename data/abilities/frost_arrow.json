@@ -1,0 +1,40 @@
+{
+  "data_id": "frost_arrow",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      100,
+      100,
+      255
+    ],
+    "reactions": [
+      {
+        "effect": {
+          "magnitude": 200,
+          "eff": "SLOWED",
+          "categories": {
+            "py/set": []
+          },
+          "properties": {},
+          "py/object": "effects.Effect"
+        },
+        "type": "apply_timed_effect",
+        "target": "projectile_hit_entity",
+        "time": 1000
+      }
+    ],
+    "name": "Frost arrow",
+    "trigger": "shot_hit",
+    "conditions": [
+      {
+        "kwargs": {
+          "number": "0",
+          "sign": ">"
+        },
+        "condition": "DEALT_DAMAGE",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

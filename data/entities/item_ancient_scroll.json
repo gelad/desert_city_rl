@@ -1,0 +1,30 @@
+{
+  "init_kwargs": {
+    "description": "Ancient scroll, with some writing in it.",
+    "name": "ancient scroll",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "stackable",
+        "scroll",
+        "relic"
+      ]
+    },
+    "char": "?",
+    "pass_cost": 1,
+    "color": [
+      255,
+      20,
+      147
+    ],
+    "weight": 0.1,
+    "properties": {
+      "value": 5
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_ancient_scroll",
+  "abils": null
+}

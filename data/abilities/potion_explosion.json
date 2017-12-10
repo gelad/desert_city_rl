@@ -1,0 +1,36 @@
+{
+  "data_id": "potion_explosion",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      127,
+      80
+    ],
+    "reactions": [
+      {
+        "dmg_type": "bashing",
+        "type": "deal_damage_aoe",
+        "damage": {
+          "py/tuple": [
+            7,
+            15
+          ]
+        },
+        "aoe": "circle",
+        "radius": 2.5,
+        "include_center": true,
+        "target": "projectile_hit_entity",
+        "strike_type": "projectile"
+      },
+      {
+        "target": "thrown",
+        "type": "kill_entity"
+      }
+    ],
+    "name": "BOOM!",
+    "trigger": "projectile_hit",
+    "conditions": []
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

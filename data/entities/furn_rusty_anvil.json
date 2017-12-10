@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 50,
+      "eff": "BLOCK_BASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 50,
+      "eff": "BLOCK_SLASHING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 50,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "furn_rusty_anvil",
+  "stored_class_name": "Prop",
+  "abils": null,
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 150,
+    "char": "\u25bc",
+    "pass_cost": 2,
+    "properties": null,
+    "blocks_shots": 0,
+    "description": "An anvil, dirty and covered in rust.",
+    "occupies_tile": false,
+    "color": [
+      225,
+      200,
+      200
+    ],
+    "blocks_los": false,
+    "categories": null,
+    "name": "Rusty anvil",
+    "armor": {"bashing": 500, "slashing": 500, "piercing": 500},
+    "hp": 250
+  }
+}

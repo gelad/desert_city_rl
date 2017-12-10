@@ -1,0 +1,34 @@
+{
+  "init_kwargs": {
+    "description": "A test weapon with tremendous power to smash walls.",
+    "name": "wall smasher",
+    "categories": {
+      "py/set": [
+        "weapon",
+        "blunt"
+      ]
+    },
+    "char": "/",
+    "pass_cost": 1,
+    "color": [
+      255,
+      0,
+      128
+    ],
+    "weight": 15,
+    "properties": {
+      "attack_speed_mod": 2,
+      "bashing": {
+        "py/tuple": [
+          150,
+          300
+        ]
+      }
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_wall_smasher",
+  "abils": null
+}

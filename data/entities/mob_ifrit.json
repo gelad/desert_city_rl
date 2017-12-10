@@ -1,0 +1,45 @@
+{
+  "effs": [
+    {
+      "magnitude": 100,
+      "eff": "BLOCK_FIRE",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "mob_ifrit",
+  "stored_class_name": "Fighter",
+  "abils": [
+    "flaming_fists",
+    "fireball"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 100,
+    "char": "F",
+    "properties": {
+      "loot_list": "mob_ifrit"
+    },
+    "description": "A magical creature with human upper body floating over column of flame.",
+    "color": [
+      255,
+      50,
+      0
+    ],
+    "categories": {
+      "py/set": [
+        "magical",
+        "living"
+      ]
+    },
+    "name": "Ifrit",
+    "armor": {"bashing": 100, "slashing": 100, "piercing": 100},
+    "resist": {"cold": -50, "fire": 1000},
+    "hp": 25, "speed": 100, "sight_radius": 18,
+    "damage": {"py/tuple": [3, 5]}, "dmg_type": "bashing",
+    "ai": "AbilityUserAI"
+  }
+}

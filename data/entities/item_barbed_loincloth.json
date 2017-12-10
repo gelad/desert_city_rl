@@ -1,0 +1,33 @@
+{
+  "init_kwargs": {
+    "description": "It is covered in spikes. Ouch!",
+    "name": "barbed loincloth",
+    "categories": {
+      "py/set": [
+        "armor",
+        "waist"
+      ]
+    },
+    "char": "~",
+    "pass_cost": 1,
+    "color": [
+      200,
+      0,
+      100
+    ],
+    "weight": 0.5,
+    "properties": null,
+    "equip_slots": {
+      "py/set": [
+        "WAIST"
+      ]
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_barbed_loincloth",
+  "abils": [
+    "barbs"
+  ]
+}

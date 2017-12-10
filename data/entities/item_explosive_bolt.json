@@ -1,0 +1,39 @@
+{
+  "init_kwargs": {
+    "description": "Crossbow bolt with attached alchemical explosive head.",
+    "name": "explosive bolt",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "sticks_to_target",
+        "stackable",
+        "bolt"
+      ]
+    },
+    "char": "=",
+    "pass_cost": 1,
+    "color": [
+      255,
+      127,
+      80
+    ],
+    "weight": 0.1,
+    "properties": {
+      "break_chance": 1,
+      "value": 110,
+      "bashing": {
+        "py/tuple": [
+          0,
+          3
+        ]
+      }
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_explosive_bolt",
+  "abils": [
+    "bolt_explosion"
+  ]
+}

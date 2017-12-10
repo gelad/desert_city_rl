@@ -1,0 +1,30 @@
+{
+  "data_id": "hot_ash_hit",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      215,
+      0
+    ],
+    "reactions": [
+      {
+        "type": "deal_damage",
+        "damage": {
+          "py/tuple": [
+            1,
+            3
+          ]
+        },
+        "strike_type": "projectile",
+        "target": "projectile_hit_entity",
+        "chance": 70,
+        "dmg_type": "fire"
+      }
+    ],
+    "name": "Ignite",
+    "trigger": "projectile_hit",
+    "conditions": []
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

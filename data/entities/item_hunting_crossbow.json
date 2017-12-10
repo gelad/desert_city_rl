@@ -1,0 +1,50 @@
+{
+  "init_kwargs": {
+    "description": "A small crossbow.",
+    "name": "hunting crossbow",
+    "range": 14,
+    "ammo_type": "bolt",
+    "categories": {
+      "py/set": [
+        "blunt",
+        "crossbow",
+        "weapon"
+      ]
+    },
+    "char": ")",
+    "pass_cost": 1,
+    "color": [
+      200,
+      200,
+      200
+    ],
+    "weight": 3,
+    "properties": {
+      "accuracy_ranged": 1,
+      "attack_speed_mod": 1.5,
+      "shot_speed": 2,
+      "value": 600,
+      "bashing": {
+        "py/tuple": [
+          1,
+          3
+        ]
+      }
+    }
+  },
+  "stored_class_name": "ItemRangedWeapon",
+  "effs": [
+    {
+      "magnitude": 4,
+      "eff": "INCREASE_RANGED_DAMAGE",
+      "properties": {},
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect"
+    }
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_hunting_crossbow",
+  "abils": null
+}

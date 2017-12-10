@@ -1,0 +1,29 @@
+{
+  "init_kwargs": {
+    "description": "Clay tablet, with some writing or picture in it.",
+    "name": "clay tablet",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "stackable",
+        "relic"
+      ]
+    },
+    "char": "\u00e6",
+    "pass_cost": 1,
+    "color": [
+      255,
+      20,
+      147
+    ],
+    "weight": 1,
+    "properties": {
+      "value": 15
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_ancient_clay_tablet",
+  "abils": null
+}

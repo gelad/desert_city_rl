@@ -1,0 +1,29 @@
+{
+  "data_id": "throwing_knife_hit",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      255,
+      255,
+      255
+    ],
+    "reactions": [
+      {
+        "strike_type": "projectile",
+        "target": "projectile_hit_entity",
+        "dmg_type": "piercing",
+        "type": "deal_damage",
+        "damage": {
+          "py/tuple": [
+            1,
+            3
+          ]
+        }
+      }
+    ],
+    "name": "Shank",
+    "trigger": "projectile_hit",
+    "conditions": []
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

@@ -1,0 +1,31 @@
+{
+  "init_kwargs": {
+    "description": "A potion that cures all poison effects, and protects from poison for a short time.",
+    "name": "antidote potion",
+    "categories": {
+      "py/set": [
+        "consumable",
+        "potion"
+      ]
+    },
+    "char": "!",
+    "pass_cost": 1,
+    "color": [
+      0,
+      150,
+      0
+    ],
+    "weight": 0.2,
+    "properties": {
+      "value": 40,
+      "usable": "self"
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_antidote_potion",
+  "abils": [
+    "antidote"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 100,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 100,
+      "eff": "BLOCK_COLD",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "mob_frost_wisp",
+  "stored_class_name": "Fighter",
+  "abils": [
+    "wisp_frostbolt"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 1,
+    "char": "w",
+    "properties": {
+      "loot_list": "mob_frost_wisp_ingredients"
+    },
+    "description": "Hostile ball of cold energy, burning with hatred to all living beings.",
+    "color": [
+      100,
+      100,
+      255
+    ],
+    "categories": {
+      "py/set": [
+        "magical"
+      ]
+    },
+    "name": "Frost wisp",
+    "armor": {"bashing": 100, "slashing": 100, "piercing": 1000},
+    "resist": {"cold": 1000, "fire": -200},
+    "hp": 2, "speed": 100, "sight_radius": 15,
+    "damage": {"py/tuple": [1, 2]}, "dmg_type": "cold",
+    "corpse": "no corpse",
+    "ai": "AbilityUserAI",
+    "ai_kwargs": {"behavior": "ranged", "properties": {"preferred_range": 8}}
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "A double-edged straight sword.",
+    "name": "longsword",
+    "categories": {
+      "py/set": [
+        "sword",
+        "weapon"
+      ]
+    },
+    "char": "\u03ef",
+    "pass_cost": 1,
+    "color": [
+      150,
+      150,
+      255
+    ],
+    "weight": 4,
+    "properties": {
+      "slashing": {
+        "py/tuple": [
+          5,
+          9
+        ]
+      },
+      "attack_speed_mod": 1.2,
+      "value": 450
+    }
+  },
+  "stored_class_name": "Item",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_longsword",
+  "abils": null
+}

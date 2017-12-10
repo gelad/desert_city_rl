@@ -1,0 +1,48 @@
+{
+  "data_id": "wisp_chill",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      100,
+      100,
+      255
+    ],
+    "reactions": [
+      {
+        "effect": {
+          "magnitude": 150,
+          "eff": "SLOWED",
+          "categories": {
+            "py/set": []
+          },
+          "properties": {},
+          "py/object": "effects.Effect"
+        },
+        "type": "apply_timed_effect",
+        "target": "projectile_hit_entity",
+        "time": 500
+      }
+    ],
+    "name": "Chill",
+    "trigger": "ability_fired",
+    "conditions": [
+      {
+        "kwargs": {
+          "name": "Freeze"
+        },
+        "condition": "ABILITY_NAME_IS",
+        "py/object": "abilities.Condition"
+      },
+      " and ",
+      {
+        "kwargs": {
+          "number": "0",
+          "sign": ">"
+        },
+        "condition": "DEALT_DAMAGE",
+        "py/object": "abilities.Condition"
+      }
+    ]
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

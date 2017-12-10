@@ -1,0 +1,29 @@
+{
+  "data_id": "freeze",
+  "stored_class_name": "Ability",
+  "init_kwargs": {
+    "message_color": [
+      100,
+      100,
+      255
+    ],
+    "reactions": [
+      {
+        "strike_type": "projectile",
+        "target": "projectile_hit_entity",
+        "dmg_type": "cold",
+        "type": "deal_damage",
+        "damage": {
+          "py/tuple": [
+            3,
+            6
+          ]
+        }
+      }
+    ],
+    "name": "Freeze",
+    "trigger": "projectile_hit",
+    "conditions": []
+  },
+  "py/object": "abilities.AbilityTemplate"
+}

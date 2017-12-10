@@ -1,0 +1,35 @@
+{
+  "init_kwargs": {
+    "description": "Unstable potion, that explodes if breaked.",
+    "name": "explosive potion",
+    "categories": {
+      "py/set": [
+        "weight_per_charge",
+        "sticks_to_target",
+        "throwing",
+        "stackable"
+      ]
+    },
+    "char": "!",
+    "pass_cost": 1,
+    "color": [
+      255,
+      127,
+      80
+    ],
+    "weight": 0.5,
+    "properties": {
+      "break_chance": 1,
+      "accuracy_thrown": 1,
+      "throw_speed": 0.75,
+      "value": 160
+    }
+  },
+  "stored_class_name": "ItemCharges",
+  "effs": [],
+  "py/object": "game_logic.EntityTemplate",
+  "data_id": "item_explosive_potion",
+  "abils": [
+    "potion_explosion"
+  ]
+}

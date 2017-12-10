@@ -1,0 +1,54 @@
+{
+  "effs": [
+    {
+      "magnitude": 100,
+      "eff": "BLOCK_PIERCING",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    },
+    {
+      "magnitude": 100,
+      "eff": "BLOCK_FIRE",
+      "categories": {
+        "py/set": []
+      },
+      "py/object": "effects.Effect",
+      "properties": {}
+    }
+  ],
+  "data_id": "mob_flame_wisp",
+  "stored_class_name": "Fighter",
+  "abils": [
+    "wisp_firebolt"
+  ],
+  "py/object": "game_logic.EntityTemplate",
+  "init_kwargs": {
+    "weight": 1,
+    "char": "w",
+    "properties": {
+      "loot_list": "mob_flame_wisp_ingredients"
+    },
+    "description": "Hostile ball of flame, burning with hatred to all living beings.",
+    "color": [
+      255,
+      0,
+      0
+    ],
+    "categories": {
+      "py/set": [
+        "magical"
+      ]
+    },
+    "name": "Flame wisp",
+    "armor": {"bashing": 100, "slashing": 100, "piercing": 1000},
+    "resist": {"cold": -200, "fire": 1000},
+    "hp": 2, "speed": 100, "sight_radius": 15,
+    "damage": {"py/tuple": [1, 2]}, "dmg_type": "fire",
+    "corpse": "no corpse",
+    "ai": "AbilityUserAI",
+    "ai_kwargs": {"behavior": "ranged", "properties": {"preferred_range": 8}}
+  }
+}
