@@ -425,7 +425,6 @@ class BattleEntity(Entity):
 
     def get_protection(self, dmg_type):
         """ Method to get protection (both armor and block) to specific damage type """
-        # TODO: add immunity effects, and return 'immune' ?
         prot = 0  # protection  mitigation (% reduce)
         if dmg_type in self.armor.keys():
             prot = self.armor[dmg_type]
@@ -971,7 +970,7 @@ class AbilityUserAI(AI):
                                                ability.ai_info['whole_time'], ability.ai_info['use_offset'])
                             acted = True
                             break  # one action at a time
-                if not acted and range_to_player > pref_range:  # if farther than in preferred range - move closer
+                if not acted and range_to_player >= pref_range:  # if farther than in preferred range - move closer
                     path = pathfinding.get_path(self.owner.location, x, y, point[0], point[1])  # using pathfinding
                     if len(path) > 0:  # if there are path
                         step_cell = path[0]  # move closer
@@ -984,8 +983,23 @@ class AbilityUserAI(AI):
                     self.owner.perform(actions.act_attack_melee_basic, self.owner, player)
                     acted = True
                     break  # action is performed - stop iterating through FOV
-                else:  # if within preferred range - stand still
-                    # TODO: make ranged mob backpedal if too close
+                if not acted and range_to_player < pref_range:  # simple backpedaling, without pathfinding now
+                    dx, dy = 0, 0
+                    if player.position[0] > x:
+                        dx = -1
+                    elif player.position[0] < x:
+                        dx = 1
+                    if player.position[0] > y:
+                        dy = -1
+                    elif player.position[0] < y:
+                        dy = 1
+                    if self.owner.location.is_in_boundaries(x + dx, y + dy) and (dx != 0 or dy != 0):
+                        if self.owner.location.get_move_cost((x, y), (x + dx, y + dy)) < 3:
+                            self.owner.perform(actions.act_move, self.owner, dx, dy)
+                            moved = True
+                            acted = True
+                            break  # action is performed - stop iterating
+                else:  # if nothing to do - stand still
                     acted = True
                     self.owner.perform(actions.act_wait, self.owner, self.owner.speed)
                     break  # action is performed - stop iterating through FOV
