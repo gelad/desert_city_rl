@@ -381,7 +381,6 @@ def command_leave_loc(game, flee=False):
     else:
         raid_report_text += _('You escaped the City with nothing of value in your pockets. At least you managed to stay alive.\n')
     # actual leaving location section
-    # TODO: location transition needs testing (eliminate leftovers, don't lose anything)
     player.location.remove_entity(player)
     player.effects.clear()  # simply clear list for now. Needs testing
     game.remove_location(old_loc)
