@@ -946,7 +946,6 @@ class AbilityUserAI(AI):
                 self.seen_x = player.position[0]  # update last seen position of player
                 self.seen_y = player.position[1]
                 range_to_player = hypot(point[0] - self.owner.position[0], point[1] - self.owner.position[1])
-                # TODO: move abilities usage to separate method
                 if len(self.owner.abilities) > 0:  # if there are abilities - try to use them
                     # get a list of ai-usable abilities
                     ai_abilities = [a for a in self.owner.abilities if a.ai_info and a.ability_on_cd is False]
