@@ -46,7 +46,11 @@
       205
     ],
     "blocks_los": true,
-    "categories": null,
+    "categories": {
+      "py/set": [
+        "wall"
+      ]
+    },
     "name": "Wall",
     "armor": {"bashing": 100, "slashing": 500, "piercing": 300},
     "hp": 100,

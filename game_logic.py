@@ -36,8 +36,6 @@ from math import ceil, floor
 #         finally:
 #             profiler.dump_stats('myprofile-%d.profile' % (self.ident,))
 
-temp_ent_dict = {}
-
 
 class Cell:
     """

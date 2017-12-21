@@ -162,7 +162,11 @@ def generate_loc(loc_type, settings, width, height):
                    connected_types={'wall_sandstone', 'window_small_sandstone',
                                     'window_large_sandstone', 'debris_large_sandstone',
                                     'door_wooden'})
-    loc.path_map_recompute()  # generate pathfinding map for location
+    # remove intersecting objects - stuck in walls or other impassable objects
+    # a crutch, because entities must be generated without intersection
+    eliminate_intersecting_entities(loc)
+    # generate pathfinding map for location
+    loc.path_map_recompute()
     return loc  # return generated location
 
 
@@ -513,6 +517,30 @@ def wall_transform(loc, wall_types, connected_types=None):
             if neighbors[2] and neighbors[4] and neighbors[8] and neighbors[6]:
                 char = '╋'
             wall.char = char
+
+
+def eliminate_intersecting_entities(loc, settings=None):
+    """
+    Eliminates entities on top of each other
+    :param loc: Location object
+    :param settings: settings dict
+    :return: None
+    """
+    if not settings:
+        settings = {}
+    for row in loc.cells:
+        for cell in row:  # iterate through every cell
+            blocking_entity = None
+            for entity in cell.entities:
+                if entity.occupies_tile and not isinstance(entity, game_logic.Fighter):
+                    blocking_entity = entity
+                    break
+            if blocking_entity:  # if some entity blocks movement entirely - remove others
+                ent_list_copy = list(cell.entities)
+                for ent in ent_list_copy:
+                    if ent != blocking_entity:
+                        #  print('Removed ' + str(ent)) - it's for debug
+                        loc.remove_entity(ent)
 
 
 # =================================== PREFAB SECTION =======================================================
