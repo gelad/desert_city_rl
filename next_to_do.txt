@@ -1,3 +1,114 @@
+====>Unfixed bugs:
+#1: russian letters in path prevent INI file from loading.
+
+==================================== R O A D M A P =============================================
+UI:
+    Dialogue Scene
+    # tree-style dialogue
+    Announcer
+    # Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.)
+    Inform player if targeting failed.
+    Basic mouse support
+        Mouse 'look'
+        Mouse targeting
+        Mouse button click
+    Camp menu
+        Character screen
+        Item storage
+    Tavern - FAR FAR AWAY, maybe at beta
+        Random stories
+        Random encounters
+        Quests
+    ?? Make entity appearance change with range (i.e. weapon/sword/sword of Destruction +1)
+    Make Loading progress bar.
+
+Game mechanics:
+    AI
+        State machine AI, standartize it.
+        # ideal would be single AI type, behavior determined with some kind of switch table, modificators.
+        Door-opening mobs
+        Fleeing enemies (fear stat?)
+        Smart enemies - avoiding dangerous places
+        Cooperation between mobs (pack AI)
+    Interactive objects
+        Containers (chests, sacks etc)
+        Statues
+        # to make entities, interacting with dialogue window
+    Combat system
+        Make multi-bodypart armor
+        Make 2-handed weapons, especially ranged
+    Character progression THINK OF IT
+    # here will be progression system - stats, perks, exp
+        Combat progression
+        Exploration (lore) progression
+        Magic
+        # character magic system
+    Raid screen
+        Limited location 'rerolls', simple variant
+        Weather changes, options to delve deeper/move out City
+        Limited storage (upgradeable?) - rucksack, donkey, etc
+        # doesn't appear in the location. It's needed to make multiple location visit viable - store loot.
+        Resources (water, food?)
+        # to prevent infinite wandering
+        Random encounters
+            Simple events (dialogue form)
+            Ambushes, interesting mob spotting
+            # combat in various conditions, on small map
+    Smell system
+    # object propagate smell from it's position. Smell decay over time
+        Player smell map
+        Smell related items and abilities
+        Other smells ?? if needed
+    Sound system
+    # Actions generate sound, entities in some range that can hear will recieve message
+        Sound related items and abilities
+    Lighting system
+        Simple vision reduction when weather is bad or loc modificator (cave, dungeon)
+        Complex lighting ? - propagation, effects on stealth
+            Lighting related items and abilities
+        # if needed only
+    Magic contamination (Winds of magic?) ?? (idea) THINK OF IT
+    # core mechanic, if implemented. Affects all magic actions, mob spawn, loot, mapgen etc
+    Quests - FAR FAR AWAY, maybe at beta
+        Simple random quests - 'bring relic/mob part/visit and explore loc'
+        Some sort of quest line (story?)
+
+Mapgen:
+    Loot generation remake
+        More relics, less useful items
+    Locations
+        Mage's Tower
+        # location of several floors with stairs between them. To make level transition.
+        Dungeon
+        # simple dungeon with rooms. Rogue style, limited vision, cramped places.
+            Cave-ins
+            # explosions, wall breaking may cause a cave-in. Can be deadly if no precautions taken.
+        Caves
+        # like a dungeon, but more natural shape (or mix).
+        City block with one dominant structure
+        # big cathedral, fort, palace, etc. With surrounding buildings.
+    Anomalies
+    # like traps, but areas with some effects
+    Location modificators
+    # they change loc population/loot, trap and anomaly types, maybe add some structures
+        'Undead' mod
+        # undead mob versions, some necromantic-themed ones, death damage traps, crypts, tombs
+        Weather mods
+        # stats change, weapons effectiveness, some impact on population
+    Make more big map features - squares, crossroads, etc.
+    Make road-specific buildings like carts, wagons, small shops etc.
+    Add prefab_info store variant-specific layer numbers, to place additional entities for variant. ?? 9 layers max
+
+Other:
+
+
+Content:
+    Temple prefab
+    # to make interactive altars with various choices/actions. God-specific mobs.
+
+========================================================================================================================
+Already done:
+
 Implement composite actions (i.e. c + direction for closing doors) (DONE)
 Implement doors (as objects) and close/open action (DONE)
 Implement time system. (DONE!)
@@ -72,15 +183,3 @@ Make 'give item' debug command. (DONE - actually made sort of debug console)
 BUG: explosive potion vanishes if taken off after throw (FIXED, item was stacked with itself before adding to inventory)
 Separate abilities from entities in dataset section. (DONE)
 BUG: too long delay before throwing item. (FIXED)
-
-BUG: russian letters in path prevent INI file from loading.
-Make entity in range/rect search method in location.
-Add prefab_info store variant-specific layer numbers, to place additional entities for variant. ?? 9 layers max
-Make 2-handed weapons, especially ranged.
-Make multi-bodypart armor. (?)
-Make Announcer object that keeps track on events, and if they have to be seen by player - display them in log.
-Inform player if targeting failed.
-Make door-opening mobs.
-Make Loading progress bar.
-Make road-specific buildings like carts, wagons, small shops etc.
-Make more big map features - squares, crossroads, etc.
