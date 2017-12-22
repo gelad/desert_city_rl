@@ -1,5 +1,6 @@
 ====>Unfixed bugs:
 #1: russian letters in path prevent INI file from loading.
+#2: frost arrow hangs
 
 ==================================== R O A D M A P =============================================
 UI:
