@@ -312,7 +312,7 @@ class Ability(events.Observer):
         target = self.owner  # default
         if reaction['target'] == 'projectile_hit_entity':
             target = event_data['target']
-            if isinstance(event_data['owner'].launcher, game_logic.Player):  # if player attacks - inform him of effect
+            if isinstance(event_data['attacker'], game_logic.Player):  # if player attacks - inform him of effect
                 game_logic.Game.add_message(message=_('{ent_name} is now {eff_name}: {eff_descr} for {time} ticks.').
                                                                     format(ent_name=str(target), eff_name=
                                                                         _(reaction['effect'].eff).
@@ -328,6 +328,35 @@ class Ability(events.Observer):
                                                                  capitalize().replace('_', ' '),
                                                                  eff_descr=reaction['effect'].description,
                                                                  time=str(reaction['time'])),
+                                        level='PLAYER', color=self.message_color)
+        if reaction['target'] == 'fired_ability_target':
+            target = event_data['target']
+            attacker = event_data['owner']
+            try:
+                attacker = event_data['owner'].launcher
+            except AttributeError:
+                pass
+            if isinstance(attacker, game_logic.Player):  # if player attacks - inform him of effect
+                game_logic.Game.add_message(message=_('{ent_name} is now {eff_name}: {eff_descr} for {time} ticks.').
+                                            format(ent_name=str(target), eff_name=
+                _(reaction['effect'].eff).
+                                                   capitalize().replace('_', ' '),
+                                                   eff_descr=reaction['effect'].description,
+                                                   time=str(reaction['time'])),
+                                            level='PLAYER', color=self.message_color)
+        self.owner.location.action_mgr.register_action(reaction['time'], actions.act_apply_timed_effect,
+                                                       target, reaction['effect'], self.message_color)
+        if isinstance(target, game_logic.Player):  # if player uses - inform him of effect
+            game_logic.Game.add_message(message=_('{eff_name}: {eff_descr} for {time} ticks.').format(eff_name=
+                                                                                                      _(reaction[
+                                                                                                            'effect'].eff).
+                                                                                                      capitalize().replace(
+                                                                                                          '_', ' '),
+                                                                                                      eff_descr=
+                                                                                                      reaction[
+                                                                                                          'effect'].description,
+                                                                                                      time=str(reaction[
+                                                                                                                   'time'])),
                                         level='PLAYER', color=self.message_color)
         return {'success': True}  # PLACEHOLDER effect applying is always successiful now
     
