@@ -19,7 +19,7 @@
           "py/object": "effects.Effect"
         },
         "type": "apply_timed_effect",
-        "target": "projectile_hit_entity",
+        "target": "fired_ability_target",
         "time": 500
       }
     ],
